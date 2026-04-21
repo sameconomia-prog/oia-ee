@@ -71,6 +71,7 @@ export default function KpisTable() {
       )
     ).then((results) => {
       setRows(results.filter((r): r is CarreraRow => r !== null))
+    }).finally(() => {
       setLoading(false)
     })
   }, [])
