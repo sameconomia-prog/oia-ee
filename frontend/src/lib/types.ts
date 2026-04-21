@@ -35,3 +35,32 @@ export interface IngestResult {
   classified: number
   embedded: number
 }
+
+export interface IesInfo {
+  id: string
+  nombre: string
+  nombre_corto: string | null
+}
+
+export interface CarreraKpi {
+  id: string
+  nombre: string
+  matricula: number | null
+  kpi: KpiResult | null
+}
+
+export interface AlertaItem {
+  id: string
+  carrera_nombre: string
+  tipo: 'd1_alto' | 'd2_bajo' | 'ambos'
+  severidad: 'alta' | 'media'
+  titulo: string
+  mensaje: string | null
+  fecha: string
+}
+
+export interface RectorData {
+  ies: IesInfo
+  carreras: CarreraKpi[]
+  alertas: AlertaItem[]
+}

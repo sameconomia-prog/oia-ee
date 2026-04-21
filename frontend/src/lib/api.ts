@@ -1,4 +1,4 @@
-import type { Noticia, KpiResult, IngestResult } from './types'
+import type { Noticia, KpiResult, IngestResult, RectorData } from './types'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -27,6 +27,12 @@ export async function postIngestGdelt(adminKey: string): Promise<IngestResult> {
     method: 'POST',
     headers: { 'X-Admin-Key': adminKey },
   })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function getRectorData(iesId: number): Promise<RectorData> {
+  const res = await fetch(`${BASE}/rector?ies_id=${iesId}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }

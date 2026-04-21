@@ -1,4 +1,4 @@
-import { getNoticias, getKpis, postIngestGdelt } from '@/lib/api'
+import { getNoticias, getKpis, postIngestGdelt, getRectorData } from '@/lib/api'
 
 const mockFetch = jest.fn()
 global.fetch = mockFetch
@@ -67,5 +67,29 @@ describe('network errors', () => {
   it('propagates network failure from getNoticias', async () => {
     mockFetch.mockRejectedValueOnce(new Error('Network error'))
     await expect(getNoticias()).rejects.toThrow('Network error')
+  })
+})
+
+describe('getRectorData', () => {
+  it('returns RectorData on success', async () => {
+    const mockData = {
+      ies: { id: '1', nombre: 'Humanitas', nombre_corto: 'UH' },
+      carreras: [],
+      alertas: [],
+    }
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockData,
+    } as Response)
+    const result = await getRectorData(1)
+    expect(result.ies.nombre).toBe('Humanitas')
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/rector?ies_id=1')
+    )
+  })
+
+  it('throws on non-OK response', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 404 } as Response)
+    await expect(getRectorData(99)).rejects.toThrow('HTTP 404')
   })
 })
