@@ -54,7 +54,7 @@ def test_rector_alerta_generada_por_d1_alto(client, db_session):
     data = resp.json()
     # Con p_automatizacion=0.95, D1 debe ser > 0.7 → genera alerta
     alertas = data["alertas"]
-    if alertas:
-        assert alertas[0]["carrera_nombre"] == "Carrera Riesgo"
-        assert alertas[0]["severidad"] in ("alta", "media")
-        assert alertas[0]["tipo"] in ("d1_alto", "d2_bajo", "ambos")
+    assert len(alertas) >= 1, "Expected at least one alert for high D1"
+    assert alertas[0]["carrera_nombre"] == "Carrera Riesgo"
+    assert alertas[0]["severidad"] in ("alta", "media")
+    assert alertas[0]["tipo"] in ("d1_alto", "ambos")
