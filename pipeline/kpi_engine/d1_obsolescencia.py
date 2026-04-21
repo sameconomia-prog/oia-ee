@@ -7,6 +7,8 @@ from pipeline.db.models import Ocupacion, Vacante, CarreraIES, Carrera
 
 logger = logging.getLogger(__name__)
 
+MAX_VACANTES_BES = 200  # cap to avoid full-table scans in large DBs
+
 
 @dataclass
 class D1Result:
@@ -23,10 +25,14 @@ def calcular_iva(carrera: Carrera, session: Session) -> float:
     except json.JSONDecodeError:
         return 0.5
     if not codes:
+        logger.debug("IVA default: no ONET codes for carrera %s", carrera.id)
         return 0.5
     ocupaciones = session.query(Ocupacion).filter(Ocupacion.onet_code.in_(codes)).all()
     vals = [float(o.p_automatizacion) for o in ocupaciones if o.p_automatizacion is not None]
-    return sum(vals) / len(vals) if vals else 0.5
+    if not vals:
+        logger.debug("IVA default: no ocupaciones found for carrera %s", carrera.id)
+        return 0.5
+    return sum(vals) / len(vals)
 
 
 def calcular_bes(carrera_ies: CarreraIES, session: Session) -> float:
@@ -36,15 +42,17 @@ def calcular_bes(carrera_ies: CarreraIES, session: Session) -> float:
     except json.JSONDecodeError:
         return 0.5
     if not plan_skills:
+        logger.debug("BES default: empty plan_skills")
         return 0.5
-    vacantes = session.query(Vacante).limit(200).all()
+    vacantes = session.query(Vacante).limit(MAX_VACANTES_BES).all()
     demanded: set[str] = set()
     for v in vacantes:
         try:
             demanded.update(s.lower().strip() for s in json.loads(v.skills or "[]"))
-        except Exception:
+        except json.JSONDecodeError:
             pass
     if not demanded:
+        logger.debug("BES default: no vacantes found")
         return 0.5
     overlap = len(plan_skills & demanded)
     return 1.0 - (overlap / len(plan_skills))

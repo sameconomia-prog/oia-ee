@@ -63,7 +63,8 @@ def test_calcular_bes_con_overlap(session):
     session.add(v)
     session.flush()
     bes = calcular_bes(cie, session)
-    assert 0.0 <= bes <= 1.0
+    # plan=[python, sql, java], demanded=[python, docker, kubernetes], overlap=1, BES=1-1/3=0.6667
+    assert bes == pytest.approx(2/3, abs=0.001)
 
 
 def test_calcular_d1_score_en_rango(session):
@@ -77,3 +78,14 @@ def test_calcular_d1_score_en_rango(session):
     assert 0.0 <= result.iva <= 1.0
     assert 0.0 <= result.bes <= 1.0
     assert 0.0 <= result.vac <= 1.0
+
+
+def test_calcular_vac_con_vacantes(session):
+    c = _carrera(session)
+    cie = _carrera_ies(session, c, egresados=10)
+    for i in range(5):
+        session.add(Vacante(titulo=f"Dev {i}", skills=json.dumps([]), fuente="stps"))
+    session.flush()
+    vac = calcular_vac(cie, session)
+    # 5 vacantes / 10 egresados = 0.5 ratio, VAC = 1 - 0.5 = 0.5
+    assert vac == pytest.approx(0.5, abs=0.001)
