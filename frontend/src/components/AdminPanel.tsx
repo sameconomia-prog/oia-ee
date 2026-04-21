@@ -109,8 +109,8 @@ export default function AdminPanel() {
           <p className="text-sm text-gray-400">Sin ejecuciones previas.</p>
         ) : (
           <ul className="space-y-2">
-            {history.map((h, i) => (
-              <li key={i} className="text-xs bg-gray-50 border rounded px-3 py-2">
+            {history.map((h) => (
+              <li key={h.timestamp} className="text-xs bg-gray-50 border rounded px-3 py-2">
                 <span className="text-gray-500">{formatTs(h.timestamp)}</span>
                 {' — '}
                 fetched {h.result.fetched} / stored {h.result.stored} / classified{' '}
