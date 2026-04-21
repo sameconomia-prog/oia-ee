@@ -24,6 +24,9 @@ secrets.yaml
 # Superpowers
 .superpowers/
 
+# Git worktrees
+.worktrees/
+
 # OS
 .DS_Store
 Thumbs.db
