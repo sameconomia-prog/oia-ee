@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
@@ -8,6 +9,7 @@ engine = create_engine(DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
+@contextmanager
 def get_session():
     """Context manager: yields a session and commits/rolls back on exit."""
     db = SessionLocal()
