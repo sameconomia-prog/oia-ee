@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>TechCrunch</title>
+    <item>
+      <title>AI startup lays off 3,000 workers</title>
+      <link>https://techcrunch.com/2026/04/21/ai-layoff</link>
+      <pubDate>Mon, 21 Apr 2026 10:00:00 +0000</pubDate>
+      <description>An AI startup announced massive layoffs today due to automation.</description>
+    </item>
+    <item>
+      <title>New AI jobs emerging in healthcare</title>
+      <link>https://techcrunch.com/2026/04/21/ai-healthcare-jobs</link>
+      <pubDate>Mon, 21 Apr 2026 11:00:00 +0000</pubDate>
+      <description>Healthcare sector creates 5,000 new AI-related positions.</description>
+    </item>
+  </channel>
+</rss>

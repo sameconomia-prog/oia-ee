@@ -1,0 +1,4 @@
+clave_sep,nombre_ies,tipo,subsistema,estado,matricula_total,nombre_carrera,area_conocimiento,nivel,matricula,egresados,ciclo
+UVM001,Universidad del Valle de México,privada,SUP_PART,Ciudad de México,45000,Ingeniería en Sistemas,Ingeniería,licenciatura,1200,180,2024/2
+UVM001,Universidad del Valle de México,privada,SUP_PART,Ciudad de México,45000,Administración de Empresas,Ciencias Sociales,licenciatura,2100,340,2024/2
+IPN001,Instituto Politécnico Nacional,publica,SUP_FED,Ciudad de México,80000,Ingeniería en Computación,Ingeniería,licenciatura,3500,420,2024/2
