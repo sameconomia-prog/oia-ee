@@ -1,0 +1,17 @@
+{
+  "code": "15-1252.00",
+  "title": "Software Developers",
+  "automation": {"value": 0.18},
+  "skills": {
+    "element": [
+      {"name": {"value": "Programming"}, "score": {"value": 78}},
+      {"name": {"value": "Systems Analysis"}, "score": {"value": 72}}
+    ]
+  },
+  "tasks": {
+    "element": [
+      {"statement": {"value": "Develop software solutions by studying requirements"}},
+      {"statement": {"value": "Design and test code structures"}}
+    ]
+  }
+}
