@@ -73,3 +73,21 @@ class GdeltScraper(BaseScraper):
             fecha_pub=fecha_pub,
             pais=a.get("sourcecountry", "global"),
         )
+
+
+if __name__ == "__main__":
+    import os
+    from pipeline.db import get_session
+    from pipeline.ingest_gdelt import run_gdelt_pipeline
+
+    api_key_claude = os.getenv("ANTHROPIC_API_KEY", "")
+    api_key_voyage = os.getenv("VOYAGE_API_KEY", "")
+
+    with get_session() as session:
+        result = run_gdelt_pipeline(session, api_key_claude, api_key_voyage)
+
+    print(f"GDELT Ingest complete:")
+    print(f"  fetched:    {result.fetched}")
+    print(f"  stored:     {result.stored}")
+    print(f"  classified: {result.classified}")
+    print(f"  embedded:   {result.embedded}")
