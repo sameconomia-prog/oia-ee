@@ -34,3 +34,32 @@ class KpiOut(BaseModel):
     carrera_id: str
     d1_obsolescencia: D1Out
     d2_oportunidades: D2Out
+
+
+class IesOut(BaseModel):
+    id: str
+    nombre: str
+    nombre_corto: Optional[str] = None
+
+
+class CarreraKpiOut(BaseModel):
+    id: str
+    nombre: str
+    matricula: Optional[int] = None
+    kpi: Optional[KpiOut] = None
+
+
+class AlertaItemOut(BaseModel):
+    id: str
+    carrera_nombre: str
+    tipo: str
+    severidad: str
+    titulo: str
+    mensaje: Optional[str] = None
+    fecha: str
+
+
+class RectorOut(BaseModel):
+    ies: IesOut
+    carreras: list[CarreraKpiOut]
+    alertas: list[AlertaItemOut]
