@@ -1,0 +1,4 @@
+id_vacante,titulo,empresa,sector,habilidades,salario_min,salario_max,fecha_publicacion,estado,nivel_educativo,experiencia
+V001,Ingeniero de Software IA,TechCorp,Tecnología,"Python,Machine Learning,SQL",25000,45000,2026-04-01,Ciudad de México,Licenciatura,2
+V002,Analista de Datos,DataMex,Tecnología,"Excel,Python,Power BI",18000,30000,2026-04-10,Monterrey,Licenciatura,1
+V003,Técnico en IA,AutoFactory,Manufactura,"Robotica,Python",15000,22000,2026-03-15,Guadalajara,TSU,0
