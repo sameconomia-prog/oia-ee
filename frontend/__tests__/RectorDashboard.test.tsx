@@ -33,18 +33,18 @@ const mockData = {
 
 test('renderiza nombre de la IES', async () => {
   mockGetRectorData.mockResolvedValue(mockData)
-  render(<RectorDashboard iesId={1} />)
+  render(<RectorDashboard iesId="1" />)
   await waitFor(() => expect(screen.getByText('Universidad Humanitas')).toBeInTheDocument())
 })
 
 test('muestra tabla con carreras', async () => {
   mockGetRectorData.mockResolvedValue(mockData)
-  render(<RectorDashboard iesId={1} />)
+  render(<RectorDashboard iesId="1" />)
   await waitFor(() => expect(screen.getAllByText('Derecho').length).toBeGreaterThan(0))
 })
 
 test('muestra panel de alertas activas', async () => {
   mockGetRectorData.mockResolvedValue(mockData)
-  render(<RectorDashboard iesId={1} />)
+  render(<RectorDashboard iesId="1" />)
   await waitFor(() => expect(screen.getByText('Alertas activas (1)')).toBeInTheDocument())
 })

@@ -5,7 +5,7 @@ import type { RectorData } from '@/lib/types'
 import AlertasPanel from './AlertasPanel'
 import RectorCarrerasTable from './RectorCarrerasTable'
 
-export default function RectorDashboard({ iesId }: { iesId: number }) {
+export default function RectorDashboard({ iesId }: { iesId: string }) {
   const [data, setData] = useState<RectorData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

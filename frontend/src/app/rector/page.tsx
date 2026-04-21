@@ -15,5 +15,5 @@ export default function RectorPage() {
     )
   }
 
-  return <RectorDashboard iesId={Number(iesId)} />
+  return <RectorDashboard iesId={iesId} />
 }

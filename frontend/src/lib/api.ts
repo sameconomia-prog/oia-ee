@@ -31,7 +31,7 @@ export async function postIngestGdelt(adminKey: string): Promise<IngestResult> {
   return await res.json()
 }
 
-export async function getRectorData(iesId: number): Promise<RectorData> {
+export async function getRectorData(iesId: string): Promise<RectorData> {
   const res = await fetch(`${BASE}/rector?ies_id=${iesId}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
