@@ -16,12 +16,15 @@ export default function AlertasPanel({ alertas }: { alertas: AlertaItem[] }) {
       </div>
     )
   }
+  const sorted = [...alertas].sort((a, b) =>
+    a.severidad === 'alta' && b.severidad !== 'alta' ? -1 : 1
+  )
   return (
     <div className="flex flex-col gap-2 p-3">
       <h3 className="text-xs font-semibold uppercase text-gray-500 tracking-wide mb-1">
         Alertas activas ({alertas.length})
       </h3>
-      {alertas.map((a) => (
+      {sorted.map((a) => (
         <div
           key={a.id}
           className={`rounded border p-2.5 text-xs ${

@@ -23,3 +23,18 @@ test('muestra mensaje vacío cuando no hay alertas', () => {
   render(<AlertasPanel alertas={[]} />)
   expect(screen.getByText(/Sin alertas activas/)).toBeInTheDocument()
 })
+
+test('ordena alertas con alta primero', () => {
+  const media: AlertaItem = {
+    id: 'b1',
+    carrera_nombre: 'Contabilidad',
+    tipo: 'd2_bajo',
+    severidad: 'media',
+    titulo: 'D2 bajo',
+    mensaje: null,
+    fecha: '2026-04-21T00:00:00',
+  }
+  const { container } = render(<AlertasPanel alertas={[media, alertaMock]} />)
+  const text = container.textContent ?? ''
+  expect(text.indexOf('Derecho')).toBeLessThan(text.indexOf('Contabilidad'))
+})
