@@ -41,6 +41,11 @@ describe('getKpis', () => {
     const result = await getKpis(999)
     expect(result).toBeNull()
   })
+
+  it('throws on non-404 server error', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 })
+    await expect(getKpis(1)).rejects.toThrow('HTTP 500')
+  })
 })
 
 describe('postIngestGdelt', () => {
@@ -55,5 +60,12 @@ describe('postIngestGdelt', () => {
       expect.stringContaining('/admin/ingest/gdelt'),
       expect.objectContaining({ headers: { 'X-Admin-Key': 'test-key' } })
     )
+  })
+})
+
+describe('network errors', () => {
+  it('propagates network failure from getNoticias', async () => {
+    mockFetch.mockRejectedValueOnce(new Error('Network error'))
+    await expect(getNoticias()).rejects.toThrow('Network error')
   })
 })
