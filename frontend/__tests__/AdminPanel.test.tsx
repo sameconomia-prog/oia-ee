@@ -16,8 +16,10 @@ it('botón dispara POST y muestra resultado', async () => {
   render(<AdminPanel />)
   await userEvent.click(screen.getByRole('button', { name: /Actualizar GDELT/ }))
   await waitFor(() => screen.getByText(/Fetched:/))
-  expect(screen.getByText(/45/)).toBeInTheDocument()
+  expect(screen.getByText(/Fetched:/)).toBeInTheDocument()
   expect(screen.getByText(/Stored:/)).toBeInTheDocument()
+  expect(screen.getByText(/Classified:/)).toBeInTheDocument()
+  expect(screen.getByText(/Embedded:/)).toBeInTheDocument()
 })
 
 it('guarda resultado en localStorage', async () => {

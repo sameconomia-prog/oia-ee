@@ -49,6 +49,7 @@ export default function AdminPanel() {
       const entry: HistoryEntry = { timestamp: new Date().toISOString(), result: r }
       const updated = [entry, ...loadHistory()].slice(0, MAX_HISTORY)
       saveHistory(updated)
+      setHistory(updated)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error desconocido')
     } finally {
