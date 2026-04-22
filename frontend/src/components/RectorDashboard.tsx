@@ -34,7 +34,7 @@ export default function RectorDashboard({ iesId }: { iesId: string }) {
           <AlertasPanel alertas={data.alertas} iesId={iesId} />
         </aside>
         <main>
-          <RectorCarrerasTable carreras={data.carreras} />
+          <RectorCarrerasTable carreras={data.carreras} iesId={iesId} />
         </main>
       </div>
     </div>

@@ -1,5 +1,5 @@
 # api/schemas.py
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 
@@ -86,3 +86,29 @@ class AlertasHistorialOut(BaseModel):
 class AlertaLeidaOut(BaseModel):
     id: str
     leida: bool
+
+
+class SimularInput(BaseModel):
+    ies_id: str
+    carrera_id: str
+    carrera_nombre: str
+    iva: float = Field(ge=0, le=1)
+    bes: float = Field(ge=0, le=1)
+    vac: float = Field(ge=0, le=1)
+    ioe: float = Field(ge=0, le=1)
+    ihe: float = Field(ge=0, le=1)
+    iea: float = Field(ge=0, le=1)
+
+
+class SimularResult(BaseModel):
+    id: str
+    carrera_nombre: str
+    d1_score: float
+    d2_score: float
+    iva: float
+    bes: float
+    vac: float
+    ioe: float
+    ihe: float
+    iea: float
+    fecha: str
