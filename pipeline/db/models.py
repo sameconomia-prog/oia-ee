@@ -147,3 +147,12 @@ class Escenario(Base):
     acciones        = Column(Text)
     proyecciones    = Column(Text)
     fecha_creacion  = Column(DateTime(timezone=True), default=datetime.utcnow)
+
+
+class Usuario(Base):
+    __tablename__ = "usuarios"
+    id              = Column(String(36), primary_key=True, default=_uuid)
+    username        = Column(String(100), unique=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    ies_id          = Column(String(36), ForeignKey("ies.id"), nullable=False)
+    activo          = Column(Boolean, default=True)
