@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import type { CarreraKpi } from '@/lib/types'
 import { dotColor, textColor } from '@/lib/kpi-colors'
+import SimuladorModal from './SimuladorModal'
 
 type SortKey = 'd1' | 'd2'
 type SortDir = 'asc' | 'desc'
@@ -34,9 +35,16 @@ function Dash() {
   return <span className="text-xs text-gray-400">—</span>
 }
 
-export default function RectorCarrerasTable({ carreras }: { carreras: CarreraKpi[] }) {
+export default function RectorCarrerasTable({
+  carreras,
+  iesId,
+}: {
+  carreras: CarreraKpi[]
+  iesId: string
+}) {
   const [sortKey, setSortKey] = useState<SortKey>('d1')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
+  const [simulando, setSimulando] = useState<string | null>(null)
 
   function handleSort(key: SortKey) {
     if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
@@ -54,65 +62,115 @@ export default function RectorCarrerasTable({ carreras }: { carreras: CarreraKpi
     return sortDir === 'desc' ? vb - va : va - vb
   })
 
+  const carreraSimulando = simulando ? carreras.find((c) => c.id === simulando) ?? null : null
+
   if (carreras.length === 0) {
     return <p className="text-gray-400 py-8 text-sm">Sin carreras registradas para esta IES.</p>
   }
 
   return (
-    <div className="overflow-x-auto rounded border">
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="text-xs text-center">
-            <th className="px-3 py-2 border-b text-left" rowSpan={2}>Carrera</th>
-            <th className="px-2 py-2 border-b text-right text-gray-500" rowSpan={2}>Matrícula</th>
-            <th colSpan={5} className="px-2 py-1.5 border-b border-l-4 border-l-red-300 bg-red-50 text-red-800 tracking-wide">
-              D1 — OBSOLESCENCIA
-            </th>
-            <th colSpan={5} className="px-2 py-1.5 border-b border-l-4 border-l-green-300 bg-green-50 text-green-800 tracking-wide">
-              D2 — OPORTUNIDADES
-            </th>
-          </tr>
-          <tr className="text-xs text-center text-gray-500 bg-gray-50">
-            <th className="px-2 py-1 border-b border-l-4 border-l-red-300 bg-red-50">●</th>
-            <th className="px-2 py-1 border-b bg-red-50 cursor-pointer hover:bg-red-100 select-none" onClick={() => handleSort('d1')}>{`Score${arrow('d1')}`}</th>
-            <th className="px-2 py-1 border-b bg-red-50">IVA</th>
-            <th className="px-2 py-1 border-b bg-red-50">BES</th>
-            <th className="px-2 py-1 border-b bg-red-50">VAC</th>
-            <th className="px-2 py-1 border-b border-l-4 border-l-green-300 bg-green-50">●</th>
-            <th className="px-2 py-1 border-b bg-green-50 cursor-pointer hover:bg-green-100 select-none" onClick={() => handleSort('d2')}>{`Score${arrow('d2')}`}</th>
-            <th className="px-2 py-1 border-b bg-green-50">IOE</th>
-            <th className="px-2 py-1 border-b bg-green-50">IHE</th>
-            <th className="px-2 py-1 border-b bg-green-50">IEA</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map(({ id, nombre, matricula, kpi }) => {
-            const d1 = kpi?.d1_obsolescencia
-            const d2 = kpi?.d2_oportunidades
-            return (
-              <tr key={id} className="border-b hover:bg-gray-50 text-center">
-                <td className="px-3 py-2 text-left text-xs font-semibold text-gray-800">{nombre}</td>
-                <td className="px-3 py-2 text-right text-xs text-gray-500">{matricula ?? '—'}</td>
-                <td className="px-2 py-2 border-l-4 border-l-red-200 bg-red-50/50">{d1 ? <Dot value={d1.score} isD1={true} /> : <Dash />}</td>
-                <td className="px-2 py-2 bg-red-50/50">{d1 ? <Bar value={d1.score} isD1={true} /> : <Dash />}</td>
-                <td className="px-2 py-2 bg-red-50/50">{d1 ? <Sub value={d1.iva} isD1={true} /> : <Dash />}</td>
-                <td className="px-2 py-2 bg-red-50/50">{d1 ? <Sub value={d1.bes} isD1={true} /> : <Dash />}</td>
-                <td className="px-2 py-2 bg-red-50/50">{d1 ? <Sub value={d1.vac} isD1={true} /> : <Dash />}</td>
-                <td className="px-2 py-2 border-l-4 border-l-green-200 bg-green-50/50">{d2 ? <Dot value={d2.score} isD1={false} /> : <Dash />}</td>
-                <td className="px-2 py-2 bg-green-50/50">{d2 ? <Bar value={d2.score} isD1={false} /> : <Dash />}</td>
-                <td className="px-2 py-2 bg-green-50/50">{d2 ? <Sub value={d2.ioe} isD1={false} /> : <Dash />}</td>
-                <td className="px-2 py-2 bg-green-50/50">{d2 ? <Sub value={d2.ihe} isD1={false} /> : <Dash />}</td>
-                <td className="px-2 py-2 bg-green-50/50">{d2 ? <Sub value={d2.iea} isD1={false} /> : <Dash />}</td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-      <p className="px-3 py-2 text-xs text-gray-400">
-        <span className="text-red-600">● rojo</span> = alerta ·{' '}
-        <span className="text-yellow-600">● amarillo</span> = medio ·{' '}
-        <span className="text-green-600">● verde</span> = bueno &nbsp;(D1: alto=malo · D2: alto=bueno)
-      </p>
-    </div>
+    <>
+      {carreraSimulando && (
+        <SimuladorModal
+          carrera={carreraSimulando}
+          iesId={iesId}
+          onClose={() => setSimulando(null)}
+        />
+      )}
+      <div className="overflow-x-auto rounded border">
+        <table className="w-full text-sm border-collapse">
+          <thead>
+            <tr className="text-xs text-center">
+              <th className="px-3 py-2 border-b text-left" rowSpan={2}>Carrera</th>
+              <th className="px-2 py-2 border-b text-right text-gray-500" rowSpan={2}>Matrícula</th>
+              <th colSpan={5} className="px-2 py-1.5 border-b border-l-4 border-l-red-300 bg-red-50 text-red-800 tracking-wide">
+                D1 — OBSOLESCENCIA
+              </th>
+              <th colSpan={5} className="px-2 py-1.5 border-b border-l-4 border-l-green-300 bg-green-50 text-green-800 tracking-wide">
+                D2 — OPORTUNIDADES
+              </th>
+              <th className="px-2 py-2 border-b text-gray-500 text-xs" rowSpan={2}>Acción</th>
+            </tr>
+            <tr className="text-xs text-center text-gray-500 bg-gray-50">
+              <th className="px-2 py-1 border-b border-l-4 border-l-red-300 bg-red-50">●</th>
+              <th
+                className="px-2 py-1 border-b bg-red-50 cursor-pointer hover:bg-red-100 select-none"
+                onClick={() => handleSort('d1')}
+              >
+                {`Score${arrow('d1')}`}
+              </th>
+              <th className="px-2 py-1 border-b bg-red-50">IVA</th>
+              <th className="px-2 py-1 border-b bg-red-50">BES</th>
+              <th className="px-2 py-1 border-b bg-red-50">VAC</th>
+              <th className="px-2 py-1 border-b border-l-4 border-l-green-300 bg-green-50">●</th>
+              <th
+                className="px-2 py-1 border-b bg-green-50 cursor-pointer hover:bg-green-100 select-none"
+                onClick={() => handleSort('d2')}
+              >
+                {`Score${arrow('d2')}`}
+              </th>
+              <th className="px-2 py-1 border-b bg-green-50">IOE</th>
+              <th className="px-2 py-1 border-b bg-green-50">IHE</th>
+              <th className="px-2 py-1 border-b bg-green-50">IEA</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map(({ id, nombre, matricula, kpi }) => {
+              const d1 = kpi?.d1_obsolescencia
+              const d2 = kpi?.d2_oportunidades
+              return (
+                <tr key={id} className="border-b hover:bg-gray-50 text-center">
+                  <td className="px-3 py-2 text-left text-xs font-semibold text-gray-800">{nombre}</td>
+                  <td className="px-3 py-2 text-right text-xs text-gray-500">{matricula ?? '—'}</td>
+                  <td className="px-2 py-2 border-l-4 border-l-red-200 bg-red-50/50">
+                    {d1 ? <Dot value={d1.score} isD1={true} /> : <Dash />}
+                  </td>
+                  <td className="px-2 py-2 bg-red-50/50">
+                    {d1 ? <Bar value={d1.score} isD1={true} /> : <Dash />}
+                  </td>
+                  <td className="px-2 py-2 bg-red-50/50">
+                    {d1 ? <Sub value={d1.iva} isD1={true} /> : <Dash />}
+                  </td>
+                  <td className="px-2 py-2 bg-red-50/50">
+                    {d1 ? <Sub value={d1.bes} isD1={true} /> : <Dash />}
+                  </td>
+                  <td className="px-2 py-2 bg-red-50/50">
+                    {d1 ? <Sub value={d1.vac} isD1={true} /> : <Dash />}
+                  </td>
+                  <td className="px-2 py-2 border-l-4 border-l-green-200 bg-green-50/50">
+                    {d2 ? <Dot value={d2.score} isD1={false} /> : <Dash />}
+                  </td>
+                  <td className="px-2 py-2 bg-green-50/50">
+                    {d2 ? <Bar value={d2.score} isD1={false} /> : <Dash />}
+                  </td>
+                  <td className="px-2 py-2 bg-green-50/50">
+                    {d2 ? <Sub value={d2.ioe} isD1={false} /> : <Dash />}
+                  </td>
+                  <td className="px-2 py-2 bg-green-50/50">
+                    {d2 ? <Sub value={d2.ihe} isD1={false} /> : <Dash />}
+                  </td>
+                  <td className="px-2 py-2 bg-green-50/50">
+                    {d2 ? <Sub value={d2.iea} isD1={false} /> : <Dash />}
+                  </td>
+                  <td className="px-2 py-2">
+                    <button
+                      onClick={() => setSimulando(id)}
+                      className="text-xs text-blue-600 hover:text-blue-800 whitespace-nowrap"
+                    >
+                      Simular →
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+        <p className="px-3 py-2 text-xs text-gray-400">
+          <span className="text-red-600">● rojo</span> = alerta ·{' '}
+          <span className="text-yellow-600">● amarillo</span> = medio ·{' '}
+          <span className="text-green-600">● verde</span> = bueno &nbsp;(D1: alto=malo · D2: alto=bueno)
+        </p>
+      </div>
+    </>
   )
 }
