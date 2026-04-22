@@ -112,3 +112,23 @@ class SimularResult(BaseModel):
     ihe: float
     iea: float
     fecha: str
+
+
+class EscenarioOut(BaseModel):
+    id: str
+    carrera_nombre: str
+    carrera_id: str
+    d1_score: float
+    d2_score: float
+    iva: float
+    bes: float
+    vac: float
+    ioe: float
+    ihe: float
+    iea: float
+    fecha: str
+
+
+class EscenariosHistorialOut(BaseModel):
+    escenarios: list[EscenarioOut]
+    total: int

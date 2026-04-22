@@ -1,10 +1,10 @@
 # api/routers/rector.py
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from api.deps import get_db
+from api.deps import get_db, get_current_user
 from api.schemas import RectorOut, IesOut, CarreraKpiOut, AlertaItemOut, KpiOut, D1Out, D2Out
-from pipeline.db.models import IES, Carrera, CarreraIES
+from pipeline.db.models import IES, Carrera, CarreraIES, Usuario
 from pipeline.kpi_engine.kpi_runner import run_kpis
 
 router = APIRouter()
@@ -23,7 +23,14 @@ def _titulo(tipo: str) -> str:
 
 
 @router.get("/", response_model=RectorOut)
-def get_rector_dashboard(ies_id: str, db: Session = Depends(get_db)):
+def get_rector_dashboard(
+    ies_id: str,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user),
+):
+    if ies_id != current_user.ies_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acceso denegado")
+
     ies = db.query(IES).filter_by(id=ies_id).first()
     if not ies:
         raise HTTPException(status_code=404, detail="IES no encontrada")

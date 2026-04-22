@@ -108,3 +108,23 @@ export interface SimResult {
   iea: number
   fecha: string
 }
+
+export interface EscenarioHistorial {
+  id: string
+  carrera_nombre: string
+  carrera_id: string
+  d1_score: number
+  d2_score: number
+  iva: number
+  bes: number
+  vac: number
+  ioe: number
+  ihe: number
+  iea: number
+  fecha: string
+}
+
+export interface EscenariosHistorialResult {
+  escenarios: EscenarioHistorial[]
+  total: number
+}

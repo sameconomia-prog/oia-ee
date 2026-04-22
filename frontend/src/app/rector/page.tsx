@@ -1,8 +1,9 @@
 'use client'
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import RectorDashboard from '@/components/RectorDashboard'
 
-export default function RectorPage() {
+function RectorContent() {
   const params = useSearchParams()
   const iesId = params.get('ies_id')
 
@@ -16,4 +17,12 @@ export default function RectorPage() {
   }
 
   return <RectorDashboard iesId={iesId} />
+}
+
+export default function RectorPage() {
+  return (
+    <Suspense fallback={<div className="py-8 text-gray-400 text-sm">Cargando...</div>}>
+      <RectorContent />
+    </Suspense>
+  )
 }
