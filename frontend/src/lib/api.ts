@@ -1,4 +1,4 @@
-import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult } from './types'
+import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult } from './types'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -60,6 +60,18 @@ export async function postSimular(input: SimularInput): Promise<SimResult> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function getEscenarios(
+  iesId: string,
+  options: { skip?: number; limit?: number } = {}
+): Promise<EscenariosHistorialResult> {
+  const q = new URLSearchParams({ ies_id: iesId })
+  if (options.skip !== undefined) q.set('skip', String(options.skip))
+  if (options.limit !== undefined) q.set('limit', String(options.limit))
+  const res = await fetch(`${BASE}/escenarios/?${q}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }
