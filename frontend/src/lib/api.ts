@@ -1,6 +1,12 @@
 import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult } from './types'
+import { getToken } from './auth'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
+
+function authHeaders(): Record<string, string> {
+  const token = getToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
 
 export async function getNoticias(
   params: { skip?: number; limit?: number; sector?: string } = {}
@@ -32,7 +38,9 @@ export async function postIngestGdelt(adminKey: string): Promise<IngestResult> {
 }
 
 export async function getRectorData(iesId: string): Promise<RectorData> {
-  const res = await fetch(`${BASE}/rector?ies_id=${iesId}`)
+  const res = await fetch(`${BASE}/rector?ies_id=${iesId}`, {
+    headers: authHeaders(),
+  })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }
@@ -44,20 +52,23 @@ export async function getAlertas(
   const q = new URLSearchParams({ ies_id: iesId })
   if (options.skip !== undefined) q.set('skip', String(options.skip))
   if (options.limit !== undefined) q.set('limit', String(options.limit))
-  const res = await fetch(`${BASE}/alertas?${q}`)
+  const res = await fetch(`${BASE}/alertas?${q}`, { headers: authHeaders() })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }
 
 export async function markAlertaRead(alertaId: string): Promise<void> {
-  const res = await fetch(`${BASE}/alertas/${alertaId}/leer`, { method: 'PUT' })
+  const res = await fetch(`${BASE}/alertas/${alertaId}/leer`, {
+    method: 'PUT',
+    headers: authHeaders(),
+  })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
 }
 
 export async function postSimular(input: SimularInput): Promise<SimResult> {
   const res = await fetch(`${BASE}/escenarios/simular`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(input),
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -71,7 +82,7 @@ export async function getEscenarios(
   const q = new URLSearchParams({ ies_id: iesId })
   if (options.skip !== undefined) q.set('skip', String(options.skip))
   if (options.limit !== undefined) q.set('limit', String(options.limit))
-  const res = await fetch(`${BASE}/escenarios/?${q}`)
+  const res = await fetch(`${BASE}/escenarios/?${q}`, { headers: authHeaders() })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }
