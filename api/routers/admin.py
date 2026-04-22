@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from api.deps import get_db
 from pipeline.ingest_gdelt import run_gdelt_pipeline
+from pipeline.jobs.alert_job import run_alert_job
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -16,6 +17,10 @@ class IngestResultOut(BaseModel):
     stored: int
     classified: int
     embedded: int
+
+
+class AlertJobResultOut(BaseModel):
+    alertas_creadas: int
 
 
 @router.post("/ingest/gdelt", response_model=IngestResultOut)
@@ -32,3 +37,15 @@ def ingest_gdelt(
         api_key_voyage=os.getenv("VOYAGE_API_KEY", ""),
     )
     return IngestResultOut(**vars(result))
+
+
+@router.post("/jobs/alertas", response_model=AlertJobResultOut)
+def trigger_alert_job(
+    x_admin_key: str = Header(None),
+    db: Session = Depends(get_db),
+):
+    admin_key = os.getenv("ADMIN_API_KEY", "")
+    if not admin_key or x_admin_key != admin_key:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    creadas = run_alert_job(db)
+    return AlertJobResultOut(alertas_creadas=creadas)
