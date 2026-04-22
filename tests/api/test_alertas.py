@@ -71,3 +71,24 @@ def test_marcar_alerta_inexistente(authed_client):
     resp = client.put("/alertas/id-no-existe/leer")
     assert resp.status_code == 404
     assert resp.json()["detail"] == "Alerta no encontrada"
+
+
+def test_marcar_leida_ies_distinta_da_403(authed_client, db_session):
+    client, ies_id = authed_client
+    # Crear otra IES y una alerta para esa IES
+    from pipeline.db.models import IES, Alerta
+    otra_ies = IES(nombre="IES Otra", nombre_corto="IO")
+    db_session.add(otra_ies)
+    db_session.flush()
+    alerta = Alerta(
+        ies_id=otra_ies.id,
+        carrera_id="carrera-x",
+        tipo="d1_alto",
+        severidad="alta",
+        titulo="Test",
+        mensaje="Test",
+    )
+    db_session.add(alerta)
+    db_session.flush()
+    resp = client.put(f"/alertas/{alerta.id}/leer")
+    assert resp.status_code == 403

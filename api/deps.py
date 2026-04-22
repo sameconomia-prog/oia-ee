@@ -23,7 +23,6 @@ def get_current_user(token: str = Depends(_oauth2_scheme), db: Session = Depends
     try:
         payload = jwt.decode(token, _SECRET, algorithms=[_ALGORITHM])
         username: str = payload.get("sub", "")
-        ies_id: str = payload.get("ies_id", "")
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
     user = db.query(Usuario).filter_by(username=username, activo=True).first()

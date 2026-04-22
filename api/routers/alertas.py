@@ -1,5 +1,5 @@
 # api/routers/alertas.py
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from api.deps import get_db, get_current_user
 from api.schemas import AlertaDBOut, AlertasHistorialOut, AlertaLeidaOut
@@ -57,6 +57,8 @@ def marcar_leida(
     alerta = db.query(Alerta).filter_by(id=alerta_id).first()
     if not alerta:
         raise HTTPException(status_code=404, detail="Alerta no encontrada")
+    if alerta.ies_id != current_user.ies_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acceso denegado")
     alerta.leida = True
     db.commit()
     return AlertaLeidaOut(id=alerta.id, leida=bool(alerta.leida))
