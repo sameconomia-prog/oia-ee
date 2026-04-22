@@ -31,7 +31,7 @@ export default function RectorDashboard({ iesId }: { iesId: string }) {
       </div>
       <div className="grid grid-cols-[280px_1fr] gap-4 items-start">
         <aside className="border rounded bg-white">
-          <AlertasPanel alertas={data.alertas} />
+          <AlertasPanel alertas={data.alertas} iesId={iesId} />
         </aside>
         <main>
           <RectorCarrerasTable carreras={data.carreras} />

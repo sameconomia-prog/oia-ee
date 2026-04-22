@@ -46,5 +46,5 @@ test('muestra tabla con carreras', async () => {
 test('muestra panel de alertas activas', async () => {
   mockGetRectorData.mockResolvedValue(mockData)
   render(<RectorDashboard iesId="1" />)
-  await waitFor(() => expect(screen.getByText('Alertas activas (1)')).toBeInTheDocument())
+  await waitFor(() => expect(screen.getByText('Actuales (1)')).toBeInTheDocument())
 })
