@@ -64,3 +64,21 @@ export interface RectorData {
   carreras: CarreraKpi[]
   alertas: AlertaItem[]
 }
+
+export interface AlertaDB {
+  id: string
+  ies_id: string
+  carrera_id: string
+  carrera_nombre: string
+  tipo: 'd1_alto' | 'd2_bajo' | 'ambos'
+  severidad: 'alta' | 'media'
+  titulo: string
+  mensaje: string | null
+  fecha: string
+  leida: boolean
+}
+
+export interface AlertasHistorial {
+  alertas: AlertaDB[]
+  total: number
+}

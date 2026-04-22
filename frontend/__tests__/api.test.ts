@@ -1,4 +1,5 @@
-import { getNoticias, getKpis, postIngestGdelt, getRectorData } from '@/lib/api'
+import { getNoticias, getKpis, postIngestGdelt, getRectorData, getAlertas, markAlertaRead } from '@/lib/api'
+import type { AlertasHistorial } from '@/lib/types'
 
 const mockFetch = jest.fn()
 global.fetch = mockFetch
@@ -81,7 +82,7 @@ describe('getRectorData', () => {
       ok: true,
       json: async () => mockData,
     } as Response)
-    const result = await getRectorData(1)
+    const result = await getRectorData('1')
     expect(result.ies.nombre).toBe('Humanitas')
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/rector?ies_id=1')
@@ -90,6 +91,32 @@ describe('getRectorData', () => {
 
   it('throws on non-OK response', async () => {
     mockFetch.mockResolvedValueOnce({ ok: false, status: 404 } as Response)
-    await expect(getRectorData(99)).rejects.toThrow('HTTP 404')
+    await expect(getRectorData('99')).rejects.toThrow('HTTP 404')
+  })
+})
+
+describe('getAlertas', () => {
+  it('retorna AlertasHistorial en éxito', async () => {
+    const mockData: AlertasHistorial = { alertas: [], total: 0 }
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockData } as Response)
+    const result = await getAlertas('ies-abc')
+    expect(result.total).toBe(0)
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('ies_id=ies-abc'))
+  })
+
+  it('lanza error en respuesta no-OK', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 } as Response)
+    await expect(getAlertas('ies-abc')).rejects.toThrow('HTTP 500')
+  })
+})
+
+describe('markAlertaRead', () => {
+  it('envía PUT y resuelve sin error', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) } as Response)
+    await expect(markAlertaRead('alerta-1')).resolves.toBeUndefined()
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/alertas/alerta-1/leer'),
+      { method: 'PUT' }
+    )
   })
 })
