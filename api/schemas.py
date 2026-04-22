@@ -63,3 +63,26 @@ class RectorOut(BaseModel):
     ies: IesOut
     carreras: list[CarreraKpiOut]
     alertas: list[AlertaItemOut]
+
+
+class AlertaDBOut(BaseModel):
+    id: str
+    ies_id: str
+    carrera_id: str
+    carrera_nombre: str
+    tipo: str
+    severidad: str
+    titulo: str
+    mensaje: str | None = None
+    fecha: str
+    leida: bool
+
+
+class AlertasHistorialOut(BaseModel):
+    alertas: list[AlertaDBOut]
+    total: int
+
+
+class AlertaLeidaOut(BaseModel):
+    id: str
+    leida: bool
