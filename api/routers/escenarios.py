@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from api.schemas import SimularInput, SimularResult
+from api.schemas import SimularInput, SimularResult, EscenarioOut, EscenariosHistorialOut
 from pipeline.db.models import Escenario
 from pipeline.scenario_engine.simulator import D1Inputs, D2Inputs, simulate_kpis
 
@@ -49,3 +49,29 @@ def simular(body: SimularInput, db: Session = Depends(get_db)):
         ioe=body.ioe, ihe=body.ihe, iea=body.iea,
         fecha=fecha,
     )
+
+
+@router.get("/", response_model=EscenariosHistorialOut)
+def get_escenarios(ies_id: str, skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
+    q = db.query(Escenario).filter(Escenario.ies_id == ies_id)
+    total = q.count()
+    rows = q.order_by(Escenario.fecha_creacion.desc()).offset(skip).limit(limit).all()
+    items = []
+    for e in rows:
+        acciones = json.loads(e.acciones or "{}")
+        proyecciones = json.loads(e.proyecciones or "{}")
+        items.append(EscenarioOut(
+            id=e.id,
+            carrera_nombre=acciones.get("carrera_nombre", ""),
+            carrera_id=acciones.get("carrera_id", ""),
+            d1_score=proyecciones.get("d1_score", 0.0),
+            d2_score=proyecciones.get("d2_score", 0.0),
+            iva=acciones.get("iva", 0.0),
+            bes=acciones.get("bes", 0.0),
+            vac=acciones.get("vac", 0.0),
+            ioe=acciones.get("ioe", 0.0),
+            ihe=acciones.get("ihe", 0.0),
+            iea=acciones.get("iea", 0.0),
+            fecha=e.fecha_creacion.isoformat() if e.fecha_creacion else datetime.utcnow().isoformat(),
+        ))
+    return EscenariosHistorialOut(escenarios=items, total=total)
