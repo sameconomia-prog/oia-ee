@@ -24,7 +24,7 @@ export default function AlertasPanel({
     if (tab !== 'historial') return
     setHistLoading(true)
     getAlertas(iesId)
-      .then((data) => setHistorial(data.alertas))
+      .then((data) => setHistorial(data?.alertas ?? []))
       .catch(() => setHistorial([]))
       .finally(() => setHistLoading(false))
   }, [tab, iesId])
