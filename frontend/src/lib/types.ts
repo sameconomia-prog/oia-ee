@@ -82,3 +82,29 @@ export interface AlertasHistorial {
   alertas: AlertaDB[]
   total: number
 }
+
+export interface SimularInput {
+  ies_id: string
+  carrera_id: string
+  carrera_nombre: string
+  iva: number
+  bes: number
+  vac: number
+  ioe: number
+  ihe: number
+  iea: number
+}
+
+export interface SimResult {
+  id: string
+  carrera_nombre: string
+  d1_score: number
+  d2_score: number
+  iva: number
+  bes: number
+  vac: number
+  ioe: number
+  ihe: number
+  iea: number
+  fecha: string
+}

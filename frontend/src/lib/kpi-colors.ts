@@ -12,3 +12,11 @@ export function textColor(value: number, isD1: boolean): string {
   if (c === 'bg-green-500') return 'text-green-600 font-bold'
   return 'text-yellow-600 font-bold'
 }
+
+export function calcD1(iva: number, bes: number, vac: number): number {
+  return Math.round((iva * 0.5 + bes * 0.3 + vac * 0.2) * 10000) / 10000
+}
+
+export function calcD2(ioe: number, ihe: number, iea: number): number {
+  return Math.round((ioe * 0.4 + ihe * 0.35 + iea * 0.25) * 10000) / 10000
+}

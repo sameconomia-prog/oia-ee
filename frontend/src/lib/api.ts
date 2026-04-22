@@ -1,4 +1,4 @@
-import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial } from './types'
+import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult } from './types'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -52,4 +52,14 @@ export async function getAlertas(
 export async function markAlertaRead(alertaId: string): Promise<void> {
   const res = await fetch(`${BASE}/alertas/${alertaId}/leer`, { method: 'PUT' })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
+}
+
+export async function postSimular(input: SimularInput): Promise<SimResult> {
+  const res = await fetch(`${BASE}/escenarios/simular`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
 }
