@@ -25,6 +25,7 @@ export default function EscenariosPanel({ iesId, onComparar }: Props) {
   const limit = 10
 
   useEffect(() => {
+    setSelected(new Set())
     setLoading(true)
     getEscenarios(iesId, { skip, limit })
       .then((r) => { setEscenarios(r.escenarios); setTotal(r.total) })
@@ -91,6 +92,7 @@ export default function EscenariosPanel({ iesId, onComparar }: Props) {
                     checked={selected.has(e.id)}
                     onChange={() => toggleSelect(e.id)}
                     disabled={!selected.has(e.id) && selected.size >= 3}
+                    aria-label={`Seleccionar ${e.carrera_nombre}`}
                     className="cursor-pointer"
                   />
                 </td>
@@ -111,9 +113,9 @@ export default function EscenariosPanel({ iesId, onComparar }: Props) {
       </div>
       {totalPages > 1 && (
         <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
-          <button onClick={() => setSkip(Math.max(0, skip - limit))} disabled={page === 0} className="disabled:opacity-40">← Anterior</button>
+          <button onClick={() => { setSkip(Math.max(0, skip - limit)); setSelected(new Set()) }} disabled={page === 0} className="disabled:opacity-40">← Anterior</button>
           <span>Página {page + 1} de {totalPages} ({total} total)</span>
-          <button onClick={() => setSkip(skip + limit)} disabled={page >= totalPages - 1} className="disabled:opacity-40">Siguiente →</button>
+          <button onClick={() => { setSkip(skip + limit); setSelected(new Set()) }} disabled={page >= totalPages - 1} className="disabled:opacity-40">Siguiente →</button>
         </div>
       )}
     </div>
