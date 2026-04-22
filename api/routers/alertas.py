@@ -1,9 +1,9 @@
 # api/routers/alertas.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from api.deps import get_db
+from api.deps import get_db, get_current_user
 from api.schemas import AlertaDBOut, AlertasHistorialOut, AlertaLeidaOut
-from pipeline.db.models import Alerta, Carrera
+from pipeline.db.models import Alerta, Carrera, Usuario
 
 router = APIRouter()
 
@@ -14,7 +14,11 @@ def get_alertas(
     skip: int = 0,
     limit: int = 20,
     db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user),
 ):
+    if ies_id != current_user.ies_id:
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+
     total = db.query(Alerta).filter_by(ies_id=ies_id).count()
     alertas = (
         db.query(Alerta)
@@ -45,7 +49,11 @@ def get_alertas(
 
 
 @router.put("/{alerta_id}/leer", response_model=AlertaLeidaOut)
-def marcar_leida(alerta_id: str, db: Session = Depends(get_db)):
+def marcar_leida(
+    alerta_id: str,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user),
+):
     alerta = db.query(Alerta).filter_by(id=alerta_id).first()
     if not alerta:
         raise HTTPException(status_code=404, detail="Alerta no encontrada")

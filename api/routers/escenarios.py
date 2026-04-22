@@ -1,18 +1,25 @@
 # api/routers/escenarios.py
 import json
 from datetime import datetime
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from api.deps import get_db
+from api.deps import get_db, get_current_user
 from api.schemas import SimularInput, SimularResult, EscenarioOut, EscenariosHistorialOut
-from pipeline.db.models import Escenario
+from pipeline.db.models import Escenario, Usuario
 from pipeline.scenario_engine.simulator import D1Inputs, D2Inputs, simulate_kpis
 
 router = APIRouter()
 
 
 @router.post("/simular", response_model=SimularResult)
-def simular(body: SimularInput, db: Session = Depends(get_db)):
+def simular(
+    body: SimularInput,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user),
+):
+    if body.ies_id != current_user.ies_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acceso denegado")
+
     result = simulate_kpis(
         D1Inputs(iva=body.iva, bes=body.bes, vac=body.vac),
         D2Inputs(ioe=body.ioe, ihe=body.ihe, iea=body.iea),
@@ -52,7 +59,13 @@ def simular(body: SimularInput, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=EscenariosHistorialOut)
-def get_escenarios(ies_id: str, skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
+def get_escenarios(
+    skip: int = 0,
+    limit: int = 20,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user),
+):
+    ies_id = current_user.ies_id
     q = db.query(Escenario).filter(Escenario.ies_id == ies_id)
     total = q.count()
     rows = q.order_by(Escenario.fecha_creacion.desc()).offset(skip).limit(limit).all()

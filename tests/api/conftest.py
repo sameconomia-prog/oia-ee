@@ -46,3 +46,33 @@ def client(db_session):
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
+
+
+import uuid as _uuid_mod
+from passlib.context import CryptContext as _CryptContext
+from pipeline.db.models import IES, Usuario
+
+_test_pwd_ctx = _CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+@pytest.fixture
+def authed_client(client, db_session):
+    """Client con JWT válido. Retorna (client, ies_id)."""
+    unique_suffix = _uuid_mod.uuid4().hex[:8]
+    ies = IES(nombre="IES Auth Fixture", nombre_corto="IAF")
+    db_session.add(ies)
+    db_session.flush()
+    username = f"rector_{unique_suffix}"
+    user = Usuario(
+        username=username,
+        hashed_password=_test_pwd_ctx.hash("fixture_pass"),
+        ies_id=ies.id,
+    )
+    db_session.add(user)
+    db_session.flush()
+
+    resp = client.post("/auth/login", data={"username": username, "password": "fixture_pass"})
+    assert resp.status_code == 200, f"Login falló en fixture: {resp.text}"
+    token = resp.json()["access_token"]
+    client.headers = {**client.headers, "Authorization": f"Bearer {token}"}
+    return client, ies.id

@@ -10,12 +10,9 @@ _VALID_INPUT = {
 }
 
 
-def test_simular_retorna_resultado(client, db_session):
-    ies = IES(nombre="IES Simulador", nombre_corto="IS")
-    db_session.add(ies)
-    db_session.flush()
-
-    resp = client.post("/escenarios/simular", json={**_VALID_INPUT, "ies_id": ies.id})
+def test_simular_retorna_resultado(authed_client):
+    client, ies_id = authed_client
+    resp = client.post("/escenarios/simular", json={**_VALID_INPUT, "ies_id": ies_id})
     assert resp.status_code == 200
     data = resp.json()
     assert data["carrera_nombre"] == "Derecho"
@@ -27,12 +24,9 @@ def test_simular_retorna_resultado(client, db_session):
     assert "fecha" in data
 
 
-def test_simular_persiste_escenario(client, db_session):
-    ies = IES(nombre="IES Persistir", nombre_corto="IP")
-    db_session.add(ies)
-    db_session.flush()
-
-    resp = client.post("/escenarios/simular", json={**_VALID_INPUT, "ies_id": ies.id})
+def test_simular_persiste_escenario(authed_client, db_session):
+    client, ies_id = authed_client
+    resp = client.post("/escenarios/simular", json={**_VALID_INPUT, "ies_id": ies_id})
     assert resp.status_code == 200
     escenario_id = resp.json()["id"]
 
@@ -48,26 +42,20 @@ def test_simular_persiste_escenario(client, db_session):
     assert proyecciones["d1_score"] == 0.735
 
 
-def test_simular_input_invalido(client, db_session):
-    ies = IES(nombre="IES Invalido", nombre_corto="II")
-    db_session.add(ies)
-    db_session.flush()
-
+def test_simular_input_invalido(authed_client):
+    client, ies_id = authed_client
     # iva = 1.5 está fuera del rango [0, 1]
-    resp = client.post("/escenarios/simular", json={**_VALID_INPUT, "ies_id": ies.id, "iva": 1.5})
+    resp = client.post("/escenarios/simular", json={**_VALID_INPUT, "ies_id": ies_id, "iva": 1.5})
     assert resp.status_code == 422
 
 
-def test_get_escenarios_lista_ordenada(client, db_session):
-    ies = IES(nombre="IES Historial", nombre_corto="IH")
-    db_session.add(ies)
-    db_session.flush()
-
-    payload_base = {**_VALID_INPUT, "ies_id": ies.id}
+def test_get_escenarios_lista_ordenada(authed_client):
+    client, ies_id = authed_client
+    payload_base = {**_VALID_INPUT, "ies_id": ies_id}
     for nombre in ["Derecho", "Medicina", "Contaduría"]:
         client.post("/escenarios/simular", json={**payload_base, "carrera_nombre": nombre})
 
-    resp = client.get(f"/escenarios/?ies_id={ies.id}")
+    resp = client.get("/escenarios/")
     assert resp.status_code == 200
     data = resp.json()
     assert data["total"] == 3
@@ -76,30 +64,38 @@ def test_get_escenarios_lista_ordenada(client, db_session):
     assert nombres[0] == "Contaduría"
 
 
-def test_get_escenarios_paginacion(client, db_session):
-    ies = IES(nombre="IES Paginacion", nombre_corto="IP2")
-    db_session.add(ies)
-    db_session.flush()
-
-    payload = {**_VALID_INPUT, "ies_id": ies.id}
+def test_get_escenarios_paginacion(authed_client):
+    client, ies_id = authed_client
+    payload = {**_VALID_INPUT, "ies_id": ies_id}
     for nombre in ["A", "B", "C", "D", "E"]:
         client.post("/escenarios/simular", json={**payload, "carrera_nombre": nombre})
 
-    resp = client.get(f"/escenarios/?ies_id={ies.id}&skip=2&limit=2")
+    resp = client.get("/escenarios/?skip=2&limit=2")
     assert resp.status_code == 200
     data = resp.json()
     assert data["total"] == 5
     assert len(data["escenarios"]) == 2
 
 
-def test_get_escenarios_ies_distinta(client, db_session):
-    ies1 = IES(nombre="IES Uno", nombre_corto="I1")
-    ies2 = IES(nombre="IES Dos", nombre_corto="I2")
-    db_session.add_all([ies1, ies2])
+def test_get_escenarios_ies_distinta(authed_client, db_session):
+    client, ies_id = authed_client
+
+    # Crear escenario de la IES autenticada via API
+    client.post("/escenarios/simular", json={**_VALID_INPUT, "ies_id": ies_id})
+
+    # Crear escenario de otra IES directamente en BD (no se puede via API por validación 403)
+    otra_ies = IES(nombre="IES Otra", nombre_corto="IO")
+    db_session.add(otra_ies)
+    db_session.flush()
+    escenario_otro = Escenario(
+        ies_id=otra_ies.id,
+        tipo="custom",
+        horizonte_anios=None,
+        acciones=json.dumps({**_VALID_INPUT}),
+        proyecciones=json.dumps({"d1_score": 0.5, "d2_score": 0.5}),
+    )
+    db_session.add(escenario_otro)
     db_session.flush()
 
-    client.post("/escenarios/simular", json={**_VALID_INPUT, "ies_id": ies1.id})
-    client.post("/escenarios/simular", json={**_VALID_INPUT, "ies_id": ies2.id})
-
-    resp = client.get(f"/escenarios/?ies_id={ies1.id}")
+    resp = client.get("/escenarios/")
     assert resp.json()["total"] == 1
