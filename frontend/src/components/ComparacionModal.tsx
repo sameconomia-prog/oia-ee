@@ -27,10 +27,19 @@ function colorValue(value: number, isD1: boolean) {
 
 export default function ComparacionModal({ escenarios, onClose }: Props) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl mx-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="comparacion-title"
+        className="bg-white rounded-lg shadow-xl w-full max-w-3xl mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex justify-between items-center px-5 py-4 border-b">
-          <h3 className="text-base font-semibold text-gray-800">Comparación de Escenarios</h3>
+          <h3 id="comparacion-title" className="text-base font-semibold text-gray-800">Comparación de Escenarios</h3>
           <button onClick={onClose} aria-label="Cerrar" className="text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
         </div>
         <div className="overflow-x-auto p-4">
