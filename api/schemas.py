@@ -132,3 +132,18 @@ class EscenarioOut(BaseModel):
 class EscenariosHistorialOut(BaseModel):
     escenarios: list[EscenarioOut]
     total: int
+
+
+class CrearUsuarioIn(BaseModel):
+    username: str
+    password: str
+    ies_id: str
+
+
+class UsuarioOut(BaseModel):
+    id: str
+    username: str
+    ies_id: str
+    activo: bool
+
+    model_config = {"from_attributes": True}

@@ -1,15 +1,26 @@
 # api/routers/admin.py
 import os
 import logging
-from fastapi import APIRouter, Header, HTTPException, Depends
+from fastapi import APIRouter, Header, HTTPException, Depends, status
 from pydantic import BaseModel
+from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from api.deps import get_db
+from api.schemas import CrearUsuarioIn, UsuarioOut
+from pipeline.db.models import IES, Usuario
 from pipeline.ingest_gdelt import run_gdelt_pipeline
 from pipeline.jobs.alert_job import run_alert_job
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+_pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def _require_admin(x_admin_key: str = Header(None)) -> None:
+    admin_key = os.getenv("ADMIN_API_KEY", "")
+    if not admin_key or x_admin_key != admin_key:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
 
 class IngestResultOut(BaseModel):
@@ -25,12 +36,9 @@ class AlertJobResultOut(BaseModel):
 
 @router.post("/ingest/gdelt", response_model=IngestResultOut)
 def ingest_gdelt(
-    x_admin_key: str = Header(None),
     db: Session = Depends(get_db),
+    _: None = Depends(_require_admin),
 ):
-    admin_key = os.getenv("ADMIN_API_KEY", "")
-    if not admin_key or x_admin_key != admin_key:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     result = run_gdelt_pipeline(
         session=db,
         api_key_claude=os.getenv("ANTHROPIC_API_KEY", ""),
@@ -41,11 +49,29 @@ def ingest_gdelt(
 
 @router.post("/jobs/alertas", response_model=AlertJobResultOut)
 def trigger_alert_job(
-    x_admin_key: str = Header(None),
     db: Session = Depends(get_db),
+    _: None = Depends(_require_admin),
 ):
-    admin_key = os.getenv("ADMIN_API_KEY", "")
-    if not admin_key or x_admin_key != admin_key:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     creadas = run_alert_job(db)
     return AlertJobResultOut(alertas_creadas=creadas)
+
+
+@router.post("/usuarios", response_model=UsuarioOut, status_code=status.HTTP_201_CREATED)
+def crear_usuario(
+    body: CrearUsuarioIn,
+    db: Session = Depends(get_db),
+    _: None = Depends(_require_admin),
+):
+    if not db.query(IES).filter_by(id=body.ies_id).first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="IES no encontrada")
+    if db.query(Usuario).filter_by(username=body.username).first():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username ya existe")
+    user = Usuario(
+        username=body.username,
+        hashed_password=_pwd.hash(body.password),
+        ies_id=body.ies_id,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
