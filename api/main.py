@@ -1,5 +1,6 @@
 # api/main.py
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -7,7 +8,25 @@ from api.routers import noticias, kpis, admin, rector, alertas, escenarios, auth
 from pipeline.db import get_session
 from pipeline.jobs.alert_job import run_alert_job
 
-app = FastAPI(title="OIA-EE API", version="0.7.0")
+_scheduler = BackgroundScheduler()
+
+
+def _run_alert_job_scheduled() -> None:
+    with get_session() as db:
+        run_alert_job(db)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if os.getenv("ENABLE_SCHEDULER", "false").lower() == "true":
+        _scheduler.add_job(_run_alert_job_scheduled, "cron", hour=3, minute=0)
+        _scheduler.start()
+    yield
+    if _scheduler.running:
+        _scheduler.shutdown()
+
+
+app = FastAPI(title="OIA-EE API", version="0.8.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,26 +43,6 @@ app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(rector.router, prefix="/rector", tags=["rector"])
 app.include_router(alertas.router, prefix="/alertas", tags=["alertas"])
 app.include_router(escenarios.router, prefix="/escenarios", tags=["escenarios"])
-
-_scheduler = BackgroundScheduler()
-
-
-def _run_alert_job_scheduled() -> None:
-    with get_session() as db:
-        run_alert_job(db)
-
-
-@app.on_event("startup")
-def _startup() -> None:
-    if os.getenv("ENABLE_SCHEDULER", "false").lower() == "true":
-        _scheduler.add_job(_run_alert_job_scheduled, "cron", hour=3, minute=0)
-        _scheduler.start()
-
-
-@app.on_event("shutdown")
-def _shutdown() -> None:
-    if _scheduler.running:
-        _scheduler.shutdown()
 
 
 @app.get("/health")

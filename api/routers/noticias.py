@@ -1,9 +1,11 @@
 # api/routers/noticias.py
+import os
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import Optional
 from api.deps import get_db
 from pipeline.db.models import Noticia
+from pipeline.utils.embeddings import embed_text, search_similar
 from api.schemas import NoticiaOut
 
 router = APIRouter()
@@ -20,6 +22,21 @@ def list_noticias(
     if sector:
         q = q.filter(Noticia.sector == sector)
     return q.offset(skip).limit(limit).all()
+
+
+@router.get("/buscar", response_model=list[NoticiaOut])
+def buscar_noticias(
+    q: str = Query(..., min_length=1),
+    top_k: int = Query(5, ge=1, le=20),
+    db: Session = Depends(get_db),
+):
+    api_key = os.getenv("VOYAGE_API_KEY", "")
+    if not api_key:
+        return []
+    vector = embed_text(q, api_key)
+    if vector is None:
+        return []
+    return search_similar(vector, db, top_k)
 
 
 @router.get("/{noticia_id}", response_model=NoticiaOut)
