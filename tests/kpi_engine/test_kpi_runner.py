@@ -3,8 +3,8 @@ import json
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from pipeline.db.models import Base, Carrera, CarreraIES, Ocupacion
-from pipeline.kpi_engine.kpi_runner import run_kpis
+from pipeline.db.models import Base, Carrera, CarreraIES, Ocupacion, IES
+from pipeline.kpi_engine.kpi_runner import run_kpis, run_kpis_ies
 from pipeline.kpi_engine.d3_mercado import D3Result
 from pipeline.kpi_engine.d6_estudiantil import D6Result
 
@@ -56,3 +56,27 @@ def test_run_kpis_incluye_d3_y_d6(session):
     assert result is not None
     assert 0.0 <= result.d3_mercado.score <= 1.0
     assert 0.0 <= result.d6_estudiantil.score <= 1.0
+
+
+def test_run_kpis_ies_retorna_d4(session):
+    ies = IES(nombre="IES Test Runner")
+    session.add(ies)
+    c = Carrera(nombre_norm="Finanzas D4")
+    session.add(c)
+    session.flush()
+    cie = CarreraIES(
+        carrera_id=c.id, ies_id=ies.id, ciclo="2024/2",
+        matricula=300, egresados=120,
+        plan_estudio_skills=json.dumps(["Python"]),
+        costo_anual_mxn=60000,
+    )
+    session.add(cie)
+    session.flush()
+    result = run_kpis_ies(ies.id, session)
+    assert result is not None
+    assert 0.0 <= result.d4_institucional.score <= 1.0
+
+
+def test_run_kpis_ies_no_existe_retorna_none(session):
+    result = run_kpis_ies("ies-no-existe", session)
+    assert result is None

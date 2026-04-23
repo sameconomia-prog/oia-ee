@@ -3,10 +3,11 @@ import json
 import logging
 from dataclasses import dataclass
 from sqlalchemy.orm import Session
-from pipeline.db.models import Carrera, CarreraIES, Ocupacion
+from pipeline.db.models import Carrera, CarreraIES, Ocupacion, IES
 from pipeline.kpi_engine.d1_obsolescencia import calcular_d1, D1Result
 from pipeline.kpi_engine.d2_oportunidades import calcular_d2, D2Result
 from pipeline.kpi_engine.d3_mercado import calcular_d3, D3Result
+from pipeline.kpi_engine.d4_institucional import calcular_d4, D4Result
 from pipeline.kpi_engine.d6_estudiantil import calcular_d6, D6Result
 
 logger = logging.getLogger(__name__)
@@ -19,6 +20,12 @@ class KpiResult:
     d2_oportunidades: D2Result
     d3_mercado: D3Result
     d6_estudiantil: D6Result
+
+
+@dataclass
+class IesKpiResult:
+    ies_id: str
+    d4_institucional: D4Result
 
 
 def run_kpis(carrera_id: str, session: Session) -> KpiResult | None:
@@ -45,6 +52,16 @@ def run_kpis(carrera_id: str, session: Session) -> KpiResult | None:
         d3_mercado=d3,
         d6_estudiantil=d6,
     )
+
+
+def run_kpis_ies(ies_id: str, session: Session) -> IesKpiResult | None:
+    """Calcula D4 para una IES. Retorna None si la IES no existe."""
+    ies = session.query(IES).filter_by(id=ies_id).first()
+    if not ies:
+        logger.debug("run_kpis_ies: IES %s no encontrada", ies_id)
+        return None
+    d4 = calcular_d4(ies_id, session)
+    return IesKpiResult(ies_id=ies_id, d4_institucional=d4)
 
 
 def _sector_de_carrera(carrera: Carrera, session: Session) -> str | None:
