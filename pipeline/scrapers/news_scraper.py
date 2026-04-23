@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Optional
 import feedparser
 import httpx
@@ -68,7 +68,7 @@ class NewsScraper(BaseScraper):
         if not self._newsapi_key:
             return []
         self._wait()
-        since = (datetime.utcnow() - timedelta(days=days_back)).strftime("%Y-%m-%d")
+        since = (datetime.now(UTC) - timedelta(days=days_back)).strftime("%Y-%m-%d")
         params = {
             "q": query, "from": since, "language": "es,en",
             "sortBy": "publishedAt", "apiKey": self._newsapi_key,

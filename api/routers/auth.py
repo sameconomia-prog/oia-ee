@@ -1,6 +1,6 @@
 # api/routers/auth.py
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
@@ -22,7 +22,7 @@ def _create_token(username: str, ies_id: str) -> str:
     payload = {
         "sub": username,
         "ies_id": ies_id,
-        "exp": datetime.utcnow() + timedelta(minutes=_EXPIRE_MINUTES),
+        "exp": datetime.now(UTC) + timedelta(minutes=_EXPIRE_MINUTES),
     }
     return jwt.encode(payload, _SECRET, algorithm=_ALGORITHM)
 

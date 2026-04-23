@@ -1,6 +1,6 @@
 # api/routers/escenarios.py
 import json
-from datetime import datetime
+from datetime import datetime, UTC
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from api.deps import get_db, get_current_user
@@ -45,7 +45,7 @@ def simular(
     fecha = (
         escenario.fecha_creacion.isoformat()
         if escenario.fecha_creacion
-        else datetime.utcnow().isoformat()
+        else datetime.now(UTC).isoformat()
     )
     return SimularResult(
         id=escenario.id,
@@ -85,6 +85,6 @@ def get_escenarios(
             ioe=acciones.get("ioe", 0.0),
             ihe=acciones.get("ihe", 0.0),
             iea=acciones.get("iea", 0.0),
-            fecha=e.fecha_creacion.isoformat() if e.fecha_creacion else datetime.utcnow().isoformat(),
+            fecha=e.fecha_creacion.isoformat() if e.fecha_creacion else datetime.now(UTC).isoformat(),
         ))
     return EscenariosHistorialOut(escenarios=items, total=total)

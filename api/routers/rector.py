@@ -1,5 +1,5 @@
 # api/routers/rector.py
-from datetime import datetime
+from datetime import datetime, UTC
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from api.deps import get_db, get_current_user
@@ -65,7 +65,7 @@ def get_rector_dashboard(
                     severidad=_severidad(d1, d2, d1_alert, d2_alert),
                     titulo=_titulo(tipo),
                     mensaje=f"D1 = {d1:.2f} (umbral: 0.70) · D2 = {d2:.2f} (umbral: 0.40)",
-                    fecha=datetime.utcnow().isoformat(),
+                    fecha=datetime.now(UTC).isoformat(),
                 ))
 
         carreras_out.append(CarreraKpiOut(

@@ -1,5 +1,5 @@
 # pipeline/jobs/alert_job.py
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from sqlalchemy.orm import Session
 from pipeline.db.models import IES, CarreraIES, Carrera, Alerta
 from pipeline.kpi_engine.kpi_runner import run_kpis
@@ -14,7 +14,7 @@ _TITULOS = {
 
 
 def _ya_existe(db: Session, ies_id: str, carrera_id: str, tipo: str) -> bool:
-    cutoff = datetime.utcnow() - timedelta(hours=_WINDOW_HORAS)
+    cutoff = datetime.now(UTC) - timedelta(hours=_WINDOW_HORAS)
     return (
         db.query(Alerta)
         .filter(
