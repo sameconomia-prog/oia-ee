@@ -30,10 +30,39 @@ class D2Out(BaseModel):
     score: float
 
 
+class D3Out(BaseModel):
+    tdm: float
+    tvc: float
+    brs: float
+    ice: float
+    score: float
+
+
+class D4Out(BaseModel):
+    tra: float
+    irf: float
+    cad: float
+    score: float
+
+
+class D6Out(BaseModel):
+    iei: float
+    crc: float
+    roi_e: float
+    score: float
+
+
 class KpiOut(BaseModel):
     carrera_id: str
     d1_obsolescencia: D1Out
     d2_oportunidades: D2Out
+    d3_mercado: D3Out
+    d6_estudiantil: D6Out
+
+
+class IesKpiOut(BaseModel):
+    ies_id: str
+    d4_institucional: D4Out
 
 
 class IesOut(BaseModel):

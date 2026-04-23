@@ -1,6 +1,6 @@
 # tests/api/test_kpis.py
 import json
-from pipeline.db.models import Carrera, CarreraIES, Ocupacion
+from pipeline.db.models import Carrera, CarreraIES, Ocupacion, IES
 
 
 def test_get_kpis_carrera_not_found(client):
@@ -40,3 +40,55 @@ def test_kpis_estructura_completa(client, db_session):
     data = resp.json()
     assert set(data["d1_obsolescencia"].keys()) == {"iva", "bes", "vac", "score"}
     assert set(data["d2_oportunidades"].keys()) == {"ioe", "ihe", "iea", "score"}
+    assert set(data["d3_mercado"].keys()) == {"tdm", "tvc", "brs", "ice", "score"}
+    assert set(data["d6_estudiantil"].keys()) == {"iei", "crc", "roi_e", "score"}
+
+
+def test_get_kpis_carrera_incluye_d3_y_d6(client, db_session):
+    c = Carrera(nombre_norm="Ing. D3D6 Test", onet_codes_relacionados=json.dumps(["15-1252.00"]))
+    db_session.add(c)
+    occ = Ocupacion(onet_code="15-1252.00", nombre="Dev", p_automatizacion=0.25)
+    db_session.add(occ)
+    db_session.flush()
+    cie = CarreraIES(
+        carrera_id=c.id, ciclo="2024/2", matricula=300, egresados=60,
+        plan_estudio_skills=json.dumps(["Python"]),
+    )
+    db_session.add(cie)
+    db_session.flush()
+    resp = client.get(f"/kpis/carrera/{c.id}")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "d3_mercado" in data
+    assert "d6_estudiantil" in data
+    assert 0.0 <= data["d3_mercado"]["score"] <= 1.0
+    assert 0.0 <= data["d6_estudiantil"]["score"] <= 1.0
+    assert set(data["d3_mercado"].keys()) == {"tdm", "tvc", "brs", "ice", "score"}
+    assert set(data["d6_estudiantil"].keys()) == {"iei", "crc", "roi_e", "score"}
+
+
+def test_get_kpis_ies_ok(client, db_session):
+    ies = IES(nombre="IES KPI Test")
+    db_session.add(ies)
+    c = Carrera(nombre_norm="Carrera IES Test")
+    db_session.add(c)
+    db_session.flush()
+    cie = CarreraIES(
+        carrera_id=c.id, ies_id=ies.id, ciclo="2024/2",
+        matricula=200, egresados=80,
+        plan_estudio_skills=json.dumps(["Python"]),
+        costo_anual_mxn=60000,
+    )
+    db_session.add(cie)
+    db_session.flush()
+    resp = client.get(f"/kpis/ies/{ies.id}")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "d4_institucional" in data
+    assert 0.0 <= data["d4_institucional"]["score"] <= 1.0
+    assert set(data["d4_institucional"].keys()) == {"tra", "irf", "cad", "score"}
+
+
+def test_get_kpis_ies_not_found(client):
+    resp = client.get("/kpis/ies/id-no-existe")
+    assert resp.status_code == 404

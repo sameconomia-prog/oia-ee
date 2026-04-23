@@ -3,7 +3,7 @@ from datetime import datetime, UTC
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from api.deps import get_db, get_current_user
-from api.schemas import RectorOut, IesOut, CarreraKpiOut, AlertaItemOut, KpiOut, D1Out, D2Out
+from api.schemas import RectorOut, IesOut, CarreraKpiOut, AlertaItemOut, KpiOut, D1Out, D2Out, D3Out, D6Out
 from pipeline.db.models import IES, Carrera, CarreraIES, Usuario
 from pipeline.kpi_engine.kpi_runner import run_kpis
 
@@ -51,6 +51,8 @@ def get_rector_dashboard(
                 carrera_id=cie.carrera_id,
                 d1_obsolescencia=D1Out(**vars(kpi_result.d1_obsolescencia)),
                 d2_oportunidades=D2Out(**vars(kpi_result.d2_oportunidades)),
+                d3_mercado=D3Out(**vars(kpi_result.d3_mercado)),
+                d6_estudiantil=D6Out(**vars(kpi_result.d6_estudiantil)),
             )
             d1 = kpi_result.d1_obsolescencia.score
             d2 = kpi_result.d2_oportunidades.score
