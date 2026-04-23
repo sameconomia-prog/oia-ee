@@ -16,6 +16,7 @@ const mockNoticias = [
 
 beforeEach(() => {
   jest.mocked(api.getNoticias).mockResolvedValue(mockNoticias)
+  jest.mocked(api.buscarNoticias).mockResolvedValue([mockNoticias[0]])
 })
 
 it('renders table rows after loading', async () => {
@@ -24,12 +25,13 @@ it('renders table rows after loading', async () => {
   expect(screen.getByText('Robots en fábricas')).toBeInTheDocument()
 })
 
-it('filters rows by search text', async () => {
+it('llama buscarNoticias al hacer submit del formulario', async () => {
   render(<NoticiasTable />)
   await waitFor(() => screen.getByText('IA en educación'))
-  await userEvent.type(screen.getByPlaceholderText('Buscar por título...'), 'Robot')
-  expect(screen.queryByText('IA en educación')).not.toBeInTheDocument()
-  expect(screen.getByText('Robots en fábricas')).toBeInTheDocument()
+  const input = screen.getByPlaceholderText(/Búsqueda semántica/)
+  await userEvent.type(input, 'educación')
+  await userEvent.keyboard('{Enter}')
+  await waitFor(() => expect(api.buscarNoticias).toHaveBeenCalledWith('educación', 20))
 })
 
 it('disables Anterior button on first page', async () => {

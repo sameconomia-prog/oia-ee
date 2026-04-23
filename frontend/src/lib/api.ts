@@ -75,6 +75,13 @@ export async function postSimular(input: SimularInput): Promise<SimResult> {
   return await res.json()
 }
 
+export async function buscarNoticias(q: string, topK: number = 5): Promise<Noticia[]> {
+  const params = new URLSearchParams({ q, top_k: String(topK) })
+  const res = await fetch(`${BASE}/noticias/buscar?${params}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function getEscenarios(
   options: { skip?: number; limit?: number } = {}
 ): Promise<EscenariosHistorialResult> {
