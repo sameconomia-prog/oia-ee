@@ -85,7 +85,8 @@ describe('getRectorData', () => {
     const result = await getRectorData('1')
     expect(result.ies.nombre).toBe('Humanitas')
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/rector?ies_id=1')
+      expect.stringContaining('/rector?ies_id=1'),
+      expect.objectContaining({ headers: expect.any(Object) })
     )
   })
 
@@ -101,7 +102,10 @@ describe('getAlertas', () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockData } as Response)
     const result = await getAlertas('ies-abc')
     expect(result.total).toBe(0)
-    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('ies_id=ies-abc'))
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('ies_id=ies-abc'),
+      expect.objectContaining({ headers: expect.any(Object) })
+    )
   })
 
   it('lanza error en respuesta no-OK', async () => {
@@ -116,7 +120,7 @@ describe('markAlertaRead', () => {
     await expect(markAlertaRead('alerta-1')).resolves.toBeUndefined()
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/alertas/alerta-1/leer'),
-      { method: 'PUT' }
+      expect.objectContaining({ method: 'PUT' })
     )
   })
 })
