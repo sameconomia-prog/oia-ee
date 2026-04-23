@@ -128,3 +128,10 @@ export interface EscenariosHistorialResult {
   escenarios: EscenarioHistorial[]
   total: number
 }
+
+export interface ResumenPublico {
+  total_ies: number
+  total_noticias: number
+  alertas_activas: number
+  noticias_recientes: Noticia[]
+}

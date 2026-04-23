@@ -1,4 +1,4 @@
-import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult } from './types'
+import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico } from './types'
 import { getToken } from './auth'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
@@ -71,6 +71,12 @@ export async function postSimular(input: SimularInput): Promise<SimResult> {
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(input),
   })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function getResumenPublico(): Promise<ResumenPublico> {
+  const res = await fetch(`${BASE}/publico/resumen`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }

@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
-from api.routers import noticias, kpis, admin, rector, alertas, escenarios, auth
+from api.routers import noticias, kpis, admin, rector, alertas, escenarios, auth, publico
 from pipeline.db import get_session
 from pipeline.jobs.alert_job import run_alert_job
 
@@ -36,6 +36,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(publico.router, prefix="/publico", tags=["publico"])
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(noticias.router, prefix="/noticias", tags=["noticias"])
 app.include_router(kpis.router, prefix="/kpis", tags=["kpis"])
