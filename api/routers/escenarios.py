@@ -65,6 +65,7 @@ def get_escenarios(
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user),
 ):
+    # ies_id se deriva del token — no se acepta como query param para evitar IDOR
     ies_id = current_user.ies_id
     q = db.query(Escenario).filter(Escenario.ies_id == ies_id)
     total = q.count()

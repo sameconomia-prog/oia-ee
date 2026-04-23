@@ -76,13 +76,13 @@ export async function postSimular(input: SimularInput): Promise<SimResult> {
 }
 
 export async function getEscenarios(
-  iesId: string,
   options: { skip?: number; limit?: number } = {}
 ): Promise<EscenariosHistorialResult> {
-  const q = new URLSearchParams({ ies_id: iesId })
+  const q = new URLSearchParams()
   if (options.skip !== undefined) q.set('skip', String(options.skip))
   if (options.limit !== undefined) q.set('limit', String(options.limit))
-  const res = await fetch(`${BASE}/escenarios/?${q}`, { headers: authHeaders() })
+  const qs = q.toString()
+  const res = await fetch(`${BASE}/escenarios/${qs ? `?${qs}` : ''}`, { headers: authHeaders() })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }

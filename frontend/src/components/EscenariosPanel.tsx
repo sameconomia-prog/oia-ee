@@ -27,7 +27,7 @@ export default function EscenariosPanel({ iesId, onComparar }: Props) {
   useEffect(() => {
     setSelected(new Set())
     setLoading(true)
-    getEscenarios(iesId, { skip, limit })
+    getEscenarios({ skip, limit })
       .then((r) => { setEscenarios(r.escenarios); setTotal(r.total) })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : 'Error'))
       .finally(() => setLoading(false))
