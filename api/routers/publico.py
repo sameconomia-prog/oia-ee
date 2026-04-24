@@ -1,10 +1,11 @@
 # api/routers/publico.py
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from typing import Optional
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from api.schemas import NoticiaOut
-from pipeline.db.models import IES, Noticia, Alerta
+from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out
+from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 router = APIRouter()
 
@@ -33,3 +34,45 @@ def resumen_publico(db: Session = Depends(get_db)):
         alertas_activas=alertas_activas,
         noticias_recientes=noticias_recientes,
     )
+
+
+@router.get("/carreras", response_model=list[CarreraKpiOut])
+def listar_carreras_publico(
+    skip: int = 0,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+):
+    from pipeline.kpi_engine.kpi_runner import run_kpis
+
+    carrera_ids = [
+        r[0]
+        for r in db.query(CarreraIES.carrera_id)
+        .distinct()
+        .offset(skip)
+        .limit(limit)
+        .all()
+    ]
+
+    result = []
+    for cid in carrera_ids:
+        carrera = db.query(Carrera).filter_by(id=cid).first()
+        if not carrera:
+            continue
+        cie = db.query(CarreraIES).filter_by(carrera_id=cid).first()
+        kpi_result = run_kpis(cid, db)
+        kpi_out: Optional[KpiOut] = None
+        if kpi_result:
+            kpi_out = KpiOut(
+                carrera_id=cid,
+                d1_obsolescencia=D1Out(**vars(kpi_result.d1_obsolescencia)),
+                d2_oportunidades=D2Out(**vars(kpi_result.d2_oportunidades)),
+                d3_mercado=D3Out(**vars(kpi_result.d3_mercado)),
+                d6_estudiantil=D6Out(**vars(kpi_result.d6_estudiantil)),
+            )
+        result.append(CarreraKpiOut(
+            id=cid,
+            nombre=carrera.nombre_norm.title(),
+            matricula=cie.matricula if cie else None,
+            kpi=kpi_out,
+        ))
+    return result

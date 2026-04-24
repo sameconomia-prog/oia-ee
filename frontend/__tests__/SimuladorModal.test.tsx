@@ -15,8 +15,11 @@ const carreraConKpi: CarreraKpi = {
   nombre: 'Derecho',
   matricula: 450,
   kpi: {
+    carrera_id: 'c1',
     d1_obsolescencia: { score: 0.82, iva: 0.75, bes: 0.80, vac: 0.60 },
     d2_oportunidades: { score: 0.35, ioe: 0.40, ihe: 0.35, iea: 0.45 },
+    d3_mercado: { score: 0.5, tdm: 0.5, tvc: 0.5, brs: 0.5, ice: 0.5 },
+    d6_estudiantil: { score: 0.4, iei: 0.4, crc: 0.4, roi_e: 0.4 },
   },
 }
 

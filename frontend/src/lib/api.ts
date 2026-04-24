@@ -1,4 +1,4 @@
-import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult } from './types'
+import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult, CarreraKpi } from './types'
 import { getToken } from './auth'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
@@ -71,6 +71,18 @@ export async function postSimular(input: SimularInput): Promise<SimResult> {
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(input),
   })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function getCarrerasPublico(
+  params: { skip?: number; limit?: number } = {}
+): Promise<CarreraKpi[]> {
+  const q = new URLSearchParams()
+  if (params.skip !== undefined) q.set('skip', String(params.skip))
+  if (params.limit !== undefined) q.set('limit', String(params.limit))
+  const qs = q.toString()
+  const res = await fetch(`${BASE}/publico/carreras${qs ? `?${qs}` : ''}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }

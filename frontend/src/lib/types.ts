@@ -51,6 +51,7 @@ export interface D6Result {
 }
 
 export interface KpiResult {
+  carrera_id?: string
   d1_obsolescencia: D1Result
   d2_oportunidades: D2Result
   d3_mercado: D3Result
