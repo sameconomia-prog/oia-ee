@@ -103,6 +103,37 @@ export async function postIngestNoticias(adminKey: string): Promise<{ fetched: n
   return await res.json()
 }
 
+export async function getAdminIes(adminKey: string): Promise<{ id: string; nombre: string; nombre_corto: string | null }[]> {
+  const res = await fetch(`${BASE}/admin/ies`, { headers: { 'X-Admin-Key': adminKey } })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function postAdminUsuario(
+  adminKey: string,
+  body: { username: string; password: string; ies_id: string }
+): Promise<{ id: string; username: string; ies_id: string; activo: boolean }> {
+  const res = await fetch(`${BASE}/admin/usuarios`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}))
+    throw new Error(detail?.detail ?? `HTTP ${res.status}`)
+  }
+  return await res.json()
+}
+
+export async function postTriggerAlertJob(adminKey: string): Promise<{ alertas_creadas: number }> {
+  const res = await fetch(`${BASE}/admin/jobs/alertas`, {
+    method: 'POST',
+    headers: { 'X-Admin-Key': adminKey },
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function postSeedDemo(adminKey: string): Promise<Record<string, number>> {
   const res = await fetch(`${BASE}/admin/jobs/seed-demo`, {
     method: 'POST',

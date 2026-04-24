@@ -1,7 +1,7 @@
 # tests/api/test_admin.py
 import pytest
 import uuid
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from pipeline.ingest_gdelt import IngestResult
 from pipeline.db.models import IES
 
@@ -74,3 +74,108 @@ def test_crear_usuario_duplicado_devuelve_409(client, db_session, monkeypatch):
     client.post("/admin/usuarios", json=payload, headers={"X-Admin-Key": "test-key"})
     resp = client.post("/admin/usuarios", json=payload, headers={"X-Admin-Key": "test-key"})
     assert resp.status_code == 409
+
+
+# --- GET /admin/status ---
+
+def test_get_status_sin_key_devuelve_401(client):
+    resp = client.get("/admin/status")
+    assert resp.status_code == 401
+
+
+def test_get_status_con_key_devuelve_conteos(client, db_session, monkeypatch):
+    monkeypatch.setenv("ADMIN_API_KEY", "test-key")
+    ies = IES(nombre="IES Status Test", nombre_corto="IST")
+    db_session.add(ies)
+    db_session.flush()
+
+    resp = client.get("/admin/status", headers={"X-Admin-Key": "test-key"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "ies" in data
+    assert "carreras" in data
+    assert "noticias" in data
+    assert "vacantes" in data
+    assert "alertas" in data
+    assert data["ies"] >= 1
+
+
+# --- GET /admin/ies ---
+
+def test_listar_ies_sin_key_devuelve_401(client):
+    resp = client.get("/admin/ies")
+    assert resp.status_code == 401
+
+
+def test_listar_ies_devuelve_lista(client, db_session, monkeypatch):
+    monkeypatch.setenv("ADMIN_API_KEY", "test-key")
+    ies = IES(nombre="IES Lista Test", nombre_corto="ILT")
+    db_session.add(ies)
+    db_session.flush()
+
+    resp = client.get("/admin/ies", headers={"X-Admin-Key": "test-key"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data, list)
+    nombres = [i["nombre"] for i in data]
+    assert "IES Lista Test" in nombres
+
+
+# --- POST /admin/ingest/noticias ---
+
+def test_ingest_noticias_sin_key_devuelve_401(client):
+    resp = client.post("/admin/ingest/noticias")
+    assert resp.status_code == 401
+
+
+def test_ingest_noticias_con_key_ok(client, monkeypatch):
+    monkeypatch.setenv("ADMIN_API_KEY", "test-key")
+    fake = MagicMock()
+    fake.fetched = 5
+    fake.stored = 3
+    fake.classified = 3
+    with patch("api.routers.admin.run_news_ingest", return_value=fake):
+        resp = client.post("/admin/ingest/noticias", headers={"X-Admin-Key": "test-key"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["fetched"] == 5
+    assert data["stored"] == 3
+
+
+# --- POST /admin/jobs/seed-demo ---
+
+def test_seed_demo_sin_key_devuelve_401(client):
+    resp = client.post("/admin/jobs/seed-demo")
+    assert resp.status_code == 401
+
+
+def test_seed_demo_con_key_ok(client, monkeypatch):
+    monkeypatch.setenv("ADMIN_API_KEY", "test-key")
+    fake = MagicMock()
+    fake.ies_creadas = 8
+    fake.carreras_creadas = 10
+    fake.ocupaciones = 6
+    fake.noticias = 15
+    fake.vacantes = 25
+    with patch("api.routers.admin.run_seed_demo", return_value=fake):
+        resp = client.post("/admin/jobs/seed-demo", headers={"X-Admin-Key": "test-key"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["ies_creadas"] == 8
+    assert data["vacantes"] == 25
+
+
+# --- POST /admin/jobs/alertas ---
+
+def test_trigger_alertas_sin_key_devuelve_401(client):
+    resp = client.post("/admin/jobs/alertas")
+    assert resp.status_code == 401
+
+
+def test_trigger_alertas_con_key_ok(client, monkeypatch):
+    monkeypatch.setenv("ADMIN_API_KEY", "test-key")
+    with patch("api.routers.admin.run_alert_job", return_value=3):
+        resp = client.post("/admin/jobs/alertas", headers={"X-Admin-Key": "test-key"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["alertas_creadas"] == 3

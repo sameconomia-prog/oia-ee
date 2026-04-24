@@ -107,6 +107,16 @@ def seed_demo(
     return SeedDemoResultOut(**vars(result))
 
 
+@router.get("/ies")
+def listar_ies(
+    db: Session = Depends(get_db),
+    _: None = Depends(_require_admin),
+):
+    from api.schemas import IesOut
+    ies_list = db.query(IES).order_by(IES.nombre).all()
+    return [IesOut(id=i.id, nombre=i.nombre, nombre_corto=i.nombre_corto) for i in ies_list]
+
+
 @router.post("/usuarios", response_model=UsuarioOut, status_code=status.HTTP_201_CREATED)
 def crear_usuario(
     body: CrearUsuarioIn,

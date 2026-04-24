@@ -1,6 +1,9 @@
 'use client'
-import { useState, useCallback } from 'react'
-import { postIngestGdelt, postIngestNoticias, postSeedDemo, getAdminStatus } from '@/lib/api'
+import { useState, useCallback, useEffect } from 'react'
+import {
+  postIngestGdelt, postIngestNoticias, postSeedDemo, getAdminStatus,
+  getAdminIes, postAdminUsuario, postTriggerAlertJob,
+} from '@/lib/api'
 
 const HISTORY_KEY = 'admin_history'
 const MAX_HISTORY = 10
@@ -39,6 +42,11 @@ export default function AdminPanel() {
   const [history, setHistory] = useState<HistoryEntry[]>(() => loadHistory())
   const [error, setError] = useState<string | null>(null)
 
+  // Crear usuario
+  const [iesOptions, setIesOptions] = useState<{ id: string; nombre: string }[]>([])
+  const [newUser, setNewUser] = useState({ username: '', password: '', ies_id: '' })
+  const [userMsg, setUserMsg] = useState<{ ok: boolean; text: string } | null>(null)
+
   const adminKey = process.env.NEXT_PUBLIC_ADMIN_KEY ?? ''
 
   const addHistory = useCallback((action: string, detail: string) => {
@@ -75,11 +83,40 @@ export default function AdminPanel() {
     }
   }
 
+  async function fetchIes() {
+    try {
+      const list = await getAdminIes(adminKey)
+      setIesOptions(list)
+      if (list.length > 0 && !newUser.ies_id) {
+        setNewUser(u => ({ ...u, ies_id: list[0].id }))
+      }
+    } catch { /* silencioso si no hay key */ }
+  }
+
+  useEffect(() => { fetchIes() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleCrearUsuario(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading('crear-usuario')
+    setUserMsg(null)
+    try {
+      const user = await postAdminUsuario(adminKey, newUser)
+      setUserMsg({ ok: true, text: `Usuario "${user.username}" creado.` })
+      setNewUser(u => ({ ...u, username: '', password: '' }))
+      addHistory('Crear Usuario', `${user.username} → ${user.ies_id}`)
+    } catch (e) {
+      setUserMsg({ ok: false, text: e instanceof Error ? e.message : 'Error' })
+    } finally {
+      setLoading(null)
+    }
+  }
+
   function Btn({ id, label, color = 'blue', onClick }: { id: string; label: string; color?: string; onClick: () => void }) {
     const colors: Record<string, string> = {
       blue: 'bg-blue-600 hover:bg-blue-700',
       green: 'bg-green-600 hover:bg-green-700',
       purple: 'bg-purple-600 hover:bg-purple-700',
+      orange: 'bg-orange-500 hover:bg-orange-600',
       gray: 'bg-gray-600 hover:bg-gray-700',
     }
     return (
@@ -123,7 +160,7 @@ export default function AdminPanel() {
           />
           <Btn
             id="noticias"
-            label="Ingest Noticias (RSS+NewsAPI)"
+            label="Ingest Noticias"
             color="blue"
             onClick={() => runAction('noticias', 'Ingest Noticias', () => postIngestNoticias(adminKey))}
           />
@@ -132,6 +169,12 @@ export default function AdminPanel() {
             label="Ingest GDELT"
             color="purple"
             onClick={() => runAction('gdelt', 'Ingest GDELT', () => postIngestGdelt(adminKey))}
+          />
+          <Btn
+            id="alertas"
+            label="Generar Alertas"
+            color="orange"
+            onClick={() => runAction('alertas', 'Alert Job', () => postTriggerAlertJob(adminKey))}
           />
         </div>
         <p className="text-xs text-gray-400 mt-2">
@@ -144,6 +187,68 @@ export default function AdminPanel() {
           Error: {error}
         </div>
       )}
+
+      {/* Crear Usuario */}
+      <section>
+        <h2 className="text-base font-semibold mb-3">Crear Usuario Rector</h2>
+        <form onSubmit={handleCrearUsuario} className="space-y-3 bg-white border rounded p-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Username</label>
+              <input
+                type="text"
+                required
+                value={newUser.username}
+                onChange={e => setNewUser(u => ({ ...u, username: e.target.value }))}
+                className="w-full border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="rector@ies"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Contraseña</label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={newUser.password}
+                onChange={e => setNewUser(u => ({ ...u, password: e.target.value }))}
+                className="w-full border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="min 6 caracteres"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">IES</label>
+            {iesOptions.length === 0 ? (
+              <p className="text-xs text-gray-400">Carga el estado primero (o ejecuta Seed Demo).</p>
+            ) : (
+              <select
+                value={newUser.ies_id}
+                onChange={e => setNewUser(u => ({ ...u, ies_id: e.target.value }))}
+                className="w-full border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              >
+                {iesOptions.map(i => (
+                  <option key={i.id} value={i.id}>{i.nombre}</option>
+                ))}
+              </select>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="submit"
+              disabled={loading !== null || iesOptions.length === 0}
+              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-1.5 rounded text-sm"
+            >
+              {loading === 'crear-usuario' ? 'Creando...' : 'Crear Usuario'}
+            </button>
+            {userMsg && (
+              <span className={`text-xs ${userMsg.ok ? 'text-green-600' : 'text-red-600'}`}>
+                {userMsg.text}
+              </span>
+            )}
+          </div>
+        </form>
+      </section>
 
       {/* Historial */}
       <section>
