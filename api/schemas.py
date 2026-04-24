@@ -189,6 +189,7 @@ class CrearUsuarioIn(BaseModel):
     username: str
     password: str
     ies_id: str
+    email: Optional[str] = None
 
 
 class UsuarioOut(BaseModel):
@@ -196,5 +197,6 @@ class UsuarioOut(BaseModel):
     username: str
     ies_id: str
     activo: bool
+    email: Optional[str] = None
 
     model_config = {"from_attributes": True}

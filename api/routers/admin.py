@@ -148,6 +148,7 @@ def crear_usuario(
         username=body.username,
         hashed_password=_pwd.hash(body.password),
         ies_id=body.ies_id,
+        email=body.email,
     )
     db.add(user)
     db.commit()

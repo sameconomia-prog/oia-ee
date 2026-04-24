@@ -44,7 +44,7 @@ export default function AdminPanel() {
 
   // Crear usuario
   const [iesOptions, setIesOptions] = useState<{ id: string; nombre: string }[]>([])
-  const [newUser, setNewUser] = useState({ username: '', password: '', ies_id: '' })
+  const [newUser, setNewUser] = useState({ username: '', password: '', ies_id: '', email: '' })
   const [userMsg, setUserMsg] = useState<{ ok: boolean; text: string } | null>(null)
 
   const adminKey = process.env.NEXT_PUBLIC_ADMIN_KEY ?? ''
@@ -101,8 +101,8 @@ export default function AdminPanel() {
     setUserMsg(null)
     try {
       const user = await postAdminUsuario(adminKey, newUser)
-      setUserMsg({ ok: true, text: `Usuario "${user.username}" creado.` })
-      setNewUser(u => ({ ...u, username: '', password: '' }))
+      setUserMsg({ ok: true, text: `Usuario "${user.username}" creado.${user.email ? ' Email de alertas registrado.' : ''}` })
+      setNewUser(u => ({ ...u, username: '', password: '', email: '' }))
       addHistory('Crear Usuario', `${user.username} → ${user.ies_id}`)
     } catch (e) {
       setUserMsg({ ok: false, text: e instanceof Error ? e.message : 'Error' })
@@ -222,6 +222,19 @@ export default function AdminPanel() {
                 placeholder="min 6 caracteres"
               />
             </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Email para alertas <span className="text-gray-400 font-normal">(opcional)</span>
+            </label>
+            <input
+              type="email"
+              value={newUser.email}
+              onChange={e => setNewUser(u => ({ ...u, email: e.target.value }))}
+              className="w-full border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="rector@universidad.mx"
+            />
+            <p className="text-xs text-gray-400 mt-0.5">Si se configura SMTP, el rector recibirá alertas automáticas por email.</p>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">IES</label>

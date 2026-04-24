@@ -123,8 +123,8 @@ export async function getAdminIes(adminKey: string): Promise<{ id: string; nombr
 
 export async function postAdminUsuario(
   adminKey: string,
-  body: { username: string; password: string; ies_id: string }
-): Promise<{ id: string; username: string; ies_id: string; activo: boolean }> {
+  body: { username: string; password: string; ies_id: string; email?: string }
+): Promise<{ id: string; username: string; ies_id: string; activo: boolean; email: string | null }> {
   const res = await fetch(`${BASE}/admin/usuarios`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },

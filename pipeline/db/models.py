@@ -156,3 +156,4 @@ class Usuario(Base):
     hashed_password = Column(String(255), nullable=False)
     ies_id          = Column(String(36), ForeignKey("ies.id"), nullable=False)
     activo          = Column(Boolean, default=True)
+    email           = Column(String(200), nullable=True)

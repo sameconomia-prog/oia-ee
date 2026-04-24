@@ -1,8 +1,13 @@
 # pipeline/jobs/alert_job.py
+import logging
+from collections import defaultdict
 from datetime import datetime, timedelta, UTC
 from sqlalchemy.orm import Session
-from pipeline.db.models import IES, CarreraIES, Carrera, Alerta
+from pipeline.db.models import IES, CarreraIES, Carrera, Alerta, Usuario
 from pipeline.kpi_engine.kpi_runner import run_kpis
+from pipeline.services.email_service import send_alert_email, AlertaResumen
+
+logger = logging.getLogger(__name__)
 
 _WINDOW_HORAS = 24
 
@@ -27,10 +32,29 @@ def _ya_existe(db: Session, ies_id: str, carrera_id: str, tipo: str) -> bool:
     ) is not None
 
 
+def _notificar_ies(db: Session, ies: IES, nuevas: list[dict]) -> None:
+    if not nuevas:
+        return
+    rectores = db.query(Usuario).filter_by(ies_id=ies.id, activo=True).all()
+    resumen = [
+        AlertaResumen(
+            carrera_nombre=a["carrera_nombre"],
+            tipo=a["tipo"],
+            severidad=a["severidad"],
+            mensaje=a["mensaje"],
+        )
+        for a in nuevas
+    ]
+    for rector in rectores:
+        if rector.email:
+            send_alert_email(rector.email, ies.nombre, resumen)
+
+
 def run_alert_job(db: Session) -> int:
     """Persiste alertas KPI para todas las IES. Retorna número de alertas creadas."""
     creadas = 0
     for ies in db.query(IES).all():
+        nuevas_ies: list[dict] = []
         for cie in db.query(CarreraIES).filter_by(ies_id=ies.id).all():
             kpi = run_kpis(cie.carrera_id, db)
             if not kpi:
@@ -45,6 +69,8 @@ def run_alert_job(db: Session) -> int:
             if _ya_existe(db, ies.id, cie.carrera_id, tipo):
                 continue
             severidad = "alta" if (d1 > 0.8 or d2 < 0.3) else "media"
+            mensaje = f"D1 = {d1:.2f} (umbral: 0.70) · D2 = {d2:.2f} (umbral: 0.40)"
+            carrera = db.query(Carrera).filter_by(id=cie.carrera_id).first()
             db.add(
                 Alerta(
                     ies_id=ies.id,
@@ -52,9 +78,16 @@ def run_alert_job(db: Session) -> int:
                     tipo=tipo,
                     severidad=severidad,
                     titulo=_TITULOS[tipo],
-                    mensaje=f"D1 = {d1:.2f} (umbral: 0.70) · D2 = {d2:.2f} (umbral: 0.40)",
+                    mensaje=mensaje,
                 )
             )
+            nuevas_ies.append({
+                "carrera_nombre": carrera.nombre_norm.title() if carrera else cie.carrera_id,
+                "tipo": tipo,
+                "severidad": severidad,
+                "mensaje": mensaje,
+            })
             creadas += 1
-    db.commit()
+        db.commit()
+        _notificar_ies(db, ies, nuevas_ies)
     return creadas
