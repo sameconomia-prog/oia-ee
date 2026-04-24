@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import {
   postIngestGdelt, postIngestNoticias, postSeedDemo, getAdminStatus,
-  getAdminIes, postAdminUsuario, postTriggerAlertJob,
+  getAdminIes, postAdminUsuario, postTriggerAlertJob, postKpiSnapshot,
 } from '@/lib/api'
 
 const HISTORY_KEY = 'admin_history'
@@ -175,6 +175,12 @@ export default function AdminPanel() {
             label="Generar Alertas"
             color="orange"
             onClick={() => runAction('alertas', 'Alert Job', () => postTriggerAlertJob(adminKey))}
+          />
+          <Btn
+            id="snapshot"
+            label="Snapshot KPIs"
+            color="gray"
+            onClick={() => runAction('snapshot', 'KPI Snapshot', () => postKpiSnapshot(adminKey))}
           />
         </div>
         <p className="text-xs text-gray-400 mt-2">

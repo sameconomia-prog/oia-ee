@@ -125,6 +125,15 @@ export async function postAdminUsuario(
   return await res.json()
 }
 
+export async function postKpiSnapshot(adminKey: string): Promise<{ carreras_procesadas: number; kpis_guardados: number; kpis_actualizados: number }> {
+  const res = await fetch(`${BASE}/admin/jobs/kpi-snapshot`, {
+    method: 'POST',
+    headers: { 'X-Admin-Key': adminKey },
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function postTriggerAlertJob(adminKey: string): Promise<{ alertas_creadas: number }> {
   const res = await fetch(`${BASE}/admin/jobs/alertas`, {
     method: 'POST',
@@ -158,6 +167,17 @@ export async function getKpisEstado(estado: string): Promise<EstadoKpiResult> {
 
 export async function getKpisNoticias(): Promise<NoticiasKpiResult> {
   const res = await fetch(`${BASE}/kpis/noticias`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function getKpisHistorico(
+  carreraId: string,
+  kpi: 'd1_score' | 'd2_score' | 'd3_score' | 'd6_score' = 'd1_score',
+  limit = 30
+): Promise<import('./types').HistoricoSerie> {
+  const params = new URLSearchParams({ kpi, limit: String(limit) })
+  const res = await fetch(`${BASE}/kpis/historico/carrera/${carreraId}?${params}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }

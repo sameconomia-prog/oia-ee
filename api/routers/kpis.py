@@ -46,3 +46,28 @@ def get_kpis_estado(estado: str, db: Session = Depends(get_db)):
 def get_kpis_noticias(db: Session = Depends(get_db)):
     result = run_kpis_noticias(db)
     return NoticiasKpiOut(d7_noticias=D7Out(**vars(result.d7_noticias)))
+
+
+@router.get("/historico/carrera/{carrera_id}")
+def get_historico_carrera(
+    carrera_id: str,
+    kpi: str = "d1_score",
+    limit: int = 30,
+    db: Session = Depends(get_db),
+):
+    from pipeline.db.models import KpiHistorico
+    valid_kpis = {"d1_score", "d2_score", "d3_score", "d6_score"}
+    if kpi not in valid_kpis:
+        raise HTTPException(status_code=400, detail=f"kpi debe ser uno de: {', '.join(sorted(valid_kpis))}")
+    rows = (
+        db.query(KpiHistorico)
+        .filter_by(entidad_tipo='carrera', entidad_id=carrera_id, kpi_nombre=kpi)
+        .order_by(KpiHistorico.fecha.asc())
+        .limit(limit)
+        .all()
+    )
+    return {
+        "carrera_id": carrera_id,
+        "kpi_nombre": kpi,
+        "serie": [{"fecha": r.fecha.isoformat(), "valor": float(r.valor)} for r in rows],
+    }

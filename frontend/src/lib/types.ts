@@ -1,3 +1,14 @@
+export interface HistoricoPoint {
+  fecha: string
+  valor: number
+}
+
+export interface HistoricoSerie {
+  carrera_id: string
+  kpi_nombre: string
+  serie: HistoricoPoint[]
+}
+
 export interface Noticia {
   id: number
   titulo: string

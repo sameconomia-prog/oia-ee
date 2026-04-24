@@ -11,6 +11,7 @@ from pipeline.db.models import IES, Usuario
 from pipeline.ingest_gdelt import run_gdelt_pipeline
 from pipeline.jobs.alert_job import run_alert_job
 from pipeline.jobs.news_ingest_job import run_news_ingest
+from pipeline.jobs.kpi_snapshot_job import run_kpi_snapshot
 from pipeline.seed_demo import run_seed_demo
 
 logger = logging.getLogger(__name__)
@@ -48,6 +49,12 @@ class SeedDemoResultOut(BaseModel):
     ocupaciones: int
     noticias: int
     vacantes: int
+
+
+class SnapshotResultOut(BaseModel):
+    carreras_procesadas: int
+    kpis_guardados: int
+    kpis_actualizados: int
 
 
 @router.post("/ingest/gdelt", response_model=IngestResultOut)
@@ -105,6 +112,16 @@ def seed_demo(
 ):
     result = run_seed_demo(db)
     return SeedDemoResultOut(**vars(result))
+
+
+@router.post("/jobs/kpi-snapshot", response_model=SnapshotResultOut)
+def trigger_kpi_snapshot(
+    db: Session = Depends(get_db),
+    _: None = Depends(_require_admin),
+):
+    result = run_kpi_snapshot(db)
+    db.commit()
+    return SnapshotResultOut(**vars(result))
 
 
 @router.get("/ies")

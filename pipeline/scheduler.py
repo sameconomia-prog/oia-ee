@@ -46,6 +46,15 @@ def run_stps_loader():
     logger.info("stps_ingest OK: %s", result)
 
 
+def run_kpi_snapshot_job():
+    from pipeline.jobs.kpi_snapshot_job import run_kpi_snapshot
+    from pipeline.db import get_session
+    with get_session() as session:
+        result = run_kpi_snapshot(session)
+        session.commit()
+    logger.info("kpi_snapshot OK: %s", result)
+
+
 def run_anuies_loader():
     path_env = os.getenv("ANUIES_CSV_PATH")
     if not path_env:
@@ -83,6 +92,14 @@ scheduler.add_job(
     trigger=CronTrigger(day_of_week="sun", hour=4),
     id="anuies_loader",
     name="Carga ANUIES anual",
+    replace_existing=True,
+)
+
+scheduler.add_job(
+    run_kpi_snapshot_job,
+    trigger=CronTrigger(day_of_week="mon", hour=5),
+    id="kpi_snapshot",
+    name="Snapshot KPIs histórico (semanal)",
     replace_existing=True,
 )
 

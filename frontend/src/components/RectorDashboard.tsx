@@ -8,8 +8,9 @@ import IesKpiCard from './IesKpiCard'
 import RectorCarrerasTable from './RectorCarrerasTable'
 import EscenariosPanel from './EscenariosPanel'
 import ComparacionModal from './ComparacionModal'
+import TendenciasPanel from './TendenciasPanel'
 
-type Tab = 'carreras' | 'escenarios'
+type Tab = 'carreras' | 'escenarios' | 'tendencias'
 
 export default function RectorDashboard({ iesId }: { iesId: string }) {
   const [data, setData] = useState<RectorData | null>(null)
@@ -58,17 +59,22 @@ export default function RectorDashboard({ iesId }: { iesId: string }) {
         </aside>
         <main>
           <div className="flex gap-4 mb-3 border-b">
-            {(['carreras', 'escenarios'] as Tab[]).map((t) => (
+            {([
+              ['carreras', 'Carreras'],
+              ['tendencias', 'Tendencias'],
+              ['escenarios', 'Historial Escenarios'],
+            ] as [Tab, string][]).map(([t, label]) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`pb-2 text-sm capitalize ${tab === t ? 'border-b-2 border-blue-600 text-blue-700 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`pb-2 text-sm ${tab === t ? 'border-b-2 border-blue-600 text-blue-700 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
               >
-                {t === 'carreras' ? 'Carreras' : 'Historial Escenarios'}
+                {label}
               </button>
             ))}
           </div>
           {tab === 'carreras' && <RectorCarrerasTable carreras={data.carreras} iesId={iesId} />}
+          {tab === 'tendencias' && <TendenciasPanel carreras={data.carreras} />}
           {tab === 'escenarios' && <EscenariosPanel iesId={iesId} onComparar={setComparando} />}
         </main>
       </div>
