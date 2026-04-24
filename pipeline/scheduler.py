@@ -1,6 +1,12 @@
 """
 Scheduler de pipelines de ingestión con APScheduler.
 Corre como proceso independiente: python -m pipeline.scheduler
+
+Variables de entorno:
+  STPS_CSV_PATH   — ruta al CSV de vacantes STPS (activa el job diario)
+  ANUIES_CSV_PATH — ruta al CSV anual ANUIES (activa el job semanal)
+  NEWSAPI_KEY     — API key de NewsAPI
+  ANTHROPIC_API_KEY — API key de Anthropic para clasificación
 """
 import logging
 import os
@@ -16,69 +22,54 @@ scheduler = BlockingScheduler(timezone="America/Mexico_City")
 
 
 def run_news_scraper():
-    """Scrapes RSS + NewsAPI and saves new articles to DB."""
-    from pipeline.scrapers.news_scraper import NewsScraper
-    from pipeline.utils.claude_client import ClaudeClient
+    from pipeline.jobs.news_ingest_job import run_news_ingest
     from pipeline.db import get_session
-    from pipeline.db.models import Noticia
-
-    newsapi_key = os.getenv("NEWSAPI_KEY")
-    api_key = os.getenv("ANTHROPIC_API_KEY", "")
-    scraper = NewsScraper(newsapi_key=newsapi_key)
-    claude = ClaudeClient(api_key=api_key)
-
-    articles = scraper.scrape()
-    logger.info("Noticias scrapeadas: %d", len(articles))
-
     with get_session() as session:
-        for art in articles:
-            exists = session.query(Noticia).filter_by(url=art.url).first()
-            if exists:
-                continue
-            clasificacion = claude.clasificar_noticia(art.titulo, art.contenido)
-            noticia = Noticia(
-                titulo=art.titulo,
-                url=art.url,
-                fuente=art.fuente,
-                fecha_pub=art.fecha_pub,
-                pais=art.pais,
-                sector=clasificacion.sector if clasificacion else None,
-                tipo_impacto=clasificacion.tipo_impacto if clasificacion else None,
-                n_empleados=clasificacion.n_empleados_afectados if clasificacion else None,
-                empresa=clasificacion.empresa if clasificacion else None,
-                causa_ia=clasificacion.causa_ia if clasificacion else None,
-                resumen_claude=clasificacion.resumen if clasificacion else None,
-                raw_content=art.contenido,
-            )
-            session.add(noticia)
-    logger.info("News pipeline completado")
-
-
-def run_onet_loader():
-    """Updates ONET occupation data (weekly)."""
-    logger.info("ONET loader iniciado — implementación en Sprint 2")
+        result = run_news_ingest(session)
+        session.commit()
+    logger.info("news_ingest OK: %s", result)
 
 
 def run_stps_loader():
-    """Updates STPS vacancies (daily)."""
-    logger.info("STPS loader iniciado — implementar ruta de descarga")
+    path_env = os.getenv("STPS_CSV_PATH")
+    if not path_env:
+        logger.warning("STPS_CSV_PATH no configurado — job omitido")
+        return
+    from pathlib import Path
+    from pipeline.loaders.stps_loader import StpsLoader
+    from pipeline.jobs.stps_ingest_job import ingest_stps
+    from pipeline.db import get_session
+    vacantes = StpsLoader().load_csv(Path(path_env))
+    with get_session() as session:
+        result = ingest_stps(vacantes, session)
+        session.commit()
+    logger.info("stps_ingest OK: %s", result)
 
 
 def run_anuies_loader():
-    """Loads ANUIES data (annual — manual trigger)."""
-    logger.info("ANUIES loader iniciado — implementar ruta de archivo")
+    path_env = os.getenv("ANUIES_CSV_PATH")
+    if not path_env:
+        logger.warning("ANUIES_CSV_PATH no configurado — job omitido")
+        return
+    from pathlib import Path
+    from pipeline.loaders.anuies_loader import AnuiesLoader
+    from pipeline.jobs.anuies_ingest_job import ingest_anuies
+    from pipeline.db import get_session
+    records = AnuiesLoader().load_csv(Path(path_env))
+    with get_session() as session:
+        result = ingest_anuies(records, session)
+        session.commit()
+    logger.info("anuies_ingest OK: %s", result)
 
 
-# Noticias: cada 6 horas
 scheduler.add_job(
     run_news_scraper,
     trigger=CronTrigger(hour="*/6"),
     id="news_scraper",
-    name="Scraper de noticias (RSS + NewsAPI)",
+    name="Scraper noticias (RSS + NewsAPI)",
     replace_existing=True,
 )
 
-# STPS vacantes: diario a las 2am
 scheduler.add_job(
     run_stps_loader,
     trigger=CronTrigger(hour=2, minute=0),
@@ -87,12 +78,11 @@ scheduler.add_job(
     replace_existing=True,
 )
 
-# ONET: domingo 3am
 scheduler.add_job(
-    run_onet_loader,
-    trigger=CronTrigger(day_of_week="sun", hour=3),
-    id="onet_loader",
-    name="Actualización ONET ocupaciones",
+    run_anuies_loader,
+    trigger=CronTrigger(day_of_week="sun", hour=4),
+    id="anuies_loader",
+    name="Carga ANUIES anual",
     replace_existing=True,
 )
 

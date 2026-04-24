@@ -88,6 +88,30 @@ export async function buscarNoticias(q: string, topK: number = 5): Promise<Notic
   return await res.json()
 }
 
+export async function getAdminStatus(adminKey: string): Promise<Record<string, number>> {
+  const res = await fetch(`${BASE}/admin/status`, { headers: { 'X-Admin-Key': adminKey } })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function postIngestNoticias(adminKey: string): Promise<{ fetched: number; stored: number; classified: number }> {
+  const res = await fetch(`${BASE}/admin/ingest/noticias`, {
+    method: 'POST',
+    headers: { 'X-Admin-Key': adminKey },
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function postSeedDemo(adminKey: string): Promise<Record<string, number>> {
+  const res = await fetch(`${BASE}/admin/jobs/seed-demo`, {
+    method: 'POST',
+    headers: { 'X-Admin-Key': adminKey },
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function getKpisIes(iesId: string): Promise<IesKpiResult | null> {
   const res = await fetch(`${BASE}/kpis/ies/${iesId}`)
   if (res.status === 404) return null

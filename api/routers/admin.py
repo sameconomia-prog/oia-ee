@@ -72,6 +72,22 @@ def trigger_alert_job(
     return AlertJobResultOut(alertas_creadas=creadas)
 
 
+@router.get("/status")
+def get_status(
+    db: Session = Depends(get_db),
+    _: None = Depends(_require_admin),
+):
+    from pipeline.db.models import Carrera, CarreraIES, Alerta, Vacante, Noticia
+    return {
+        "ies": db.query(IES).count(),
+        "carreras": db.query(Carrera).count(),
+        "carrera_ies": db.query(CarreraIES).count(),
+        "noticias": db.query(Noticia).count(),
+        "vacantes": db.query(Vacante).count(),
+        "alertas": db.query(Alerta).count(),
+    }
+
+
 @router.post("/ingest/noticias", response_model=NewsIngestResultOut)
 def ingest_noticias(
     db: Session = Depends(get_db),
