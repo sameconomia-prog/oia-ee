@@ -10,14 +10,8 @@ def test_migration_applies_cleanly(tmp_path):
     db_url = f"sqlite:///{tmp_path}/migration_test.db"
     os.environ["DATABASE_URL"] = db_url
     try:
-        # Cambiar a directorio pipeline para que rutas relativas de alembic funcionen
-        cwd = os.getcwd()
-        os.chdir("pipeline")
-        try:
-            cfg = Config("alembic.ini")
-            command.upgrade(cfg, "head")
-        finally:
-            os.chdir(cwd)
+        cfg = Config("pipeline/alembic.ini")
+        command.upgrade(cfg, "head")
 
         engine = create_engine(db_url)
         insp = inspect(engine)
