@@ -10,6 +10,8 @@ from api.schemas import CrearUsuarioIn, UsuarioOut
 from pipeline.db.models import IES, Usuario
 from pipeline.ingest_gdelt import run_gdelt_pipeline
 from pipeline.jobs.alert_job import run_alert_job
+from pipeline.jobs.news_ingest_job import run_news_ingest
+from pipeline.seed_demo import run_seed_demo
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -34,6 +36,20 @@ class AlertJobResultOut(BaseModel):
     alertas_creadas: int
 
 
+class NewsIngestResultOut(BaseModel):
+    fetched: int
+    stored: int
+    classified: int
+
+
+class SeedDemoResultOut(BaseModel):
+    ies_creadas: int
+    carreras_creadas: int
+    ocupaciones: int
+    noticias: int
+    vacantes: int
+
+
 @router.post("/ingest/gdelt", response_model=IngestResultOut)
 def ingest_gdelt(
     db: Session = Depends(get_db),
@@ -54,6 +70,25 @@ def trigger_alert_job(
 ):
     creadas = run_alert_job(db)
     return AlertJobResultOut(alertas_creadas=creadas)
+
+
+@router.post("/ingest/noticias", response_model=NewsIngestResultOut)
+def ingest_noticias(
+    db: Session = Depends(get_db),
+    _: None = Depends(_require_admin),
+):
+    result = run_news_ingest(db)
+    db.commit()
+    return NewsIngestResultOut(**vars(result))
+
+
+@router.post("/jobs/seed-demo", response_model=SeedDemoResultOut)
+def seed_demo(
+    db: Session = Depends(get_db),
+    _: None = Depends(_require_admin),
+):
+    result = run_seed_demo(db)
+    return SeedDemoResultOut(**vars(result))
 
 
 @router.post("/usuarios", response_model=UsuarioOut, status_code=status.HTTP_201_CREATED)

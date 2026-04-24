@@ -7,6 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from api.routers import noticias, kpis, admin, rector, alertas, escenarios, auth, publico
 from pipeline.db import get_session
 from pipeline.jobs.alert_job import run_alert_job
+from pipeline.jobs.news_ingest_job import run_news_ingest
 
 _scheduler = BackgroundScheduler()
 
@@ -16,10 +17,17 @@ def _run_alert_job_scheduled() -> None:
         run_alert_job(db)
 
 
+def _run_news_job_scheduled() -> None:
+    with get_session() as db:
+        run_news_ingest(db)
+        db.commit()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if os.getenv("ENABLE_SCHEDULER", "false").lower() == "true":
         _scheduler.add_job(_run_alert_job_scheduled, "cron", hour=3, minute=0)
+        _scheduler.add_job(_run_news_job_scheduled, "cron", hour="*/6")
         _scheduler.start()
     yield
     if _scheduler.running:
