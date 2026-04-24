@@ -1,4 +1,4 @@
-import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico } from './types'
+import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult } from './types'
 import { getToken } from './auth'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
@@ -84,6 +84,25 @@ export async function getResumenPublico(): Promise<ResumenPublico> {
 export async function buscarNoticias(q: string, topK: number = 5): Promise<Noticia[]> {
   const params = new URLSearchParams({ q, top_k: String(topK) })
   const res = await fetch(`${BASE}/noticias/buscar?${params}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function getKpisIes(iesId: string): Promise<IesKpiResult | null> {
+  const res = await fetch(`${BASE}/kpis/ies/${iesId}`)
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function getKpisEstado(estado: string): Promise<EstadoKpiResult> {
+  const res = await fetch(`${BASE}/kpis/estado/${encodeURIComponent(estado)}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function getKpisNoticias(): Promise<NoticiasKpiResult> {
+  const res = await fetch(`${BASE}/kpis/noticias`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }

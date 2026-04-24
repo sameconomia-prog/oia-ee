@@ -1,8 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { getRectorData } from '@/lib/api'
+import { generarReporteRector } from '@/lib/reporte-pdf'
 import type { RectorData, EscenarioHistorial } from '@/lib/types'
 import AlertasPanel from './AlertasPanel'
+import IesKpiCard from './IesKpiCard'
 import RectorCarrerasTable from './RectorCarrerasTable'
 import EscenariosPanel from './EscenariosPanel'
 import ComparacionModal from './ComparacionModal'
@@ -32,15 +34,27 @@ export default function RectorDashboard({ iesId }: { iesId: string }) {
       {comparando && (
         <ComparacionModal escenarios={comparando} onClose={() => setComparando(null)} />
       )}
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">{data.ies.nombre}</h2>
-        {data.ies.nombre_corto && (
-          <p className="text-sm text-gray-500">{data.ies.nombre_corto}</p>
-        )}
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800">{data.ies.nombre}</h2>
+          {data.ies.nombre_corto && (
+            <p className="text-sm text-gray-500">{data.ies.nombre_corto}</p>
+          )}
+        </div>
+        <button
+          onClick={() => generarReporteRector(data)}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded hover:bg-gray-50 text-gray-600 transition-colors"
+          aria-label="Descargar PDF"
+        >
+          <span>↓</span> Descargar PDF
+        </button>
       </div>
       <div className="grid grid-cols-[280px_1fr] gap-4 items-start">
-        <aside className="border rounded bg-white">
-          <AlertasPanel alertas={data.alertas} iesId={iesId} />
+        <aside>
+          <div className="border rounded bg-white">
+            <AlertasPanel alertas={data.alertas} iesId={iesId} />
+          </div>
+          <IesKpiCard iesId={iesId} />
         </aside>
         <main>
           <div className="flex gap-4 mb-3 border-b">

@@ -152,3 +152,37 @@ export interface ResumenPublico {
   alertas_activas: number
   noticias_recientes: Noticia[]
 }
+
+export interface D4Result {
+  tra: number
+  irf: number
+  cad: number
+  score: number
+}
+
+export interface IesKpiResult {
+  ies_id: string
+  d4_institucional: D4Result
+}
+
+export interface D5Result {
+  idr: number
+  icg: number
+  ies_s: number
+  score: number
+}
+
+export interface EstadoKpiResult {
+  estado: string
+  d5_geografia: D5Result
+}
+
+export interface D7Result {
+  isn: number
+  vdm: number
+  score: number
+}
+
+export interface NoticiasKpiResult {
+  d7_noticias: D7Result
+}

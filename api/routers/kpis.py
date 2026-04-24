@@ -2,8 +2,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from api.schemas import KpiOut, D1Out, D2Out, D3Out, D6Out, D4Out, D5Out, IesKpiOut, EstadoKpiOut
-from pipeline.kpi_engine.kpi_runner import run_kpis, run_kpis_ies, run_kpis_estado
+from api.schemas import KpiOut, D1Out, D2Out, D3Out, D6Out, D4Out, D5Out, D7Out, IesKpiOut, EstadoKpiOut, NoticiasKpiOut
+from pipeline.kpi_engine.kpi_runner import run_kpis, run_kpis_ies, run_kpis_estado, run_kpis_noticias
 
 router = APIRouter()
 
@@ -40,3 +40,9 @@ def get_kpis_estado(estado: str, db: Session = Depends(get_db)):
         estado=result.estado,
         d5_geografia=D5Out(**vars(result.d5_geografia)),
     )
+
+
+@router.get("/noticias", response_model=NoticiasKpiOut)
+def get_kpis_noticias(db: Session = Depends(get_db)):
+    result = run_kpis_noticias(db)
+    return NoticiasKpiOut(d7_noticias=D7Out(**vars(result.d7_noticias)))

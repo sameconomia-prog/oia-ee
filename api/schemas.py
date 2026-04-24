@@ -77,6 +77,16 @@ class EstadoKpiOut(BaseModel):
     d5_geografia: D5Out
 
 
+class D7Out(BaseModel):
+    isn: float
+    vdm: float
+    score: float
+
+
+class NoticiasKpiOut(BaseModel):
+    d7_noticias: D7Out
+
+
 class IesOut(BaseModel):
     id: str
     nombre: str
