@@ -45,6 +45,13 @@ class D4Out(BaseModel):
     score: float
 
 
+class D5Out(BaseModel):
+    idr: float
+    icg: float
+    ies_s: float
+    score: float
+
+
 class D6Out(BaseModel):
     iei: float
     crc: float
@@ -63,6 +70,11 @@ class KpiOut(BaseModel):
 class IesKpiOut(BaseModel):
     ies_id: str
     d4_institucional: D4Out
+
+
+class EstadoKpiOut(BaseModel):
+    estado: str
+    d5_geografia: D5Out
 
 
 class IesOut(BaseModel):

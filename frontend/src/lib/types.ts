@@ -24,9 +24,26 @@ export interface D2Result {
   iea: number
 }
 
+export interface D3Result {
+  score: number
+  tdm: number
+  tvc: number
+  brs: number
+  ice: number
+}
+
+export interface D6Result {
+  score: number
+  iei: number
+  crc: number
+  roi_e: number
+}
+
 export interface KpiResult {
   d1_obsolescencia: D1Result
   d2_oportunidades: D2Result
+  d3_mercado: D3Result
+  d6_estudiantil: D6Result
 }
 
 export interface IngestResult {

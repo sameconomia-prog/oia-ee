@@ -12,7 +12,7 @@ interface CarreraRow {
 
 const PROBE_IDS = Array.from({ length: 15 }, (_, i) => i + 1)
 
-type SortKey = 'd1' | 'd2'
+type SortKey = 'd1' | 'd2' | 'd3' | 'd6'
 type SortDir = 'asc' | 'desc'
 
 function Dot({ value, isD1 }: { value: number; isD1: boolean }) {
@@ -68,15 +68,13 @@ export default function KpisTable() {
   }
 
   const sorted = [...rows].sort((a, b) => {
-    const va =
-      sortKey === 'd1'
-        ? a.kpi.d1_obsolescencia.score
-        : a.kpi.d2_oportunidades.score
-    const vb =
-      sortKey === 'd1'
-        ? b.kpi.d1_obsolescencia.score
-        : b.kpi.d2_oportunidades.score
-    return sortDir === 'desc' ? vb - va : va - vb
+    const scoreOf = (row: CarreraRow) => {
+      if (sortKey === 'd1') return row.kpi.d1_obsolescencia.score
+      if (sortKey === 'd2') return row.kpi.d2_oportunidades.score
+      if (sortKey === 'd3') return row.kpi.d3_mercado.score
+      return row.kpi.d6_estudiantil.score
+    }
+    return sortDir === 'desc' ? scoreOf(b) - scoreOf(a) : scoreOf(a) - scoreOf(b)
   })
 
   function arrow(key: SortKey) {
@@ -108,6 +106,18 @@ export default function KpisTable() {
             >
               D2 — OPORTUNIDADES
             </th>
+            <th
+              colSpan={2}
+              className="px-2 py-1.5 border-b border-l-4 border-l-blue-300 bg-blue-50 text-blue-800 tracking-wide"
+            >
+              D3 — MERCADO
+            </th>
+            <th
+              colSpan={2}
+              className="px-2 py-1.5 border-b border-l-4 border-l-purple-300 bg-purple-50 text-purple-800 tracking-wide"
+            >
+              D6 — ESTUDIANTIL
+            </th>
           </tr>
           <tr className="text-xs text-center text-gray-500 bg-gray-50">
             <th className="px-2 py-1 border-b border-l-4 border-l-red-300 bg-red-50">●</th>
@@ -130,12 +140,28 @@ export default function KpisTable() {
             <th className="px-2 py-1 border-b bg-green-50">IOE</th>
             <th className="px-2 py-1 border-b bg-green-50">IHE</th>
             <th className="px-2 py-1 border-b bg-green-50">IEA</th>
+            <th className="px-2 py-1 border-b border-l-4 border-l-blue-300 bg-blue-50">●</th>
+            <th
+              className="px-2 py-1 border-b bg-blue-50 cursor-pointer hover:bg-blue-100 select-none"
+              onClick={() => handleSort('d3')}
+            >
+              {`Score${arrow('d3')}`}
+            </th>
+            <th className="px-2 py-1 border-b border-l-4 border-l-purple-300 bg-purple-50">●</th>
+            <th
+              className="px-2 py-1 border-b bg-purple-50 cursor-pointer hover:bg-purple-100 select-none"
+              onClick={() => handleSort('d6')}
+            >
+              {`Score${arrow('d6')}`}
+            </th>
           </tr>
         </thead>
         <tbody>
           {sorted.map(({ id, nombre, kpi }) => {
             const d1 = kpi.d1_obsolescencia
             const d2 = kpi.d2_oportunidades
+            const d3 = kpi.d3_mercado
+            const d6 = kpi.d6_estudiantil
             return (
               <tr key={id} className="border-b hover:bg-gray-50 text-center">
                 <td className="px-3 py-2 text-left text-xs font-semibold text-gray-800">
@@ -170,6 +196,18 @@ export default function KpisTable() {
                 </td>
                 <td className="px-2 py-2 bg-green-50/50">
                   <Sub value={d2.iea} isD1={false} />
+                </td>
+                <td className="px-2 py-2 border-l-4 border-l-blue-200 bg-blue-50/50">
+                  <Dot value={d3.score} isD1={false} />
+                </td>
+                <td className="px-2 py-2 bg-blue-50/50">
+                  <Bar value={d3.score} isD1={false} />
+                </td>
+                <td className="px-2 py-2 border-l-4 border-l-purple-200 bg-purple-50/50">
+                  <Dot value={d6.score} isD1={false} />
+                </td>
+                <td className="px-2 py-2 bg-purple-50/50">
+                  <Bar value={d6.score} isD1={false} />
                 </td>
               </tr>
             )

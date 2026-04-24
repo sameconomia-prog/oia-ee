@@ -8,6 +8,7 @@ from pipeline.kpi_engine.d1_obsolescencia import calcular_d1, D1Result
 from pipeline.kpi_engine.d2_oportunidades import calcular_d2, D2Result
 from pipeline.kpi_engine.d3_mercado import calcular_d3, D3Result
 from pipeline.kpi_engine.d4_institucional import calcular_d4, D4Result
+from pipeline.kpi_engine.d5_geografia import calcular_d5, D5Result
 from pipeline.kpi_engine.d6_estudiantil import calcular_d6, D6Result
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,12 @@ class KpiResult:
 class IesKpiResult:
     ies_id: str
     d4_institucional: D4Result
+
+
+@dataclass
+class EstadoKpiResult:
+    estado: str
+    d5_geografia: D5Result
 
 
 def run_kpis(carrera_id: str, session: Session) -> KpiResult | None:
@@ -62,6 +69,12 @@ def run_kpis_ies(ies_id: str, session: Session) -> IesKpiResult | None:
         return None
     d4 = calcular_d4(ies_id, session)
     return IesKpiResult(ies_id=ies_id, d4_institucional=d4)
+
+
+def run_kpis_estado(estado: str, session: Session) -> EstadoKpiResult:
+    """Calcula D5 para un estado. Siempre retorna resultado (con defaults si sin datos)."""
+    d5 = calcular_d5(estado, session)
+    return EstadoKpiResult(estado=estado, d5_geografia=d5)
 
 
 def _sector_de_carrera(carrera: Carrera, session: Session) -> str | None:
