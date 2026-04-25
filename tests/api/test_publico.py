@@ -177,6 +177,32 @@ def test_kpis_resumen_cache_hit(client, db_session):
     assert resp1.json() == resp2.json()
 
 
+# --- GET /publico/vacantes/skills ---
+
+def test_vacantes_skills_vacio(client):
+    resp = client.get("/publico/vacantes/skills")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_vacantes_skills_con_datos(client, db_session):
+    from pipeline.db.models import Vacante
+    import json
+    db_session.add(Vacante(titulo="Dev A", skills=json.dumps(["Python", "SQL"])))
+    db_session.add(Vacante(titulo="Dev B", skills=json.dumps(["Python", "Docker"])))
+    db_session.add(Vacante(titulo="Dev C", skills=json.dumps(["SQL", "Go"])))
+    db_session.flush()
+    resp = client.get("/publico/vacantes/skills?top=5")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) >= 1
+    nombres = [d["nombre"] for d in data]
+    assert "Python" in nombres
+    counts = {d["nombre"]: d["count"] for d in data}
+    assert counts["Python"] == 2
+    assert counts["SQL"] == 2
+
+
 def test_kpis_resumen_cache_clear(client, db_session):
     from api.routers.publico import _clear_kpis_cache
     _seed_carrera(db_session, "cache2")

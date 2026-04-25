@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut
+from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 router = APIRouter()
@@ -135,6 +135,24 @@ def resumen_kpis_nacional(db: Session = Depends(get_db)):
         _kpis_cache["at"] = time.time()
 
     return result_out
+
+
+@router.get("/vacantes/skills", response_model=list[SkillFreqOut])
+def top_vacantes_skills(top: int = 10, db: Session = Depends(get_db)):
+    import json
+    from collections import Counter
+    from pipeline.db.models import Vacante
+
+    rows = db.query(Vacante.skills).filter(Vacante.skills.isnot(None)).all()
+    counter: Counter = Counter()
+    for (skills_json,) in rows:
+        try:
+            skills = json.loads(skills_json)
+            counter.update(s.strip() for s in skills if isinstance(s, str) and s.strip())
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    return [SkillFreqOut(nombre=skill, count=count) for skill, count in counter.most_common(top)]
 
 
 @router.get("/ies", response_model=list[IesOut])

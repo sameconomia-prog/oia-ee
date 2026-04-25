@@ -210,3 +210,8 @@ class UsuarioOut(BaseModel):
     email: Optional[str] = None
 
     model_config = {"from_attributes": True}
+
+
+class SkillFreqOut(BaseModel):
+    nombre: str
+    count: int

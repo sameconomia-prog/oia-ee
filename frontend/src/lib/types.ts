@@ -208,3 +208,8 @@ export interface KpisNacionalResumen {
   carreras_riesgo_alto: number
   carreras_oportunidad_alta: number
 }
+
+export interface SkillFreq {
+  nombre: string
+  count: number
+}

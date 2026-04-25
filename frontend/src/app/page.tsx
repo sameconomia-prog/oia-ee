@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getResumenPublico, getKpisNacionalResumen } from '@/lib/api'
-import type { ResumenPublico, KpisNacionalResumen } from '@/lib/types'
+import { getResumenPublico, getKpisNacionalResumen, getVacantesTopSkills } from '@/lib/api'
+import type { ResumenPublico, KpisNacionalResumen, SkillFreq } from '@/lib/types'
 
 function StatCard({ label, value, sub, color }: {
   label: string
@@ -35,6 +35,7 @@ const IMPACTO_COLOR: Record<string, string> = {
 export default function HomePage() {
   const [data, setData] = useState<ResumenPublico | null>(null)
   const [kpisNac, setKpisNac] = useState<KpisNacionalResumen | null>(null)
+  const [topSkills, setTopSkills] = useState<SkillFreq[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -43,6 +44,9 @@ export default function HomePage() {
       .catch((e: Error) => setError(e.message))
     getKpisNacionalResumen()
       .then(setKpisNac)
+      .catch(() => {})
+    getVacantesTopSkills(12)
+      .then(setTopSkills)
       .catch(() => {})
   }, [])
 
@@ -155,6 +159,26 @@ export default function HomePage() {
           </Link>
         ))}
       </div>
+
+      {/* Skills más demandadas */}
+      {topSkills.length > 0 && (
+        <div className="mb-8 bg-white rounded-xl border shadow-sm p-5">
+          <h2 className="font-semibold text-gray-800 text-sm mb-3">Skills más demandadas · Mercado laboral</h2>
+          <div className="flex flex-wrap gap-2">
+            {topSkills.map((s) => (
+              <span
+                key={s.nombre}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium"
+              >
+                {s.nombre}
+                <span className="bg-indigo-200 text-indigo-800 rounded-full px-1.5 py-0.5 text-[10px] font-bold">
+                  {s.count}
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Noticias recientes */}
       <div className="bg-white rounded-xl border shadow-sm">
