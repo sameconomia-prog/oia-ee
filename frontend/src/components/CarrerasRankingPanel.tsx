@@ -14,10 +14,11 @@ const DIMS: { key: Dim; label: string; sub: string }[] = [
 
 export default function CarrerasRankingPanel() {
   const [dim, setDim] = useState<Dim>('d1')
+  const [filterQuery, setFilterQuery] = useState('')
 
   return (
     <div>
-      <div className="flex gap-2 mb-5 flex-wrap">
+      <div className="flex gap-2 mb-4 flex-wrap">
         {DIMS.map(d => (
           <button
             key={d.key}
@@ -32,10 +33,27 @@ export default function CarrerasRankingPanel() {
             <span className="text-xs text-gray-400">{d.sub}</span>
           </button>
         ))}
+        <div className="ml-auto flex items-center">
+          <input
+            type="text"
+            value={filterQuery}
+            onChange={e => setFilterQuery(e.target.value)}
+            placeholder="Filtrar carrera..."
+            className="border rounded px-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-1 focus:ring-blue-400"
+          />
+          {filterQuery && (
+            <button
+              onClick={() => setFilterQuery('')}
+              className="ml-1 text-gray-400 hover:text-gray-700 text-xs px-1"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
-      {dim === 'd1' && <CarrerasRankingD1 />}
-      {dim === 'd2' && <CarrerasRankingD2 />}
-      {dim === 'd3' && <CarrerasRankingD3 />}
+      {dim === 'd1' && <CarrerasRankingD1 filterQuery={filterQuery} />}
+      {dim === 'd2' && <CarrerasRankingD2 filterQuery={filterQuery} />}
+      {dim === 'd3' && <CarrerasRankingD3 filterQuery={filterQuery} />}
     </div>
   )
 }

@@ -13,7 +13,7 @@ function scoreBadgeClass(s: number) {
     : 'text-green-700 bg-green-50'
 }
 
-export default function CarrerasRankingD1() {
+export default function CarrerasRankingD1({ filterQuery = '' }: { filterQuery?: string }) {
   const [raw, setRaw] = useState<CarreraKpi[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -30,7 +30,8 @@ export default function CarrerasRankingD1() {
       .filter((c): c is CarreraKpi & { kpi: NonNullable<CarreraKpi['kpi']> } => c.kpi !== null)
       .map(c => ({ id: c.id, nombre: c.nombre, d1: c.kpi.d1_obsolescencia }))
       .sort((a, b) => b.d1.score - a.d1.score)
-  }, [raw])
+      .filter(d => !filterQuery || d.nombre.toLowerCase().includes(filterQuery.toLowerCase()))
+  }, [raw, filterQuery])
 
   const stats = useMemo(() => {
     if (datos.length === 0) return null
