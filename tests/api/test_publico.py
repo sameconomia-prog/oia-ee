@@ -193,6 +193,25 @@ def test_carreras_ies_publico(client, db_session):
     assert len(resp.json()) >= 1
 
 
+# --- GET /publico/kpis/top-riesgo ---
+
+def test_top_riesgo_vacio(client):
+    resp = client.get("/publico/kpis/top-riesgo")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_top_riesgo_con_datos(client, db_session):
+    _seed_carrera(db_session, "tr1")
+    _seed_carrera(db_session, "tr2")
+    resp = client.get("/publico/kpis/top-riesgo?n=3")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) <= 3
+    scores = [d["d1_score"] for d in data]
+    assert scores == sorted(scores, reverse=True)  # ordenado descendente
+
+
 # --- GET /publico/kpis/tendencias ---
 
 def test_kpis_tendencias_sin_datos(client):

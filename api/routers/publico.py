@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut
+from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 router = APIRouter()
@@ -149,6 +149,29 @@ def resumen_kpis_nacional(db: Session = Depends(get_db)):
         _kpis_cache["at"] = time.time()
 
     return result_out
+
+
+@router.get("/kpis/top-riesgo", response_model=list[TopRiesgoItemOut])
+def top_carreras_riesgo(n: int = 5, db: Session = Depends(get_db)):
+    from pipeline.kpi_engine.kpi_runner import run_kpis
+
+    carrera_ids = [r[0] for r in db.query(CarreraIES.carrera_id).distinct().all()]
+    items = []
+    for cid in carrera_ids:
+        carrera = db.query(Carrera).filter_by(id=cid).first()
+        cie = db.query(CarreraIES).filter_by(carrera_id=cid).first()
+        result = run_kpis(cid, db)
+        if result:
+            items.append(TopRiesgoItemOut(
+                carrera_id=cid,
+                nombre=carrera.nombre_norm.title() if carrera else cid,
+                d1_score=result.d1_obsolescencia.score,
+                d2_score=result.d2_oportunidades.score,
+                matricula=cie.matricula if cie else None,
+            ))
+
+    items.sort(key=lambda x: x.d1_score, reverse=True)
+    return items[:n]
 
 
 @router.get("/kpis/tendencias")

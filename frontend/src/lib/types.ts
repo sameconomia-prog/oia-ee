@@ -214,6 +214,14 @@ export interface SkillFreq {
   count: number
 }
 
+export interface TopRiesgoItem {
+  carrera_id: string
+  nombre: string
+  d1_score: number
+  d2_score: number
+  matricula: number | null
+}
+
 export interface VacantePublico {
   id: string
   titulo: string

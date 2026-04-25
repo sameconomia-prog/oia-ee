@@ -217,6 +217,14 @@ class SkillFreqOut(BaseModel):
     count: int
 
 
+class TopRiesgoItemOut(BaseModel):
+    carrera_id: str
+    nombre: str
+    d1_score: float
+    d2_score: float
+    matricula: Optional[int] = None
+
+
 class VacantePublicoOut(BaseModel):
     id: str
     titulo: str

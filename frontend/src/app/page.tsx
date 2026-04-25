@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getResumenPublico, getKpisNacionalResumen, getVacantesTopSkills } from '@/lib/api'
-import type { ResumenPublico, KpisNacionalResumen, SkillFreq } from '@/lib/types'
+import { getResumenPublico, getKpisNacionalResumen, getVacantesTopSkills, getTopRiesgo } from '@/lib/api'
+import type { ResumenPublico, KpisNacionalResumen, SkillFreq, TopRiesgoItem } from '@/lib/types'
 
 function StatCard({ label, value, sub, color }: {
   label: string
@@ -36,6 +36,7 @@ export default function HomePage() {
   const [data, setData] = useState<ResumenPublico | null>(null)
   const [kpisNac, setKpisNac] = useState<KpisNacionalResumen | null>(null)
   const [topSkills, setTopSkills] = useState<SkillFreq[]>([])
+  const [topRiesgo, setTopRiesgo] = useState<TopRiesgoItem[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -47,6 +48,9 @@ export default function HomePage() {
       .catch(() => {})
     getVacantesTopSkills(12)
       .then(setTopSkills)
+      .catch(() => {})
+    getTopRiesgo(5)
+      .then(setTopRiesgo)
       .catch(() => {})
   }, [])
 
@@ -159,6 +163,30 @@ export default function HomePage() {
           </Link>
         ))}
       </div>
+
+      {/* Top carreras en riesgo */}
+      {topRiesgo.length > 0 && (
+        <div className="mb-8 bg-white rounded-xl border border-red-100 shadow-sm p-5">
+          <h2 className="font-semibold text-gray-800 text-sm mb-3">
+            Carreras con mayor riesgo de obsolescencia
+            <span className="ml-2 text-xs text-red-600 font-normal">(D1 más alto)</span>
+          </h2>
+          <div className="space-y-2">
+            {topRiesgo.map((c, i) => (
+              <div key={c.carrera_id} className="flex items-center gap-3">
+                <span className="text-xs text-gray-400 font-mono w-4">{i + 1}.</span>
+                <div className="flex-1 text-sm text-gray-700">{c.nombre}</div>
+                <div className="flex gap-3 text-xs font-mono">
+                  <span className={c.d1_score >= 0.6 ? 'text-red-600 font-bold' : 'text-yellow-600'}>
+                    D1 {c.d1_score.toFixed(2)}
+                  </span>
+                  <span className="text-gray-400">D2 {c.d2_score.toFixed(2)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Skills más demandadas */}
       {topSkills.length > 0 && (
