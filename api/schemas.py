@@ -100,6 +100,20 @@ class CarreraKpiOut(BaseModel):
     kpi: Optional[KpiOut] = None
 
 
+class CarreraIesItemOut(BaseModel):
+    ies_id: str
+    ies_nombre: str
+    matricula: Optional[int] = None
+    ciclo: Optional[str] = None
+
+
+class CarreraDetalleOut(BaseModel):
+    id: str
+    nombre: str
+    kpi: Optional[KpiOut] = None
+    instituciones: list[CarreraIesItemOut] = []
+
+
 class AlertaItemOut(BaseModel):
     id: str
     carrera_nombre: str

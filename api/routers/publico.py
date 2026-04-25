@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut
+from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 router = APIRouter()
@@ -347,6 +347,46 @@ def listar_sectores_vacantes(db: Session = Depends(get_db)):
         .all()
     )
     return [r[0] for r in rows]
+
+
+@router.get("/carreras/{carrera_id}", response_model=CarreraDetalleOut)
+def detalle_carrera(carrera_id: str, db: Session = Depends(get_db)):
+    from pipeline.kpi_engine.kpi_runner import run_kpis
+    from fastapi import HTTPException
+
+    carrera = db.query(Carrera).filter_by(id=carrera_id).first()
+    if not carrera:
+        raise HTTPException(status_code=404, detail="Carrera no encontrada")
+
+    kpi_result = run_kpis(carrera_id, db)
+    kpi_out: Optional[KpiOut] = None
+    if kpi_result:
+        kpi_out = KpiOut(
+            carrera_id=carrera_id,
+            d1_obsolescencia=D1Out(**vars(kpi_result.d1_obsolescencia)),
+            d2_oportunidades=D2Out(**vars(kpi_result.d2_oportunidades)),
+            d3_mercado=D3Out(**vars(kpi_result.d3_mercado)),
+            d6_estudiantil=D6Out(**vars(kpi_result.d6_estudiantil)),
+        )
+
+    cie_list = db.query(CarreraIES).filter_by(carrera_id=carrera_id).all()
+    instituciones = []
+    for cie in cie_list:
+        ies_obj = db.query(IES).filter_by(id=cie.ies_id).first()
+        if ies_obj:
+            instituciones.append(CarreraIesItemOut(
+                ies_id=cie.ies_id,
+                ies_nombre=ies_obj.nombre,
+                matricula=cie.matricula,
+                ciclo=cie.ciclo,
+            ))
+
+    return CarreraDetalleOut(
+        id=carrera_id,
+        nombre=carrera.nombre_norm.title(),
+        kpi=kpi_out,
+        instituciones=instituciones,
+    )
 
 
 @router.get("/ies", response_model=list[IesOut])

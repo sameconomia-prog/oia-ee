@@ -336,6 +336,25 @@ def test_vacantes_skills_con_datos(client, db_session):
     assert counts["SQL"] == 2
 
 
+# --- GET /publico/carreras/{carrera_id} ---
+
+def test_detalle_carrera_no_encontrada(client):
+    resp = client.get("/publico/carreras/carrera-inexistente")
+    assert resp.status_code == 404
+
+
+def test_detalle_carrera_con_datos(client, db_session):
+    carrera = _seed_carrera(db_session, "det1")
+    resp = client.get(f"/publico/carreras/{carrera.id}")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["id"] == carrera.id
+    assert "kpi" in data
+    assert isinstance(data["instituciones"], list)
+    assert len(data["instituciones"]) >= 1
+    assert "ies_nombre" in data["instituciones"][0]
+
+
 def test_kpis_resumen_cache_clear(client, db_session):
     from api.routers.publico import _clear_kpis_cache
     _seed_carrera(db_session, "cache2")

@@ -223,6 +223,20 @@ export interface TopRiesgoItem {
   matricula: number | null
 }
 
+export interface CarreraIesItem {
+  ies_id: string
+  ies_nombre: string
+  matricula: number | null
+  ciclo: string | null
+}
+
+export interface CarreraDetalle {
+  id: string
+  nombre: string
+  kpi: KpiResult | null
+  instituciones: CarreraIesItem[]
+}
+
 export interface TendenciaNacional {
   fecha: string
   d1_score: number | null
