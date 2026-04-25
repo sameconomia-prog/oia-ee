@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { getPublicoIes, getCarrerasDeIes } from '@/lib/api'
@@ -9,6 +9,14 @@ import type { CarreraKpi } from '@/lib/types'
 type IesOpcion = { id: string; nombre: string; nombre_corto?: string }
 
 export default function CompararPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-gray-400">Cargando…</div>}>
+      <CompararContent />
+    </Suspense>
+  )
+}
+
+function CompararContent() {
   const searchParams = useSearchParams()
   const [ies, setIes] = useState<IesOpcion[]>([])
   const [iesAId, setIesAId] = useState(searchParams.get('iesA') ?? '')
@@ -156,3 +164,4 @@ export default function CompararPage() {
     </div>
   )
 }
+
