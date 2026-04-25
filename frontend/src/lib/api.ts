@@ -174,7 +174,7 @@ export async function getKpisIes(iesId: string): Promise<IesKpiResult | null> {
 export async function getPublicoIes(): Promise<{ id: string; nombre: string; nombre_corto?: string }[]> {
   const res = await fetch(`${BASE}/publico/ies`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return res.json()
+  return await res.json()
 }
 
 export async function getKpisEstado(estado: string): Promise<EstadoKpiResult> {
