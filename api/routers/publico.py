@@ -467,6 +467,14 @@ def detalle_ies(ies_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/ies", response_model=list[IesOut])
-def listar_ies_publico(db: Session = Depends(get_db)):
-    ies_list = db.query(IES).filter_by(activa=True).order_by(IES.nombre).all()
+def listar_ies_publico(q: Optional[str] = None, db: Session = Depends(get_db)):
+    from sqlalchemy import func
+    query = db.query(IES).filter_by(activa=True)
+    if q:
+        term = f"%{q.lower()}%"
+        query = query.filter(
+            func.lower(IES.nombre).like(term) |
+            func.lower(IES.nombre_corto).like(term)
+        )
+    ies_list = query.order_by(IES.nombre).all()
     return [IesOut(id=i.id, nombre=i.nombre, nombre_corto=i.nombre_corto) for i in ies_list]

@@ -487,6 +487,28 @@ def test_detalle_carrera_con_datos(client, db_session):
     assert "ies_nombre" in data["instituciones"][0]
 
 
+def test_ies_busqueda_q(client, db_session):
+    db_session.add(IES(nombre="Universidad Nacional", nombre_corto="UNAM", tipo="pública"))
+    db_session.add(IES(nombre="Instituto Tecnológico", nombre_corto="IPN", tipo="pública"))
+    db_session.flush()
+    resp = client.get("/publico/ies?q=nacion")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert any(i["nombre"] == "Universidad Nacional" for i in data)
+    assert not any(i["nombre"] == "Instituto Tecnológico" for i in data)
+
+
+def test_ies_busqueda_q_nombre_corto(client, db_session):
+    db_session.add(IES(nombre="Instituto Tecnológico", nombre_corto="ITECH", tipo="pública"))
+    db_session.add(IES(nombre="Universidad del Sur", nombre_corto="US", tipo="privada"))
+    db_session.flush()
+    resp = client.get("/publico/ies?q=itech")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert any(i["nombre_corto"] == "ITECH" for i in data)
+    assert not any(i["nombre_corto"] == "US" for i in data)
+
+
 def test_kpis_resumen_cache_clear(client, db_session):
     from api.routers.publico import _clear_kpis_cache
     _seed_carrera(db_session, "cache2")
