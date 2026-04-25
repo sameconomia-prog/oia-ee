@@ -1,8 +1,10 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { getCarrerasPublico } from '@/lib/api'
 import type { CarreraKpi } from '@/lib/types'
+
+type SortKey = 'none' | 'nombre' | 'd1' | 'd2' | 'matricula'
 
 function exportarCSV(carreras: CarreraKpi[]) {
   const headers = ['ID', 'Nombre', 'Matricula', 'D1 Obsolescencia', 'D2 Oportunidades']
@@ -43,6 +45,32 @@ export default function CarrerasListPage() {
   const [loading, setLoading] = useState(true)
   const [skip, setSkip] = useState(0)
   const [hasMore, setHasMore] = useState(true)
+  const [sortKey, setSortKey] = useState<SortKey>('none')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+
+  function handleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDir('desc')
+    }
+  }
+
+  const sorted = useMemo(() => {
+    if (sortKey === 'none') return carreras
+    return [...carreras].sort((a, b) => {
+      let av = 0, bv = 0
+      if (sortKey === 'nombre') {
+        const cmp = a.nombre.localeCompare(b.nombre, 'es')
+        return sortDir === 'asc' ? cmp : -cmp
+      }
+      if (sortKey === 'd1') { av = a.kpi?.d1_obsolescencia.score ?? -1; bv = b.kpi?.d1_obsolescencia.score ?? -1 }
+      if (sortKey === 'd2') { av = a.kpi?.d2_oportunidades.score ?? -1; bv = b.kpi?.d2_oportunidades.score ?? -1 }
+      if (sortKey === 'matricula') { av = a.matricula ?? -1; bv = b.matricula ?? -1 }
+      return sortDir === 'asc' ? av - bv : bv - av
+    })
+  }, [carreras, sortKey, sortDir])
 
   const cargar = useCallback((q: string, newSkip: number, append: boolean) => {
     setLoading(true)
@@ -109,6 +137,33 @@ export default function CarrerasListPage() {
         )}
       </form>
 
+      {carreras.length > 0 && (
+        <div className="flex gap-2 mb-3 flex-wrap items-center">
+          <span className="text-xs text-gray-400">Ordenar:</span>
+          {([
+            { key: 'nombre', label: 'Nombre' },
+            { key: 'd1', label: 'D1 Riesgo' },
+            { key: 'd2', label: 'D2 Oportunidad' },
+            { key: 'matricula', label: 'Matrícula' },
+          ] as { key: SortKey; label: string }[]).map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => handleSort(key)}
+              className={`px-2.5 py-1 text-xs rounded border transition-colors ${
+                sortKey === key ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-medium' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              {label}{sortKey === key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''}
+            </button>
+          ))}
+          {sortKey !== 'none' && (
+            <button onClick={() => setSortKey('none')} className="text-xs text-gray-400 hover:text-gray-600 ml-1">
+              Limpiar
+            </button>
+          )}
+        </div>
+      )}
+
       {loading && carreras.length === 0 && (
         <p className="text-gray-400 text-sm py-8 text-center">Cargando...</p>
       )}
@@ -117,7 +172,7 @@ export default function CarrerasListPage() {
       )}
 
       <div className="bg-white rounded-xl border shadow-sm divide-y">
-        {carreras.map(c => (
+        {sorted.map(c => (
           <div key={c.id} className="px-5 py-4 hover:bg-gray-50 flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               <Link href={`/carreras/${c.id}`} className="text-sm font-medium text-gray-800 hover:text-indigo-700 hover:underline">
