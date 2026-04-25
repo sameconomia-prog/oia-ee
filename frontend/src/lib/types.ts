@@ -161,6 +161,7 @@ export interface EscenariosHistorialResult {
 export interface ResumenPublico {
   total_ies: number
   total_noticias: number
+  total_vacantes: number
   alertas_activas: number
   noticias_recientes: Noticia[]
 }

@@ -89,7 +89,7 @@ export default function HomePage() {
       {error && (
         <p className="text-red-500 text-sm mb-4">Error cargando datos: {error}</p>
       )}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-4 gap-4 mb-8">
         <StatCard
           label="IES monitoreadas"
           value={data?.total_ies ?? '—'}
@@ -101,6 +101,12 @@ export default function HomePage() {
           value={data?.total_noticias ?? '—'}
           sub="Con clasificación IA"
           color="text-gray-800"
+        />
+        <StatCard
+          label="Vacantes IA"
+          value={data?.total_vacantes ?? '—'}
+          sub="Empleos indexados"
+          color="text-indigo-600"
         />
         <StatCard
           label="Alertas activas"

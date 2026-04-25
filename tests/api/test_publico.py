@@ -9,6 +9,7 @@ def test_resumen_vacio(client):
     data = resp.json()
     assert data["total_ies"] >= 0
     assert data["total_noticias"] >= 0
+    assert data["total_vacantes"] >= 0
     assert data["alertas_activas"] >= 0
     assert isinstance(data["noticias_recientes"], list)
 

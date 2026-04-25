@@ -29,14 +29,17 @@ def _clear_kpis_cache() -> None:
 class ResumenPublico(BaseModel):
     total_ies: int
     total_noticias: int
+    total_vacantes: int
     alertas_activas: int
     noticias_recientes: list[NoticiaOut]
 
 
 @router.get("/resumen", response_model=ResumenPublico)
 def resumen_publico(db: Session = Depends(get_db)):
+    from pipeline.db.models import Vacante
     total_ies = db.query(IES).filter_by(activa=True).count()
     total_noticias = db.query(Noticia).count()
+    total_vacantes = db.query(Vacante).count()
     alertas_activas = db.query(Alerta).filter_by(leida=False).count()
     noticias_recientes = (
         db.query(Noticia)
@@ -47,6 +50,7 @@ def resumen_publico(db: Session = Depends(get_db)):
     return ResumenPublico(
         total_ies=total_ies,
         total_noticias=total_noticias,
+        total_vacantes=total_vacantes,
         alertas_activas=alertas_activas,
         noticias_recientes=noticias_recientes,
     )
