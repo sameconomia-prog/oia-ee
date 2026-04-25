@@ -1,4 +1,8 @@
-import { getNoticias, getKpis, postIngestGdelt, getRectorData, getAlertas, markAlertaRead } from '@/lib/api'
+import {
+  getNoticias, getKpis, postIngestGdelt, getRectorData, getAlertas, markAlertaRead,
+  getVacanteDetalle, getCarreraDetalle, getIesDetalle, getNoticiaDetalle,
+  getSectoresVacantes, getSectoresNoticias, getVacantesPublico,
+} from '@/lib/api'
 import type { AlertasHistorial } from '@/lib/types'
 
 const mockFetch = jest.fn()
@@ -122,5 +126,97 @@ describe('markAlertaRead', () => {
       expect.stringContaining('/alertas/alerta-1/leer'),
       expect.objectContaining({ method: 'PUT' })
     )
+  })
+})
+
+describe('getVacanteDetalle', () => {
+  it('retorna VacantePublico para ID existente', async () => {
+    const mock = { id: 'v1', titulo: 'ML Engineer', empresa: 'TechCo', sector: 'tecnologia',
+      estado: 'CDMX', skills: ['Python', 'TensorFlow'], salario_min: 30000, salario_max: 50000,
+      experiencia_anios: 2, nivel_educativo: 'Licenciatura', fecha_pub: '2026-01-01' }
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mock })
+    const result = await getVacanteDetalle('v1')
+    expect(result.titulo).toBe('ML Engineer')
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/publico/vacantes/v1'))
+  })
+
+  it('lanza error en HTTP 404', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 404 })
+    await expect(getVacanteDetalle('inexistente')).rejects.toThrow('HTTP 404')
+  })
+})
+
+describe('getCarreraDetalle', () => {
+  it('retorna CarreraDetalle con KPIs e instituciones', async () => {
+    const mock = {
+      id: 'c1', nombre: 'Ingeniería en IA',
+      kpi: { d1_obsolescencia: { score: 0.3 }, d2_oportunidades: { score: 0.8 },
+             d3_mercado: { score: 0.7 }, d6_estudiantil: { score: 0.6 } },
+      instituciones: [{ ies_id: 'ies-1', ies_nombre: 'UNAM', matricula: 500, ciclo: '2024-1' }],
+    }
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mock })
+    const result = await getCarreraDetalle('c1')
+    expect(result.nombre).toBe('Ingeniería en IA')
+    expect(result.instituciones).toHaveLength(1)
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/publico/carreras/c1'))
+  })
+})
+
+describe('getIesDetalle', () => {
+  it('retorna IesDetalle con estadísticas agregadas', async () => {
+    const mock = { id: 'ies-1', nombre: 'UNAM', nombre_corto: 'UNAM',
+      total_carreras: 12, promedio_d1: 0.45, promedio_d2: 0.62, carreras_riesgo_alto: 3 }
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mock })
+    const result = await getIesDetalle('ies-1')
+    expect(result.nombre).toBe('UNAM')
+    expect(result.total_carreras).toBe(12)
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/publico/ies/ies-1'))
+  })
+})
+
+describe('getNoticiaDetalle', () => {
+  it('retorna Noticia por ID', async () => {
+    const mock = { id: 'n1', titulo: 'IA reemplaza empleos', url: 'http://x.com',
+      fuente: 'gdelt', fecha_pub: '2026-01-01', fecha_ingesta: '2026-01-01',
+      pais: 'Mexico', sector: 'tecnologia', tipo_impacto: 'riesgo' }
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mock })
+    const result = await getNoticiaDetalle('n1')
+    expect(result.titulo).toBe('IA reemplaza empleos')
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/noticias/n1'))
+  })
+})
+
+describe('getSectoresVacantes', () => {
+  it('retorna lista de sectores únicos', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ['educacion', 'tecnologia'] })
+    const result = await getSectoresVacantes()
+    expect(result).toEqual(['educacion', 'tecnologia'])
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/publico/sectores'))
+  })
+})
+
+describe('getSectoresNoticias', () => {
+  it('retorna lista de sectores de noticias', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ['finanzas', 'logistica'] })
+    const result = await getSectoresNoticias()
+    expect(result).toEqual(['finanzas', 'logistica'])
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/noticias/sectores'))
+  })
+})
+
+describe('getVacantesPublico', () => {
+  it('llama con parámetros sector y limit correctos', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => [] })
+    await getVacantesPublico('tecnologia', 10)
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('sector=tecnologia')
+    )
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('limit=10'))
+  })
+
+  it('retorna array vacío cuando no hay vacantes', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => [] })
+    const result = await getVacantesPublico()
+    expect(result).toEqual([])
   })
 })
