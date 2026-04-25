@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { getVacantesPublico, getVacantesTopSkills, getSectoresVacantes } from '@/lib/api'
 import type { VacantePublico, SkillFreq } from '@/lib/types'
 
@@ -35,7 +35,18 @@ export default function VacantesPage() {
   const [skills, setSkills] = useState<SkillFreq[]>([])
   const [sectores, setSectores] = useState<string[]>([])
   const [sectorFiltro, setSectorFiltro] = useState<string>('')
+  const [busqueda, setBusqueda] = useState('')
   const [loading, setLoading] = useState(true)
+
+  const vacantesFiltradas = useMemo(() => {
+    if (!busqueda.trim()) return vacantes
+    const q = busqueda.toLowerCase()
+    return vacantes.filter(v =>
+      v.titulo.toLowerCase().includes(q) ||
+      (v.empresa ?? '').toLowerCase().includes(q) ||
+      v.skills.some(s => s.toLowerCase().includes(q))
+    )
+  }, [vacantes, busqueda])
 
   useEffect(() => {
     getVacantesTopSkills(10).then(setSkills).catch(() => {})
@@ -75,8 +86,15 @@ export default function VacantesPage() {
         </div>
       )}
 
-      {/* Filtro sector */}
-      <div className="flex items-center gap-3 mb-4">
+      {/* Filtros */}
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
+        <input
+          type="text"
+          value={busqueda}
+          onChange={e => setBusqueda(e.target.value)}
+          placeholder="Buscar título, empresa, skill..."
+          className="border rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 flex-1 min-w-[200px]"
+        />
         <select
           value={sectorFiltro}
           onChange={e => setSectorFiltro(e.target.value)}
@@ -87,10 +105,13 @@ export default function VacantesPage() {
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-        <span className="text-xs text-gray-400">{vacantes.length} vacantes</span>
-        {vacantes.length > 0 && (
+        {busqueda && (
+          <button onClick={() => setBusqueda('')} className="text-xs text-gray-400 hover:text-gray-700">✕</button>
+        )}
+        <span className="text-xs text-gray-400">{vacantesFiltradas.length} vacantes</span>
+        {vacantesFiltradas.length > 0 && (
           <button
-            onClick={() => exportarCSV(vacantes)}
+            onClick={() => exportarCSV(vacantesFiltradas)}
             className="ml-auto text-xs px-3 py-1.5 border rounded hover:bg-gray-50 text-gray-600 transition-colors"
           >
             ↓ Exportar CSV
@@ -101,11 +122,11 @@ export default function VacantesPage() {
       {/* Lista */}
       {loading ? (
         <p className="text-gray-400 text-sm py-8 text-center">Cargando...</p>
-      ) : vacantes.length === 0 ? (
+      ) : vacantesFiltradas.length === 0 ? (
         <p className="text-gray-400 text-sm py-8 text-center">Sin vacantes disponibles.</p>
       ) : (
         <div className="space-y-3">
-          {vacantes.map(v => (
+          {vacantesFiltradas.map(v => (
             <div key={v.id} className="bg-white border rounded-xl p-4 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
