@@ -44,13 +44,13 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 61, 2026-04-25)
-- 191 tests pasando
+## Estado actual (Sprint 64, 2026-04-25)
+- 192 tests pasando
 - 0 errores TypeScript
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Pendiente: Railway deploy (ver .env.example para env vars)
 
-## Nuevas rutas (Sprints 46-61)
+## Nuevas rutas (Sprints 46-64)
 - `GET /publico/vacantes` — lista vacantes con filtro ?sector=
 - `GET /publico/vacantes/skills` — top skills por frecuencia
 - `GET /publico/sectores` — sectores únicos de vacantes
@@ -58,7 +58,9 @@ OIA-EE/
 - `GET /publico/kpis/top-riesgo` — top N carreras por D1 (riesgo)
 - `GET /publico/kpis/tendencias` — promedios históricos nacionales
 - `POST /admin/cache/clear` — invalida cache KPIs nacional (5min TTL)
+- `GET /publico/estadisticas` — resumen consolidado (IES, carreras, vacantes, noticias, top skills)
 - `/vacantes` — página pública de vacantes con búsqueda, filtros, CSV
+- `/publico/resumen` incluye `total_vacantes`; homepage tiene 4 StatCards
 
 ## Tests
 ```
