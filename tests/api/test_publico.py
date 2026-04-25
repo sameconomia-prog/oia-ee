@@ -97,6 +97,23 @@ def test_carreras_publico_incluye_kpi(client, db_session):
     assert "d6_estudiantil" in kpi
 
 
+def test_carreras_publico_filtro_nombre(client, db_session):
+    _seed_carrera(db_session, "filtq1")
+    resp = client.get("/publico/carreras?q=filtq1")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data, list)
+    nombres = [c["nombre"].lower() for c in data]
+    assert any("filtq1" in n for n in nombres)
+
+
+def test_carreras_publico_filtro_nombre_vacio(client, db_session):
+    _seed_carrera(db_session, "filtq2")
+    resp = client.get("/publico/carreras?q=xyzzzznoencontrada")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
 def test_carreras_publico_paginacion(client, db_session):
     _seed_carrera(db_session, "p1")
     _seed_carrera(db_session, "p2")

@@ -60,20 +60,27 @@ def resumen_publico(db: Session = Depends(get_db)):
 def listar_carreras_publico(
     skip: int = 0,
     limit: int = 50,
+    q: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     from pipeline.kpi_engine.kpi_runner import run_kpis
 
-    cache_key = (skip, limit)
+    cache_key = (skip, limit, q or '')
     with _carreras_cache_lock:
         entry = _carreras_cache.get(cache_key)
     if entry and (time.time() - entry["at"]) < _KPIS_TTL:
         return entry["data"]
 
+    carrera_query = db.query(CarreraIES.carrera_id).distinct()
+    if q:
+        carrera_query = (
+            carrera_query
+            .join(Carrera, CarreraIES.carrera_id == Carrera.id)
+            .filter(Carrera.nombre_norm.ilike(f'%{q.lower()}%'))
+        )
     carrera_ids = [
         r[0]
-        for r in db.query(CarreraIES.carrera_id)
-        .distinct()
+        for r in carrera_query
         .offset(skip)
         .limit(limit)
         .all()
