@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, useMemo } from 'react'
+import Link from 'next/link'
 import { getCarrerasPublico } from '@/lib/api'
 import type { CarreraKpi } from '@/lib/types'
 
@@ -121,7 +122,9 @@ export default function CarrerasRankingD1({ filterQuery = '' }: { filterQuery?: 
             {datos.map(({ id, nombre, d1 }, i) => (
               <tr key={id} className="border-t hover:bg-gray-50">
                 <td className="px-4 py-2 text-gray-400 font-mono text-xs">{i + 1}</td>
-                <td className="px-4 py-2 font-medium text-gray-700">{nombre}</td>
+                <td className="px-4 py-2 font-medium text-gray-700">
+                  <Link href={`/carreras/${id}`} className="hover:text-indigo-700 hover:underline">{nombre}</Link>
+                </td>
                 <td className="px-4 py-2 text-center">
                   <span className={`px-2 py-0.5 rounded text-xs font-mono font-semibold ${scoreBadgeClass(d1.score)}`}>
                     {d1.score.toFixed(2)}
