@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut
+from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 router = APIRouter()
@@ -76,6 +76,40 @@ def listar_carreras_publico(
             kpi=kpi_out,
         ))
     return result
+
+
+@router.get("/kpis/resumen", response_model=KpisNacionalResumenOut)
+def resumen_kpis_nacional(db: Session = Depends(get_db)):
+    from pipeline.kpi_engine.kpi_runner import run_kpis
+
+    carrera_ids = [
+        r[0]
+        for r in db.query(CarreraIES.carrera_id).distinct().all()
+    ]
+
+    d1_scores, d2_scores, d3_scores, d6_scores = [], [], [], []
+    for cid in carrera_ids:
+        result = run_kpis(cid, db)
+        if result:
+            d1_scores.append(result.d1_obsolescencia.score)
+            d2_scores.append(result.d2_oportunidades.score)
+            d3_scores.append(result.d3_mercado.score)
+            d6_scores.append(result.d6_estudiantil.score)
+
+    total = len(d1_scores)
+
+    def avg(lst: list[float]) -> float:
+        return round(sum(lst) / len(lst), 4) if lst else 0.0
+
+    return KpisNacionalResumenOut(
+        total_carreras=total,
+        promedio_d1=avg(d1_scores),
+        promedio_d2=avg(d2_scores),
+        promedio_d3=avg(d3_scores),
+        promedio_d6=avg(d6_scores),
+        carreras_riesgo_alto=sum(1 for s in d1_scores if s >= 0.6),
+        carreras_oportunidad_alta=sum(1 for s in d2_scores if s >= 0.6),
+    )
 
 
 @router.get("/ies", response_model=list[IesOut])

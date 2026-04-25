@@ -116,6 +116,16 @@ class RectorOut(BaseModel):
     alertas: list[AlertaItemOut]
 
 
+class KpisNacionalResumenOut(BaseModel):
+    total_carreras: int
+    promedio_d1: float
+    promedio_d2: float
+    promedio_d3: float
+    promedio_d6: float
+    carreras_riesgo_alto: int
+    carreras_oportunidad_alta: int
+
+
 class AlertaDBOut(BaseModel):
     id: str
     ies_id: str

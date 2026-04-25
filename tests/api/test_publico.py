@@ -138,3 +138,31 @@ def test_listar_ies_publico_solo_activas(client, db_session):
     nombres = [d["nombre"] for d in data]
     assert "IES Activa" in nombres
     assert "IES Inactiva" not in nombres
+
+
+# --- GET /publico/kpis/resumen ---
+
+def test_kpis_resumen_nacional_vacio(client):
+    resp = client.get("/publico/kpis/resumen")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_carreras"] == 0
+    assert data["promedio_d1"] == 0.0
+    assert data["promedio_d2"] == 0.0
+    assert data["carreras_riesgo_alto"] == 0
+    assert data["carreras_oportunidad_alta"] == 0
+
+
+def test_kpis_resumen_nacional_con_datos(client, db_session):
+    _seed_carrera(db_session, "rn1")
+    _seed_carrera(db_session, "rn2")
+    resp = client.get("/publico/kpis/resumen")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_carreras"] >= 2
+    assert 0.0 <= data["promedio_d1"] <= 1.0
+    assert 0.0 <= data["promedio_d2"] <= 1.0
+    assert 0.0 <= data["promedio_d3"] <= 1.0
+    assert 0.0 <= data["promedio_d6"] <= 1.0
+    assert data["carreras_riesgo_alto"] >= 0
+    assert data["carreras_oportunidad_alta"] >= 0
