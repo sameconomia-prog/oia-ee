@@ -9,8 +9,9 @@ import RectorCarrerasTable from './RectorCarrerasTable'
 import EscenariosPanel from './EscenariosPanel'
 import ComparacionModal from './ComparacionModal'
 import TendenciasPanel from './TendenciasPanel'
+import RectorNoticiasPanel from './RectorNoticiasPanel'
 
-type Tab = 'carreras' | 'escenarios' | 'tendencias'
+type Tab = 'carreras' | 'escenarios' | 'tendencias' | 'noticias'
 
 export default function RectorDashboard({ iesId }: { iesId: string }) {
   const [data, setData] = useState<RectorData | null>(null)
@@ -63,6 +64,7 @@ export default function RectorDashboard({ iesId }: { iesId: string }) {
               ['carreras', 'Carreras'],
               ['tendencias', 'Tendencias'],
               ['escenarios', 'Historial Escenarios'],
+              ['noticias', 'Noticias IA'],
             ] as [Tab, string][]).map(([t, label]) => (
               <button
                 key={t}
@@ -76,6 +78,7 @@ export default function RectorDashboard({ iesId }: { iesId: string }) {
           {tab === 'carreras' && <RectorCarrerasTable carreras={data.carreras} iesId={iesId} />}
           {tab === 'tendencias' && <TendenciasPanel carreras={data.carreras} />}
           {tab === 'escenarios' && <EscenariosPanel iesId={iesId} onComparar={setComparando} />}
+          {tab === 'noticias' && <RectorNoticiasPanel />}
         </main>
       </div>
     </div>
