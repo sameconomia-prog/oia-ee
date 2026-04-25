@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
+import Link from 'next/link'
 import { getPublicoIes, getCarrerasDeIes } from '@/lib/api'
 import ComparacionIES from '@/components/ComparacionIES'
 import type { CarreraKpi } from '@/lib/types'
@@ -116,7 +117,9 @@ export default function CompararPage() {
                 </div>
                 {carrerasComunes.map(({ cA, cB }) => (
                   <div key={cA.id} className="grid grid-cols-5 border-t px-4 py-2 hover:bg-gray-50">
-                    <div className="col-span-2 text-gray-700 text-xs truncate" title={cA.nombre}>{cA.nombre}</div>
+                    <div className="col-span-2 text-xs truncate" title={cA.nombre}>
+                      <Link href={`/carreras/${cA.id}`} className="text-gray-700 hover:text-indigo-700 hover:underline">{cA.nombre}</Link>
+                    </div>
                     <div className="text-center font-mono text-xs">
                       <span className={cA.kpi && cA.kpi.d1_obsolescencia.score >= 0.6 ? 'text-red-600' : 'text-green-600'}>
                         {cA.kpi?.d1_obsolescencia.score.toFixed(2) ?? '—'}

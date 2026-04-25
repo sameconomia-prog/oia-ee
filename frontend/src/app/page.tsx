@@ -189,7 +189,7 @@ export default function HomePage() {
             {topRiesgo.map((c, i) => (
               <div key={c.carrera_id} className="flex items-center gap-3">
                 <span className="text-xs text-gray-400 font-mono w-4">{i + 1}.</span>
-                <div className="flex-1 text-sm text-gray-700">{c.nombre}</div>
+                <Link href={`/carreras/${c.carrera_id}`} className="flex-1 text-sm text-gray-700 hover:text-indigo-700 hover:underline">{c.nombre}</Link>
                 <div className="flex gap-3 text-xs font-mono">
                   <span className={c.d1_score >= 0.6 ? 'text-red-600 font-bold' : 'text-yellow-600'}>
                     D1 {c.d1_score.toFixed(2)}
