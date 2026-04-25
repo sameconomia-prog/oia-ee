@@ -46,7 +46,7 @@ app = FastAPI(title="OIA-EE API", version="0.8.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.getenv("CORS_ORIGIN", "http://localhost:3000")],
+    allow_origins=[o.strip() for o in os.getenv("CORS_ORIGIN", "http://localhost:3000").split(",")],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
