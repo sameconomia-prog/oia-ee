@@ -4,8 +4,9 @@ import KpisTable from '@/components/KpisTable'
 import EstadoKpiSection from '@/components/EstadoKpiSection'
 import NoticiasKpiSection from '@/components/NoticiasKpiSection'
 import EstadoRankingNacional from '@/components/EstadoRankingNacional'
+import CarrerasRankingD1 from '@/components/CarrerasRankingD1'
 
-type Tab = 'carreras' | 'estado' | 'noticias' | 'ranking'
+type Tab = 'carreras' | 'estado' | 'ranking_d5' | 'noticias' | 'ranking_d1'
 
 export default function KpisPage() {
   const [tab, setTab] = useState<Tab>('carreras')
@@ -13,11 +14,12 @@ export default function KpisPage() {
   return (
     <div>
       <h1 className="text-xl font-semibold mb-4">KPIs del Observatorio</h1>
-      <div className="flex gap-4 mb-4 border-b">
+      <div className="flex gap-4 mb-4 border-b flex-wrap">
         {([
           { key: 'carreras', label: 'D1–D3–D6 por Carrera' },
           { key: 'estado', label: 'D5 Geografía por Estado' },
-          { key: 'ranking', label: 'D5 Ranking Nacional' },
+          { key: 'ranking_d5', label: 'D5 Ranking Nacional' },
+          { key: 'ranking_d1', label: 'D1 Ranking Carreras' },
           { key: 'noticias', label: 'D7 Noticias (Global)' },
         ] as { key: Tab; label: string }[]).map(({ key, label }) => (
           <button
@@ -31,7 +33,8 @@ export default function KpisPage() {
       </div>
       {tab === 'carreras' && <KpisTable />}
       {tab === 'estado' && <EstadoKpiSection />}
-      {tab === 'ranking' && <EstadoRankingNacional />}
+      {tab === 'ranking_d5' && <EstadoRankingNacional />}
+      {tab === 'ranking_d1' && <CarrerasRankingD1 />}
       {tab === 'noticias' && <NoticiasKpiSection />}
     </div>
   )
