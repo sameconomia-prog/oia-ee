@@ -223,6 +223,14 @@ export interface TopRiesgoItem {
   matricula: number | null
 }
 
+export interface TendenciaNacional {
+  fecha: string
+  d1_score: number | null
+  d2_score: number | null
+  d3_score: number | null
+  d6_score: number | null
+}
+
 export interface VacantePublico {
   id: string
   titulo: string

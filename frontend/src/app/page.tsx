@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { getResumenPublico, getKpisNacionalResumen, getVacantesTopSkills, getTopRiesgo } from '@/lib/api'
 import type { ResumenPublico, KpisNacionalResumen, SkillFreq, TopRiesgoItem } from '@/lib/types'
+import TendenciasNacionalesChart from '@/components/TendenciasNacionalesChart'
 
 function StatCard({ label, value, sub, color }: {
   label: string
@@ -147,6 +148,9 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* Tendencias nacionales */}
+      <TendenciasNacionalesChart dias={30} />
 
       {/* Feature cards */}
       <div className="grid grid-cols-2 gap-3 mb-8">
