@@ -100,6 +100,16 @@ class CarreraKpiOut(BaseModel):
     kpi: Optional[KpiOut] = None
 
 
+class IesDetalleOut(BaseModel):
+    id: str
+    nombre: str
+    nombre_corto: Optional[str] = None
+    total_carreras: int
+    promedio_d1: float
+    promedio_d2: float
+    carreras_riesgo_alto: int
+
+
 class CarreraIesItemOut(BaseModel):
     ies_id: str
     ies_nombre: str

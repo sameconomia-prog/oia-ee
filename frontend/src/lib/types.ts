@@ -223,6 +223,16 @@ export interface TopRiesgoItem {
   matricula: number | null
 }
 
+export interface IesDetalle {
+  id: string
+  nombre: string
+  nombre_corto: string | null
+  total_carreras: number
+  promedio_d1: number
+  promedio_d2: number
+  carreras_riesgo_alto: number
+}
+
 export interface CarreraIesItem {
   ies_id: string
   ies_nombre: string

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut
+from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut, IesDetalleOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 router = APIRouter()
@@ -386,6 +386,38 @@ def detalle_carrera(carrera_id: str, db: Session = Depends(get_db)):
         nombre=carrera.nombre_norm.title(),
         kpi=kpi_out,
         instituciones=instituciones,
+    )
+
+
+@router.get("/ies/{ies_id}", response_model=IesDetalleOut)
+def detalle_ies(ies_id: str, db: Session = Depends(get_db)):
+    from pipeline.kpi_engine.kpi_runner import run_kpis
+    from fastapi import HTTPException
+
+    ies_obj = db.query(IES).filter_by(id=ies_id, activa=True).first()
+    if not ies_obj:
+        raise HTTPException(status_code=404, detail="IES no encontrada")
+
+    cie_list = db.query(CarreraIES).filter_by(ies_id=ies_id).all()
+    d1_scores = []
+    d2_scores = []
+    for cie in cie_list:
+        result = run_kpis(cie.carrera_id, db)
+        if result:
+            d1_scores.append(result.d1_obsolescencia.score)
+            d2_scores.append(result.d2_oportunidades.score)
+
+    def avg(lst: list[float]) -> float:
+        return round(sum(lst) / len(lst), 4) if lst else 0.0
+
+    return IesDetalleOut(
+        id=ies_id,
+        nombre=ies_obj.nombre,
+        nombre_corto=ies_obj.nombre_corto,
+        total_carreras=len(cie_list),
+        promedio_d1=avg(d1_scores),
+        promedio_d2=avg(d2_scores),
+        carreras_riesgo_alto=sum(1 for s in d1_scores if s >= 0.6),
     )
 
 

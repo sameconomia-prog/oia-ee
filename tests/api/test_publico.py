@@ -336,6 +336,26 @@ def test_vacantes_skills_con_datos(client, db_session):
     assert counts["SQL"] == 2
 
 
+# --- GET /publico/ies/{ies_id} ---
+
+def test_detalle_ies_no_encontrada(client):
+    resp = client.get("/publico/ies/ies-inexistente")
+    assert resp.status_code == 404
+
+
+def test_detalle_ies_con_datos(client, db_session):
+    _seed_carrera(db_session, "iesdet1")
+    ies = db_session.query(__import__('pipeline.db.models', fromlist=['IES']).IES).filter_by(nombre="IES Pub iesdet1").first()
+    resp = client.get(f"/publico/ies/{ies.id}")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["id"] == ies.id
+    assert data["total_carreras"] >= 1
+    assert 0.0 <= data["promedio_d1"] <= 1.0
+    assert 0.0 <= data["promedio_d2"] <= 1.0
+    assert data["carreras_riesgo_alto"] >= 0
+
+
 # --- GET /publico/carreras/{carrera_id} ---
 
 def test_detalle_carrera_no_encontrada(client):
