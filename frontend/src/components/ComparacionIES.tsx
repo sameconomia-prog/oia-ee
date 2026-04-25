@@ -3,6 +3,23 @@ import { useState, useEffect } from 'react'
 import { getKpisIes } from '@/lib/api'
 import type { D4Result } from '@/lib/types'
 
+function exportarComparacionCSV(
+  nombreA: string, d4A: D4Result,
+  nombreB: string, d4B: D4Result,
+  metricas: { key: keyof D4Result; label: string }[],
+) {
+  const headers = ['Métrica', nombreA, nombreB]
+  const rows = metricas.map(m => [m.label, d4A[m.key].toFixed(4), d4B[m.key].toFixed(4)])
+  const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `comparacion_d4_${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 const METRICAS: { key: keyof D4Result; label: string; titulo: string; invert: boolean }[] = [
   { key: 'score', label: 'Score D4', titulo: 'Score general institucional', invert: false },
   { key: 'tra', label: 'TRA — Retención', titulo: 'Tasa Retención-Absorción', invert: false },
@@ -76,9 +93,17 @@ export default function ComparacionIES({
         )
       })}
 
-      <p className="text-xs text-gray-400 px-4 py-2 bg-gray-50 border-t">
-        D4 Institucional · ✓ indica mejor valor · IRF: menor es mejor
-      </p>
+      <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-t">
+        <p className="text-xs text-gray-400">
+          D4 Institucional · ✓ indica mejor valor · IRF: menor es mejor
+        </p>
+        <button
+          onClick={() => exportarComparacionCSV(iesANombre, d4A, iesBNombre, d4B, METRICAS)}
+          className="text-xs px-2 py-1 border rounded hover:bg-white text-gray-600 transition-colors"
+        >
+          ↓ CSV
+        </button>
+      </div>
     </div>
   )
 }
