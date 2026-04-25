@@ -141,3 +141,27 @@ def test_noticias_filtro_impacto_oportunidad(client, db_session):
     titulos = [n["titulo"] for n in data]
     assert "Oportunidad A" in titulos
     assert "Riesgo B" not in titulos
+
+
+# --- GET /noticias/tendencia ---
+
+def test_noticias_tendencia_vacio(client):
+    resp = client.get("/noticias/tendencia")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_noticias_tendencia_con_datos(client, db_session):
+    from datetime import datetime
+    db_session.add(Noticia(titulo="N1", url="https://t.co/t1", fuente="rss", fecha_pub=datetime(2024, 3, 10)))
+    db_session.add(Noticia(titulo="N2", url="https://t.co/t2", fuente="rss", fecha_pub=datetime(2024, 3, 22)))
+    db_session.add(Noticia(titulo="N3", url="https://t.co/t3", fuente="rss", fecha_pub=datetime(2024, 4, 5)))
+    db_session.flush()
+    resp = client.get("/noticias/tendencia")
+    assert resp.status_code == 200
+    data = resp.json()
+    meses = [d["mes"] for d in data]
+    assert "2024-03" in meses
+    assert "2024-04" in meses
+    mar = next(d for d in data if d["mes"] == "2024-03")
+    assert mar["count"] == 2

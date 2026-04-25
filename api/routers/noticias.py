@@ -54,6 +54,25 @@ def buscar_noticias(
     return search_similar(vector, db, top_k)
 
 
+@router.get("/tendencia")
+def tendencia_noticias(meses: int = 12, db: Session = Depends(get_db)):
+    from sqlalchemy import func
+    rows = (
+        db.query(
+            func.strftime('%Y-%m', Noticia.fecha_pub).label('mes'),
+            func.count(Noticia.id).label('count'),
+        )
+        .filter(Noticia.fecha_pub.isnot(None))
+        .group_by('mes')
+        .order_by('mes')
+        .all()
+    )
+    if not rows:
+        return []
+    result = [{"mes": row.mes, "count": row.count} for row in rows]
+    return result[-meses:] if len(result) > meses else result
+
+
 @router.get("/{noticia_id}", response_model=NoticiaOut)
 def get_noticia(noticia_id: str, db: Session = Depends(get_db)):
     noticia = db.query(Noticia).filter_by(id=noticia_id).first()
