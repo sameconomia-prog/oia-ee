@@ -109,3 +109,31 @@ def test_carreras_publico_paginacion(client, db_session):
     id2 = resp2.json()[0]["id"] if resp2.json() else None
     if id2:
         assert id1 != id2
+
+
+# --- GET /publico/ies ---
+
+def test_listar_ies_publico_sin_auth(client, db_session):
+    db_session.add(IES(nombre="Universidad Comparar A", nombre_corto="UCA", activa=True))
+    db_session.add(IES(nombre="Universidad Comparar B", nombre_corto="UCB", activa=True))
+    db_session.flush()
+    resp = client.get("/publico/ies")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data, list)
+    nombres = [d["nombre"] for d in data]
+    assert "Universidad Comparar A" in nombres
+    assert "Universidad Comparar B" in nombres
+    assert "id" in data[0]
+
+
+def test_listar_ies_publico_solo_activas(client, db_session):
+    db_session.add(IES(nombre="IES Activa", nombre_corto="IA", activa=True))
+    db_session.add(IES(nombre="IES Inactiva", nombre_corto="II", activa=False))
+    db_session.flush()
+    resp = client.get("/publico/ies")
+    assert resp.status_code == 200
+    data = resp.json()
+    nombres = [d["nombre"] for d in data]
+    assert "IES Activa" in nombres
+    assert "IES Inactiva" not in nombres
