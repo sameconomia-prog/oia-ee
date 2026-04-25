@@ -96,9 +96,61 @@ function KpiCard({ kpi, carreraId }: {
 
 export default function TendenciasPanel({ carreras }: { carreras: CarreraKpi[] }) {
   const [selectedId, setSelectedId] = useState<string>(carreras[0]?.id ?? '')
+  const [exportando, setExportando] = useState(false)
 
   if (carreras.length === 0) {
     return <p className="text-sm text-gray-400">Sin carreras registradas.</p>
+  }
+
+  async function exportarCSV(carreraId: string, carreraNombre: string) {
+    const [d1, d2, d3, d6] = await Promise.all([
+      getKpisHistorico(carreraId, 'd1_score'),
+      getKpisHistorico(carreraId, 'd2_score'),
+      getKpisHistorico(carreraId, 'd3_score'),
+      getKpisHistorico(carreraId, 'd6_score'),
+    ])
+
+    const allFechas = [
+      ...d1.serie.map(p => p.fecha),
+      ...d2.serie.map(p => p.fecha),
+      ...d3.serie.map(p => p.fecha),
+      ...d6.serie.map(p => p.fecha),
+    ]
+    const fechas = Array.from(new Set(allFechas)).sort()
+
+    const lookup = {
+      d1: Object.fromEntries(d1.serie.map(p => [p.fecha, p.valor])),
+      d2: Object.fromEntries(d2.serie.map(p => [p.fecha, p.valor])),
+      d3: Object.fromEntries(d3.serie.map(p => [p.fecha, p.valor])),
+      d6: Object.fromEntries(d6.serie.map(p => [p.fecha, p.valor])),
+    }
+
+    const header = 'fecha,d1_score,d2_score,d3_score,d6_score'
+    const rows = fechas.map(f =>
+      `${f},${lookup.d1[f] ?? ''},${lookup.d2[f] ?? ''},${lookup.d3[f] ?? ''},${lookup.d6[f] ?? ''}`
+    )
+    const csv = [header, ...rows].join('\n')
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const fecha = new Date().toISOString().slice(0, 10)
+    const nombre = carreraNombre.replace(/\s+/g, '_').toLowerCase()
+    a.href = url
+    a.download = `tendencias_${nombre}_${fecha}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  async function handleExport() {
+    if (!selectedId || exportando) return
+    setExportando(true)
+    try {
+      const carrera = carreras.find(c => c.id === selectedId)
+      await exportarCSV(selectedId, carrera?.nombre ?? selectedId)
+    } finally {
+      setExportando(false)
+    }
   }
 
   return (
@@ -114,6 +166,13 @@ export default function TendenciasPanel({ carreras }: { carreras: CarreraKpi[] }
             <option key={c.id} value={c.id}>{c.nombre}</option>
           ))}
         </select>
+        <button
+          onClick={handleExport}
+          disabled={!selectedId || exportando}
+          className="ml-auto text-xs px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {exportando ? 'Exportando...' : 'Exportar CSV'}
+        </button>
       </div>
 
       {selectedId && (
