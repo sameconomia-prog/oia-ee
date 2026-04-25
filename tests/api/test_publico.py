@@ -125,6 +125,7 @@ def test_listar_ies_publico_sin_auth(client, db_session):
     assert "Universidad Comparar A" in nombres
     assert "Universidad Comparar B" in nombres
     assert "id" in data[0]
+    assert nombres == sorted(nombres)
 
 
 def test_listar_ies_publico_solo_activas(client, db_session):
