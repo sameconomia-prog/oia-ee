@@ -2,6 +2,7 @@ import {
   getNoticias, getKpis, postIngestGdelt, getRectorData, getAlertas, markAlertaRead,
   getVacanteDetalle, getCarreraDetalle, getIesDetalle, getNoticiaDetalle,
   getSectoresVacantes, getSectoresNoticias, getVacantesPublico,
+  getKpisHistorico, getCarrerasPublico,
 } from '@/lib/api'
 import type { AlertasHistorial } from '@/lib/types'
 
@@ -218,5 +219,50 @@ describe('getVacantesPublico', () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => [] })
     const result = await getVacantesPublico()
     expect(result).toEqual([])
+  })
+})
+
+describe('getKpisHistorico', () => {
+  it('retorna HistoricoSerie para carrera y KPI dados', async () => {
+    const mock = {
+      carrera_id: 'c1',
+      kpi_nombre: 'd1_score',
+      serie: [
+        { fecha: '2026-01-01', valor: 0.65 },
+        { fecha: '2026-02-01', valor: 0.70 },
+      ],
+    }
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mock })
+    const result = await getKpisHistorico('c1', 'd1_score', 10)
+    expect(result.carrera_id).toBe('c1')
+    expect(result.serie).toHaveLength(2)
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/kpis/historico/carrera/c1')
+    )
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('kpi=d1_score'))
+  })
+
+  it('lanza error en respuesta no-OK', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 })
+    await expect(getKpisHistorico('c1')).rejects.toThrow('HTTP 500')
+  })
+})
+
+describe('getCarrerasPublico', () => {
+  it('llama con parámetro q correctamente', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => [] })
+    await getCarrerasPublico({ q: 'derecho', limit: 10 })
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('q=derecho'))
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('limit=10'))
+  })
+
+  it('retorna lista de CarreraKpi en éxito', async () => {
+    const mock = [
+      { id: 'c1', nombre: 'Derecho', matricula: 300, kpi: null },
+    ]
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mock })
+    const result = await getCarrerasPublico()
+    expect(result).toHaveLength(1)
+    expect(result[0].nombre).toBe('Derecho')
   })
 })
