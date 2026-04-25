@@ -1,6 +1,8 @@
 'use client'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { isAuthenticated, clearAuth } from '@/lib/auth'
 
 const links = [
   { href: '/', label: 'Inicio', icon: '🏠' },
@@ -14,6 +16,19 @@ const links = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const [authed, setAuthed] = useState(false)
+
+  useEffect(() => {
+    setAuthed(isAuthenticated())
+  }, [pathname])
+
+  function handleLogout() {
+    clearAuth()
+    setAuthed(false)
+    router.push('/login')
+  }
+
   return (
     <aside className="w-56 bg-gray-900 text-gray-100 min-h-screen flex flex-col shrink-0">
       <div className="p-4 border-b border-gray-700">
@@ -36,6 +51,17 @@ export default function Sidebar() {
           </Link>
         ))}
       </nav>
+      {authed && (
+        <div className="p-2 border-t border-gray-700">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+          >
+            <span>🚪</span>
+            <span>Cerrar sesión</span>
+          </button>
+        </div>
+      )}
     </aside>
   )
 }
