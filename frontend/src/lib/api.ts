@@ -229,6 +229,12 @@ export async function getVacantesPublico(sector?: string, limit = 25): Promise<V
   return await res.json()
 }
 
+export async function getSectoresVacantes(): Promise<string[]> {
+  const res = await fetch(`${BASE}/publico/sectores`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function getEscenarios(
   options: { skip?: number; limit?: number } = {}
 ): Promise<EscenariosHistorialResult> {

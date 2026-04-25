@@ -212,6 +212,28 @@ def test_vacantes_publico_filtro_sector(client, db_session):
     assert any(v["titulo"] == "ML Eng" for v in data)
 
 
+# --- GET /publico/sectores ---
+
+def test_sectores_vacio(client):
+    resp = client.get("/publico/sectores")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_sectores_con_datos(client, db_session):
+    from pipeline.db.models import Vacante
+    db_session.add(Vacante(titulo="A", sector="Tecnología"))
+    db_session.add(Vacante(titulo="B", sector="Finanzas"))
+    db_session.add(Vacante(titulo="C", sector="Tecnología"))
+    db_session.flush()
+    resp = client.get("/publico/sectores")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "Tecnología" in data
+    assert "Finanzas" in data
+    assert data == sorted(data)
+
+
 # --- GET /publico/vacantes/skills ---
 
 def test_vacantes_skills_vacio(client):

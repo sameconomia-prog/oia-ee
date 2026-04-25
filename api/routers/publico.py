@@ -191,6 +191,19 @@ def top_vacantes_skills(top: int = 10, db: Session = Depends(get_db)):
     return [SkillFreqOut(nombre=skill, count=count) for skill, count in counter.most_common(top)]
 
 
+@router.get("/sectores", response_model=list[str])
+def listar_sectores_vacantes(db: Session = Depends(get_db)):
+    from pipeline.db.models import Vacante
+    rows = (
+        db.query(Vacante.sector)
+        .filter(Vacante.sector.isnot(None))
+        .distinct()
+        .order_by(Vacante.sector)
+        .all()
+    )
+    return [r[0] for r in rows]
+
+
 @router.get("/ies", response_model=list[IesOut])
 def listar_ies_publico(db: Session = Depends(get_db)):
     ies_list = db.query(IES).filter_by(activa=True).order_by(IES.nombre).all()

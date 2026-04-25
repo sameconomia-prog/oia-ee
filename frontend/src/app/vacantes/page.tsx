@@ -1,6 +1,6 @@
 'use client'
-import { useEffect, useState, useMemo } from 'react'
-import { getVacantesPublico, getVacantesTopSkills } from '@/lib/api'
+import { useEffect, useState } from 'react'
+import { getVacantesPublico, getVacantesTopSkills, getSectoresVacantes } from '@/lib/api'
 import type { VacantePublico, SkillFreq } from '@/lib/types'
 
 const SALARIO_FMT = (n: number) =>
@@ -9,11 +9,13 @@ const SALARIO_FMT = (n: number) =>
 export default function VacantesPage() {
   const [vacantes, setVacantes] = useState<VacantePublico[]>([])
   const [skills, setSkills] = useState<SkillFreq[]>([])
+  const [sectores, setSectores] = useState<string[]>([])
   const [sectorFiltro, setSectorFiltro] = useState<string>('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     getVacantesTopSkills(10).then(setSkills).catch(() => {})
+    getSectoresVacantes().then(setSectores).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -23,11 +25,6 @@ export default function VacantesPage() {
       .catch(() => setVacantes([]))
       .finally(() => setLoading(false))
   }, [sectorFiltro])
-
-  const sectores = useMemo(() => {
-    const s = new Set(vacantes.map(v => v.sector).filter(Boolean) as string[])
-    return Array.from(s).sort()
-  }, [vacantes])
 
   return (
     <div className="max-w-4xl mx-auto">
