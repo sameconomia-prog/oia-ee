@@ -128,6 +128,9 @@ class CarreraIesItemOut(BaseModel):
 class CarreraDetalleOut(BaseModel):
     id: str
     nombre: str
+    area_conocimiento: Optional[str] = None
+    nivel: Optional[str] = None
+    duracion_anios: Optional[int] = None
     kpi: Optional[KpiOut] = None
     instituciones: list[CarreraIesItemOut] = []
 

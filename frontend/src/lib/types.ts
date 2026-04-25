@@ -250,6 +250,9 @@ export interface CarreraIesItem {
 export interface CarreraDetalle {
   id: string
   nombre: string
+  area_conocimiento: string | null
+  nivel: string | null
+  duracion_anios: number | null
   kpi: KpiResult | null
   instituciones: CarreraIesItem[]
 }

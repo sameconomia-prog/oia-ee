@@ -478,6 +478,9 @@ def detalle_carrera(carrera_id: str, db: Session = Depends(get_db)):
     return CarreraDetalleOut(
         id=carrera_id,
         nombre=carrera.nombre_norm.title(),
+        area_conocimiento=carrera.area_conocimiento,
+        nivel=carrera.nivel,
+        duracion_anios=carrera.duracion_anios,
         kpi=kpi_out,
         instituciones=instituciones,
     )

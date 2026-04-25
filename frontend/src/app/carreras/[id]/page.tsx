@@ -86,6 +86,17 @@ export default function CarreraDetallePage() {
       <div className="mb-6">
         <Link href="/carreras" className="text-xs text-indigo-600 hover:underline">← Carreras</Link>
         <h1 className="text-2xl font-bold text-gray-900 mt-2">{d.nombre}</h1>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {d.area_conocimiento && (
+            <span className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-medium">{d.area_conocimiento}</span>
+          )}
+          {d.nivel && (
+            <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 text-xs">{d.nivel}</span>
+          )}
+          {d.duracion_anios && (
+            <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 text-xs">{d.duracion_anios} años</span>
+          )}
+        </div>
       </div>
 
       {d.kpi && (
