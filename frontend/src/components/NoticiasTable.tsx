@@ -4,6 +4,22 @@ import Link from 'next/link'
 import { getNoticias, buscarNoticias, getSectoresNoticias } from '@/lib/api'
 import type { Noticia } from '@/lib/types'
 
+function exportarCSVNoticias(noticias: Noticia[]) {
+  const headers = ['Titulo', 'Fuente', 'Sector', 'Impacto', 'Pais', 'Empresa', 'Empleados', 'Fecha Pub', 'URL']
+  const rows = noticias.map(n => [
+    n.titulo, n.fuente ?? '', n.sector ?? '', n.tipo_impacto ?? '',
+    n.pais ?? '', n.empresa ?? '', n.n_empleados ?? '', n.fecha_pub ?? '', n.url,
+  ])
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `noticias_ia_${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 const PAGE_SIZE = 20
 
 const SECTOR_BADGE: Record<string, string> = {
@@ -110,6 +126,17 @@ export default function NoticiasTable() {
           </span>
         )}
       </form>
+
+      {noticias.length > 0 && (
+        <div className="flex justify-end mb-2">
+          <button
+            onClick={() => exportarCSVNoticias(noticias)}
+            className="text-xs px-3 py-1.5 border rounded hover:bg-gray-50 text-gray-600 transition-colors"
+          >
+            ↓ Exportar CSV
+          </button>
+        </div>
+      )}
 
       {error && <p className="text-red-600 text-sm mb-3">Error: {error}</p>}
 
