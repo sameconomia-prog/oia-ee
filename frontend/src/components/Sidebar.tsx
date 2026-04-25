@@ -6,6 +6,7 @@ const links = [
   { href: '/', label: 'Inicio', icon: '🏠' },
   { href: '/noticias', label: 'Noticias', icon: '📰' },
   { href: '/kpis', label: 'KPIs', icon: '📊' },
+  { href: '/comparar', label: 'Comparar', icon: '⚖️' },
   { href: '/rector', label: 'Rector', icon: '🏛' },
   { href: '/admin', label: 'Admin', icon: '⚙️' },
 ]
