@@ -13,6 +13,8 @@ router = APIRouter()
 
 _kpis_cache_lock = threading.Lock()
 _kpis_cache: dict = {"data": None, "at": 0.0}
+_carreras_cache_lock = threading.Lock()
+_carreras_cache: dict[tuple, dict] = {}
 _KPIS_TTL = 300  # 5 minutes
 
 
@@ -20,6 +22,8 @@ def _clear_kpis_cache() -> None:
     with _kpis_cache_lock:
         _kpis_cache["data"] = None
         _kpis_cache["at"] = 0.0
+    with _carreras_cache_lock:
+        _carreras_cache.clear()
 
 
 class ResumenPublico(BaseModel):
@@ -56,6 +60,12 @@ def listar_carreras_publico(
 ):
     from pipeline.kpi_engine.kpi_runner import run_kpis
 
+    cache_key = (skip, limit)
+    with _carreras_cache_lock:
+        entry = _carreras_cache.get(cache_key)
+    if entry and (time.time() - entry["at"]) < _KPIS_TTL:
+        return entry["data"]
+
     carrera_ids = [
         r[0]
         for r in db.query(CarreraIES.carrera_id)
@@ -87,6 +97,10 @@ def listar_carreras_publico(
             matricula=cie.matricula if cie else None,
             kpi=kpi_out,
         ))
+
+    with _carreras_cache_lock:
+        _carreras_cache[cache_key] = {"data": result, "at": time.time()}
+
     return result
 
 
