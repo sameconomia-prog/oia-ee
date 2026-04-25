@@ -112,3 +112,32 @@ def test_buscar_embed_error_devuelve_lista_vacia(client, monkeypatch):
         resp = client.get("/noticias/buscar?q=fallo")
     assert resp.status_code == 200
     assert resp.json() == []
+
+
+# --- GET /noticias/?impacto= ---
+
+def test_noticias_filtro_impacto_riesgo(client, db_session):
+    db_session.add(Noticia(titulo="Noticia riesgo", url="https://t.co/imp1", fuente="rss", tipo_impacto="riesgo"))
+    db_session.add(Noticia(titulo="Noticia oportunidad", url="https://t.co/imp2", fuente="rss", tipo_impacto="oportunidad"))
+    db_session.add(Noticia(titulo="Noticia neutro", url="https://t.co/imp3", fuente="rss", tipo_impacto="neutro"))
+    db_session.flush()
+    resp = client.get("/noticias/?impacto=riesgo")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert all(n["tipo_impacto"] == "riesgo" for n in data)
+    titulos = [n["titulo"] for n in data]
+    assert "Noticia riesgo" in titulos
+    assert "Noticia oportunidad" not in titulos
+
+
+def test_noticias_filtro_impacto_oportunidad(client, db_session):
+    db_session.add(Noticia(titulo="Oportunidad A", url="https://t.co/oa1", fuente="rss", tipo_impacto="oportunidad"))
+    db_session.add(Noticia(titulo="Riesgo B", url="https://t.co/rb1", fuente="rss", tipo_impacto="riesgo"))
+    db_session.flush()
+    resp = client.get("/noticias/?impacto=oportunidad")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert all(n["tipo_impacto"] == "oportunidad" for n in data)
+    titulos = [n["titulo"] for n in data]
+    assert "Oportunidad A" in titulos
+    assert "Riesgo B" not in titulos

@@ -16,11 +16,14 @@ def list_noticias(
     skip: int = 0,
     limit: int = 20,
     sector: Optional[str] = Query(None),
+    impacto: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
     q = db.query(Noticia)
     if sector:
         q = q.filter(Noticia.sector == sector)
+    if impacto:
+        q = q.filter(Noticia.tipo_impacto == impacto)
     return q.offset(skip).limit(limit).all()
 
 

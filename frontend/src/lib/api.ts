@@ -9,12 +9,13 @@ function authHeaders(): Record<string, string> {
 }
 
 export async function getNoticias(
-  params: { skip?: number; limit?: number; sector?: string } = {}
+  params: { skip?: number; limit?: number; sector?: string; impacto?: string } = {}
 ): Promise<Noticia[]> {
   const q = new URLSearchParams()
   if (params.skip !== undefined) q.set('skip', String(params.skip))
   if (params.limit !== undefined) q.set('limit', String(params.limit))
   if (params.sector) q.set('sector', params.sector)
+  if (params.impacto) q.set('impacto', params.impacto)
   const qs = q.toString()
   const res = await fetch(`${BASE}/noticias/${qs ? `?${qs}` : ''}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)

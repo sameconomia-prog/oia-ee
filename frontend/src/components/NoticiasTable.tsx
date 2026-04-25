@@ -50,6 +50,7 @@ function formatDate(dateStr: string | null): string {
 export default function NoticiasTable() {
   const [noticias, setNoticias] = useState<Noticia[]>([])
   const [sector, setSector] = useState('')
+  const [impacto, setImpacto] = useState('')
   const [sectoresDisponibles, setSectoresDisponibles] = useState<string[]>([])
   const [query, setQuery] = useState('')
   const [queryActiva, setQueryActiva] = useState('')
@@ -66,12 +67,12 @@ export default function NoticiasTable() {
     setError(null)
     const fn = queryActiva
       ? buscarNoticias(queryActiva, 20)
-      : getNoticias({ skip: page * PAGE_SIZE, limit: PAGE_SIZE, sector: sector || undefined })
+      : getNoticias({ skip: page * PAGE_SIZE, limit: PAGE_SIZE, sector: sector || undefined, impacto: impacto || undefined })
     fn
       .then(setNoticias)
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [sector, page, queryActiva])
+  }, [sector, impacto, page, queryActiva])
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
@@ -108,6 +109,18 @@ export default function NoticiasTable() {
         <button type="submit" className="px-3 py-1.5 text-sm border rounded bg-gray-50 hover:bg-gray-100">
           Buscar
         </button>
+        {!queryActiva && (
+          <select
+            className="border rounded px-2 py-1.5 text-sm"
+            value={impacto}
+            onChange={(e) => { setImpacto(e.target.value); setPage(0) }}
+          >
+            <option value="">Todo impacto</option>
+            <option value="riesgo">Riesgo</option>
+            <option value="oportunidad">Oportunidad</option>
+            <option value="neutro">Neutro</option>
+          </select>
+        )}
         {!queryActiva && (
           <select
             className="border rounded px-2 py-1.5 text-sm"
