@@ -4,6 +4,25 @@ import Link from 'next/link'
 import { getCarrerasPublico } from '@/lib/api'
 import type { CarreraKpi } from '@/lib/types'
 
+function exportarCSV(carreras: CarreraKpi[]) {
+  const headers = ['ID', 'Nombre', 'Matricula', 'D1 Obsolescencia', 'D2 Oportunidades']
+  const rows = carreras.map(c => [
+    c.id,
+    c.nombre,
+    c.matricula ?? '',
+    c.kpi?.d1_obsolescencia.score.toFixed(3) ?? '',
+    c.kpi?.d2_oportunidades.score.toFixed(3) ?? '',
+  ])
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `carreras_oia_${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 function ScoreBadge({ label, score, invert }: { label: string; score: number; invert?: boolean }) {
   const bad = invert ? score >= 0.6 : score < 0.4
   const ok = invert ? score < 0.4 : score >= 0.6
@@ -77,6 +96,15 @@ export default function CarrerasListPage() {
             className="px-3 py-2 border rounded-lg text-sm text-gray-500 hover:bg-gray-50"
           >
             ✕
+          </button>
+        )}
+        {carreras.length > 0 && (
+          <button
+            type="button"
+            onClick={() => exportarCSV(carreras)}
+            className="px-3 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+          >
+            ↓ CSV
           </button>
         )}
       </form>
