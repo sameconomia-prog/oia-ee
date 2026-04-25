@@ -284,3 +284,15 @@ export interface EstadisticasPublicas {
   alertas_activas: number
   top_skills: string[]
 }
+
+export interface KpisBin {
+  rango: string
+  min_val: number
+  max_val: number
+  count: number
+}
+
+export interface KpisDistribucion {
+  d1: KpisBin[]
+  d2: KpisBin[]
+}

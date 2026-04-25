@@ -564,3 +564,33 @@ def test_ies_lista_total_carreras_cero_sin_carreras(client, db_session):
     ies_data = next((i for i in data if i["nombre"] == "IES Sin Carreras"), None)
     assert ies_data is not None
     assert ies_data["total_carreras"] == 0
+
+
+# --- GET /publico/kpis/distribucion ---
+
+def test_kpis_distribucion_vacio(client):
+    resp = client.get("/publico/kpis/distribucion")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "d1" in data and "d2" in data
+    assert isinstance(data["d1"], list)
+    total_d1 = sum(b["count"] for b in data["d1"])
+    total_d2 = sum(b["count"] for b in data["d2"])
+    assert total_d1 == 0
+    assert total_d2 == 0
+
+
+def test_kpis_distribucion_con_datos(client, db_session):
+    _seed_carrera(db_session, "dbx1")
+    _seed_carrera(db_session, "dby2")
+    resp = client.get("/publico/kpis/distribucion")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["d1"]) == 3
+    assert len(data["d2"]) == 3
+    total = sum(b["count"] for b in data["d1"])
+    assert total >= 2
+    rangos = [b["rango"] for b in data["d1"]]
+    assert any("Bajo" in r for r in rangos)
+    assert any("Medio" in r for r in rangos)
+    assert any("Alto" in r for r in rangos)

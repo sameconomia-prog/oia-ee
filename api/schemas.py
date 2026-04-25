@@ -158,6 +158,18 @@ class KpisNacionalResumenOut(BaseModel):
     carreras_oportunidad_alta: int
 
 
+class KpisBinOut(BaseModel):
+    rango: str
+    min_val: float
+    max_val: float
+    count: int
+
+
+class KpisDistribucionOut(BaseModel):
+    d1: list[KpisBinOut]
+    d2: list[KpisBinOut]
+
+
 class AlertaDBOut(BaseModel):
     id: str
     ies_id: str

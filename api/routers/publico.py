@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut, IesDetalleOut
+from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut, IesDetalleOut, KpisDistribucionOut, KpisBinOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 router = APIRouter()
@@ -238,6 +238,32 @@ def top_carreras_oportunidades(n: int = 5, db: Session = Depends(get_db)):
 
     items.sort(key=lambda x: x.d2_score, reverse=True)
     return items[:n]
+
+
+@router.get("/kpis/distribucion", response_model=KpisDistribucionOut)
+def kpis_distribucion(db: Session = Depends(get_db)):
+    from pipeline.kpi_engine.kpi_runner import run_kpis
+    carrera_ids = [row[0] for row in db.query(CarreraIES.carrera_id).distinct().all()]
+    BINS = [
+        ("Bajo (0–0.4)", 0.0, 0.4),
+        ("Medio (0.4–0.6)", 0.4, 0.6),
+        ("Alto (0.6–1.0)", 0.6, 1.0),
+    ]
+    d1_counts = {label: 0 for label, _, _ in BINS}
+    d2_counts = {label: 0 for label, _, _ in BINS}
+    for cid in carrera_ids:
+        result = run_kpis(cid, db)
+        if not result:
+            continue
+        for label, lo, hi in BINS:
+            if lo <= result.d1_obsolescencia.score < hi or (hi == 1.0 and result.d1_obsolescencia.score == 1.0):
+                d1_counts[label] += 1
+            if lo <= result.d2_oportunidades.score < hi or (hi == 1.0 and result.d2_oportunidades.score == 1.0):
+                d2_counts[label] += 1
+    return KpisDistribucionOut(
+        d1=[KpisBinOut(rango=label, min_val=lo, max_val=hi, count=d1_counts[label]) for label, lo, hi in BINS],
+        d2=[KpisBinOut(rango=label, min_val=lo, max_val=hi, count=d2_counts[label]) for label, lo, hi in BINS],
+    )
 
 
 @router.get("/kpis/tendencias")

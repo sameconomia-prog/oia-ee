@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getEstadisticasPublicas } from '@/lib/api'
-import type { EstadisticasPublicas } from '@/lib/types'
+import { getEstadisticasPublicas, getKpisDistribucion } from '@/lib/api'
+import type { EstadisticasPublicas, KpisDistribucion } from '@/lib/types'
 
 function StatBox({ label, value, color, href }: { label: string; value: number | string; color: string; href?: string }) {
   const inner = (
@@ -14,14 +14,42 @@ function StatBox({ label, value, color, href }: { label: string; value: number |
   return href ? <Link href={href}>{inner}</Link> : inner
 }
 
+function DistribucionBar({ bins, colorFn }: {
+  bins: KpisDistribucion['d1']
+  colorFn: (rango: string) => string
+}) {
+  const total = bins.reduce((s, b) => s + b.count, 0)
+  if (total === 0) return <p className="text-xs text-gray-400">Sin datos</p>
+  return (
+    <div className="space-y-2">
+      {bins.map(b => (
+        <div key={b.rango} className="flex items-center gap-3">
+          <span className="text-xs text-gray-500 w-32 shrink-0">{b.rango}</span>
+          <div className="flex-1 bg-gray-100 rounded-full h-3">
+            <div
+              className={`h-3 rounded-full ${colorFn(b.rango)}`}
+              style={{ width: `${total > 0 ? (b.count / total) * 100 : 0}%` }}
+            />
+          </div>
+          <span className="text-xs font-mono text-gray-600 w-8 text-right">{b.count}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function EstadisticasPage() {
   const [data, setData] = useState<EstadisticasPublicas | null>(null)
+  const [distribucion, setDistribucion] = useState<KpisDistribucion | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     getEstadisticasPublicas()
       .then(setData)
       .catch((e: Error) => setError(e.message))
+    getKpisDistribucion()
+      .then(setDistribucion)
+      .catch(() => {})
   }, [])
 
   return (
@@ -58,6 +86,28 @@ export default function EstadisticasPage() {
                     {s}
                   </span>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {distribucion && (
+            <div className="bg-white rounded-xl border shadow-sm p-5 mb-6">
+              <h2 className="font-semibold text-gray-800 text-sm mb-4">Distribución de riesgo nacional</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 mb-2">D1 Obsolescencia (riesgo por IA)</p>
+                  <DistribucionBar
+                    bins={distribucion.d1}
+                    colorFn={r => r.startsWith('Alto') ? 'bg-red-400' : r.startsWith('Medio') ? 'bg-yellow-400' : 'bg-green-400'}
+                  />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-500 mb-2">D2 Oportunidades curriculares</p>
+                  <DistribucionBar
+                    bins={distribucion.d2}
+                    colorFn={r => r.startsWith('Alto') ? 'bg-green-400' : r.startsWith('Medio') ? 'bg-yellow-400' : 'bg-red-400'}
+                  />
+                </div>
               </div>
             </div>
           )}
