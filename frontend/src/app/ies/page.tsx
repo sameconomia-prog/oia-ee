@@ -62,6 +62,9 @@ export default function IesListPage() {
             {ies.nombre_corto && (
               <p className="text-xs text-gray-400">{ies.nombre_corto}</p>
             )}
+            {(ies.total_carreras ?? 0) > 0 && (
+              <p className="text-xs text-indigo-500 mt-1">{ies.total_carreras} carrera{(ies.total_carreras ?? 0) !== 1 ? 's' : ''}</p>
+            )}
           </Link>
         ))}
       </div>

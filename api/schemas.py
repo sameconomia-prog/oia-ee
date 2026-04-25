@@ -96,6 +96,9 @@ class IesOut(BaseModel):
     id: str
     nombre: str
     nombre_corto: Optional[str] = None
+    total_carreras: int = 0
+    promedio_d1: Optional[float] = None
+    promedio_d2: Optional[float] = None
 
 
 class CarreraKpiOut(BaseModel):

@@ -536,3 +536,31 @@ def test_kpis_resumen_cache_clear(client, db_session):
     _clear_kpis_cache()
     resp2 = client.get("/publico/kpis/resumen")
     assert resp2.status_code == 200
+
+
+def test_ies_lista_incluye_total_carreras(client, db_session):
+    ies = IES(nombre="IES Con Carreras", nombre_corto="ICC", activa=True)
+    db_session.add(ies)
+    db_session.flush()
+    carrera = Carrera(nombre_norm="ingenieria_sistemas_test102")
+    db_session.add(carrera)
+    db_session.flush()
+    db_session.add(CarreraIES(carrera_id=carrera.id, ies_id=ies.id, ciclo="2024A"))
+    db_session.flush()
+    resp = client.get("/publico/ies")
+    assert resp.status_code == 200
+    data = resp.json()
+    ies_data = next((i for i in data if i["nombre"] == "IES Con Carreras"), None)
+    assert ies_data is not None
+    assert ies_data["total_carreras"] == 1
+
+
+def test_ies_lista_total_carreras_cero_sin_carreras(client, db_session):
+    db_session.add(IES(nombre="IES Sin Carreras", nombre_corto="ISC", activa=True))
+    db_session.flush()
+    resp = client.get("/publico/ies")
+    assert resp.status_code == 200
+    data = resp.json()
+    ies_data = next((i for i in data if i["nombre"] == "IES Sin Carreras"), None)
+    assert ies_data is not None
+    assert ies_data["total_carreras"] == 0

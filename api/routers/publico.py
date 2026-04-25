@@ -500,4 +500,16 @@ def listar_ies_publico(q: Optional[str] = None, db: Session = Depends(get_db)):
             func.lower(IES.nombre_corto).like(term)
         )
     ies_list = query.order_by(IES.nombre).all()
-    return [IesOut(id=i.id, nombre=i.nombre, nombre_corto=i.nombre_corto) for i in ies_list]
+    if not ies_list:
+        return []
+    ies_ids = [i.id for i in ies_list]
+    conteos = dict(
+        db.query(CarreraIES.ies_id, func.count(CarreraIES.id))
+        .filter(CarreraIES.ies_id.in_(ies_ids))
+        .group_by(CarreraIES.ies_id)
+        .all()
+    )
+    return [
+        IesOut(id=i.id, nombre=i.nombre, nombre_corto=i.nombre_corto, total_carreras=conteos.get(i.id, 0))
+        for i in ies_list
+    ]

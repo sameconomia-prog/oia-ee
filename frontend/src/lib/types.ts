@@ -73,6 +73,9 @@ export interface IesInfo {
   id: string
   nombre: string
   nombre_corto: string | null
+  total_carreras?: number
+  promedio_d1?: number | null
+  promedio_d2?: number | null
 }
 
 export interface CarreraKpi {
