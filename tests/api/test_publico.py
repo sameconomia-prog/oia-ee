@@ -377,6 +377,29 @@ def test_vacantes_publico_filtro_q_empresa(client, db_session):
     assert not any(v["empresa"] == "Banca Global" for v in data)
 
 
+def test_vacantes_publico_paginacion_skip(client, db_session):
+    from pipeline.db.models import Vacante
+    import json
+    for i in range(5):
+        db_session.add(Vacante(titulo=f"Vacante {i}", skills=json.dumps([])))
+    db_session.flush()
+    resp_all = client.get("/publico/vacantes?limit=5")
+    assert resp_all.status_code == 200
+    all_titles = [v["titulo"] for v in resp_all.json()]
+    resp_skip = client.get("/publico/vacantes?skip=2&limit=3")
+    assert resp_skip.status_code == 200
+    skipped = resp_skip.json()
+    assert len(skipped) == 3
+    assert all(v["titulo"] in all_titles for v in skipped)
+    assert skipped[0]["titulo"] == all_titles[2]
+
+
+def test_vacantes_publico_paginacion_limit_cero(client):
+    resp = client.get("/publico/vacantes?limit=0")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
 # --- GET /publico/sectores ---
 
 def test_sectores_vacio(client):
