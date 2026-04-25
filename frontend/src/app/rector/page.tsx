@@ -1,17 +1,25 @@
 'use client'
 import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import RectorDashboard from '@/components/RectorDashboard'
+import { getStoredIesId } from '@/lib/auth'
 
 function RectorContent() {
   const params = useSearchParams()
-  const iesId = params.get('ies_id')
+  const iesIdParam = params.get('ies_id')
+  const iesId = iesIdParam ?? getStoredIesId()
 
   if (!iesId) {
     return (
-      <div className="py-8 text-gray-400 text-sm">
-        Selecciona una IES para continuar. Ejemplo:{' '}
-        <code className="bg-gray-100 px-1 rounded">/rector?ies_id=1</code>
+      <div className="py-12 text-center">
+        <p className="text-gray-500 text-sm mb-4">Acceso restringido a rectores autenticados.</p>
+        <Link
+          href="/login"
+          className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700"
+        >
+          Iniciar sesión →
+        </Link>
       </div>
     )
   }
