@@ -177,6 +177,41 @@ def test_kpis_resumen_cache_hit(client, db_session):
     assert resp1.json() == resp2.json()
 
 
+# --- GET /publico/vacantes ---
+
+def test_vacantes_publico_vacio(client):
+    resp = client.get("/publico/vacantes")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_vacantes_publico_con_datos(client, db_session):
+    from pipeline.db.models import Vacante
+    import json
+    db_session.add(Vacante(titulo="Dev Python", empresa="ACME", sector="Tecnología", skills=json.dumps(["Python"])))
+    db_session.add(Vacante(titulo="Analista SQL", empresa="XYZ", sector="Finanzas", skills=json.dumps(["SQL"])))
+    db_session.flush()
+    resp = client.get("/publico/vacantes")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 2
+    titulos = [v["titulo"] for v in data]
+    assert "Dev Python" in titulos
+
+
+def test_vacantes_publico_filtro_sector(client, db_session):
+    from pipeline.db.models import Vacante
+    import json
+    db_session.add(Vacante(titulo="ML Eng", sector="Tecnología", skills=json.dumps(["Python"])))
+    db_session.add(Vacante(titulo="Analista", sector="Finanzas", skills=json.dumps(["Excel"])))
+    db_session.flush()
+    resp = client.get("/publico/vacantes?sector=Tecnología")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert all(v["sector"] == "Tecnología" for v in data)
+    assert any(v["titulo"] == "ML Eng" for v in data)
+
+
 # --- GET /publico/vacantes/skills ---
 
 def test_vacantes_skills_vacio(client):

@@ -213,3 +213,17 @@ export interface SkillFreq {
   nombre: string
   count: number
 }
+
+export interface VacantePublico {
+  id: string
+  titulo: string
+  empresa: string | null
+  sector: string | null
+  skills: string[]
+  salario_min: number | null
+  salario_max: number | null
+  estado: string | null
+  nivel_educativo: string | null
+  experiencia_anios: number | null
+  fecha_pub: string | null
+}

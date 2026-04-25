@@ -215,3 +215,17 @@ class UsuarioOut(BaseModel):
 class SkillFreqOut(BaseModel):
     nombre: str
     count: int
+
+
+class VacantePublicoOut(BaseModel):
+    id: str
+    titulo: str
+    empresa: Optional[str] = None
+    sector: Optional[str] = None
+    skills: list[str] = []
+    salario_min: Optional[int] = None
+    salario_max: Optional[int] = None
+    estado: Optional[str] = None
+    nivel_educativo: Optional[str] = None
+    experiencia_anios: Optional[int] = None
+    fecha_pub: Optional[str] = None

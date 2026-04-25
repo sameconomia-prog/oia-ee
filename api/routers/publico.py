@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut
+from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 router = APIRouter()
@@ -135,6 +135,42 @@ def resumen_kpis_nacional(db: Session = Depends(get_db)):
         _kpis_cache["at"] = time.time()
 
     return result_out
+
+
+@router.get("/vacantes", response_model=list[VacantePublicoOut])
+def listar_vacantes_publico(
+    sector: Optional[str] = None,
+    limit: int = 25,
+    db: Session = Depends(get_db),
+):
+    import json
+    from pipeline.db.models import Vacante
+
+    query = db.query(Vacante)
+    if sector:
+        query = query.filter(Vacante.sector == sector)
+    rows = query.order_by(Vacante.fecha_pub.desc()).limit(limit).all()
+
+    result = []
+    for v in rows:
+        try:
+            skills = json.loads(v.skills) if v.skills else []
+        except (json.JSONDecodeError, TypeError):
+            skills = []
+        result.append(VacantePublicoOut(
+            id=v.id,
+            titulo=v.titulo,
+            empresa=v.empresa,
+            sector=v.sector,
+            skills=skills,
+            salario_min=v.salario_min,
+            salario_max=v.salario_max,
+            estado=v.estado,
+            nivel_educativo=v.nivel_educativo,
+            experiencia_anios=v.experiencia_anios,
+            fecha_pub=str(v.fecha_pub) if v.fecha_pub else None,
+        ))
+    return result
 
 
 @router.get("/vacantes/skills", response_model=list[SkillFreqOut])

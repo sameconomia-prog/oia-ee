@@ -1,4 +1,4 @@
-import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult, CarreraKpi, KpisNacionalResumen, SkillFreq } from './types'
+import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult, CarreraKpi, KpisNacionalResumen, SkillFreq, VacantePublico } from './types'
 import { getToken } from './auth'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
@@ -217,6 +217,14 @@ export async function getKpisNacionalResumen(): Promise<KpisNacionalResumen> {
 
 export async function getVacantesTopSkills(top = 10): Promise<SkillFreq[]> {
   const res = await fetch(`${BASE}/publico/vacantes/skills?top=${top}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function getVacantesPublico(sector?: string, limit = 25): Promise<VacantePublico[]> {
+  const params = new URLSearchParams({ limit: String(limit) })
+  if (sector) params.set('sector', sector)
+  const res = await fetch(`${BASE}/publico/vacantes?${params}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }
