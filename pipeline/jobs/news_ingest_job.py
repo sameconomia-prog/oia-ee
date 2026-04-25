@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from pipeline.db.models import Noticia
 from pipeline.scrapers.news_scraper import NewsScraper
 from pipeline.utils.claude_client import ClaudeClient
+from pipeline.utils.rule_classifier import RuleClassifier
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ def run_news_ingest(
     anthropic_key = anthropic_key or os.getenv("ANTHROPIC_API_KEY", "")
 
     scraper = NewsScraper(newsapi_key=newsapi_key)
-    claude = ClaudeClient(api_key=anthropic_key)
+    claude = ClaudeClient(api_key=anthropic_key) if anthropic_key else RuleClassifier()
 
     articles = scraper.scrape()
     fetched = len(articles)

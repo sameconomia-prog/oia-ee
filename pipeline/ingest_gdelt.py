@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from pipeline.db.models import Noticia
 from pipeline.scrapers.gdelt_scraper import GdeltScraper, DEFAULT_QUERIES
 from pipeline.utils.claude_client import ClaudeClient
+from pipeline.utils.rule_classifier import RuleClassifier
 from pipeline.utils.embeddings import embed_text, store_embedding
 
 logger = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ def run_gdelt_pipeline(
     articles = GdeltScraper(queries=queries).fetch()
     fetched = len(articles)
 
-    claude = ClaudeClient(api_key=api_key_claude) if api_key_claude else None
+    claude = ClaudeClient(api_key=api_key_claude) if api_key_claude else RuleClassifier()
     stored = classified = embedded = 0
 
     for article in articles:
@@ -49,7 +50,7 @@ def run_gdelt_pipeline(
         stored += 1
 
         try:
-            result = claude.clasificar_noticia(noticia.titulo, noticia.raw_content or "") if claude else None
+            result = claude.clasificar_noticia(noticia.titulo, noticia.raw_content or "")
             if result:
                 noticia.sector = result.sector
                 noticia.tipo_impacto = result.tipo_impacto
