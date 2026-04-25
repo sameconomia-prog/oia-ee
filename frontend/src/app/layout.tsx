@@ -9,6 +9,13 @@ export const metadata: Metadata = {
   },
   description: 'Monitoreo en tiempo real del impacto de la IA en educación y empleo en México. Rankings D1-D7, comparación IES, alertas y tendencias.',
   keywords: ['IA', 'educación', 'empleo', 'México', 'KPIs', 'observatorio', 'automatización'],
+  openGraph: {
+    title: 'OIA-EE — Observatorio IA · Empleo · Educación',
+    description: 'Rankings D1–D7 de carreras por riesgo de automatización. Datos abiertos sobre IES en México.',
+    type: 'website',
+    locale: 'es_MX',
+    siteName: 'OIA-EE',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
