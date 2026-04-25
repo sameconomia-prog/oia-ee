@@ -2,7 +2,14 @@ import type { Metadata } from 'next'
 import './globals.css'
 import Sidebar from '@/components/Sidebar'
 
-export const metadata: Metadata = { title: 'OIA-EE Dashboard' }
+export const metadata: Metadata = {
+  title: {
+    default: 'OIA-EE — Observatorio IA · Empleo · Educación',
+    template: '%s | OIA-EE',
+  },
+  description: 'Monitoreo en tiempo real del impacto de la IA en educación y empleo en México. Rankings D1-D7, comparación IES, alertas y tendencias.',
+  keywords: ['IA', 'educación', 'empleo', 'México', 'KPIs', 'observatorio', 'automatización'],
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
