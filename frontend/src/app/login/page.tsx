@@ -32,8 +32,8 @@ export default function LoginPage() {
         return
       }
       const data = await res.json()
-      const payloadB64 = data.access_token.split('.')[1]
-      const payload = JSON.parse(atob(payloadB64))
+      const payloadB64 = data.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+      const payload = JSON.parse(atob(payloadB64.padEnd(payloadB64.length + (4 - payloadB64.length % 4) % 4, '=')))
       saveAuth(data.access_token, payload.ies_id)
       router.push('/rector')
     } catch {
