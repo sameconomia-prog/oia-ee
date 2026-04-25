@@ -43,7 +43,7 @@ export default function Sidebar() {
             key={href}
             href={href}
             className={`flex items-center gap-3 px-3 py-2 rounded-md mb-1 text-sm transition-colors ${
-              pathname === href
+              (href === '/' ? pathname === '/' : pathname.startsWith(href))
                 ? 'bg-gray-700 text-white'
                 : 'text-gray-400 hover:bg-gray-800 hover:text-white'
             }`}
