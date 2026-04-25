@@ -209,6 +209,28 @@ def test_estadisticas_publicas(client):
     assert isinstance(data["top_skills"], list)
 
 
+def test_estadisticas_con_vacantes(client, db_session):
+    from pipeline.db.models import Vacante
+    import json as _json
+    db_session.add(Vacante(titulo="DS", sector="Tech", skills=_json.dumps(["Python", "SQL"])))
+    db_session.add(Vacante(titulo="MLE", sector="Tech", skills=_json.dumps(["Python", "TF"])))
+    db_session.flush()
+    resp = client.get("/publico/estadisticas")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_vacantes"] >= 2
+    assert "Python" in data["top_skills"]
+
+
+def test_carreras_filtro_q(client, db_session):
+    _seed_carrera(db_session, "filtroq99")
+    resp = client.get("/publico/carreras?q=filtroq99")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) >= 1
+    assert any("filtroq99" in c["nombre"].lower() for c in data)
+
+
 # --- GET /publico/ies/{ies_id}/carreras ---
 
 def test_carreras_ies_no_encontrada(client):
