@@ -198,3 +198,13 @@ export interface D7Result {
 export interface NoticiasKpiResult {
   d7_noticias: D7Result
 }
+
+export interface KpisNacionalResumen {
+  total_carreras: number
+  promedio_d1: number
+  promedio_d2: number
+  promedio_d3: number
+  promedio_d6: number
+  carreras_riesgo_alto: number
+  carreras_oportunidad_alta: number
+}

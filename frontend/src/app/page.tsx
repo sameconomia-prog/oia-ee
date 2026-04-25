@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getResumenPublico } from '@/lib/api'
-import type { ResumenPublico } from '@/lib/types'
+import { getResumenPublico, getKpisNacionalResumen } from '@/lib/api'
+import type { ResumenPublico, KpisNacionalResumen } from '@/lib/types'
 
 function StatCard({ label, value, sub, color }: {
   label: string
@@ -34,12 +34,16 @@ const IMPACTO_COLOR: Record<string, string> = {
 
 export default function HomePage() {
   const [data, setData] = useState<ResumenPublico | null>(null)
+  const [kpisNac, setKpisNac] = useState<KpisNacionalResumen | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     getResumenPublico()
       .then(setData)
       .catch((e: Error) => setError(e.message))
+    getKpisNacionalResumen()
+      .then(setKpisNac)
+      .catch(() => {})
   }, [])
 
   return (
@@ -97,6 +101,38 @@ export default function HomePage() {
           color={data && data.alertas_activas > 0 ? 'text-red-500' : 'text-gray-800'}
         />
       </div>
+
+      {/* Promedios nacionales KPI */}
+      {kpisNac && kpisNac.total_carreras > 0 && (
+        <div className="mb-8 bg-white rounded-xl border shadow-sm p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-gray-800 text-sm">Promedios nacionales · {kpisNac.total_carreras} carreras</h2>
+            <div className="flex gap-3 text-xs text-gray-500">
+              <span className="text-red-600">{kpisNac.carreras_riesgo_alto} en riesgo alto (D1)</span>
+              <span className="text-green-600">{kpisNac.carreras_oportunidad_alta} con alta oportunidad (D2)</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {([
+              { dim: 'D1', label: 'Obsolescencia', val: kpisNac.promedio_d1, invert: true },
+              { dim: 'D2', label: 'Oportunidades', val: kpisNac.promedio_d2, invert: false },
+              { dim: 'D3', label: 'Mercado Laboral', val: kpisNac.promedio_d3, invert: false },
+              { dim: 'D6', label: 'Perfil Estudiantil', val: kpisNac.promedio_d6, invert: false },
+            ] as { dim: string; label: string; val: number; invert: boolean }[]).map(({ dim, label, val, invert }) => {
+              const good = invert ? val < 0.4 : val >= 0.6
+              const warn = invert ? val >= 0.4 && val < 0.6 : val >= 0.4 && val < 0.6
+              const color = good ? 'text-green-700' : warn ? 'text-yellow-700' : 'text-red-700'
+              return (
+                <div key={dim} className="text-center p-3 bg-gray-50 rounded border">
+                  <p className="text-xs font-mono font-bold text-gray-500 mb-1">{dim}</p>
+                  <p className={`text-xl font-bold font-mono ${color}`}>{val.toFixed(2)}</p>
+                  <p className="text-xs text-gray-400 mt-1">{label}</p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Feature cards */}
       <div className="grid grid-cols-2 gap-3 mb-8">
