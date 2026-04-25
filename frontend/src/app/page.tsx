@@ -159,10 +159,10 @@ export default function HomePage() {
       {/* Feature cards */}
       <div className="grid grid-cols-2 gap-3 mb-8">
         {[
-          { href: '/kpis', icon: '📊', title: 'Rankings de Carreras', desc: 'D1 Obsolescencia · D2 Oportunidades · D3 Mercado por carrera' },
+          { href: '/carreras', icon: '🎓', title: 'Explorar Carreras', desc: 'Busca cualquier carrera y consulta su riesgo D1, oportunidades D2 y más' },
           { href: '/vacantes', icon: '💼', title: 'Vacantes IA', desc: 'Empleos que demandan habilidades de inteligencia artificial en México' },
           { href: '/comparar', icon: '⚖️', title: 'Comparar IES', desc: 'Análisis D4 de dos instituciones lado a lado' },
-          { href: '/metodologia', icon: '📐', title: 'Metodología', desc: 'Cómo se calculan los indicadores D1–D7' },
+          { href: '/kpis', icon: '📊', title: 'Rankings Detallados', desc: 'D1 Obsolescencia · D2 Oportunidades · D3 Mercado · D6 Estudiantil' },
         ].map(({ href, icon, title, desc }) => (
           <Link
             key={href + title}
@@ -181,10 +181,13 @@ export default function HomePage() {
       {/* Top carreras en riesgo */}
       {topRiesgo.length > 0 && (
         <div className="mb-8 bg-white rounded-xl border border-red-100 shadow-sm p-5">
-          <h2 className="font-semibold text-gray-800 text-sm mb-3">
-            Carreras con mayor riesgo de obsolescencia
-            <span className="ml-2 text-xs text-red-600 font-normal">(D1 más alto)</span>
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-gray-800 text-sm">
+              Carreras con mayor riesgo de obsolescencia
+              <span className="ml-2 text-xs text-red-600 font-normal">(D1 más alto)</span>
+            </h2>
+            <Link href="/kpis" className="text-xs text-indigo-600 hover:underline">Ver rankings →</Link>
+          </div>
           <div className="space-y-2">
             {topRiesgo.map((c, i) => (
               <div key={c.carrera_id} className="flex items-center gap-3">
