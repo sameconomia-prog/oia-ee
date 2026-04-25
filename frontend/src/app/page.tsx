@@ -142,7 +142,7 @@ export default function HomePage() {
       <div className="grid grid-cols-2 gap-3 mb-8">
         {[
           { href: '/kpis', icon: '📊', title: 'Rankings de Carreras', desc: 'D1 Obsolescencia · D2 Oportunidades · D3 Mercado por carrera' },
-          { href: '/kpis', icon: '🗺️', title: 'Ranking D5 Nacional', desc: 'Los 32 estados mexicanos ordenados por D5 Geografía' },
+          { href: '/vacantes', icon: '💼', title: 'Vacantes IA', desc: 'Empleos que demandan habilidades de inteligencia artificial en México' },
           { href: '/comparar', icon: '⚖️', title: 'Comparar IES', desc: 'Análisis D4 de dos instituciones lado a lado' },
           { href: '/metodologia', icon: '📐', title: 'Metodología', desc: 'Cómo se calculan los indicadores D1–D7' },
         ].map(({ href, icon, title, desc }) => (

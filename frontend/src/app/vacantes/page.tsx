@@ -3,8 +3,6 @@ import { useEffect, useState, useMemo } from 'react'
 import { getVacantesPublico, getVacantesTopSkills } from '@/lib/api'
 import type { VacantePublico, SkillFreq } from '@/lib/types'
 
-export const metadata = { title: 'Vacantes IA · OIA-EE' }
-
 const SALARIO_FMT = (n: number) =>
   new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(n)
 
