@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import {
   postIngestGdelt, postIngestNoticias, postSeedDemo, getAdminStatus,
-  getAdminIes, postAdminUsuario, postTriggerAlertJob, postKpiSnapshot,
+  getAdminIes, postAdminUsuario, postTriggerAlertJob, postKpiSnapshot, postClearCache,
 } from '@/lib/api'
 
 const HISTORY_KEY = 'admin_history'
@@ -181,6 +181,12 @@ export default function AdminPanel() {
             label="Snapshot KPIs"
             color="gray"
             onClick={() => runAction('snapshot', 'KPI Snapshot', () => postKpiSnapshot(adminKey))}
+          />
+          <Btn
+            id="clear-cache"
+            label="Limpiar Cache"
+            color="orange"
+            onClick={() => runAction('clear-cache', 'Cache Clear', () => postClearCache(adminKey))}
           />
         </div>
         <p className="text-xs text-gray-400 mt-2">

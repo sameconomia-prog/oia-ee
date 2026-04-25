@@ -164,6 +164,15 @@ export async function postSeedDemo(adminKey: string): Promise<Record<string, num
   return await res.json()
 }
 
+export async function postClearCache(adminKey: string): Promise<{ ok: boolean }> {
+  const res = await fetch(`${BASE}/admin/cache/clear`, {
+    method: 'POST',
+    headers: { 'X-Admin-Key': adminKey },
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function getKpisIes(iesId: string): Promise<IesKpiResult | null> {
   const res = await fetch(`${BASE}/kpis/ies/${iesId}`)
   if (res.status === 404) return null
