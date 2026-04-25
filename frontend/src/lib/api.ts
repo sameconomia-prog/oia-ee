@@ -247,6 +247,12 @@ export async function getSectoresVacantes(): Promise<string[]> {
   return await res.json()
 }
 
+export async function getIesPublico(): Promise<import('./types').IesInfo[]> {
+  const res = await fetch(`${BASE}/publico/ies`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function getTendenciasNacionales(dias = 30): Promise<TendenciaNacional[]> {
   const res = await fetch(`${BASE}/publico/kpis/tendencias?dias=${dias}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
