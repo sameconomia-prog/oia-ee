@@ -64,6 +64,35 @@ export default function RectorCarrerasTable({
 
   const carreraSimulando = simulando ? carreras.find((c) => c.id === simulando) ?? null : null
 
+  function exportarCSV() {
+    const header = 'Carrera,Matrícula,D1 Score,D1-IVA,D1-BES,D1-VAC,D2 Score,D2-IOE,D2-IHE,D2-IEA'
+    const rows = sorted.map(({ nombre, matricula, kpi }) => {
+      const d1 = kpi?.d1_obsolescencia
+      const d2 = kpi?.d2_oportunidades
+      return [
+        `"${nombre}"`,
+        matricula ?? '',
+        d1 ? d1.score.toFixed(4) : '',
+        d1 ? d1.iva.toFixed(4) : '',
+        d1 ? d1.bes.toFixed(4) : '',
+        d1 ? d1.vac.toFixed(4) : '',
+        d2 ? d2.score.toFixed(4) : '',
+        d2 ? d2.ioe.toFixed(4) : '',
+        d2 ? d2.ihe.toFixed(4) : '',
+        d2 ? d2.iea.toFixed(4) : '',
+      ].join(',')
+    })
+    const csv = [header, ...rows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const fecha = new Date().toISOString().slice(0, 10)
+    a.href = url
+    a.download = `kpis_carreras_rector_${fecha}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   if (carreras.length === 0) {
     return <p className="text-gray-400 py-8 text-sm">Sin carreras registradas para esta IES.</p>
   }
@@ -77,6 +106,14 @@ export default function RectorCarrerasTable({
           onClose={() => setSimulando(null)}
         />
       )}
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={exportarCSV}
+          className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs rounded border hover:bg-gray-200"
+        >
+          Exportar CSV
+        </button>
+      </div>
       <div className="overflow-x-auto rounded border">
         <table className="w-full text-sm border-collapse">
           <thead>
