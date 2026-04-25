@@ -75,9 +75,38 @@ export default function CompararPage() {
           {/* Carreras en común */}
           {carrerasComunes.length > 0 && (
             <div className="mt-8">
-              <h2 className="text-base font-semibold text-gray-800 mb-3">
-                Carreras en común · {carrerasComunes.length}
-              </h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-base font-semibold text-gray-800">
+                  Carreras en común · {carrerasComunes.length}
+                </h2>
+                <button
+                  onClick={() => {
+                    const nombreA = ies.find(i => i.id === iesAId)?.nombre_corto ?? iesAId
+                    const nombreB = ies.find(i => i.id === iesBId)?.nombre_corto ?? iesBId
+                    const headers = ['Carrera', `D1 ${nombreA}`, `D1 ${nombreB}`, `D2 ${nombreA}`, `D2 ${nombreB}`, `D3 ${nombreA}`, `D3 ${nombreB}`]
+                    const rows = carrerasComunes.map(({ cA, cB }) => [
+                      cA.nombre,
+                      cA.kpi?.d1_obsolescencia.score.toFixed(4) ?? '',
+                      cB.kpi?.d1_obsolescencia.score.toFixed(4) ?? '',
+                      cA.kpi?.d2_oportunidades.score.toFixed(4) ?? '',
+                      cB.kpi?.d2_oportunidades.score.toFixed(4) ?? '',
+                      cA.kpi?.d3_mercado.score.toFixed(4) ?? '',
+                      cB.kpi?.d3_mercado.score.toFixed(4) ?? '',
+                    ])
+                    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+                    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `comparacion_carreras_${new Date().toISOString().slice(0, 10)}.csv`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                  }}
+                  className="text-xs px-3 py-1 border rounded hover:bg-gray-50 text-gray-600"
+                >
+                  ↓ CSV
+                </button>
+              </div>
               <div className="border rounded-lg overflow-hidden text-sm">
                 <div className="grid grid-cols-5 bg-gray-800 text-white text-xs font-semibold px-4 py-2">
                   <div className="col-span-2">Carrera</div>
