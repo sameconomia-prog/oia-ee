@@ -77,8 +77,8 @@ export default function VacantesPage() {
           {skills.map(s => (
             <button
               key={s.nombre}
-              onClick={() => {}}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium"
+              onClick={() => setBusqueda(prev => prev === s.nombre ? '' : s.nombre)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${busqueda === s.nombre ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'}`}
             >
               {s.nombre}
               <span className="bg-indigo-200 text-indigo-800 rounded-full px-1.5 py-0.5 text-[10px] font-bold">{s.count}</span>
