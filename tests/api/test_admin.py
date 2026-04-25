@@ -179,3 +179,17 @@ def test_trigger_alertas_con_key_ok(client, monkeypatch):
     assert resp.status_code == 200
     data = resp.json()
     assert data["alertas_creadas"] == 3
+
+
+# --- POST /admin/cache/clear ---
+
+def test_cache_clear_sin_key_devuelve_401(client):
+    resp = client.post("/admin/cache/clear")
+    assert resp.status_code == 401
+
+
+def test_cache_clear_con_key_ok(client, monkeypatch):
+    monkeypatch.setenv("ADMIN_API_KEY", "test-key")
+    resp = client.post("/admin/cache/clear", headers={"X-Admin-Key": "test-key"})
+    assert resp.status_code == 200
+    assert resp.json()["ok"] is True

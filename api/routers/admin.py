@@ -13,6 +13,7 @@ from pipeline.jobs.alert_job import run_alert_job
 from pipeline.jobs.news_ingest_job import run_news_ingest
 from pipeline.jobs.kpi_snapshot_job import run_kpi_snapshot
 from pipeline.seed_demo import run_seed_demo
+from api.routers.publico import _clear_kpis_cache
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -111,6 +112,7 @@ def seed_demo(
     _: None = Depends(_require_admin),
 ):
     result = run_seed_demo(db)
+    _clear_kpis_cache()
     return SeedDemoResultOut(**vars(result))
 
 
@@ -121,7 +123,16 @@ def trigger_kpi_snapshot(
 ):
     result = run_kpi_snapshot(db)
     db.commit()
+    _clear_kpis_cache()
     return SnapshotResultOut(**vars(result))
+
+
+@router.post("/cache/clear")
+def clear_cache(
+    _: None = Depends(_require_admin),
+):
+    _clear_kpis_cache()
+    return {"ok": True}
 
 
 @router.get("/ies")
