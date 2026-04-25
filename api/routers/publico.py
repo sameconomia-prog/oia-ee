@@ -1,4 +1,6 @@
 # api/routers/publico.py
+import time
+import threading
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from typing import Optional
@@ -8,6 +10,16 @@ from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, 
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 router = APIRouter()
+
+_kpis_cache_lock = threading.Lock()
+_kpis_cache: dict = {"data": None, "at": 0.0}
+_KPIS_TTL = 300  # 5 minutes
+
+
+def _clear_kpis_cache() -> None:
+    with _kpis_cache_lock:
+        _kpis_cache["data"] = None
+        _kpis_cache["at"] = 0.0
 
 
 class ResumenPublico(BaseModel):
@@ -82,6 +94,13 @@ def listar_carreras_publico(
 def resumen_kpis_nacional(db: Session = Depends(get_db)):
     from pipeline.kpi_engine.kpi_runner import run_kpis
 
+    with _kpis_cache_lock:
+        cached_data = _kpis_cache["data"]
+        cached_at = _kpis_cache["at"]
+
+    if cached_data is not None and (time.time() - cached_at) < _KPIS_TTL:
+        return cached_data
+
     carrera_ids = [
         r[0]
         for r in db.query(CarreraIES.carrera_id).distinct().all()
@@ -101,7 +120,7 @@ def resumen_kpis_nacional(db: Session = Depends(get_db)):
     def avg(lst: list[float]) -> float:
         return round(sum(lst) / len(lst), 4) if lst else 0.0
 
-    return KpisNacionalResumenOut(
+    result_out = KpisNacionalResumenOut(
         total_carreras=total,
         promedio_d1=avg(d1_scores),
         promedio_d2=avg(d2_scores),
@@ -110,6 +129,12 @@ def resumen_kpis_nacional(db: Session = Depends(get_db)):
         carreras_riesgo_alto=sum(1 for s in d1_scores if s >= 0.6),
         carreras_oportunidad_alta=sum(1 for s in d2_scores if s >= 0.6),
     )
+
+    with _kpis_cache_lock:
+        _kpis_cache["data"] = result_out
+        _kpis_cache["at"] = time.time()
+
+    return result_out
 
 
 @router.get("/ies", response_model=list[IesOut])

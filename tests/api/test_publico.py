@@ -166,3 +166,22 @@ def test_kpis_resumen_nacional_con_datos(client, db_session):
     assert 0.0 <= data["promedio_d6"] <= 1.0
     assert data["carreras_riesgo_alto"] >= 0
     assert data["carreras_oportunidad_alta"] >= 0
+
+
+def test_kpis_resumen_cache_hit(client, db_session):
+    _seed_carrera(db_session, "cache1")
+    resp1 = client.get("/publico/kpis/resumen")
+    resp2 = client.get("/publico/kpis/resumen")
+    assert resp1.status_code == 200
+    assert resp2.status_code == 200
+    assert resp1.json() == resp2.json()
+
+
+def test_kpis_resumen_cache_clear(client, db_session):
+    from api.routers.publico import _clear_kpis_cache
+    _seed_carrera(db_session, "cache2")
+    resp1 = client.get("/publico/kpis/resumen")
+    assert resp1.json()["total_carreras"] >= 1
+    _clear_kpis_cache()
+    resp2 = client.get("/publico/kpis/resumen")
+    assert resp2.status_code == 200

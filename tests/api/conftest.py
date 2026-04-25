@@ -48,6 +48,14 @@ def client(db_session):
     app.dependency_overrides.clear()
 
 
+@pytest.fixture(autouse=True)
+def clear_kpis_cache():
+    from api.routers.publico import _clear_kpis_cache
+    _clear_kpis_cache()
+    yield
+    _clear_kpis_cache()
+
+
 import uuid as _uuid_mod
 from passlib.context import CryptContext as _CryptContext
 from pipeline.db.models import IES, Usuario
