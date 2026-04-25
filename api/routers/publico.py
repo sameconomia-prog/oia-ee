@@ -303,6 +303,26 @@ def tendencias_nacionales(dias: int = 30, db: Session = Depends(get_db)):
     return resultado
 
 
+@router.get("/vacantes/tendencia")
+def tendencia_vacantes(meses: int = 12, db: Session = Depends(get_db)):
+    from pipeline.db.models import Vacante
+    from sqlalchemy import func
+    rows = (
+        db.query(
+            func.strftime('%Y-%m', Vacante.fecha_pub).label('mes'),
+            func.count(Vacante.id).label('count'),
+        )
+        .filter(Vacante.fecha_pub.isnot(None))
+        .group_by('mes')
+        .order_by('mes')
+        .all()
+    )
+    if not rows:
+        return []
+    result = [{"mes": row.mes, "count": row.count} for row in rows]
+    return result[-meses:] if len(result) > meses else result
+
+
 @router.get("/vacantes", response_model=list[VacantePublicoOut])
 def listar_vacantes_publico(
     sector: Optional[str] = None,

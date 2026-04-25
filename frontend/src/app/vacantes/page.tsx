@@ -1,8 +1,26 @@
 'use client'
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
-import { getVacantesPublico, getVacantesTopSkills, getSectoresVacantes } from '@/lib/api'
-import type { VacantePublico, SkillFreq } from '@/lib/types'
+import { getVacantesPublico, getVacantesTopSkills, getSectoresVacantes, getVacantesTendencia } from '@/lib/api'
+import type { VacantePublico, SkillFreq, VacanteTendencia } from '@/lib/types'
+
+function TendenciaChart({ data }: { data: VacanteTendencia[] }) {
+  if (data.length < 2) return null
+  const maxCount = Math.max(...data.map(d => d.count), 1)
+  const W = 300, H = 40, BAR_W = Math.max(4, Math.floor((W - data.length) / data.length))
+  return (
+    <div className="flex items-end gap-1 h-10">
+      {data.map((d, i) => (
+        <div
+          key={i}
+          title={`${d.mes}: ${d.count} vacantes`}
+          className="bg-indigo-400 hover:bg-indigo-600 rounded-t transition-colors"
+          style={{ height: `${Math.max(4, (d.count / maxCount) * H)}px`, width: `${BAR_W}px` }}
+        />
+      ))}
+    </div>
+  )
+}
 
 const SALARIO_FMT = (n: number) =>
   new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(n)
@@ -35,6 +53,7 @@ export default function VacantesPage() {
   const [vacantes, setVacantes] = useState<VacantePublico[]>([])
   const [skills, setSkills] = useState<SkillFreq[]>([])
   const [sectores, setSectores] = useState<string[]>([])
+  const [tendencia, setTendencia] = useState<VacanteTendencia[]>([])
   const [sectorFiltro, setSectorFiltro] = useState<string>('')
   const [busqueda, setBusqueda] = useState('')
   const [loading, setLoading] = useState(true)
@@ -55,6 +74,7 @@ export default function VacantesPage() {
   useEffect(() => {
     getVacantesTopSkills(10).then(setSkills).catch(() => {})
     getSectoresVacantes().then(setSectores).catch(() => {})
+    getVacantesTendencia(12).then(setTendencia).catch(() => {})
   }, [])
 
   const cargar = (newSkip: number, append: boolean) => {
@@ -77,11 +97,19 @@ export default function VacantesPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Vacantes con perfil IA</h1>
-        <p className="text-sm text-gray-500">
-          Empleos que demandan habilidades relacionadas con inteligencia artificial en México.
-        </p>
+      <div className="mb-6 flex items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">Vacantes con perfil IA</h1>
+          <p className="text-sm text-gray-500">
+            Empleos que demandan habilidades relacionadas con inteligencia artificial en México.
+          </p>
+        </div>
+        {tendencia.length > 1 && (
+          <div className="shrink-0">
+            <p className="text-xs text-gray-400 mb-1 text-right">Vacantes por mes</p>
+            <TendenciaChart data={tendencia} />
+          </div>
+        )}
       </div>
 
       {/* Skills demandadas */}

@@ -299,3 +299,8 @@ export interface KpisDistribucion {
   d1: KpisBin[]
   d2: KpisBin[]
 }
+
+export interface VacanteTendencia {
+  mes: string
+  count: number
+}

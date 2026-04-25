@@ -594,3 +594,29 @@ def test_kpis_distribucion_con_datos(client, db_session):
     assert any("Bajo" in r for r in rangos)
     assert any("Medio" in r for r in rangos)
     assert any("Alto" in r for r in rangos)
+
+
+# --- GET /publico/vacantes/tendencia ---
+
+def test_vacantes_tendencia_vacio(client):
+    resp = client.get("/publico/vacantes/tendencia")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_vacantes_tendencia_con_datos(client, db_session):
+    from pipeline.db.models import Vacante
+    from datetime import date
+    db_session.add(Vacante(titulo="ML Eng", sector="Tech", fecha_pub=date(2024, 1, 15)))
+    db_session.add(Vacante(titulo="DS", sector="Tech", fecha_pub=date(2024, 1, 20)))
+    db_session.add(Vacante(titulo="AI Res", sector="Tech", fecha_pub=date(2024, 2, 10)))
+    db_session.flush()
+    resp = client.get("/publico/vacantes/tendencia")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) >= 2
+    meses = [d["mes"] for d in data]
+    assert "2024-01" in meses
+    assert "2024-02" in meses
+    jan = next(d for d in data if d["mes"] == "2024-01")
+    assert jan["count"] == 2
