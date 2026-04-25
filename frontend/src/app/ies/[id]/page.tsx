@@ -57,10 +57,20 @@ export default function IesDetailPage() {
     <div className="max-w-3xl mx-auto">
       <div className="mb-6">
         <Link href="/ies" className="text-xs text-indigo-600 hover:underline">← Instituciones</Link>
-        <h1 className="text-2xl font-bold text-gray-900 mt-2">{detalle.nombre}</h1>
-        {detalle.nombre_corto && (
-          <p className="text-sm text-gray-500">{detalle.nombre_corto}</p>
-        )}
+        <div className="flex items-start justify-between gap-3 mt-2">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">{detalle.nombre}</h1>
+            {detalle.nombre_corto && (
+              <p className="text-sm text-gray-500">{detalle.nombre_corto}</p>
+            )}
+          </div>
+          <Link
+            href={`/comparar?iesA=${id}`}
+            className="shrink-0 mt-1 px-4 py-2 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            ⚖️ Comparar
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}

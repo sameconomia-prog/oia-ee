@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { getPublicoIes, getCarrerasDeIes } from '@/lib/api'
 import ComparacionIES from '@/components/ComparacionIES'
 import type { CarreraKpi } from '@/lib/types'
@@ -8,9 +9,10 @@ import type { CarreraKpi } from '@/lib/types'
 type IesOpcion = { id: string; nombre: string; nombre_corto?: string }
 
 export default function CompararPage() {
+  const searchParams = useSearchParams()
   const [ies, setIes] = useState<IesOpcion[]>([])
-  const [iesAId, setIesAId] = useState('')
-  const [iesBId, setIesBId] = useState('')
+  const [iesAId, setIesAId] = useState(searchParams.get('iesA') ?? '')
+  const [iesBId, setIesBId] = useState(searchParams.get('iesB') ?? '')
   const [carrerasA, setCarrerasA] = useState<CarreraKpi[]>([])
   const [carrerasB, setCarrerasB] = useState<CarreraKpi[]>([])
 
