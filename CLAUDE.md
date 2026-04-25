@@ -44,8 +44,8 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 100, 2026-04-25)
-- 213 pytest + 46 Jest = 259 tests pasando
+## Estado actual (Sprint 104, 2026-04-25)
+- 215 pytest + 48 Jest = 263 tests pasando
 - 0 errores TypeScript
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Pendiente: Railway deploy (ver .env.example para env vars)
@@ -68,6 +68,8 @@ OIA-EE/
 - `GET /publico/vacantes?q=&skip=&limit=` — búsqueda server-side + paginación
 - `GET /publico/ies?q=` — búsqueda por nombre/nombre_corto
 - `GET /publico/kpis/top-oportunidades?n=` — top N carreras por D2 (mejor D2 primero)
+- `GET /publico/estadisticas` — resumen consolidado: IES, carreras, vacantes, noticias, alertas, top_skills
+- `GET /publico/ies` — incluye `total_carreras` (count de CarreraIES por IES)
 
 ## Páginas frontend (Sprints 46-89)
 - `/vacantes` — vacantes con búsqueda, filtros por sector, CSV export
@@ -82,6 +84,9 @@ OIA-EE/
 - `/carreras`: botón Exportar CSV; mini gráfica histórica D1/D2 en /carreras/[id]
 - Noticias: botón Exportar CSV en NoticiasTable
 - Sidebar con highlight `startsWith` para rutas dinámicas
+- `/estadisticas` — dashboard con totales: IES, carreras, vacantes, noticias, alertas, top skills
+- `/ies` — tarjetas incluyen badge "X carreras" (consumido del campo total_carreras del API)
+- Homepage incluye sección "Top oportunidades" (D2 más alto) junto a "Top riesgo" (D1 más alto)
 
 ## Tests
 ```
