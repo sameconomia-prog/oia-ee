@@ -240,6 +240,12 @@ export async function getTopRiesgo(n = 5): Promise<TopRiesgoItem[]> {
   return await res.json()
 }
 
+export async function getTopOportunidades(n = 5): Promise<TopRiesgoItem[]> {
+  const res = await fetch(`${BASE}/publico/kpis/top-oportunidades?n=${n}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function getVacantesPublico(
   params: { sector?: string; q?: string; skip?: number; limit?: number } = {}
 ): Promise<VacantePublico[]> {

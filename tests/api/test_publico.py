@@ -266,6 +266,25 @@ def test_top_riesgo_con_datos(client, db_session):
     assert scores == sorted(scores, reverse=True)  # ordenado descendente
 
 
+# --- GET /publico/kpis/top-oportunidades ---
+
+def test_top_oportunidades_vacio(client):
+    resp = client.get("/publico/kpis/top-oportunidades")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_top_oportunidades_con_datos(client, db_session):
+    _seed_carrera(db_session, "to1")
+    _seed_carrera(db_session, "to2")
+    resp = client.get("/publico/kpis/top-oportunidades?n=3")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) <= 3
+    scores = [d["d2_score"] for d in data]
+    assert scores == sorted(scores, reverse=True)  # ordenado descendente por D2
+
+
 # --- GET /publico/kpis/tendencias ---
 
 def test_kpis_tendencias_sin_datos(client):

@@ -217,6 +217,29 @@ def top_carreras_riesgo(n: int = 5, db: Session = Depends(get_db)):
     return items[:n]
 
 
+@router.get("/kpis/top-oportunidades", response_model=list[TopRiesgoItemOut])
+def top_carreras_oportunidades(n: int = 5, db: Session = Depends(get_db)):
+    from pipeline.kpi_engine.kpi_runner import run_kpis
+
+    carrera_ids = [r[0] for r in db.query(CarreraIES.carrera_id).distinct().all()]
+    items = []
+    for cid in carrera_ids:
+        carrera = db.query(Carrera).filter_by(id=cid).first()
+        cie = db.query(CarreraIES).filter_by(carrera_id=cid).first()
+        result = run_kpis(cid, db)
+        if result:
+            items.append(TopRiesgoItemOut(
+                carrera_id=cid,
+                nombre=carrera.nombre_norm.title() if carrera else cid,
+                d1_score=result.d1_obsolescencia.score,
+                d2_score=result.d2_oportunidades.score,
+                matricula=cie.matricula if cie else None,
+            ))
+
+    items.sort(key=lambda x: x.d2_score, reverse=True)
+    return items[:n]
+
+
 @router.get("/kpis/tendencias")
 def tendencias_nacionales(dias: int = 30, db: Session = Depends(get_db)):
     from collections import defaultdict

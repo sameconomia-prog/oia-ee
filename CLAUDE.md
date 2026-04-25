@@ -44,8 +44,8 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 89, 2026-04-25)
-- 205 pytest + 33 Jest = 238 tests pasando
+## Estado actual (Sprint 100, 2026-04-25)
+- 213 pytest + 46 Jest = 259 tests pasando
 - 0 errores TypeScript
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Pendiente: Railway deploy (ver .env.example para env vars)
@@ -65,6 +65,9 @@ OIA-EE/
 - `GET /publico/vacantes/{vacante_id}` — detalle de vacante por ID
 - `GET /noticias/sectores` — sectores únicos de noticias (ordenados, antes de /{id})
 - `GET /publico/carreras?q=` — búsqueda por texto en nombre de carrera
+- `GET /publico/vacantes?q=&skip=&limit=` — búsqueda server-side + paginación
+- `GET /publico/ies?q=` — búsqueda por nombre/nombre_corto
+- `GET /publico/kpis/top-oportunidades?n=` — top N carreras por D2 (mejor D2 primero)
 
 ## Páginas frontend (Sprints 46-89)
 - `/vacantes` — vacantes con búsqueda, filtros por sector, CSV export
@@ -75,7 +78,9 @@ OIA-EE/
 - `/noticias/[id]` — detalle de noticia con resumen IA, causa, empresa, empleados
 - `/vacantes/[id]` — detalle de vacante con nivel educativo, salario, skills
 - Rankings de carreras, KpisTable y top riesgo (homepage) navegan a `/carreras/[id]`
-- `/vacantes`: skill pills clickables filtran por habilidad (pill se resalta cuando activa)
+- `/vacantes`: skill pills clickables filtran por habilidad; paginación "Cargar más"
+- `/carreras`: botón Exportar CSV; mini gráfica histórica D1/D2 en /carreras/[id]
+- Noticias: botón Exportar CSV en NoticiasTable
 - Sidebar con highlight `startsWith` para rutas dinámicas
 
 ## Tests
