@@ -38,6 +38,9 @@ export default function VacantesPage() {
   const [sectorFiltro, setSectorFiltro] = useState<string>('')
   const [busqueda, setBusqueda] = useState('')
   const [loading, setLoading] = useState(true)
+  const [skip, setSkip] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const PAGE_SIZE = 25
 
   const vacantesFiltradas = useMemo(() => {
     if (!busqueda.trim()) return vacantes
@@ -54,13 +57,23 @@ export default function VacantesPage() {
     getSectoresVacantes().then(setSectores).catch(() => {})
   }, [])
 
-  useEffect(() => {
+  const cargar = (newSkip: number, append: boolean) => {
     setLoading(true)
-    getVacantesPublico(sectorFiltro || undefined, 50)
-      .then(setVacantes)
+    getVacantesPublico({ sector: sectorFiltro || undefined, skip: newSkip, limit: PAGE_SIZE })
+      .then(data => {
+        setVacantes(prev => append ? [...prev, ...data] : data)
+        setSkip(newSkip + data.length)
+        setHasMore(data.length === PAGE_SIZE)
+      })
       .catch(() => setVacantes([]))
       .finally(() => setLoading(false))
-  }, [sectorFiltro])
+  }
+
+  useEffect(() => {
+    setSkip(0)
+    setVacantes([])
+    cargar(0, false)
+  }, [sectorFiltro]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -160,6 +173,19 @@ export default function VacantesPage() {
             </div>
           ))}
         </div>
+      )}
+      {hasMore && !loading && !busqueda && (
+        <div className="mt-4 flex justify-center">
+          <button
+            onClick={() => cargar(skip, true)}
+            className="px-5 py-2 border rounded-lg text-sm hover:bg-gray-50"
+          >
+            Cargar más
+          </button>
+        </div>
+      )}
+      {loading && vacantes.length > 0 && (
+        <p className="text-center text-gray-400 text-xs mt-3">Cargando...</p>
       )}
     </div>
   )

@@ -240,11 +240,14 @@ export async function getTopRiesgo(n = 5): Promise<TopRiesgoItem[]> {
   return await res.json()
 }
 
-export async function getVacantesPublico(sector?: string, limit = 25, q?: string): Promise<VacantePublico[]> {
-  const params = new URLSearchParams({ limit: String(limit) })
-  if (sector) params.set('sector', sector)
-  if (q) params.set('q', q)
-  const res = await fetch(`${BASE}/publico/vacantes?${params}`)
+export async function getVacantesPublico(
+  params: { sector?: string; q?: string; skip?: number; limit?: number } = {}
+): Promise<VacantePublico[]> {
+  const qs = new URLSearchParams({ limit: String(params.limit ?? 25) })
+  if (params.sector) qs.set('sector', params.sector)
+  if (params.q) qs.set('q', params.q)
+  if (params.skip) qs.set('skip', String(params.skip))
+  const res = await fetch(`${BASE}/publico/vacantes?${qs}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }

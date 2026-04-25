@@ -258,6 +258,7 @@ def tendencias_nacionales(dias: int = 30, db: Session = Depends(get_db)):
 def listar_vacantes_publico(
     sector: Optional[str] = None,
     q: Optional[str] = None,
+    skip: int = 0,
     limit: int = 25,
     db: Session = Depends(get_db),
 ):
@@ -275,7 +276,7 @@ def listar_vacantes_publico(
             func.lower(Vacante.empresa).like(term) |
             func.lower(Vacante.estado).like(term)
         )
-    rows = query.order_by(Vacante.fecha_pub.desc()).limit(limit).all()
+    rows = query.order_by(Vacante.fecha_pub.desc()).offset(skip).limit(limit).all()
 
     result = []
     for v in rows:

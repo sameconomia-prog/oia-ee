@@ -207,7 +207,7 @@ describe('getSectoresNoticias', () => {
 describe('getVacantesPublico', () => {
   it('llama con parámetros sector y limit correctos', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => [] })
-    await getVacantesPublico('tecnologia', 10)
+    await getVacantesPublico({ sector: 'tecnologia', limit: 10 })
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('sector=tecnologia')
     )
