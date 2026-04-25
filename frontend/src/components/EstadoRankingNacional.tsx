@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { getKpisEstado } from '@/lib/api'
 import type { D5Result } from '@/lib/types'
 
@@ -27,6 +27,16 @@ export default function EstadoRankingNacional() {
   const [loading, setLoading] = useState(false)
   const [cargados, setCargados] = useState(0)
 
+  const stats = useMemo(() => {
+    if (datos.length === 0) return null
+    const scores = datos.map(d => d.d5.score)
+    const promedio = scores.reduce((a, b) => a + b, 0) / scores.length
+    const verde = scores.filter(s => s >= 0.6).length
+    const amarillo = scores.filter(s => s >= 0.4 && s < 0.6).length
+    const rojo = scores.filter(s => s < 0.4).length
+    return { promedio, verde, amarillo, rojo, mejor: datos[0], peor: datos[datos.length - 1] }
+  }, [datos])
+
   async function cargarTodos() {
     setLoading(true)
     setCargados(0)
@@ -53,9 +63,25 @@ export default function EstadoRankingNacional() {
     setLoading(false)
   }
 
+  function exportarCSV() {
+    const header = '#,Estado,D5 Score,IDR,ICG,IES-S'
+    const rows = datos.map(({ estado, d5 }, i) =>
+      `${i + 1},${estado},${d5.score.toFixed(4)},${d5.idr.toFixed(4)},${d5.icg.toFixed(4)},${d5.ies_s.toFixed(4)}`
+    )
+    const csv = [header, ...rows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const fecha = new Date().toISOString().slice(0, 10)
+    a.href = url
+    a.download = `ranking_d5_nacional_${fecha}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div>
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-4 flex items-center gap-3 flex-wrap">
         <button
           onClick={cargarTodos}
           disabled={loading}
@@ -68,9 +94,46 @@ export default function EstadoRankingNacional() {
             : 'Cargar ranking nacional'}
         </button>
         {datos.length > 0 && !loading && (
-          <span className="text-xs text-gray-400">{datos.length} estados · ordenado por D5 Score</span>
+          <>
+            <span className="text-xs text-gray-400">{datos.length} estados · ordenado por D5 Score</span>
+            <button
+              onClick={exportarCSV}
+              className="ml-auto px-3 py-1.5 bg-gray-100 text-gray-700 text-xs rounded border hover:bg-gray-200"
+            >
+              Exportar CSV
+            </button>
+          </>
         )}
       </div>
+
+      {stats && !loading && (
+        <div className="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="border rounded p-3 bg-gray-50">
+            <p className="text-xs text-gray-500 mb-1">Promedio nacional D5</p>
+            <p className={`text-lg font-mono font-semibold ${stats.promedio >= 0.6 ? 'text-green-700' : stats.promedio >= 0.4 ? 'text-yellow-700' : 'text-red-700'}`}>
+              {stats.promedio.toFixed(3)}
+            </p>
+          </div>
+          <div className="border rounded p-3 bg-gray-50">
+            <p className="text-xs text-gray-500 mb-1">🥇 Mejor estado</p>
+            <p className="text-sm font-semibold text-green-700 truncate">{stats.mejor.estado}</p>
+            <p className="text-xs font-mono text-green-600">{stats.mejor.d5.score.toFixed(3)}</p>
+          </div>
+          <div className="border rounded p-3 bg-gray-50">
+            <p className="text-xs text-gray-500 mb-1">Último lugar</p>
+            <p className="text-sm font-semibold text-red-700 truncate">{stats.peor.estado}</p>
+            <p className="text-xs font-mono text-red-600">{stats.peor.d5.score.toFixed(3)}</p>
+          </div>
+          <div className="border rounded p-3 bg-gray-50">
+            <p className="text-xs text-gray-500 mb-2">Distribución</p>
+            <div className="flex gap-2 text-xs">
+              <span className="text-green-700 font-semibold">{stats.verde}🟢</span>
+              <span className="text-yellow-700 font-semibold">{stats.amarillo}🟡</span>
+              <span className="text-red-700 font-semibold">{stats.rojo}🔴</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {datos.length > 0 && (
         <div className="border rounded overflow-hidden">
