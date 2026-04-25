@@ -266,6 +266,12 @@ export async function getIesDetalle(iesId: string): Promise<IesDetalle> {
   return await res.json()
 }
 
+export async function getVacanteDetalle(id: string): Promise<VacantePublico> {
+  const res = await fetch(`${BASE}/publico/vacantes/${id}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function getCarreraDetalle(carreraId: string): Promise<CarreraDetalle> {
   const res = await fetch(`${BASE}/publico/carreras/${carreraId}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)

@@ -292,6 +292,30 @@ def test_kpis_tendencias_con_datos(client, db_session):
     assert data[0]["d1_score"] == 0.45
 
 
+# --- GET /publico/vacantes/{id} ---
+
+def test_detalle_vacante_no_encontrada(client):
+    resp = client.get("/publico/vacantes/vac-inexistente")
+    assert resp.status_code == 404
+
+
+def test_detalle_vacante_con_datos(client, db_session):
+    from pipeline.db.models import Vacante
+    import json as _json
+    v = Vacante(titulo="SWE Python", empresa="TechCo", sector="Tecnología",
+                skills=_json.dumps(["Python", "FastAPI"]), nivel_educativo="Ingeniería",
+                experiencia_anios=3)
+    db_session.add(v)
+    db_session.flush()
+    resp = client.get(f"/publico/vacantes/{v.id}")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["titulo"] == "SWE Python"
+    assert "Python" in data["skills"]
+    assert data["nivel_educativo"] == "Ingeniería"
+    assert data["experiencia_anios"] == 3
+
+
 # --- GET /publico/vacantes ---
 
 def test_vacantes_publico_vacio(client):

@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, useMemo } from 'react'
+import Link from 'next/link'
 import { getVacantesPublico, getVacantesTopSkills, getSectoresVacantes } from '@/lib/api'
 import type { VacantePublico, SkillFreq } from '@/lib/types'
 
@@ -130,7 +131,7 @@ export default function VacantesPage() {
             <div key={v.id} className="bg-white border rounded-xl p-4 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <h2 className="font-semibold text-gray-900 text-sm">{v.titulo}</h2>
+                  <Link href={`/vacantes/${v.id}`} className="font-semibold text-gray-900 text-sm hover:text-indigo-700 hover:underline">{v.titulo}</Link>
                   <p className="text-xs text-gray-500 mt-0.5">
                     {[v.empresa, v.estado, v.sector].filter(Boolean).join(' · ')}
                   </p>

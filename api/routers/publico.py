@@ -308,6 +308,34 @@ def top_vacantes_skills(top: int = 10, db: Session = Depends(get_db)):
     return [SkillFreqOut(nombre=skill, count=count) for skill, count in counter.most_common(top)]
 
 
+@router.get("/vacantes/{vacante_id}", response_model=VacantePublicoOut)
+def detalle_vacante(vacante_id: str, db: Session = Depends(get_db)):
+    import json
+    from pipeline.db.models import Vacante
+    from fastapi import HTTPException
+
+    v = db.query(Vacante).filter_by(id=vacante_id).first()
+    if not v:
+        raise HTTPException(status_code=404, detail="Vacante no encontrada")
+    try:
+        skills = json.loads(v.skills) if v.skills else []
+    except (json.JSONDecodeError, TypeError):
+        skills = []
+    return VacantePublicoOut(
+        id=v.id,
+        titulo=v.titulo,
+        empresa=v.empresa,
+        sector=v.sector,
+        skills=skills,
+        salario_min=v.salario_min,
+        salario_max=v.salario_max,
+        estado=v.estado,
+        nivel_educativo=v.nivel_educativo,
+        experiencia_anios=v.experiencia_anios,
+        fecha_pub=str(v.fecha_pub) if v.fecha_pub else None,
+    )
+
+
 @router.get("/ies/{ies_id}/carreras", response_model=list[CarreraKpiOut])
 def carreras_de_ies(ies_id: str, db: Session = Depends(get_db)):
     from pipeline.kpi_engine.kpi_runner import run_kpis
