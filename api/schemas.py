@@ -225,6 +225,15 @@ class TopRiesgoItemOut(BaseModel):
     matricula: Optional[int] = None
 
 
+class EstadisticasPublicasOut(BaseModel):
+    total_ies: int
+    total_carreras: int
+    total_vacantes: int
+    total_noticias: int
+    alertas_activas: int
+    top_skills: list[str]
+
+
 class VacantePublicoOut(BaseModel):
     id: str
     titulo: str

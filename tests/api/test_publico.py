@@ -177,6 +177,20 @@ def test_kpis_resumen_cache_hit(client, db_session):
     assert resp1.json() == resp2.json()
 
 
+# --- GET /publico/estadisticas ---
+
+def test_estadisticas_publicas(client):
+    resp = client.get("/publico/estadisticas")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "total_ies" in data
+    assert "total_carreras" in data
+    assert "total_vacantes" in data
+    assert "total_noticias" in data
+    assert "alertas_activas" in data
+    assert isinstance(data["top_skills"], list)
+
+
 # --- GET /publico/ies/{ies_id}/carreras ---
 
 def test_carreras_ies_no_encontrada(client):

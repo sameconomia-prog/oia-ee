@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut
+from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 router = APIRouter()
@@ -149,6 +149,38 @@ def resumen_kpis_nacional(db: Session = Depends(get_db)):
         _kpis_cache["at"] = time.time()
 
     return result_out
+
+
+@router.get("/estadisticas", response_model=EstadisticasPublicasOut)
+def estadisticas_publicas(db: Session = Depends(get_db)):
+    import json
+    from collections import Counter
+    from pipeline.db.models import Vacante
+
+    total_ies = db.query(IES).filter_by(activa=True).count()
+    total_noticias = db.query(Noticia).count()
+    alertas_activas = db.query(Alerta).filter_by(leida=False).count()
+    total_vacantes = db.query(Vacante).count()
+
+    carrera_ids = db.query(CarreraIES.carrera_id).distinct().count()
+
+    rows = db.query(Vacante.skills).filter(Vacante.skills.isnot(None)).all()
+    counter: Counter = Counter()
+    for (skills_json,) in rows:
+        try:
+            counter.update(s.strip() for s in json.loads(skills_json) if isinstance(s, str) and s.strip())
+        except (json.JSONDecodeError, TypeError):
+            pass
+    top_skills = [s for s, _ in counter.most_common(3)]
+
+    return EstadisticasPublicasOut(
+        total_ies=total_ies,
+        total_carreras=carrera_ids,
+        total_vacantes=total_vacantes,
+        total_noticias=total_noticias,
+        alertas_activas=alertas_activas,
+        top_skills=top_skills,
+    )
 
 
 @router.get("/kpis/top-riesgo", response_model=list[TopRiesgoItemOut])
