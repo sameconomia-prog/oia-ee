@@ -135,7 +135,10 @@ export default function TendenciasPanel({ carreras }: { carreras: CarreraKpi[] }
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     const fecha = new Date().toISOString().slice(0, 10)
-    const nombre = carreraNombre.replace(/\s+/g, '_').toLowerCase()
+    const nombre = carreraNombre
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '_')
+      .toLowerCase()
     a.href = url
     a.download = `tendencias_${nombre}_${fecha}.csv`
     a.click()
