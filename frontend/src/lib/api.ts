@@ -326,6 +326,12 @@ export async function getVacantesTendencia(meses = 12): Promise<VacanteTendencia
   return await res.json()
 }
 
+export async function getNoticiasTendencia(meses = 12): Promise<VacanteTendencia[]> {
+  const res = await fetch(`${BASE}/noticias/tendencia?meses=${meses}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function getEscenarios(
   options: { skip?: number; limit?: number } = {}
 ): Promise<EscenariosHistorialResult> {

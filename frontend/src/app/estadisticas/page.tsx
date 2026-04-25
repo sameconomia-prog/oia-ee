@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getEstadisticasPublicas, getKpisDistribucion } from '@/lib/api'
-import type { EstadisticasPublicas, KpisDistribucion } from '@/lib/types'
+import { getEstadisticasPublicas, getKpisDistribucion, getVacantesTendencia, getNoticiasTendencia } from '@/lib/api'
+import type { EstadisticasPublicas, KpisDistribucion, VacanteTendencia } from '@/lib/types'
 
 function StatBox({ label, value, color, href }: { label: string; value: number | string; color: string; href?: string }) {
   const inner = (
@@ -38,9 +38,32 @@ function DistribucionBar({ bins, colorFn }: {
   )
 }
 
+function MiniTendencia({ data, label, color }: { data: VacanteTendencia[]; label: string; color: string }) {
+  if (data.length < 2) return null
+  const maxCount = Math.max(...data.map(d => d.count), 1)
+  const H = 32
+  return (
+    <div>
+      <p className="text-xs text-gray-400 mb-1">{label}</p>
+      <div className="flex items-end gap-0.5 h-8">
+        {data.map((d, i) => (
+          <div
+            key={i}
+            title={`${d.mes}: ${d.count}`}
+            className={`rounded-t ${color} hover:opacity-80 transition-opacity`}
+            style={{ height: `${Math.max(2, (d.count / maxCount) * H)}px`, flex: 1 }}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function EstadisticasPage() {
   const [data, setData] = useState<EstadisticasPublicas | null>(null)
   const [distribucion, setDistribucion] = useState<KpisDistribucion | null>(null)
+  const [vacTendencia, setVacTendencia] = useState<VacanteTendencia[]>([])
+  const [notTendencia, setNotTendencia] = useState<VacanteTendencia[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -50,6 +73,8 @@ export default function EstadisticasPage() {
     getKpisDistribucion()
       .then(setDistribucion)
       .catch(() => {})
+    getVacantesTendencia(12).then(setVacTendencia).catch(() => {})
+    getNoticiasTendencia(12).then(setNotTendencia).catch(() => {})
   }, [])
 
   return (
@@ -76,6 +101,20 @@ export default function EstadisticasPage() {
               color={data.alertas_activas > 0 ? 'text-red-500' : 'text-gray-400'}
             />
           </div>
+
+          {(vacTendencia.length > 1 || notTendencia.length > 1) && (
+            <div className="bg-white rounded-xl border shadow-sm p-5 mb-6">
+              <h2 className="font-semibold text-gray-800 text-sm mb-4">Tendencia mensual (últimos 12 meses)</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {vacTendencia.length > 1 && (
+                  <MiniTendencia data={vacTendencia} label="Vacantes IA publicadas" color="bg-indigo-400" />
+                )}
+                {notTendencia.length > 1 && (
+                  <MiniTendencia data={notTendencia} label="Noticias analizadas" color="bg-blue-400" />
+                )}
+              </div>
+            </div>
+          )}
 
           {data.top_skills.length > 0 && (
             <div className="bg-white rounded-xl border shadow-sm p-5 mb-6">
