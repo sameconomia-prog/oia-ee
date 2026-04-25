@@ -351,6 +351,32 @@ def test_vacantes_publico_filtro_sector(client, db_session):
     assert any(v["titulo"] == "ML Eng" for v in data)
 
 
+def test_vacantes_publico_filtro_q(client, db_session):
+    from pipeline.db.models import Vacante
+    import json
+    db_session.add(Vacante(titulo="Data Scientist IA", empresa="TechCorp", skills=json.dumps([])))
+    db_session.add(Vacante(titulo="Contador Público", empresa="Finanzas SA", skills=json.dumps([])))
+    db_session.flush()
+    resp = client.get("/publico/vacantes?q=data")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert any(v["titulo"] == "Data Scientist IA" for v in data)
+    assert not any(v["titulo"] == "Contador Público" for v in data)
+
+
+def test_vacantes_publico_filtro_q_empresa(client, db_session):
+    from pipeline.db.models import Vacante
+    import json
+    db_session.add(Vacante(titulo="Desarrollador", empresa="TechCorp IA", skills=json.dumps([])))
+    db_session.add(Vacante(titulo="Analista", empresa="Banca Global", skills=json.dumps([])))
+    db_session.flush()
+    resp = client.get("/publico/vacantes?q=techcorp")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert any(v["empresa"] == "TechCorp IA" for v in data)
+    assert not any(v["empresa"] == "Banca Global" for v in data)
+
+
 # --- GET /publico/sectores ---
 
 def test_sectores_vacio(client):

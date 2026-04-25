@@ -257,6 +257,7 @@ def tendencias_nacionales(dias: int = 30, db: Session = Depends(get_db)):
 @router.get("/vacantes", response_model=list[VacantePublicoOut])
 def listar_vacantes_publico(
     sector: Optional[str] = None,
+    q: Optional[str] = None,
     limit: int = 25,
     db: Session = Depends(get_db),
 ):
@@ -266,6 +267,14 @@ def listar_vacantes_publico(
     query = db.query(Vacante)
     if sector:
         query = query.filter(Vacante.sector == sector)
+    if q:
+        term = f"%{q.lower()}%"
+        from sqlalchemy import func
+        query = query.filter(
+            func.lower(Vacante.titulo).like(term) |
+            func.lower(Vacante.empresa).like(term) |
+            func.lower(Vacante.estado).like(term)
+        )
     rows = query.order_by(Vacante.fecha_pub.desc()).limit(limit).all()
 
     result = []
