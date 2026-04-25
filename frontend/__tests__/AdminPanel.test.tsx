@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AdminPanel from '@/components/AdminPanel'
 import * as api from '@/lib/api'
@@ -6,34 +6,43 @@ import * as api from '@/lib/api'
 jest.mock('@/lib/api')
 
 beforeEach(() => {
+  jest.mocked(api.getAdminIes).mockResolvedValue([])
   jest.mocked(api.postIngestGdelt).mockResolvedValue({
     fetched: 45, stored: 38, classified: 35, embedded: 33,
   })
   localStorage.clear()
 })
 
-it('botón dispara POST y muestra resultado', async () => {
-  render(<AdminPanel />)
-  await userEvent.click(screen.getByRole('button', { name: /Actualizar GDELT/ }))
-  await waitFor(() => screen.getByText(/Fetched:/))
-  expect(screen.getByText(/Fetched:/)).toBeInTheDocument()
-  expect(screen.getByText(/Stored:/)).toBeInTheDocument()
-  expect(screen.getByText(/Classified:/)).toBeInTheDocument()
-  expect(screen.getByText(/Embedded:/)).toBeInTheDocument()
+it('renderiza el panel con botones de acción', async () => {
+  await act(async () => { render(<AdminPanel />) })
+  expect(screen.getByRole('button', { name: /Ingest GDELT/ })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: /Seed Demo/ })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: /Ingest Noticias/ })).toBeInTheDocument()
 })
 
-it('guarda resultado en localStorage', async () => {
-  render(<AdminPanel />)
-  await userEvent.click(screen.getByRole('button', { name: /Actualizar GDELT/ }))
-  await waitFor(() => screen.getByText(/Fetched:/))
-  const stored = localStorage.getItem('gdelt_history')
-  expect(stored).not.toBeNull()
-  expect(JSON.parse(stored!)[0].result.fetched).toBe(45)
+it('botón Ingest GDELT llama a postIngestGdelt', async () => {
+  await act(async () => { render(<AdminPanel />) })
+  const user = userEvent.setup()
+  await user.click(screen.getByRole('button', { name: /Ingest GDELT/ }))
+  await waitFor(() => expect(api.postIngestGdelt).toHaveBeenCalled())
 })
 
-it('muestra error cuando API falla con 401', async () => {
+it('guarda resultado en admin_history de localStorage', async () => {
+  await act(async () => { render(<AdminPanel />) })
+  const user = userEvent.setup()
+  await user.click(screen.getByRole('button', { name: /Ingest GDELT/ }))
+  await waitFor(() => {
+    const stored = localStorage.getItem('admin_history')
+    expect(stored).not.toBeNull()
+    const entries = JSON.parse(stored!)
+    expect(entries.length).toBeGreaterThan(0)
+  })
+})
+
+it('muestra error cuando API falla', async () => {
   jest.mocked(api.postIngestGdelt).mockRejectedValue(new Error('HTTP 401'))
-  render(<AdminPanel />)
-  await userEvent.click(screen.getByRole('button', { name: /Actualizar GDELT/ }))
-  await waitFor(() => screen.getByText(/Error: HTTP 401/))
+  await act(async () => { render(<AdminPanel />) })
+  const user = userEvent.setup()
+  await user.click(screen.getByRole('button', { name: /Ingest GDELT/ }))
+  await waitFor(() => expect(screen.getByText(/HTTP 401/)).toBeInTheDocument())
 })

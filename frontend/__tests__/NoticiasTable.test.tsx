@@ -17,6 +17,7 @@ const mockNoticias = [
 beforeEach(() => {
   jest.mocked(api.getNoticias).mockResolvedValue(mockNoticias)
   jest.mocked(api.buscarNoticias).mockResolvedValue([mockNoticias[0]])
+  jest.mocked(api.getSectoresNoticias).mockResolvedValue(['educacion', 'tecnologia'])
 })
 
 it('renders table rows after loading', async () => {
