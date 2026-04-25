@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getResumenPublico, getKpisNacionalResumen, getVacantesTopSkills, getTopRiesgo, getIesPublico } from '@/lib/api'
+import { getResumenPublico, getKpisNacionalResumen, getVacantesTopSkills, getTopRiesgo, getTopOportunidades, getIesPublico } from '@/lib/api'
 import type { ResumenPublico, KpisNacionalResumen, SkillFreq, TopRiesgoItem, IesInfo } from '@/lib/types'
 import TendenciasNacionalesChart from '@/components/TendenciasNacionalesChart'
 
@@ -38,6 +38,7 @@ export default function HomePage() {
   const [kpisNac, setKpisNac] = useState<KpisNacionalResumen | null>(null)
   const [topSkills, setTopSkills] = useState<SkillFreq[]>([])
   const [topRiesgo, setTopRiesgo] = useState<TopRiesgoItem[]>([])
+  const [topOportunidades, setTopOportunidades] = useState<TopRiesgoItem[]>([])
   const [iesList, setIesList] = useState<IesInfo[]>([])
   const [error, setError] = useState<string | null>(null)
 
@@ -53,6 +54,9 @@ export default function HomePage() {
       .catch(() => {})
     getTopRiesgo(5)
       .then(setTopRiesgo)
+      .catch(() => {})
+    getTopOportunidades(5)
+      .then(setTopOportunidades)
       .catch(() => {})
     getIesPublico()
       .then(setIesList)
@@ -198,6 +202,33 @@ export default function HomePage() {
                     D1 {c.d1_score.toFixed(2)}
                   </span>
                   <span className="text-gray-400">D2 {c.d2_score.toFixed(2)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Top carreras con oportunidad */}
+      {topOportunidades.length > 0 && (
+        <div className="mb-8 bg-white rounded-xl border border-green-100 shadow-sm p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-gray-800 text-sm">
+              Carreras con mayor oportunidad de actualización
+              <span className="ml-2 text-xs text-green-600 font-normal">(D2 más alto)</span>
+            </h2>
+            <Link href="/kpis" className="text-xs text-indigo-600 hover:underline">Ver rankings →</Link>
+          </div>
+          <div className="space-y-2">
+            {topOportunidades.map((c, i) => (
+              <div key={c.carrera_id} className="flex items-center gap-3">
+                <span className="text-xs text-gray-400 font-mono w-4">{i + 1}.</span>
+                <Link href={`/carreras/${c.carrera_id}`} className="flex-1 text-sm text-gray-700 hover:text-indigo-700 hover:underline">{c.nombre}</Link>
+                <div className="flex gap-3 text-xs font-mono">
+                  <span className="text-gray-400">D1 {c.d1_score.toFixed(2)}</span>
+                  <span className={c.d2_score >= 0.6 ? 'text-green-600 font-bold' : 'text-yellow-600'}>
+                    D2 {c.d2_score.toFixed(2)}
+                  </span>
                 </div>
               </div>
             ))}
