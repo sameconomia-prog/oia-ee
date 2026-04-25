@@ -2,7 +2,7 @@ import {
   getNoticias, getKpis, postIngestGdelt, getRectorData, getAlertas, markAlertaRead,
   getVacanteDetalle, getCarreraDetalle, getIesDetalle, getNoticiaDetalle,
   getSectoresVacantes, getSectoresNoticias, getVacantesPublico,
-  getKpisHistorico, getCarrerasPublico,
+  getKpisHistorico, getCarrerasPublico, getEstadisticasPublicas,
 } from '@/lib/api'
 import type { AlertasHistorial } from '@/lib/types'
 
@@ -264,5 +264,24 @@ describe('getCarrerasPublico', () => {
     const result = await getCarrerasPublico()
     expect(result).toHaveLength(1)
     expect(result[0].nombre).toBe('Derecho')
+  })
+})
+
+describe('getEstadisticasPublicas', () => {
+  it('retorna estadísticas consolidadas', async () => {
+    const mock = {
+      total_ies: 10, total_carreras: 50, total_vacantes: 200,
+      total_noticias: 500, alertas_activas: 3, top_skills: ['Python', 'SQL'],
+    }
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mock })
+    const result = await getEstadisticasPublicas()
+    expect(result.total_ies).toBe(10)
+    expect(result.top_skills).toEqual(['Python', 'SQL'])
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/publico/estadisticas'))
+  })
+
+  it('lanza error en respuesta no-OK', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 503 })
+    await expect(getEstadisticasPublicas()).rejects.toThrow('HTTP 503')
   })
 })
