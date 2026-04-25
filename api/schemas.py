@@ -12,6 +12,11 @@ class NoticiaOut(BaseModel):
     sector: Optional[str] = None
     tipo_impacto: Optional[str] = None
     fecha_ingesta: Optional[datetime] = None
+    resumen_claude: Optional[str] = None
+    causa_ia: Optional[str] = None
+    n_empleados: Optional[int] = None
+    empresa: Optional[str] = None
+    pais: Optional[str] = None
 
     model_config = {"from_attributes": True}
 

@@ -6,11 +6,11 @@ import * as api from '@/lib/api'
 jest.mock('@/lib/api')
 
 const mockNoticias = [
-  { id: 1, titulo: 'IA en educación', url: 'http://a.com', fuente: 'gdelt',
-    contenido: '', fecha_pub: '2024-04-01T00:00:00',
+  { id: 'n1', titulo: 'IA en educación', url: 'http://a.com', fuente: 'gdelt',
+    fecha_pub: '2024-04-01T00:00:00', fecha_ingesta: '2024-04-01T00:00:00',
     pais: 'Mexico', sector: 'educacion', tipo_impacto: 'oportunidad' },
-  { id: 2, titulo: 'Robots en fábricas', url: 'http://b.com', fuente: 'gdelt',
-    contenido: '', fecha_pub: '2024-04-02T00:00:00',
+  { id: 'n2', titulo: 'Robots en fábricas', url: 'http://b.com', fuente: 'gdelt',
+    fecha_pub: '2024-04-02T00:00:00', fecha_ingesta: '2024-04-02T00:00:00',
     pais: 'USA', sector: 'tecnologia', tipo_impacto: 'riesgo' },
 ]
 

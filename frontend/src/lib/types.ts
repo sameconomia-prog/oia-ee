@@ -10,15 +10,19 @@ export interface HistoricoSerie {
 }
 
 export interface Noticia {
-  id: number
+  id: string
   titulo: string
   url: string
-  fuente: string
-  contenido: string
-  fecha_pub: string
+  fuente: string | null
+  fecha_pub: string | null
+  fecha_ingesta: string | null
   pais: string | null
   sector: string | null
   tipo_impacto: string | null
+  resumen_claude?: string | null
+  causa_ia?: string | null
+  n_empleados?: number | null
+  empresa?: string | null
 }
 
 export interface D1Result {
