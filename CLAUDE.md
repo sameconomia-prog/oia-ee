@@ -44,8 +44,8 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 104, 2026-04-25)
-- 215 pytest + 48 Jest = 263 tests pasando
+## Estado actual (Sprint 111, 2026-04-25)
+- 221 pytest + 48 Jest = 269 tests pasando
 - 0 errores TypeScript
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Pendiente: Railway deploy (ver .env.example para env vars)
@@ -70,6 +70,10 @@ OIA-EE/
 - `GET /publico/kpis/top-oportunidades?n=` — top N carreras por D2 (mejor D2 primero)
 - `GET /publico/estadisticas` — resumen consolidado: IES, carreras, vacantes, noticias, alertas, top_skills
 - `GET /publico/ies` — incluye `total_carreras` (count de CarreraIES por IES)
+- `GET /publico/kpis/distribucion` — conteo de carreras en bins D1/D2 (Bajo/Medio/Alto)
+- `GET /publico/vacantes/tendencia?meses=` — conteo mensual de vacantes IA
+- `GET /publico/carreras/areas` — áreas de conocimiento únicas de carreras activas
+- `GET /publico/carreras?area=` — filtro por área de conocimiento
 
 ## Páginas frontend (Sprints 46-89)
 - `/vacantes` — vacantes con búsqueda, filtros por sector, CSV export
@@ -87,6 +91,10 @@ OIA-EE/
 - `/estadisticas` — dashboard con totales: IES, carreras, vacantes, noticias, alertas, top skills
 - `/ies` — tarjetas incluyen badge "X carreras" (consumido del campo total_carreras del API)
 - Homepage incluye sección "Top oportunidades" (D2 más alto) junto a "Top riesgo" (D1 más alto)
+- `/noticias` — filtro por impacto (riesgo/oportunidad/neutro) además de sector
+- `/carreras` — ordenación client-side por D1/D2/nombre/matrícula + filtro por área de conocimiento
+- `/vacantes` — mini bar chart de tendencia mensual de vacantes IA
+- `/estadisticas` — barras de distribución D1/D2 por rango (Bajo/Medio/Alto)
 
 ## Tests
 ```
