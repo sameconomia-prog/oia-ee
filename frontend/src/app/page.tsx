@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getResumenPublico, getKpisNacionalResumen, getVacantesTopSkills, getTopRiesgo } from '@/lib/api'
-import type { ResumenPublico, KpisNacionalResumen, SkillFreq, TopRiesgoItem } from '@/lib/types'
+import { getResumenPublico, getKpisNacionalResumen, getVacantesTopSkills, getTopRiesgo, getIesPublico } from '@/lib/api'
+import type { ResumenPublico, KpisNacionalResumen, SkillFreq, TopRiesgoItem, IesInfo } from '@/lib/types'
 import TendenciasNacionalesChart from '@/components/TendenciasNacionalesChart'
 
 function StatCard({ label, value, sub, color }: {
@@ -38,6 +38,7 @@ export default function HomePage() {
   const [kpisNac, setKpisNac] = useState<KpisNacionalResumen | null>(null)
   const [topSkills, setTopSkills] = useState<SkillFreq[]>([])
   const [topRiesgo, setTopRiesgo] = useState<TopRiesgoItem[]>([])
+  const [iesList, setIesList] = useState<IesInfo[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -52,6 +53,9 @@ export default function HomePage() {
       .catch(() => {})
     getTopRiesgo(5)
       .then(setTopRiesgo)
+      .catch(() => {})
+    getIesPublico()
+      .then(setIesList)
       .catch(() => {})
   }, [])
 
@@ -213,6 +217,26 @@ export default function HomePage() {
                   {s.count}
                 </span>
               </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Instituciones monitoreadas */}
+      {iesList.length > 0 && (
+        <div className="mb-8 bg-white rounded-xl border shadow-sm p-5">
+          <h2 className="font-semibold text-gray-800 text-sm mb-3">
+            Instituciones monitoreadas
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {iesList.map(ies => (
+              <Link
+                key={ies.id}
+                href={`/ies/${ies.id}`}
+                className="px-3 py-1.5 rounded-lg border text-xs text-gray-700 hover:border-indigo-400 hover:text-indigo-700 hover:bg-indigo-50 transition-colors"
+              >
+                {ies.nombre_corto ?? ies.nombre}
+              </Link>
             ))}
           </div>
         </div>
