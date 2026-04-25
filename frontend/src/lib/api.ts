@@ -229,6 +229,12 @@ export async function getVacantesPublico(sector?: string, limit = 25): Promise<V
   return await res.json()
 }
 
+export async function getCarrerasDeIes(iesId: string): Promise<CarreraKpi[]> {
+  const res = await fetch(`${BASE}/publico/ies/${iesId}/carreras`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function getSectoresVacantes(): Promise<string[]> {
   const res = await fetch(`${BASE}/publico/sectores`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)

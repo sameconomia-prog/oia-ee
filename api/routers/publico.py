@@ -242,6 +242,41 @@ def top_vacantes_skills(top: int = 10, db: Session = Depends(get_db)):
     return [SkillFreqOut(nombre=skill, count=count) for skill, count in counter.most_common(top)]
 
 
+@router.get("/ies/{ies_id}/carreras", response_model=list[CarreraKpiOut])
+def carreras_de_ies(ies_id: str, db: Session = Depends(get_db)):
+    from pipeline.kpi_engine.kpi_runner import run_kpis
+    from pipeline.db.models import Vacante as _V  # noqa
+
+    ies_obj = db.query(IES).filter_by(id=ies_id, activa=True).first()
+    if not ies_obj:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="IES no encontrada")
+
+    cie_list = db.query(CarreraIES).filter_by(ies_id=ies_id).all()
+    result = []
+    for cie in cie_list:
+        carrera = db.query(Carrera).filter_by(id=cie.carrera_id).first()
+        if not carrera:
+            continue
+        kpi_result = run_kpis(cie.carrera_id, db)
+        kpi_out: Optional[KpiOut] = None
+        if kpi_result:
+            kpi_out = KpiOut(
+                carrera_id=cie.carrera_id,
+                d1_obsolescencia=D1Out(**vars(kpi_result.d1_obsolescencia)),
+                d2_oportunidades=D2Out(**vars(kpi_result.d2_oportunidades)),
+                d3_mercado=D3Out(**vars(kpi_result.d3_mercado)),
+                d6_estudiantil=D6Out(**vars(kpi_result.d6_estudiantil)),
+            )
+        result.append(CarreraKpiOut(
+            id=cie.carrera_id,
+            nombre=carrera.nombre_norm.title(),
+            matricula=cie.matricula,
+            kpi=kpi_out,
+        ))
+    return result
+
+
 @router.get("/sectores", response_model=list[str])
 def listar_sectores_vacantes(db: Session = Depends(get_db)):
     from pipeline.db.models import Vacante

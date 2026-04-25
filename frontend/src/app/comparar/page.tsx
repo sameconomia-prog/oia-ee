@@ -1,7 +1,8 @@
 'use client'
-import { useState, useEffect } from 'react'
-import { getPublicoIes } from '@/lib/api'
+import { useState, useEffect, useMemo } from 'react'
+import { getPublicoIes, getCarrerasDeIes } from '@/lib/api'
 import ComparacionIES from '@/components/ComparacionIES'
+import type { CarreraKpi } from '@/lib/types'
 
 type IesOpcion = { id: string; nombre: string; nombre_corto?: string }
 
@@ -9,10 +10,29 @@ export default function CompararPage() {
   const [ies, setIes] = useState<IesOpcion[]>([])
   const [iesAId, setIesAId] = useState('')
   const [iesBId, setIesBId] = useState('')
+  const [carrerasA, setCarrerasA] = useState<CarreraKpi[]>([])
+  const [carrerasB, setCarrerasB] = useState<CarreraKpi[]>([])
 
   useEffect(() => {
     getPublicoIes().then(setIes).catch(() => setIes([]))
   }, [])
+
+  useEffect(() => {
+    if (iesAId) getCarrerasDeIes(iesAId).then(setCarrerasA).catch(() => setCarrerasA([]))
+    else setCarrerasA([])
+  }, [iesAId])
+
+  useEffect(() => {
+    if (iesBId) getCarrerasDeIes(iesBId).then(setCarrerasB).catch(() => setCarrerasB([]))
+    else setCarrerasB([])
+  }, [iesBId])
+
+  const carrerasComunes = useMemo(() => {
+    const nombresB = new Map(carrerasB.map(c => [c.nombre.toLowerCase(), c]))
+    return carrerasA
+      .filter(c => nombresB.has(c.nombre.toLowerCase()))
+      .map(cA => ({ cA, cB: nombresB.get(cA.nombre.toLowerCase())! }))
+  }, [carrerasA, carrerasB])
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -44,12 +64,56 @@ export default function CompararPage() {
       </div>
 
       {iesAId && iesBId && iesAId !== iesBId ? (
-        <ComparacionIES
-          iesAId={iesAId}
-          iesBId={iesBId}
-          iesANombre={ies.find(i => i.id === iesAId)?.nombre ?? iesAId}
-          iesBNombre={ies.find(i => i.id === iesBId)?.nombre ?? iesBId}
-        />
+        <>
+          <ComparacionIES
+            iesAId={iesAId}
+            iesBId={iesBId}
+            iesANombre={ies.find(i => i.id === iesAId)?.nombre ?? iesAId}
+            iesBNombre={ies.find(i => i.id === iesBId)?.nombre ?? iesBId}
+          />
+
+          {/* Carreras en común */}
+          {carrerasComunes.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-base font-semibold text-gray-800 mb-3">
+                Carreras en común · {carrerasComunes.length}
+              </h2>
+              <div className="border rounded-lg overflow-hidden text-sm">
+                <div className="grid grid-cols-5 bg-gray-800 text-white text-xs font-semibold px-4 py-2">
+                  <div className="col-span-2">Carrera</div>
+                  <div className="text-center">D1 A / B</div>
+                  <div className="text-center">D2 A / B</div>
+                  <div className="text-center">D3 A / B</div>
+                </div>
+                {carrerasComunes.map(({ cA, cB }) => (
+                  <div key={cA.id} className="grid grid-cols-5 border-t px-4 py-2 hover:bg-gray-50">
+                    <div className="col-span-2 text-gray-700 text-xs truncate" title={cA.nombre}>{cA.nombre}</div>
+                    <div className="text-center font-mono text-xs">
+                      <span className={cA.kpi && cA.kpi.d1_obsolescencia.score >= 0.6 ? 'text-red-600' : 'text-green-600'}>
+                        {cA.kpi?.d1_obsolescencia.score.toFixed(2) ?? '—'}
+                      </span>
+                      {' / '}
+                      <span className={cB.kpi && cB.kpi.d1_obsolescencia.score >= 0.6 ? 'text-red-600' : 'text-green-600'}>
+                        {cB.kpi?.d1_obsolescencia.score.toFixed(2) ?? '—'}
+                      </span>
+                    </div>
+                    <div className="text-center font-mono text-xs">
+                      {cA.kpi?.d2_oportunidades.score.toFixed(2) ?? '—'}
+                      {' / '}
+                      {cB.kpi?.d2_oportunidades.score.toFixed(2) ?? '—'}
+                    </div>
+                    <div className="text-center font-mono text-xs">
+                      {cA.kpi?.d3_mercado.score.toFixed(2) ?? '—'}
+                      {' / '}
+                      {cB.kpi?.d3_mercado.score.toFixed(2) ?? '—'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 mt-1">D1: menor=mejor · D2/D3: mayor=mejor</p>
+            </div>
+          )}
+        </>
       ) : (
         <p className="text-sm text-gray-400 text-center py-12">
           Selecciona dos instituciones distintas para comparar.

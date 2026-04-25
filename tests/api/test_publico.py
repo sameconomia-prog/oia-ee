@@ -177,6 +177,22 @@ def test_kpis_resumen_cache_hit(client, db_session):
     assert resp1.json() == resp2.json()
 
 
+# --- GET /publico/ies/{ies_id}/carreras ---
+
+def test_carreras_ies_no_encontrada(client):
+    resp = client.get("/publico/ies/ies-inexistente/carreras")
+    assert resp.status_code == 404
+
+
+def test_carreras_ies_publico(client, db_session):
+    _seed_carrera(db_session, "iescarr1")
+    ies = db_session.query(__import__('pipeline.db.models', fromlist=['IES']).IES).filter_by(nombre="IES Pub iescarr1").first()
+    resp = client.get(f"/publico/ies/{ies.id}/carreras")
+    assert resp.status_code == 200
+    assert isinstance(resp.json(), list)
+    assert len(resp.json()) >= 1
+
+
 # --- GET /publico/kpis/tendencias ---
 
 def test_kpis_tendencias_sin_datos(client):
