@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { getCarrerasPublico } from '@/lib/api'
 import { dotColor, textColor } from '@/lib/kpi-colors'
 import type { CarreraKpi } from '@/lib/types'
@@ -177,7 +178,9 @@ export default function KpisTable() {
               return (
                 <tr key={id} className="border-b hover:bg-gray-50 text-center">
                   <td className="px-3 py-2 text-left text-xs font-semibold text-gray-800">
-                    {nombre}
+                    <Link href={`/carreras/${id}`} className="hover:text-indigo-700 hover:underline">
+                      {nombre}
+                    </Link>
                   </td>
                   <td className="px-2 py-2 border-l-4 border-l-red-200 bg-red-50/50">
                     <Dot value={d1.score} isD1={true} />
