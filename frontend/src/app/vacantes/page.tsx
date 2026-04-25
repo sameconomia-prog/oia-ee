@@ -6,6 +6,30 @@ import type { VacantePublico, SkillFreq } from '@/lib/types'
 const SALARIO_FMT = (n: number) =>
   new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(n)
 
+function exportarCSV(vacantes: VacantePublico[]) {
+  const headers = ['Titulo', 'Empresa', 'Sector', 'Skills', 'Salario Min', 'Salario Max', 'Estado', 'Nivel Educativo', 'Experiencia', 'Fecha Pub']
+  const rows = vacantes.map(v => [
+    v.titulo,
+    v.empresa ?? '',
+    v.sector ?? '',
+    v.skills.join('; '),
+    v.salario_min ?? '',
+    v.salario_max ?? '',
+    v.estado ?? '',
+    v.nivel_educativo ?? '',
+    v.experiencia_anios ?? '',
+    v.fecha_pub ?? '',
+  ])
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `vacantes_ia_${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export default function VacantesPage() {
   const [vacantes, setVacantes] = useState<VacantePublico[]>([])
   const [skills, setSkills] = useState<SkillFreq[]>([])
@@ -64,6 +88,14 @@ export default function VacantesPage() {
           ))}
         </select>
         <span className="text-xs text-gray-400">{vacantes.length} vacantes</span>
+        {vacantes.length > 0 && (
+          <button
+            onClick={() => exportarCSV(vacantes)}
+            className="ml-auto text-xs px-3 py-1.5 border rounded hover:bg-gray-50 text-gray-600 transition-colors"
+          >
+            ↓ Exportar CSV
+          </button>
+        )}
       </div>
 
       {/* Lista */}
