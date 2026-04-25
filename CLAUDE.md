@@ -44,23 +44,33 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 64, 2026-04-25)
-- 192 tests pasando
+## Estado actual (Sprint 75, 2026-04-25)
+- 196 tests pasando
 - 0 errores TypeScript
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Pendiente: Railway deploy (ver .env.example para env vars)
 
-## Nuevas rutas (Sprints 46-64)
+## Nuevas rutas backend (Sprints 46-75)
 - `GET /publico/vacantes` — lista vacantes con filtro ?sector=
 - `GET /publico/vacantes/skills` — top skills por frecuencia
 - `GET /publico/sectores` — sectores únicos de vacantes
 - `GET /publico/ies/{ies_id}/carreras` — carreras de una IES con KPIs
+- `GET /publico/ies/{ies_id}` — detalle de IES con KPIs agregados (D1/D2 promedio, riesgo alto)
+- `GET /publico/carreras/{carrera_id}` — detalle de carrera con KPIs y lista de IES
 - `GET /publico/kpis/top-riesgo` — top N carreras por D1 (riesgo)
 - `GET /publico/kpis/tendencias` — promedios históricos nacionales
 - `POST /admin/cache/clear` — invalida cache KPIs nacional (5min TTL)
 - `GET /publico/estadisticas` — resumen consolidado (IES, carreras, vacantes, noticias, top skills)
-- `/vacantes` — página pública de vacantes con búsqueda, filtros, CSV
 - `/publico/resumen` incluye `total_vacantes`; homepage tiene 4 StatCards
+
+## Páginas frontend (Sprints 46-75)
+- `/vacantes` — vacantes con búsqueda, filtros por sector, CSV export
+- `/ies` — listado de todas las IES con búsqueda
+- `/ies/[id]` — detalle de IES: stats, promedio D1/D2, lista carreras, botón Comparar
+- `/carreras/[id]` — detalle de carrera: KPI bars, lista IES que la ofrecen
+- `/comparar?iesA=&iesB=` — acepta params para pre-selección desde /ies/[id]
+- Rankings de carreras, KpisTable y top riesgo (homepage) navegan a `/carreras/[id]`
+- Sidebar con highlight `startsWith` para rutas dinámicas
 
 ## Tests
 ```
