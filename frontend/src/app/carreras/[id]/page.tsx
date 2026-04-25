@@ -2,8 +2,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getCarreraDetalle } from '@/lib/api'
-import type { CarreraDetalle } from '@/lib/types'
+import { getCarreraDetalle, getKpisHistorico } from '@/lib/api'
+import type { CarreraDetalle, HistoricoSerie } from '@/lib/types'
 
 type ScoreKey = 'd1_obsolescencia' | 'd2_oportunidades' | 'd3_mercado' | 'd6_estudiantil'
 
@@ -32,11 +32,31 @@ function ScoreBar({ label, score, invert }: { label: string; score: number; inve
   )
 }
 
+function MiniLineChart({ d1, d2 }: { d1: HistoricoSerie; d2: HistoricoSerie }) {
+  const points = d1.serie
+  if (points.length < 2) return <p className="text-xs text-gray-400 py-4 text-center">Sin datos históricos suficientes.</p>
+  const W = 400, H = 80, PAD = 8
+  const allVals = [...d1.serie.map(p => p.valor), ...d2.serie.map(p => p.valor)]
+  const minV = Math.min(...allVals, 0), maxV = Math.max(...allVals, 1)
+  const xOf = (i: number) => PAD + (i / (points.length - 1)) * (W - PAD * 2)
+  const yOf = (v: number) => H - PAD - ((v - minV) / (maxV - minV)) * (H - PAD * 2)
+  const toPath = (serie: HistoricoSerie) =>
+    serie.serie.map((p, i) => `${i === 0 ? 'M' : 'L'}${xOf(i)},${yOf(p.valor)}`).join(' ')
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-20">
+      <path d={toPath(d1)} fill="none" stroke="#ef4444" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d={toPath(d2)} fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export default function CarreraDetallePage() {
   const { id } = useParams<{ id: string }>()
   const [detalle, setDetalle] = useState<CarreraDetalle | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+  const [histD1, setHistD1] = useState<HistoricoSerie | null>(null)
+  const [histD2, setHistD2] = useState<HistoricoSerie | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -44,6 +64,8 @@ export default function CarreraDetallePage() {
       .then(setDetalle)
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
+    getKpisHistorico(id, 'd1_score', 30).then(setHistD1).catch(() => {})
+    getKpisHistorico(id, 'd2_score', 30).then(setHistD2).catch(() => {})
   }, [id])
 
   if (loading) return <p className="text-gray-400 text-sm py-8 text-center">Cargando...</p>
@@ -79,6 +101,19 @@ export default function CarreraDetallePage() {
               />
             ))}
           </div>
+        </div>
+      )}
+
+      {histD1 && histD2 && (
+        <div className="bg-white rounded-xl border shadow-sm p-5 mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold text-gray-800 text-sm">Tendencia histórica</h2>
+            <div className="flex gap-3 text-xs">
+              <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-red-500"></span>D1 Obsolescencia</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-blue-500"></span>D2 Oportunidades</span>
+            </div>
+          </div>
+          <MiniLineChart d1={histD1} d2={histD2} />
         </div>
       )}
 
