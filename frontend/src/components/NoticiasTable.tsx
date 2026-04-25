@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { getNoticias, buscarNoticias } from '@/lib/api'
 import type { Noticia } from '@/lib/types'
 
@@ -138,13 +139,17 @@ export default function NoticiasTable() {
               noticias.map((n) => (
                 <tr key={n.id} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-2 max-w-xs">
+                    <Link href={`/noticias/${n.id}`} className="hover:underline text-gray-900">
+                      {n.titulo.length > 80 ? n.titulo.slice(0, 80) + '…' : n.titulo}
+                    </Link>
                     <a
                       href={n.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:underline text-gray-900"
+                      className="ml-1 text-gray-400 hover:text-indigo-600 text-xs"
+                      title="Abrir fuente"
                     >
-                      {n.titulo.length > 80 ? n.titulo.slice(0, 80) + '…' : n.titulo}
+                      ↗
                     </a>
                   </td>
                   <td className="px-4 py-2">
