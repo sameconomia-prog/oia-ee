@@ -1,14 +1,21 @@
 'use client'
-import { Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { Suspense, useEffect } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import RectorDashboard from '@/components/RectorDashboard'
 import { getStoredIesId } from '@/lib/auth'
 
 function RectorContent() {
   const params = useSearchParams()
+  const router = useRouter()
   const iesIdParam = params.get('ies_id')
   const iesId = iesIdParam ?? getStoredIesId()
+
+  useEffect(() => {
+    if (iesId && !iesIdParam) {
+      router.replace(`/rector?ies_id=${iesId}`)
+    }
+  }, [iesId, iesIdParam, router])
 
   if (!iesId) {
     return (
