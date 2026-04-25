@@ -3,8 +3,9 @@ import { useState } from 'react'
 import KpisTable from '@/components/KpisTable'
 import EstadoKpiSection from '@/components/EstadoKpiSection'
 import NoticiasKpiSection from '@/components/NoticiasKpiSection'
+import EstadoRankingNacional from '@/components/EstadoRankingNacional'
 
-type Tab = 'carreras' | 'estado' | 'noticias'
+type Tab = 'carreras' | 'estado' | 'noticias' | 'ranking'
 
 export default function KpisPage() {
   const [tab, setTab] = useState<Tab>('carreras')
@@ -16,6 +17,7 @@ export default function KpisPage() {
         {([
           { key: 'carreras', label: 'D1–D3–D6 por Carrera' },
           { key: 'estado', label: 'D5 Geografía por Estado' },
+          { key: 'ranking', label: 'D5 Ranking Nacional' },
           { key: 'noticias', label: 'D7 Noticias (Global)' },
         ] as { key: Tab; label: string }[]).map(({ key, label }) => (
           <button
@@ -29,6 +31,7 @@ export default function KpisPage() {
       </div>
       {tab === 'carreras' && <KpisTable />}
       {tab === 'estado' && <EstadoKpiSection />}
+      {tab === 'ranking' && <EstadoRankingNacional />}
       {tab === 'noticias' && <NoticiasKpiSection />}
     </div>
   )
