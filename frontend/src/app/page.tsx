@@ -98,6 +98,28 @@ export default function HomePage() {
         />
       </div>
 
+      {/* Feature cards */}
+      <div className="grid grid-cols-2 gap-3 mb-8">
+        {[
+          { href: '/kpis', icon: '📊', title: 'Rankings de Carreras', desc: 'D1 Obsolescencia · D2 Oportunidades · D3 Mercado por carrera' },
+          { href: '/kpis', icon: '🗺️', title: 'Ranking D5 Nacional', desc: 'Los 32 estados mexicanos ordenados por D5 Geografía' },
+          { href: '/comparar', icon: '⚖️', title: 'Comparar IES', desc: 'Análisis D4 de dos instituciones lado a lado' },
+          { href: '/metodologia', icon: '📐', title: 'Metodología', desc: 'Cómo se calculan los indicadores D1–D7' },
+        ].map(({ href, icon, title, desc }) => (
+          <Link
+            key={href + title}
+            href={href}
+            className="flex items-start gap-3 p-4 bg-white rounded-xl border shadow-sm hover:shadow-md transition-shadow"
+          >
+            <span className="text-2xl shrink-0">{icon}</span>
+            <div>
+              <p className="font-semibold text-gray-800 text-sm mb-0.5">{title}</p>
+              <p className="text-xs text-gray-500">{desc}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+
       {/* Noticias recientes */}
       <div className="bg-white rounded-xl border shadow-sm">
         <div className="flex items-center justify-between px-5 py-4 border-b">
