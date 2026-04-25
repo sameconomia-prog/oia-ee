@@ -225,9 +225,10 @@ export default function HomePage() {
       {/* Instituciones monitoreadas */}
       {iesList.length > 0 && (
         <div className="mb-8 bg-white rounded-xl border shadow-sm p-5">
-          <h2 className="font-semibold text-gray-800 text-sm mb-3">
-            Instituciones monitoreadas
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-gray-800 text-sm">Instituciones monitoreadas</h2>
+            <Link href="/ies" className="text-xs text-indigo-600 hover:underline">Ver todas →</Link>
+          </div>
           <div className="flex flex-wrap gap-2">
             {iesList.map(ies => (
               <Link

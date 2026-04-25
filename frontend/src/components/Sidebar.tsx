@@ -8,6 +8,7 @@ const links = [
   { href: '/', label: 'Inicio', icon: '🏠' },
   { href: '/noticias', label: 'Noticias', icon: '📰' },
   { href: '/vacantes', label: 'Vacantes', icon: '💼' },
+  { href: '/ies', label: 'Instituciones', icon: '🏫' },
   { href: '/kpis', label: 'KPIs', icon: '📊' },
   { href: '/comparar', label: 'Comparar', icon: '⚖️' },
   { href: '/metodologia', label: 'Metodología', icon: '📐' },
