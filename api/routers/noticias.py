@@ -24,6 +24,18 @@ def list_noticias(
     return q.offset(skip).limit(limit).all()
 
 
+@router.get("/sectores", response_model=list[str])
+def listar_sectores_noticias(db: Session = Depends(get_db)):
+    rows = (
+        db.query(Noticia.sector)
+        .filter(Noticia.sector.isnot(None))
+        .distinct()
+        .order_by(Noticia.sector)
+        .all()
+    )
+    return [r[0] for r in rows]
+
+
 @router.get("/buscar", response_model=list[NoticiaOut])
 def buscar_noticias(
     q: str = Query(..., min_length=1),

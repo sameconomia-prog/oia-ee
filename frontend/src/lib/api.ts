@@ -94,6 +94,12 @@ export async function getResumenPublico(): Promise<ResumenPublico> {
   return await res.json()
 }
 
+export async function getSectoresNoticias(): Promise<string[]> {
+  const res = await fetch(`${BASE}/noticias/sectores`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function getNoticiaDetalle(id: string): Promise<Noticia> {
   const res = await fetch(`${BASE}/noticias/${id}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)

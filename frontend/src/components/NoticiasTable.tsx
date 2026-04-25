@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getNoticias, buscarNoticias } from '@/lib/api'
+import { getNoticias, buscarNoticias, getSectoresNoticias } from '@/lib/api'
 import type { Noticia } from '@/lib/types'
 
 const PAGE_SIZE = 20
@@ -34,11 +34,16 @@ function formatDate(dateStr: string | null): string {
 export default function NoticiasTable() {
   const [noticias, setNoticias] = useState<Noticia[]>([])
   const [sector, setSector] = useState('')
+  const [sectoresDisponibles, setSectoresDisponibles] = useState<string[]>([])
   const [query, setQuery] = useState('')
   const [queryActiva, setQueryActiva] = useState('')
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    getSectoresNoticias().then(setSectoresDisponibles).catch(() => {})
+  }, [])
 
   useEffect(() => {
     setLoading(true)
@@ -94,10 +99,9 @@ export default function NoticiasTable() {
             onChange={(e) => { setSector(e.target.value); setPage(0) }}
           >
             <option value="">Todos los sectores</option>
-            <option value="tecnologia">Tecnología</option>
-            <option value="educacion">Educación</option>
-            <option value="logistica">Logística</option>
-            <option value="finanzas">Finanzas</option>
+            {sectoresDisponibles.map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
           </select>
         )}
         {queryActiva && (
