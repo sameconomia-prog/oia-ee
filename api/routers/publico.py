@@ -151,6 +151,43 @@ def resumen_kpis_nacional(db: Session = Depends(get_db)):
     return result_out
 
 
+@router.get("/kpis/tendencias")
+def tendencias_nacionales(dias: int = 30, db: Session = Depends(get_db)):
+    from collections import defaultdict
+    from pipeline.db.models import KpiHistorico
+
+    rows = (
+        db.query(KpiHistorico)
+        .filter(KpiHistorico.entidad_tipo == 'carrera')
+        .filter(KpiHistorico.kpi_nombre.in_(['d1_score', 'd2_score', 'd3_score', 'd6_score']))
+        .all()
+    )
+
+    if not rows:
+        return []
+
+    from datetime import date, timedelta
+    hoy = date.today()
+    cutoff = hoy - timedelta(days=dias)
+    recientes = [r for r in rows if r.fecha and r.fecha >= cutoff]
+    if not recientes:
+        return []
+
+    por_fecha_kpi: dict[tuple, list[float]] = defaultdict(list)
+    for r in recientes:
+        por_fecha_kpi[(str(r.fecha), r.kpi_nombre)].append(float(r.valor))
+
+    fechas = sorted({str(r.fecha) for r in recientes})
+    resultado = []
+    for fecha in fechas:
+        punto = {"fecha": fecha}
+        for kpi in ['d1_score', 'd2_score', 'd3_score', 'd6_score']:
+            vals = por_fecha_kpi.get((fecha, kpi), [])
+            punto[kpi] = round(sum(vals) / len(vals), 4) if vals else None
+        resultado.append(punto)
+    return resultado
+
+
 @router.get("/vacantes", response_model=list[VacantePublicoOut])
 def listar_vacantes_publico(
     sector: Optional[str] = None,

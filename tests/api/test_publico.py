@@ -177,6 +177,32 @@ def test_kpis_resumen_cache_hit(client, db_session):
     assert resp1.json() == resp2.json()
 
 
+# --- GET /publico/kpis/tendencias ---
+
+def test_kpis_tendencias_sin_datos(client):
+    resp = client.get("/publico/kpis/tendencias")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_kpis_tendencias_con_datos(client, db_session):
+    from pipeline.db.models import KpiHistorico
+    from datetime import date
+    hoy = date.today()
+    for kpi in ['d1_score', 'd2_score', 'd3_score', 'd6_score']:
+        db_session.add(KpiHistorico(
+            entidad_tipo='carrera', entidad_id='c1', fecha=hoy,
+            kpi_nombre=kpi, valor=0.45,
+        ))
+    db_session.flush()
+    resp = client.get("/publico/kpis/tendencias?dias=30")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["fecha"] == str(hoy)
+    assert data[0]["d1_score"] == 0.45
+
+
 # --- GET /publico/vacantes ---
 
 def test_vacantes_publico_vacio(client):
