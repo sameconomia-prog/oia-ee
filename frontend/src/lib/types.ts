@@ -275,3 +275,12 @@ export interface VacantePublico {
   experiencia_anios: number | null
   fecha_pub: string | null
 }
+
+export interface EstadisticasPublicas {
+  total_ies: number
+  total_carreras: number
+  total_vacantes: number
+  total_noticias: number
+  alertas_activas: number
+  top_skills: string[]
+}

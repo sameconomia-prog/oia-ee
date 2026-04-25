@@ -1,4 +1,4 @@
-import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult, CarreraKpi, KpisNacionalResumen, SkillFreq, VacantePublico, TopRiesgoItem, TendenciaNacional, CarreraDetalle, IesDetalle } from './types'
+import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult, CarreraKpi, KpisNacionalResumen, SkillFreq, VacantePublico, TopRiesgoItem, TendenciaNacional, CarreraDetalle, IesDetalle, EstadisticasPublicas } from './types'
 import { getToken } from './auth'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
@@ -296,6 +296,12 @@ export async function getIesPublico(): Promise<import('./types').IesInfo[]> {
 
 export async function getTendenciasNacionales(dias = 30): Promise<TendenciaNacional[]> {
   const res = await fetch(`${BASE}/publico/kpis/tendencias?dias=${dias}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function getEstadisticasPublicas(): Promise<EstadisticasPublicas> {
+  const res = await fetch(`${BASE}/publico/estadisticas`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }
