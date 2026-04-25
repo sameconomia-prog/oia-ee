@@ -56,28 +56,40 @@ def resumen_publico(db: Session = Depends(get_db)):
     )
 
 
+@router.get("/carreras/areas")
+def listar_areas_carreras(db: Session = Depends(get_db)):
+    rows = (
+        db.query(Carrera.area_conocimiento)
+        .join(CarreraIES, CarreraIES.carrera_id == Carrera.id)
+        .filter(Carrera.area_conocimiento.isnot(None))
+        .distinct()
+        .order_by(Carrera.area_conocimiento)
+        .all()
+    )
+    return [r[0] for r in rows]
+
+
 @router.get("/carreras", response_model=list[CarreraKpiOut])
 def listar_carreras_publico(
     skip: int = 0,
     limit: int = 50,
     q: Optional[str] = None,
+    area: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     from pipeline.kpi_engine.kpi_runner import run_kpis
 
-    cache_key = (skip, limit, q or '')
+    cache_key = (skip, limit, q or '', area or '')
     with _carreras_cache_lock:
         entry = _carreras_cache.get(cache_key)
     if entry and (time.time() - entry["at"]) < _KPIS_TTL:
         return entry["data"]
 
-    carrera_query = db.query(CarreraIES.carrera_id).distinct()
+    carrera_query = db.query(CarreraIES.carrera_id).distinct().join(Carrera, CarreraIES.carrera_id == Carrera.id)
     if q:
-        carrera_query = (
-            carrera_query
-            .join(Carrera, CarreraIES.carrera_id == Carrera.id)
-            .filter(Carrera.nombre_norm.ilike(f'%{q.lower()}%'))
-        )
+        carrera_query = carrera_query.filter(Carrera.nombre_norm.ilike(f'%{q.lower()}%'))
+    if area:
+        carrera_query = carrera_query.filter(Carrera.area_conocimiento == area)
     carrera_ids = [
         r[0]
         for r in carrera_query
@@ -105,6 +117,7 @@ def listar_carreras_publico(
         result.append(CarreraKpiOut(
             id=cid,
             nombre=carrera.nombre_norm.title(),
+            area_conocimiento=carrera.area_conocimiento,
             matricula=cie.matricula if cie else None,
             kpi=kpi_out,
         ))

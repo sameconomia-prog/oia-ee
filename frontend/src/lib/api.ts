@@ -77,14 +77,21 @@ export async function postSimular(input: SimularInput): Promise<SimResult> {
 }
 
 export async function getCarrerasPublico(
-  params: { skip?: number; limit?: number; q?: string } = {}
+  params: { skip?: number; limit?: number; q?: string; area?: string } = {}
 ): Promise<CarreraKpi[]> {
   const qs = new URLSearchParams()
   if (params.skip !== undefined) qs.set('skip', String(params.skip))
   if (params.limit !== undefined) qs.set('limit', String(params.limit))
   if (params.q) qs.set('q', params.q)
+  if (params.area) qs.set('area', params.area)
   const qstr = qs.toString()
   const res = await fetch(`${BASE}/publico/carreras${qstr ? `?${qstr}` : ''}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function getAreasCarreras(): Promise<string[]> {
+  const res = await fetch(`${BASE}/publico/carreras/areas`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }

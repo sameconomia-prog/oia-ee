@@ -81,6 +81,7 @@ export interface IesInfo {
 export interface CarreraKpi {
   id: string
   nombre: string
+  area_conocimiento?: string | null
   matricula: number | null
   kpi: KpiResult | null
 }

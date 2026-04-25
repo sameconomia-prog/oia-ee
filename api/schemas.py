@@ -104,6 +104,7 @@ class IesOut(BaseModel):
 class CarreraKpiOut(BaseModel):
     id: str
     nombre: str
+    area_conocimiento: Optional[str] = None
     matricula: Optional[int] = None
     kpi: Optional[KpiOut] = None
 

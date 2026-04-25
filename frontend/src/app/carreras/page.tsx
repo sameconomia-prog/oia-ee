@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
-import { getCarrerasPublico } from '@/lib/api'
+import { getCarrerasPublico, getAreasCarreras } from '@/lib/api'
 import type { CarreraKpi } from '@/lib/types'
 
 type SortKey = 'none' | 'nombre' | 'd1' | 'd2' | 'matricula'
@@ -42,6 +42,8 @@ export default function CarrerasListPage() {
   const [carreras, setCarreras] = useState<CarreraKpi[]>([])
   const [busqueda, setBusqueda] = useState('')
   const [query, setQuery] = useState('')
+  const [areaFiltro, setAreaFiltro] = useState('')
+  const [areas, setAreas] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [skip, setSkip] = useState(0)
   const [hasMore, setHasMore] = useState(true)
@@ -72,9 +74,13 @@ export default function CarrerasListPage() {
     })
   }, [carreras, sortKey, sortDir])
 
-  const cargar = useCallback((q: string, newSkip: number, append: boolean) => {
+  useEffect(() => {
+    getAreasCarreras().then(setAreas).catch(() => {})
+  }, [])
+
+  const cargar = useCallback((q: string, area: string, newSkip: number, append: boolean) => {
     setLoading(true)
-    getCarrerasPublico({ q: q || undefined, skip: newSkip, limit: PAGE_SIZE })
+    getCarrerasPublico({ q: q || undefined, area: area || undefined, skip: newSkip, limit: PAGE_SIZE })
       .then(data => {
         setCarreras(prev => append ? [...prev, ...data] : data)
         setSkip(newSkip + data.length)
@@ -87,8 +93,8 @@ export default function CarrerasListPage() {
   useEffect(() => {
     setSkip(0)
     setCarreras([])
-    cargar(query, 0, false)
-  }, [query, cargar])
+    cargar(query, areaFiltro, 0, false)
+  }, [query, areaFiltro, cargar])
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
@@ -117,10 +123,20 @@ export default function CarrerasListPage() {
         >
           Buscar
         </button>
-        {query && (
+        {areas.length > 0 && (
+          <select
+            value={areaFiltro}
+            onChange={e => setAreaFiltro(e.target.value)}
+            className="border rounded-lg px-3 py-2 text-sm text-gray-600 focus:outline-none"
+          >
+            <option value="">Todas las áreas</option>
+            {areas.map(a => <option key={a} value={a}>{a}</option>)}
+          </select>
+        )}
+        {(query || areaFiltro) && (
           <button
             type="button"
-            onClick={() => { setBusqueda(''); setQuery('') }}
+            onClick={() => { setBusqueda(''); setQuery(''); setAreaFiltro('') }}
             className="px-3 py-2 border rounded-lg text-sm text-gray-500 hover:bg-gray-50"
           >
             ✕
@@ -178,9 +194,14 @@ export default function CarrerasListPage() {
               <Link href={`/carreras/${c.id}`} className="text-sm font-medium text-gray-800 hover:text-indigo-700 hover:underline">
                 {c.nombre}
               </Link>
-              {c.matricula != null && (
-                <p className="text-xs text-gray-400 mt-0.5">{c.matricula.toLocaleString()} estudiantes</p>
-              )}
+              <div className="flex gap-2 items-center mt-0.5">
+                {c.area_conocimiento && (
+                  <span className="text-xs text-indigo-500">{c.area_conocimiento}</span>
+                )}
+                {c.matricula != null && (
+                  <span className="text-xs text-gray-400">{c.matricula.toLocaleString()} estudiantes</span>
+                )}
+              </div>
             </div>
             {c.kpi && (
               <div className="flex gap-1.5 flex-wrap justify-end shrink-0">
@@ -195,7 +216,7 @@ export default function CarrerasListPage() {
       {hasMore && !loading && (
         <div className="mt-4 flex justify-center">
           <button
-            onClick={() => cargar(query, skip, true)}
+            onClick={() => cargar(query, areaFiltro, skip, true)}
             className="px-5 py-2 border rounded-lg text-sm hover:bg-gray-50"
           >
             Cargar más
