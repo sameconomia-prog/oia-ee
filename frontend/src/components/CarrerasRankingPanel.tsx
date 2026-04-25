@@ -2,12 +2,14 @@
 import { useState } from 'react'
 import CarrerasRankingD1 from './CarrerasRankingD1'
 import CarrerasRankingD2 from './CarrerasRankingD2'
+import CarrerasRankingD3 from './CarrerasRankingD3'
 
-type Dim = 'd1' | 'd2'
+type Dim = 'd1' | 'd2' | 'd3'
 
 const DIMS: { key: Dim; label: string; sub: string }[] = [
   { key: 'd1', label: 'D1 Obsolescencia', sub: 'Mayor score = mayor riesgo' },
   { key: 'd2', label: 'D2 Oportunidades', sub: 'Mayor score = mayor potencial' },
+  { key: 'd3', label: 'D3 Mercado Laboral', sub: 'Mayor score = mayor relevancia' },
 ]
 
 export default function CarrerasRankingPanel() {
@@ -15,7 +17,7 @@ export default function CarrerasRankingPanel() {
 
   return (
     <div>
-      <div className="flex gap-2 mb-5">
+      <div className="flex gap-2 mb-5 flex-wrap">
         {DIMS.map(d => (
           <button
             key={d.key}
@@ -31,7 +33,9 @@ export default function CarrerasRankingPanel() {
           </button>
         ))}
       </div>
-      {dim === 'd1' ? <CarrerasRankingD1 /> : <CarrerasRankingD2 />}
+      {dim === 'd1' && <CarrerasRankingD1 />}
+      {dim === 'd2' && <CarrerasRankingD2 />}
+      {dim === 'd3' && <CarrerasRankingD3 />}
     </div>
   )
 }
