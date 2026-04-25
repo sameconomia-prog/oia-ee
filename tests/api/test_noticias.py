@@ -30,6 +30,38 @@ def test_get_noticia_not_found(client):
     assert resp.status_code == 404
 
 
+def test_get_noticia_con_datos(client, db_session):
+    n = Noticia(titulo="Test detalle", url="https://t.co/det1", fuente="rss",
+                resumen_claude="Resumen IA test", causa_ia="Automatización", n_empleados=500)
+    db_session.add(n)
+    db_session.flush()
+    resp = client.get(f"/noticias/{n.id}")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["titulo"] == "Test detalle"
+    assert data["resumen_claude"] == "Resumen IA test"
+    assert data["n_empleados"] == 500
+
+
+def test_sectores_noticias_vacio(client):
+    resp = client.get("/noticias/sectores")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_sectores_noticias_con_datos(client, db_session):
+    db_session.add(Noticia(titulo="A", url="https://t.co/sn1", sector="educacion"))
+    db_session.add(Noticia(titulo="B", url="https://t.co/sn2", sector="tecnologia"))
+    db_session.add(Noticia(titulo="C", url="https://t.co/sn3", sector="educacion"))
+    db_session.flush()
+    resp = client.get("/noticias/sectores")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "educacion" in data
+    assert "tecnologia" in data
+    assert data == sorted(data)
+
+
 def test_filter_por_sector(client, db_session):
     n = Noticia(titulo="Salud IA", url="https://t.co/api-salud1", fuente="rss", sector="salud")
     db_session.add(n)
