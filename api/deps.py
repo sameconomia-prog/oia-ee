@@ -1,5 +1,6 @@
 # api/deps.py
 import os
+from typing import Callable
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -14,12 +15,14 @@ _oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 def get_db():
-    """FastAPI dependency: yields a DB session."""
     with get_session() as session:
         yield session
 
 
-def get_current_user(token: str = Depends(_oauth2_scheme), db: Session = Depends(get_db)) -> Usuario:
+def get_current_user(
+    token: str = Depends(_oauth2_scheme),
+    db: Session = Depends(get_db),
+) -> Usuario:
     try:
         payload = jwt.decode(token, _SECRET, algorithms=[_ALGORITHM])
         username: str = payload.get("sub", "")
@@ -29,3 +32,26 @@ def get_current_user(token: str = Depends(_oauth2_scheme), db: Session = Depends
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no encontrado")
     return user
+
+
+def require_roles(*roles: str) -> Callable:
+    """Factory: returns a FastAPI dependency that enforces role membership.
+
+    superadmin siempre pasa, sin importar los roles requeridos.
+    """
+    def _check(current_user: Usuario = Depends(get_current_user)) -> Usuario:
+        if current_user.rol == "superadmin":
+            return current_user
+        if current_user.rol not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Rol requerido: {', '.join(roles)}. Tu rol: {current_user.rol}",
+            )
+        return current_user
+    return _check
+
+
+# Shortcuts comunes
+get_admin_user = require_roles("admin_ies", "superadmin")
+get_researcher_user = require_roles("researcher", "admin_ies", "superadmin")
+get_superadmin_user = require_roles("superadmin")
