@@ -173,3 +173,7 @@ class RefreshToken(Base):
     revocado    = Column(Boolean, default=False)
     created_at  = Column(DateTime(timezone=True), default=datetime.utcnow)
     usuario     = relationship("Usuario")
+
+
+# Importar modelos del Radar para que Alembic los detecte
+from pipeline.db.models_radar import EventoIADespido, EventoIAEmpleo, SkillEmergente  # noqa: F401
