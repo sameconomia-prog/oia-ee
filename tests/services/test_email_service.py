@@ -1,54 +1,76 @@
 # tests/services/test_email_service.py
-from unittest.mock import patch, MagicMock
-from pipeline.services.email_service import send_alert_email, AlertaResumen
-
-ALERTAS = [
-    AlertaResumen(carrera_nombre="Derecho", tipo="d1_alto", severidad="alta", mensaje="D1=0.82"),
-    AlertaResumen(carrera_nombre="Contabilidad", tipo="d2_bajo", severidad="media", mensaje="D2=0.35"),
-]
+"""Tests para pipeline/services/email_service.py (implementación Resend)."""
+from unittest.mock import patch
+import importlib
 
 
-def test_sin_smtp_host_retorna_false(monkeypatch):
-    monkeypatch.delenv("SMTP_HOST", raising=False)
-    result = send_alert_email("rector@ies.mx", "UNAM", ALERTAS)
+def _reload_email_service():
+    from pipeline.services import email_service
+    importlib.reload(email_service)
+    return email_service
+
+
+def test_sin_resend_key_retorna_false(monkeypatch):
+    """Sin RESEND_API_KEY configurada, retorna False."""
+    monkeypatch.delenv("RESEND_API_KEY", raising=False)
+    svc = _reload_email_service()
+    result = svc.send_alert_email(
+        to="rector@ies.mx",
+        ies_nombre="UNAM",
+        carrera_nombre="Derecho",
+        severidad="alta",
+        mensaje="D1=0.82",
+        accion_sugerida="Actualizar plan de estudios",
+    )
     assert result is False
 
 
-def test_con_smtp_envia_y_retorna_true(monkeypatch):
-    monkeypatch.setenv("SMTP_HOST", "smtp.test.com")
-    monkeypatch.setenv("SMTP_PORT", "587")
-    monkeypatch.setenv("SMTP_USER", "user@test.com")
-    monkeypatch.setenv("SMTP_PASSWORD", "secret")
-    monkeypatch.setenv("EMAIL_FROM", "noreply@oia-ee.mx")
+def test_con_resend_key_envia_y_retorna_true(monkeypatch):
+    """Con RESEND_API_KEY configurada, llama a resend.Emails.send y retorna True."""
+    monkeypatch.setenv("RESEND_API_KEY", "re_test_key")
+    svc = _reload_email_service()
 
-    mock_smtp = MagicMock()
-    mock_smtp.__enter__ = MagicMock(return_value=mock_smtp)
-    mock_smtp.__exit__ = MagicMock(return_value=False)
-
-    with patch("pipeline.services.email_service.smtplib.SMTP", return_value=mock_smtp):
-        result = send_alert_email("rector@ies.mx", "UNAM", ALERTAS)
-
+    with patch("resend.Emails.send", return_value={"id": "abc123"}):
+        result = svc.send_alert_email(
+            to="rector@ies.mx",
+            ies_nombre="UNAM",
+            carrera_nombre="Derecho",
+            severidad="alta",
+            mensaje="D1=0.82",
+            accion_sugerida="Actualizar plan de estudios",
+        )
     assert result is True
-    mock_smtp.starttls.assert_called_once()
-    mock_smtp.login.assert_called_once_with("user@test.com", "secret")
-    mock_smtp.sendmail.assert_called_once()
-    call_args = mock_smtp.sendmail.call_args
-    assert "rector@ies.mx" in call_args[0]
 
 
-def test_lista_vacia_retorna_false(monkeypatch):
-    monkeypatch.setenv("SMTP_HOST", "smtp.test.com")
-    result = send_alert_email("rector@ies.mx", "UNAM", [])
+def test_resend_error_retorna_false(monkeypatch):
+    """Si resend.Emails.send lanza excepción, retorna False."""
+    monkeypatch.setenv("RESEND_API_KEY", "re_test_key")
+    svc = _reload_email_service()
+
+    with patch("resend.Emails.send", side_effect=Exception("API error")):
+        result = svc.send_alert_email(
+            to="rector@ies.mx",
+            ies_nombre="UNAM",
+            carrera_nombre="Derecho",
+            severidad="alta",
+            mensaje="D1=0.82",
+            accion_sugerida="Actualizar plan de estudios",
+        )
     assert result is False
 
 
-def test_smtp_error_retorna_false(monkeypatch):
-    monkeypatch.setenv("SMTP_HOST", "smtp.test.com")
-    monkeypatch.setenv("SMTP_PORT", "587")
-    monkeypatch.setenv("SMTP_USER", "")
-    monkeypatch.setenv("SMTP_PASSWORD", "")
+def test_severidad_media_envia_correctamente(monkeypatch):
+    """Severidad media funciona sin errores."""
+    monkeypatch.setenv("RESEND_API_KEY", "re_test_key")
+    svc = _reload_email_service()
 
-    with patch("pipeline.services.email_service.smtplib.SMTP", side_effect=ConnectionRefusedError):
-        result = send_alert_email("rector@ies.mx", "UNAM", ALERTAS)
-
-    assert result is False
+    with patch("resend.Emails.send", return_value={"id": "xyz789"}):
+        result = svc.send_alert_email(
+            to="rector@ies.mx",
+            ies_nombre="IPN",
+            carrera_nombre="Contabilidad",
+            severidad="media",
+            mensaje="D2=0.35",
+            accion_sugerida="Revisar inserción laboral",
+        )
+    assert result is True

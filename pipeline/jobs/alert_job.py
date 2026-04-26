@@ -1,11 +1,11 @@
 # pipeline/jobs/alert_job.py
 import logging
-from collections import defaultdict
+from dataclasses import dataclass
 from datetime import datetime, timedelta, UTC
 from sqlalchemy.orm import Session
 from pipeline.db.models import IES, CarreraIES, Carrera, Alerta, Usuario
 from pipeline.kpi_engine.kpi_runner import run_kpis
-from pipeline.services.email_service import send_alert_email, AlertaResumen
+from pipeline.services.email_service import send_alert_email
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +16,14 @@ _TITULOS = {
     "d2_bajo": "D2 bajo",
     "ambos": "D1 crítico y D2 bajo",
 }
+
+
+@dataclass
+class AlertaResumen:
+    carrera_nombre: str
+    tipo: str
+    severidad: str
+    mensaje: str
 
 
 def _ya_existe(db: Session, ies_id: str, carrera_id: str, tipo: str) -> bool:
@@ -36,18 +44,18 @@ def _notificar_ies(db: Session, ies: IES, nuevas: list[dict]) -> None:
     if not nuevas:
         return
     rectores = db.query(Usuario).filter_by(ies_id=ies.id, activo=True).all()
-    resumen = [
-        AlertaResumen(
-            carrera_nombre=a["carrera_nombre"],
-            tipo=a["tipo"],
-            severidad=a["severidad"],
-            mensaje=a["mensaje"],
-        )
-        for a in nuevas
-    ]
     for rector in rectores:
         if rector.email:
-            send_alert_email(rector.email, ies.nombre, resumen)
+            # Enviar una alerta por correo por cada alerta nueva
+            for a in nuevas:
+                send_alert_email(
+                    rector.email,
+                    ies.nombre,
+                    a["carrera_nombre"],
+                    a["severidad"],
+                    a["mensaje"],
+                    "Revisar el plan de estudios y estrategia de empleabilidad.",
+                )
 
 
 def run_alert_job(db: Session) -> int:
