@@ -64,7 +64,7 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
 @router.post("/refresh")
 def refresh(body: RefreshRequest, db: Session = Depends(get_db)):
     rt = db.query(RefreshToken).filter_by(token=body.refresh_token, revocado=False).first()
-    if not rt or rt.expires_at.replace(tzinfo=UTC) < datetime.now(UTC):
+    if not rt or rt.expires_at.replace(tzinfo=None) < datetime.now(UTC).replace(tzinfo=None):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token inválido o expirado")
     user = db.query(Usuario).filter_by(id=rt.usuario_id, activo=True).first()
     if not user:
@@ -73,6 +73,9 @@ def refresh(body: RefreshRequest, db: Session = Depends(get_db)):
     return {"access_token": new_access, "token_type": "bearer"}
 
 
+# TODO(security): almacenar hash SHA-256 del token en lugar del token directo
+# para eliminar timing side-channel en comparaciones SQL. Prioridad baja dado
+# que tokens son de 64 chars (2^288 espacio de búsqueda). Ver P0 security review.
 @router.post("/logout")
 def logout(body: RefreshRequest, db: Session = Depends(get_db)):
     rt = db.query(RefreshToken).filter_by(token=body.refresh_token).first()
