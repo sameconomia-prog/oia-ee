@@ -26,6 +26,8 @@ def test_require_roles_blocks_wrong_role():
     with pytest.raises(HTTPException) as exc_info:
         dep(current_user=user)
     assert exc_info.value.status_code == 403
+    assert "viewer" in exc_info.value.detail
+    assert "superadmin" in exc_info.value.detail
 
 
 def test_require_roles_superadmin_passes_any():
