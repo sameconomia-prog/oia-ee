@@ -4,8 +4,29 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getCarreraDetalle, getKpisHistorico } from '@/lib/api'
 import type { CarreraDetalle, HistoricoSerie } from '@/lib/types'
+import FanChart from '@/components/FanChart'
+
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
 type ScoreKey = 'd1_obsolescencia' | 'd2_oportunidades' | 'd3_mercado' | 'd6_estudiantil'
+
+interface PredData {
+  predicciones: Record<string, {
+    fecha_prediccion: string
+    valor_predicho: number
+    ci_80_lower: number | null
+    ci_80_upper: number | null
+    ci_95_lower: number | null
+    ci_95_upper: number | null
+  }[]>
+}
+
+interface SemaforoEntry {
+  color: string
+  valor_predicho: number | null
+}
+
+type SemaforoData = Record<string, SemaforoEntry>
 
 const KPI_META: { key: ScoreKey; label: string; invert: boolean }[] = [
   { key: 'd1_obsolescencia', label: 'D1 Obsolescencia', invert: true },
@@ -57,6 +78,8 @@ export default function CarreraDetallePage() {
   const [notFound, setNotFound] = useState(false)
   const [histD1, setHistD1] = useState<HistoricoSerie | null>(null)
   const [histD2, setHistD2] = useState<HistoricoSerie | null>(null)
+  const [predData, setPredData] = useState<PredData | null>(null)
+  const [semaforoRes, setSemaforoRes] = useState<SemaforoData | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -66,6 +89,14 @@ export default function CarreraDetallePage() {
       .finally(() => setLoading(false))
     getKpisHistorico(id, 'd1_score', 30).then(setHistD1).catch(() => {})
     getKpisHistorico(id, 'd2_score', 30).then(setHistD2).catch(() => {})
+    fetch(`${BASE}/predicciones/carrera/${id}?kpi=D1`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setPredData(data) })
+      .catch(() => {})
+    fetch(`${BASE}/predicciones/carrera/${id}/semaforo`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setSemaforoRes(data) })
+      .catch(() => {})
   }, [id])
 
   if (loading) return <p className="text-gray-400 text-sm py-8 text-center">Cargando...</p>
@@ -125,6 +156,50 @@ export default function CarreraDetallePage() {
             </div>
           </div>
           <MiniLineChart d1={histD1} d2={histD2} />
+        </div>
+      )}
+
+      {/* Semáforo Predictivo */}
+      {semaforoRes && (
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <h2 className="text-lg font-semibold text-gray-800 mb-3">
+            Proyección de Riesgo D1
+          </h2>
+          <div className="flex gap-4">
+            {([['1_año', '1 año'], ['3_años', '3 años'], ['5_años', '5 años']] as [string, string][]).map(([key, label]) => {
+              const s = semaforoRes[key]
+              const colors: Record<string, string> = {
+                verde: 'bg-green-100 text-green-800 border-green-300',
+                amarillo: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+                rojo: 'bg-red-100 text-red-800 border-red-300',
+                sin_datos: 'bg-gray-100 text-gray-500 border-gray-200',
+              }
+              const icons: Record<string, string> = { verde: '🟢', amarillo: '🟡', rojo: '🔴', sin_datos: '⚫' }
+              const colorKey = s?.color ?? 'sin_datos'
+              const cls = colors[colorKey] ?? colors['sin_datos']
+              return (
+                <div key={key} className={`flex-1 p-3 rounded border text-center ${cls}`}>
+                  <div className="text-lg">{icons[colorKey] ?? icons['sin_datos']}</div>
+                  <div className="text-sm font-semibold">{label}</div>
+                  {s?.valor_predicho != null && (
+                    <div className="text-xs mt-1">D1 = {s.valor_predicho.toFixed(2)}</div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Fan Chart D1 */}
+      {predData?.predicciones?.D1 && predData.predicciones.D1.length > 0 && (
+        <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+          <FanChart
+            historico={[]}
+            predicciones={predData.predicciones.D1}
+            kpiNombre="D1"
+            titulo="Proyección D1 — Riesgo de Obsolescencia (3 años)"
+          />
         </div>
       )}
 
