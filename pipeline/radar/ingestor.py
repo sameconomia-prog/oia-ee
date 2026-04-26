@@ -111,6 +111,5 @@ def run_radar_ingestion(db: Session, tipo: str = "despidos") -> IngestResult:
             logger.error("radar_ingest_error", url=url, error=str(e))
             result.errores += 1
 
-    db.commit()
     logger.info("radar_ingestion_complete", tipo=tipo, **result.__dict__)
     return result
