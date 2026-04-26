@@ -5,6 +5,7 @@ from sqlalchemy import (
     DateTime, Numeric, ForeignKey, UniqueConstraint, Index
 )
 from sqlalchemy.orm import DeclarativeBase, relationship
+from pgvector.sqlalchemy import Vector
 
 
 class Base(DeclarativeBase):
@@ -31,6 +32,8 @@ class Noticia(Base):
     causa_ia       = Column(Text)
     resumen_claude = Column(Text)
     embedding_json = Column(Text)
+    embedding      = Column(Vector(1536), nullable=True)
+    # embedding_json se mantiene para migración gradual; se eliminará en P1
     raw_content    = Column(Text)
 
 
