@@ -12,6 +12,7 @@ const links = [
   { href: '/carreras', label: 'Carreras', icon: '🎓' },
   { href: '/kpis', label: 'KPIs', icon: '📊' },
   { href: '/estadisticas', label: 'Estadísticas', icon: '📈' },
+  { href: '/impacto', label: 'Impacto IA', icon: '🌐' },
   { href: '/comparar', label: 'Comparar', icon: '⚖️' },
   { href: '/metodologia', label: 'Metodología', icon: '📐' },
   { href: '/rector', label: 'Rector', icon: '🏛' },

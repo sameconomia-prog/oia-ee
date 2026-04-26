@@ -1,4 +1,4 @@
-import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult, CarreraKpi, KpisNacionalResumen, SkillFreq, VacantePublico, TopRiesgoItem, TendenciaNacional, CarreraDetalle, IesDetalle, EstadisticasPublicas, KpisDistribucion, VacanteTendencia } from './types'
+import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult, CarreraKpi, KpisNacionalResumen, SkillFreq, VacantePublico, TopRiesgoItem, TendenciaNacional, CarreraDetalle, IesDetalle, EstadisticasPublicas, KpisDistribucion, VacanteTendencia, ImpactoData } from './types'
 import { getToken } from './auth'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
@@ -328,6 +328,12 @@ export async function getVacantesTendencia(meses = 12): Promise<VacanteTendencia
 
 export async function getNoticiasTendencia(meses = 12): Promise<VacanteTendencia[]> {
   const res = await fetch(`${BASE}/noticias/tendencia?meses=${meses}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function getImpacto(): Promise<ImpactoData> {
+  const res = await fetch(`${BASE}/publico/impacto`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }

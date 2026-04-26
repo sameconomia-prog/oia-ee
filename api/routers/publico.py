@@ -551,6 +551,144 @@ def detalle_ies(ies_id: str, db: Session = Depends(get_db)):
     )
 
 
+@router.get("/impacto")
+def resumen_impacto(db: Session = Depends(get_db)):
+    """Mapa completo de impacto IA en empleo: despidos, empleos generados, vacantes, ocupaciones."""
+    import json
+    from collections import Counter, defaultdict
+    from pipeline.db.models import Vacante, Ocupacion
+    from sqlalchemy import func
+
+    TIPOS_DESPIDO = ('despido_masivo', 'desplazamiento')
+    TIPOS_POSITIVO = ('adopcion_ia', 'nueva_carrera', 'oportunidad', 'augmentación', 'regulacion')
+
+    noticias_despido = (
+        db.query(Noticia)
+        .filter(Noticia.tipo_impacto.in_(TIPOS_DESPIDO))
+        .order_by(Noticia.n_empleados.desc())
+        .all()
+    )
+    total_empleados_afectados = sum(n.n_empleados or 0 for n in noticias_despido)
+
+    despidos_sector: dict = defaultdict(lambda: {'noticias': 0, 'empleados': 0})
+    despidos_pais: dict = defaultdict(lambda: {'noticias': 0, 'empleados': 0})
+    causa_counter: Counter = Counter()
+    for n in noticias_despido:
+        s = n.sector or 'Sin clasificar'
+        despidos_sector[s]['noticias'] += 1
+        despidos_sector[s]['empleados'] += n.n_empleados or 0
+        p = n.pais or 'Sin especificar'
+        despidos_pais[p]['noticias'] += 1
+        despidos_pais[p]['empleados'] += n.n_empleados or 0
+        if n.causa_ia:
+            causa_counter[n.causa_ia] += 1
+
+    noticias_positivas = (
+        db.query(Noticia)
+        .filter(Noticia.tipo_impacto.in_(TIPOS_POSITIVO))
+        .order_by(Noticia.fecha_ingesta.desc())
+        .all()
+    )
+    positivos_sector: dict = defaultdict(int)
+    for n in noticias_positivas:
+        positivos_sector[n.sector or 'Sin clasificar'] += 1
+
+    # Vacantes activas (empleos IA disponibles ahora)
+    total_vacantes = db.query(Vacante).count()
+    vac_sector = (
+        db.query(Vacante.sector, func.count(Vacante.id))
+        .filter(Vacante.sector.isnot(None))
+        .group_by(Vacante.sector)
+        .order_by(func.count(Vacante.id).desc())
+        .limit(12)
+        .all()
+    )
+    vac_nivel = (
+        db.query(Vacante.nivel_educativo, func.count(Vacante.id))
+        .filter(Vacante.nivel_educativo.isnot(None))
+        .group_by(Vacante.nivel_educativo)
+        .all()
+    )
+
+    all_skills_rows = db.query(Vacante.skills).filter(Vacante.skills.isnot(None)).all()
+    skills_counter: Counter = Counter()
+    for (skills_json,) in all_skills_rows:
+        try:
+            skills_counter.update(s.strip() for s in json.loads(skills_json) if isinstance(s, str) and s.strip())
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    # Ocupaciones ONET
+    ocup_riesgo = db.query(Ocupacion).order_by(Ocupacion.p_automatizacion.desc()).limit(10).all()
+    ocup_oportunidad = db.query(Ocupacion).order_by(Ocupacion.p_augmentacion.desc()).limit(10).all()
+
+    def _ocup_out(o: Ocupacion) -> dict:
+        return {
+            "nombre": o.nombre,
+            "p_automatizacion": float(o.p_automatizacion or 0),
+            "p_augmentacion": float(o.p_augmentacion or 0),
+            "sector": o.sector,
+            "salario_mediana_usd": o.salario_mediana_usd,
+        }
+
+    return {
+        "resumen": {
+            "total_noticias_despido": len(noticias_despido),
+            "total_empleados_afectados": total_empleados_afectados,
+            "total_noticias_positivas": len(noticias_positivas),
+            "total_vacantes_ia": total_vacantes,
+        },
+        "despidos_por_sector": sorted(
+            [{"sector": k, **v} for k, v in despidos_sector.items()],
+            key=lambda x: x["empleados"], reverse=True
+        ),
+        "despidos_por_pais": sorted(
+            [{"pais": k, **v} for k, v in despidos_pais.items()],
+            key=lambda x: x["noticias"], reverse=True
+        )[:15],
+        "despidos_por_causa_ia": [{"causa": k, "count": v} for k, v in causa_counter.most_common(10)],
+        "top_eventos_despido": [
+            {
+                "id": n.id,
+                "empresa": n.empresa,
+                "titulo": n.titulo,
+                "n_empleados": n.n_empleados,
+                "sector": n.sector,
+                "pais": n.pais,
+                "causa_ia": n.causa_ia,
+                "fecha": str(n.fecha_pub or n.fecha_ingesta or ""),
+                "url": n.url,
+            }
+            for n in noticias_despido if (n.n_empleados or 0) > 0
+        ][:15],
+        "noticias_positivas_recientes": [
+            {
+                "id": n.id,
+                "titulo": n.titulo,
+                "empresa": n.empresa,
+                "sector": n.sector,
+                "tipo_impacto": n.tipo_impacto,
+                "pais": n.pais,
+                "fecha": str(n.fecha_pub or n.fecha_ingesta or ""),
+                "url": n.url,
+                "resumen": n.resumen_claude,
+            }
+            for n in noticias_positivas[:15]
+        ],
+        "positivos_por_sector": sorted(
+            [{"sector": k, "noticias": v} for k, v in positivos_sector.items()],
+            key=lambda x: x["noticias"], reverse=True
+        ),
+        "vacantes_por_sector": [{"sector": s, "count": c} for s, c in vac_sector],
+        "vacantes_por_nivel_educativo": [{"nivel": n, "count": c} for n, c in vac_nivel],
+        "top_skills_demandados": [
+            {"skill": k, "count": v} for k, v in skills_counter.most_common(20)
+        ],
+        "ocupaciones_mayor_riesgo": [_ocup_out(o) for o in ocup_riesgo],
+        "ocupaciones_mayor_oportunidad": [_ocup_out(o) for o in ocup_oportunidad],
+    }
+
+
 @router.get("/ies", response_model=list[IesOut])
 def listar_ies_publico(q: Optional[str] = None, db: Session = Depends(get_db)):
     from sqlalchemy import func

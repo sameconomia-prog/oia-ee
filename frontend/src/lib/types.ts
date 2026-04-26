@@ -305,3 +305,89 @@ export interface VacanteTendencia {
   mes: string
   count: number
 }
+
+export interface ImpactoResumen {
+  total_noticias_despido: number
+  total_empleados_afectados: number
+  total_noticias_positivas: number
+  total_vacantes_ia: number
+}
+
+export interface ImpactoSector {
+  sector: string
+  noticias: number
+  empleados: number
+}
+
+export interface ImpactoPais {
+  pais: string
+  noticias: number
+  empleados: number
+}
+
+export interface ImpactoCausa {
+  causa: string
+  count: number
+}
+
+export interface ImpactoEventoDespido {
+  id: string
+  empresa: string | null
+  titulo: string
+  n_empleados: number | null
+  sector: string | null
+  pais: string | null
+  causa_ia: string | null
+  fecha: string
+  url: string
+}
+
+export interface ImpactoNoticiaPositiva {
+  id: string
+  titulo: string
+  empresa: string | null
+  sector: string | null
+  tipo_impacto: string | null
+  pais: string | null
+  fecha: string
+  url: string
+  resumen: string | null
+}
+
+export interface ImpactoVacanteSector {
+  sector: string
+  count: number
+}
+
+export interface ImpactoSkill {
+  skill: string
+  count: number
+}
+
+export interface ImpactoOcupacion {
+  nombre: string
+  p_automatizacion: number
+  p_augmentacion: number
+  sector: string | null
+  salario_mediana_usd: number | null
+}
+
+export interface ImpactoPositivoSector {
+  sector: string
+  noticias: number
+}
+
+export interface ImpactoData {
+  resumen: ImpactoResumen
+  despidos_por_sector: ImpactoSector[]
+  despidos_por_pais: ImpactoPais[]
+  despidos_por_causa_ia: ImpactoCausa[]
+  top_eventos_despido: ImpactoEventoDespido[]
+  noticias_positivas_recientes: ImpactoNoticiaPositiva[]
+  positivos_por_sector: ImpactoPositivoSector[]
+  vacantes_por_sector: ImpactoVacanteSector[]
+  vacantes_por_nivel_educativo: { nivel: string; count: number }[]
+  top_skills_demandados: ImpactoSkill[]
+  ocupaciones_mayor_riesgo: ImpactoOcupacion[]
+  ocupaciones_mayor_oportunidad: ImpactoOcupacion[]
+}
