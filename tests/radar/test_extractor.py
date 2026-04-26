@@ -151,3 +151,51 @@ def test_extract_despido_returns_none_when_both_keys_absent():
     assert result is None
     mock_groq.assert_not_called()
     mock_haiku.assert_not_called()
+
+
+def test_extract_empleo_uses_groq_when_groq_key_present():
+    """Groq se usa primero en empleo cuando GROQ_API_KEY está disponible."""
+    groq_resp = json.dumps({
+        "empresa": "OpenAI", "pais": "US", "sector": "tech",
+        "fecha_anuncio": "2025-01-01", "numero_empleos": 200,
+        "tipo_contrato": "permanente", "titulo_puesto": "AI Engineer",
+        "habilidades_requeridas": ["Python"], "salario_min_usd": 150000,
+        "salario_max_usd": 300000, "ia_tecnologia_usada": "GPT-4",
+        "confiabilidad": "alta",
+    })
+
+    with patch("pipeline.radar.extractor.call_groq", return_value=groq_resp) as mock_groq, \
+         patch("pipeline.radar.extractor._call_haiku") as mock_haiku:
+
+        result = extract_empleo_event(NOTICIA_EMPLEO, groq_api_key="groq-test-key")
+
+    assert isinstance(result, ExtractedEmpleo)
+    assert result.empresa == "OpenAI"
+    mock_groq.assert_called_once()
+    mock_haiku.assert_not_called()
+
+
+def test_extract_despido_falls_back_to_claude_when_groq_returns_malformed_json():
+    """Si Groq retorna JSON malformado, se intenta Claude Haiku."""
+    haiku_resp = MagicMock()
+    haiku_resp.content = [MagicMock(text=json.dumps({
+        "empresa": "FallbackCorp", "pais": "MX", "sector": "tech",
+        "fecha_anuncio": "2025-03-01", "numero_despidos": 50,
+        "rango_min_despidos": None, "rango_max_despidos": None,
+        "salario_promedio_usd": None, "ia_tecnologia": None,
+        "area_reemplazada": None, "porcentaje_fuerza_laboral": None,
+        "es_reemplazo_total": None, "confiabilidad": "baja",
+    }))]
+
+    with patch("pipeline.radar.extractor.call_groq", return_value="Here is the JSON: not valid json {"), \
+         patch("anthropic.Anthropic") as MockAnthropic:
+        MockAnthropic.return_value.messages.create.return_value = haiku_resp
+
+        result = extract_despido_event(
+            NOTICIA_DESPIDO,
+            api_key="anthropic-test-key",
+            groq_api_key="groq-test-key",
+        )
+
+    assert isinstance(result, ExtractedDespido)
+    assert result.empresa == "FallbackCorp"

@@ -92,10 +92,10 @@ def _call_haiku(prompt: str, api_key: str) -> Optional[str]:
 
 
 def _resolve_raw(prompt: str, groq_key: Optional[str], anthropic_key: Optional[str]) -> Optional[str]:
-    """Intenta Groq primero, luego Claude Haiku. Retorna texto crudo o None."""
+    """Intenta Groq primero, luego Claude Haiku. Retorna texto crudo parseable o None."""
     if groq_key:
         raw = call_groq(prompt, groq_key)
-        if raw is not None:
+        if raw is not None and _parse_json_response(raw) is not None:
             return raw
     if anthropic_key:
         return _call_haiku(prompt, anthropic_key)
