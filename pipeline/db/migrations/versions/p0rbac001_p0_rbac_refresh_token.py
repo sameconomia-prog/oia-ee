@@ -22,8 +22,8 @@ def upgrade() -> None:
         sa.Column('usuario_id', sa.String(36), sa.ForeignKey('usuarios.id'), nullable=False),
         sa.Column('token', sa.String(255), unique=True, nullable=False),
         sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
-        sa.Column('revocado', sa.Boolean(), default=False),
-        sa.Column('created_at', sa.DateTime(timezone=True)),
+        sa.Column('revocado', sa.Boolean(), nullable=False, server_default=sa.false()),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
     )
 
 
