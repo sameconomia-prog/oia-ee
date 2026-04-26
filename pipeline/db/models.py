@@ -157,3 +157,16 @@ class Usuario(Base):
     ies_id          = Column(String(36), ForeignKey("ies.id"), nullable=False)
     activo          = Column(Boolean, default=True)
     email           = Column(String(200), nullable=True)
+    rol             = Column(String(20), nullable=False, default="viewer")
+    # Valores válidos: 'viewer', 'researcher', 'admin_ies', 'superadmin'
+
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+    id          = Column(String(36), primary_key=True, default=_uuid)
+    usuario_id  = Column(String(36), ForeignKey("usuarios.id"), nullable=False)
+    token       = Column(String(255), unique=True, nullable=False)
+    expires_at  = Column(DateTime(timezone=True), nullable=False)
+    revocado    = Column(Boolean, default=False)
+    created_at  = Column(DateTime(timezone=True), default=datetime.utcnow)
+    usuario     = relationship("Usuario")
