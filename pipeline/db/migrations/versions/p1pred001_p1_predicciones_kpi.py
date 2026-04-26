@@ -29,7 +29,7 @@ def upgrade() -> None:
         sa.Column('ci_95_lower', sa.Float()),
         sa.Column('ci_95_upper', sa.Float()),
         sa.Column('modelo_version', sa.String(20), nullable=False),
-        sa.Column('fecha_generacion', sa.DateTime(timezone=True), server_default=sa.func.now()),
+        sa.Column('fecha_generacion', sa.DateTime(timezone=True)),
     )
     op.create_index('idx_pred_entidad_kpi', 'predicciones_kpi',
                     ['entidad_tipo', 'entidad_id', 'kpi_nombre'])
