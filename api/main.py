@@ -7,11 +7,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
 from apscheduler.schedulers.background import BackgroundScheduler
-from api.routers import noticias, kpis, admin, rector, alertas, escenarios, auth, publico
+from api.routers import noticias, kpis, admin, rector, alertas, escenarios, auth, publico, radar
 from pipeline.db import get_session
 from pipeline.jobs.alert_job import run_alert_job
 from pipeline.jobs.news_ingest_job import run_news_ingest
 from pipeline.jobs.kpi_snapshot_job import run_kpi_snapshot
+from pipeline.jobs.radar_job import run_radar_despidos_job, run_radar_empleos_job, run_obsidian_sync_job
 
 # Sentry — solo en producción
 _SENTRY_DSN = os.getenv("SENTRY_DSN", "")
@@ -66,6 +67,9 @@ async def lifespan(app: FastAPI):
         _scheduler.add_job(_run_alert_job_scheduled, "cron", hour=3, minute=0)
         _scheduler.add_job(_run_news_job_scheduled, "cron", hour="*/6")
         _scheduler.add_job(_run_snapshot_job_scheduled, "cron", day_of_week="mon", hour=5)
+        _scheduler.add_job(run_radar_despidos_job, "cron", hour="*/12")
+        _scheduler.add_job(run_radar_empleos_job, "cron", hour="*/12", minute=30)
+        _scheduler.add_job(run_obsidian_sync_job, "cron", day_of_week="sun", hour=6)
         _scheduler.start()
         logger.info("scheduler_started")
 
@@ -94,6 +98,7 @@ app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(rector.router, prefix="/rector", tags=["rector"])
 app.include_router(alertas.router, prefix="/alertas", tags=["alertas"])
 app.include_router(escenarios.router, prefix="/escenarios", tags=["escenarios"])
+app.include_router(radar.router, prefix="/radar", tags=["radar"])
 
 
 @app.get("/health")
