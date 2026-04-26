@@ -7,6 +7,7 @@ Configurar en Railway > Project > Variables:
 | `DATABASE_URL` | Auto-inyectada por Railway PostgreSQL add-on | (automático) |
 | `JWT_SECRET_KEY` | Clave secreta JWT — generar con `openssl rand -hex 32` | abc123... |
 | `ANTHROPIC_API_KEY` | API key de Anthropic | sk-ant-... |
+| `GROQ_API_KEY` | API key Groq Free Tier (clasificador primario P8) | gsk_... (obtener en console.groq.com) |
 | `ENVIRONMENT` | Entorno | `production` |
 | `ENABLE_SCHEDULER` | Activar job de alertas nocturno | `true` |
 | `ADMIN_API_KEY` | Clave para endpoints /admin | (generar) |
