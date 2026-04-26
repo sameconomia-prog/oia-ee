@@ -19,6 +19,11 @@ def upgrade() -> None:
         op.execute("CREATE EXTENSION IF NOT EXISTS vector")
     op.add_column('noticias', sa.Column('embedding', sa.Text(), nullable=True,
                   comment='pgvector vector(1536) — tipo Text en migración, convertir manualmente si se requiere'))
+    # TODO(p1-migration): In production PostgreSQL, run manually:
+    #   ALTER TABLE noticias ALTER COLUMN embedding TYPE vector(1536)
+    #   USING embedding::vector(1536);
+    # The ORM model uses Vector(1536) but this migration uses Text to stay SQLite-safe.
+    # Alembic autogenerate will detect drift — add a dedicated P1 migration to fix the type.
 
 
 def downgrade() -> None:
