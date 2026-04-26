@@ -13,6 +13,7 @@ from pipeline.jobs.alert_job import run_alert_job
 from pipeline.jobs.news_ingest_job import run_news_ingest
 from pipeline.jobs.kpi_snapshot_job import run_kpi_snapshot
 from pipeline.jobs.radar_job import run_radar_despidos_job, run_radar_empleos_job, run_obsidian_sync_job
+from pipeline.jobs.forecast_job import run_forecast_job, run_skills_job
 
 # Sentry — solo en producción
 _SENTRY_DSN = os.getenv("SENTRY_DSN", "")
@@ -70,6 +71,8 @@ async def lifespan(app: FastAPI):
         _scheduler.add_job(run_radar_despidos_job, "cron", hour="*/12")
         _scheduler.add_job(run_radar_empleos_job, "cron", hour="*/12", minute=30)
         _scheduler.add_job(run_obsidian_sync_job, "cron", day_of_week="sun", hour=6)
+        _scheduler.add_job(run_forecast_job, "cron", day_of_week="sun", hour=4)
+        _scheduler.add_job(run_skills_job, "cron", day_of_week="sun", hour=5)
         _scheduler.start()
         logger.info("scheduler_started")
 
