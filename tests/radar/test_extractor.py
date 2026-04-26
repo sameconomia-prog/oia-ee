@@ -91,3 +91,63 @@ def test_extract_empleo_event_returns_structured_data():
     assert result.empresa == "OpenAI"
     assert result.numero_empleos == 500
     assert "Python" in result.habilidades_requeridas
+
+
+def test_extract_despido_uses_groq_when_groq_key_present():
+    """Groq se usa primero cuando GROQ_API_KEY está disponible."""
+    groq_resp = json.dumps({
+        "empresa": "TechCorp", "pais": "US", "sector": "tech",
+        "fecha_anuncio": "2025-01-01", "numero_despidos": 500,
+        "rango_min_despidos": None, "rango_max_despidos": None,
+        "salario_promedio_usd": None, "ia_tecnologia": "GPT-4",
+        "area_reemplazada": "support", "porcentaje_fuerza_laboral": None,
+        "es_reemplazo_total": False, "confiabilidad": "media",
+    })
+
+    with patch("pipeline.radar.extractor.call_groq", return_value=groq_resp) as mock_groq, \
+         patch("pipeline.radar.extractor._call_haiku") as mock_haiku:
+
+        result = extract_despido_event(NOTICIA_DESPIDO, groq_api_key="groq-test-key")
+
+    assert isinstance(result, ExtractedDespido)
+    assert result.empresa == "TechCorp"
+    mock_groq.assert_called_once()
+    mock_haiku.assert_not_called()
+
+
+def test_extract_despido_falls_back_to_claude_when_groq_fails():
+    """Si Groq retorna None, se intenta Claude Haiku."""
+    haiku_resp = MagicMock()
+    haiku_resp.content = [MagicMock(text=json.dumps({
+        "empresa": "AcmeCorp", "pais": "MX", "sector": "retail",
+        "fecha_anuncio": "2025-02-01", "numero_despidos": 100,
+        "rango_min_despidos": None, "rango_max_despidos": None,
+        "salario_promedio_usd": None, "ia_tecnologia": None,
+        "area_reemplazada": None, "porcentaje_fuerza_laboral": None,
+        "es_reemplazo_total": None, "confiabilidad": "baja",
+    }))]
+
+    with patch("pipeline.radar.extractor.call_groq", return_value=None), \
+         patch("anthropic.Anthropic") as MockAnthropic:
+        MockAnthropic.return_value.messages.create.return_value = haiku_resp
+
+        result = extract_despido_event(
+            NOTICIA_DESPIDO,
+            api_key="anthropic-test-key",
+            groq_api_key="groq-test-key",
+        )
+
+    assert isinstance(result, ExtractedDespido)
+    assert result.empresa == "AcmeCorp"
+
+
+def test_extract_despido_returns_none_when_both_keys_absent():
+    """Sin keys, retorna None (no hay LLM disponible)."""
+    with patch("pipeline.radar.extractor.call_groq") as mock_groq, \
+         patch("pipeline.radar.extractor._call_haiku") as mock_haiku:
+
+        result = extract_despido_event(NOTICIA_DESPIDO, api_key="", groq_api_key="")
+
+    assert result is None
+    mock_groq.assert_not_called()
+    mock_haiku.assert_not_called()

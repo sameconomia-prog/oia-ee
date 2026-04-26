@@ -1,11 +1,12 @@
 # pipeline/radar/extractor.py
-"""Extrae datos estructurados de noticias usando Claude Haiku."""
+"""Extrae datos estructurados de noticias. Cadena: Groq → Claude Haiku → None."""
 import json
 import os
 import structlog
 from dataclasses import dataclass, field
 from typing import Optional
 import anthropic
+from pipeline.radar.groq_classifier import call_groq
 
 logger = structlog.get_logger()
 
@@ -90,9 +91,38 @@ def _call_haiku(prompt: str, api_key: str) -> Optional[str]:
         return None
 
 
-def extract_despido_event(article_text: str, api_key: Optional[str] = None) -> Optional[ExtractedDespido]:
-    """Extrae datos de evento de despido por IA de un artículo de noticias."""
-    key = api_key or os.getenv("ANTHROPIC_API_KEY", "")
+def _resolve_raw(prompt: str, groq_key: Optional[str], anthropic_key: Optional[str]) -> Optional[str]:
+    """Intenta Groq primero, luego Claude Haiku. Retorna texto crudo o None."""
+    if groq_key:
+        raw = call_groq(prompt, groq_key)
+        if raw is not None:
+            return raw
+    if anthropic_key:
+        return _call_haiku(prompt, anthropic_key)
+    return None
+
+
+def _parse_json_response(raw: Optional[str]) -> Optional[dict]:
+    if not raw or raw.strip() == "null":
+        return None
+    try:
+        data = json.loads(raw.strip())
+        if not data or not isinstance(data, dict):
+            return None
+        return data
+    except (json.JSONDecodeError, TypeError):
+        return None
+
+
+def extract_despido_event(
+    article_text: str,
+    api_key: Optional[str] = None,
+    groq_api_key: Optional[str] = None,
+) -> Optional[ExtractedDespido]:
+    """Extrae evento de despido por IA. Usa Groq → Claude → None."""
+    groq_key = groq_api_key if groq_api_key is not None else os.getenv("GROQ_API_KEY", "") or None
+    anthropic_key = api_key if api_key is not None else os.getenv("ANTHROPIC_API_KEY", "") or None
+
     schema_str = json.dumps(_DESPIDO_SCHEMA, ensure_ascii=False, indent=2)
     prompt = f"""Extrae de este artículo datos sobre despidos causados por implementación de IA.
 Devuelve SOLO un objeto JSON con este schema (usa null si no está disponible):
@@ -104,22 +134,26 @@ Artículo:
 IMPORTANTE: Si el artículo NO describe despidos por IA, devuelve: null
 Responde SOLO con el JSON o null, sin explicación."""
 
-    raw = _call_haiku(prompt, key)
-    if not raw or raw.strip() == "null":
+    raw = _resolve_raw(prompt, groq_key, anthropic_key)
+    data = _parse_json_response(raw)
+    if data is None:
         return None
     try:
-        data = json.loads(raw.strip())
-        if not data or not isinstance(data, dict):
-            return None
         return ExtractedDespido(**{k: data.get(k) for k in ExtractedDespido.__dataclass_fields__})
-    except (json.JSONDecodeError, TypeError) as e:
+    except TypeError as e:
         logger.warning("despido_extract_parse_error", error=str(e))
         return None
 
 
-def extract_empleo_event(article_text: str, api_key: Optional[str] = None) -> Optional[ExtractedEmpleo]:
-    """Extrae datos de nuevos empleos generados por IA de un artículo."""
-    key = api_key or os.getenv("ANTHROPIC_API_KEY", "")
+def extract_empleo_event(
+    article_text: str,
+    api_key: Optional[str] = None,
+    groq_api_key: Optional[str] = None,
+) -> Optional[ExtractedEmpleo]:
+    """Extrae evento de empleo por IA. Usa Groq → Claude → None."""
+    groq_key = groq_api_key if groq_api_key is not None else os.getenv("GROQ_API_KEY", "") or None
+    anthropic_key = api_key if api_key is not None else os.getenv("ANTHROPIC_API_KEY", "") or None
+
     schema_str = json.dumps(_EMPLEO_SCHEMA, ensure_ascii=False, indent=2)
     prompt = f"""Extrae de este artículo datos sobre empleos NUEVOS creados por empresas que usan IA.
 Devuelve SOLO un objeto JSON con este schema (usa null si no está disponible):
@@ -131,14 +165,12 @@ Artículo:
 IMPORTANTE: Si el artículo NO describe creación de empleos relacionados con IA, devuelve: null
 Responde SOLO con el JSON o null, sin explicación."""
 
-    raw = _call_haiku(prompt, key)
-    if not raw or raw.strip() == "null":
+    raw = _resolve_raw(prompt, groq_key, anthropic_key)
+    data = _parse_json_response(raw)
+    if data is None:
         return None
     try:
-        data = json.loads(raw.strip())
-        if not data or not isinstance(data, dict):
-            return None
         return ExtractedEmpleo(**{k: data.get(k) for k in ExtractedEmpleo.__dataclass_fields__})
-    except (json.JSONDecodeError, TypeError) as e:
+    except TypeError as e:
         logger.warning("empleo_extract_parse_error", error=str(e))
         return None
