@@ -1,6 +1,4 @@
 # tests/radar/test_groq_classifier.py
-import pytest
-import json
 from unittest.mock import patch, MagicMock
 from pipeline.radar.groq_classifier import call_groq
 
