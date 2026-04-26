@@ -13,14 +13,15 @@ test('homepage muestra estadísticas y top riesgo', async ({ page }) => {
 test('carreras - lista carga y permite búsqueda', async ({ page }) => {
   await page.goto('/carreras')
   await expect(page.getByRole('heading', { name: /carreras/i })).toBeVisible()
+  // El input de búsqueda debe existir (falla si hay bug de renderizado)
   const searchInput = page.getByPlaceholder(/buscar/i)
-  if (await searchInput.isVisible()) {
-    await searchInput.fill('ingeniería')
-    await page.waitForTimeout(500)
-    const rows = page.locator('table tbody tr')
-    const count = await rows.count()
-    expect(count).toBeGreaterThanOrEqual(0)
-  }
+  await expect(searchInput).toBeVisible()
+  // Escribir en el input no debe crashear la página
+  await searchInput.fill('ingeniería')
+  await page.waitForTimeout(800)
+  // La página no debe mostrar error
+  await expect(page.locator('body')).not.toContainText('Internal Server Error')
+  await expect(page.locator('body')).not.toContainText('Error 500')
 })
 
 // Flujo 3: Listado de IES
