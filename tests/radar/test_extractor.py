@@ -1,5 +1,4 @@
 # tests/radar/test_extractor.py
-import pytest
 import json
 from unittest.mock import patch, MagicMock
 from pipeline.radar.extractor import extract_despido_event, extract_empleo_event, ExtractedDespido, ExtractedEmpleo
@@ -171,6 +170,16 @@ def test_extract_empleo_uses_groq_when_groq_key_present():
 
     assert isinstance(result, ExtractedEmpleo)
     assert result.empresa == "OpenAI"
+    mock_groq.assert_called_once()
+    mock_haiku.assert_not_called()
+
+
+def test_extract_despido_returns_none_without_calling_claude_when_groq_says_null():
+    """Groq 'null' es respuesta válida — Haiku NO debe llamarse."""
+    with patch("pipeline.radar.extractor.call_groq", return_value="null") as mock_groq, \
+         patch("pipeline.radar.extractor._call_haiku") as mock_haiku:
+        result = extract_despido_event(NOTICIA_DESPIDO, groq_api_key="groq-test-key")
+    assert result is None
     mock_groq.assert_called_once()
     mock_haiku.assert_not_called()
 
