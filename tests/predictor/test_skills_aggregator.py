@@ -22,7 +22,7 @@ def test_aggregate_skills_counts_mentions(session):
 
 
 def test_aggregate_skills_updates_existing(session):
-    existing = SkillEmergente(skill="SQL", categoria="tecnica", menciones_30d=10)
+    existing = SkillEmergente(skill="Sql", categoria="tecnica", menciones_30d=10)
     session.add(existing)
     session.flush()
 
@@ -31,6 +31,6 @@ def test_aggregate_skills_updates_existing(session):
 
     aggregate_skills_from_vacantes(db=session)
 
-    skills = session.query(SkillEmergente).filter_by(skill="SQL").all()
+    skills = session.query(SkillEmergente).filter_by(skill="Sql").all()
     assert len(skills) == 1  # no duplicar
-    assert skills[0].menciones_30d >= 1
+    assert skills[0].menciones_30d == 1
