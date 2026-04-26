@@ -6,6 +6,7 @@ from datetime import date
 from sqlalchemy.orm import Session
 from pipeline.radar.sources.grok_source import fetch_grok_news
 from pipeline.radar.sources.newsapi_source import fetch_newsapi_articles
+from pipeline.radar.sources.gdelt_radar_source import fetch_gdelt_articles
 from pipeline.radar.extractor import extract_despido_event, extract_empleo_event
 from pipeline.db.models_radar import EventoIADespido, EventoIAEmpleo
 
@@ -43,7 +44,8 @@ def run_radar_ingestion(db: Session, tipo: str = "despidos") -> IngestResult:
 
     grok_articles = fetch_grok_news(tipo=tipo)
     newsapi_articles = fetch_newsapi_articles(tipo=tipo)
-    all_articles = grok_articles + newsapi_articles
+    gdelt_articles = fetch_gdelt_articles(tipo=tipo)
+    all_articles = grok_articles + newsapi_articles + gdelt_articles
 
     logger.info("radar_ingestion_start", tipo=tipo, total_articles=len(all_articles))
 
