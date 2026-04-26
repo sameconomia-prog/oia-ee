@@ -1,14 +1,34 @@
 # api/main.py
 import os
+import structlog
 from contextlib import asynccontextmanager
+import redis.asyncio as aioredis
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_limiter import FastAPILimiter
 from apscheduler.schedulers.background import BackgroundScheduler
 from api.routers import noticias, kpis, admin, rector, alertas, escenarios, auth, publico
 from pipeline.db import get_session
 from pipeline.jobs.alert_job import run_alert_job
 from pipeline.jobs.news_ingest_job import run_news_ingest
 from pipeline.jobs.kpi_snapshot_job import run_kpi_snapshot
+
+# Sentry — solo en producción
+_SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+if _SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+    sentry_sdk.init(dsn=_SENTRY_DSN, integrations=[FastApiIntegration()], traces_sample_rate=0.1)
+
+# structlog config
+structlog.configure(
+    processors=[
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.add_log_level,
+        structlog.processors.JSONRenderer(),
+    ]
+)
+logger = structlog.get_logger()
 
 _scheduler = BackgroundScheduler()
 
@@ -32,24 +52,38 @@ def _run_snapshot_job_scheduled() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Redis para rate limiting (graceful degradation si no está disponible)
+    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+    try:
+        redis = aioredis.from_url(redis_url, encoding="utf-8", decode_responses=True)
+        await FastAPILimiter.init(redis)
+        logger.info("redis_connected", url=redis_url)
+    except Exception as e:
+        logger.warning("redis_unavailable", error=str(e), detail="Rate limiting deshabilitado")
+
+    # Scheduler
     if os.getenv("ENABLE_SCHEDULER", "false").lower() == "true":
         _scheduler.add_job(_run_alert_job_scheduled, "cron", hour=3, minute=0)
         _scheduler.add_job(_run_news_job_scheduled, "cron", hour="*/6")
         _scheduler.add_job(_run_snapshot_job_scheduled, "cron", day_of_week="mon", hour=5)
         _scheduler.start()
+        logger.info("scheduler_started")
+
     yield
+
     if _scheduler.running:
         _scheduler.shutdown()
 
 
-app = FastAPI(title="OIA-EE API", version="0.8.0", lifespan=lifespan)
+app = FastAPI(title="OIA-EE API", version="0.9.0", lifespan=lifespan)
 
+_ALLOWED_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGIN", "http://localhost:3000").split(",")]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[o.strip() for o in os.getenv("CORS_ORIGIN", "http://localhost:3000").split(",")],
+    allow_origins=_ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 app.include_router(publico.router, prefix="/publico", tags=["publico"])
@@ -64,4 +98,4 @@ app.include_router(escenarios.router, prefix="/escenarios", tags=["escenarios"])
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "version": "0.9.0"}
