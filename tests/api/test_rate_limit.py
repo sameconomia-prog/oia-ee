@@ -82,22 +82,13 @@ def test_key_no_registrada_retorna_anon(session):
     assert tier == "anon"
 
 
-def test_dynamic_rate_limiter_anon_retorna_limiter():
-    # Cuando se llama con tier="anon", retorna un RateLimiter (o None si Redis falla)
-    result = dynamic_rate_limiter("anon")
-    # En full test suite: FastAPILimiter está inicializado → RateLimiter
-    # En test aislado: no está inicializado → None
-    # Ambos son válidos; lo importante es que no lance excepción
-    assert result is None or str(type(result).__name__) == "RateLimiter"
-
-
-def test_dynamic_rate_limiter_researcher_retorna_limiter():
-    # Cuando se llama con tier="researcher", retorna un RateLimiter (o None si Redis falla)
-    result = dynamic_rate_limiter("researcher")
-    assert result is None or str(type(result).__name__) == "RateLimiter"
+def test_dynamic_rate_limiter_sin_redis_retorna_none():
+    from unittest.mock import patch
+    with patch("api.middleware.rate_limit.FastAPILimiter.redis", None):
+        result = dynamic_rate_limiter("anon")
+        assert result is None
 
 
 def test_dynamic_rate_limiter_premium_retorna_none():
-    # Premium siempre retorna None (sin límite)
     result = dynamic_rate_limiter("premium")
     assert result is None
