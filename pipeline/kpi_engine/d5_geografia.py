@@ -61,15 +61,24 @@ def calcular_ies_s(estado: str, session: Session) -> float:
         .count()
     )
 
-    imss_row = (
-        session.query(sqlalchemy_func.sum(EmpleoFormalIMSS.trabajadores))
+    # Find the latest period first (ano, mes), then sum only that period
+    latest = (
+        session.query(EmpleoFormalIMSS.anio, EmpleoFormalIMSS.mes)
         .filter(EmpleoFormalIMSS.estado == estado)
         .order_by(EmpleoFormalIMSS.anio.desc(), EmpleoFormalIMSS.mes.desc())
         .first()
     )
 
-    if imss_row and imss_row[0]:
-        empleo = int(imss_row[0])
+    if latest:
+        empleo = int(
+            session.query(sqlalchemy_func.sum(EmpleoFormalIMSS.trabajadores))
+            .filter(
+                EmpleoFormalIMSS.estado == estado,
+                EmpleoFormalIMSS.anio == latest.anio,
+                EmpleoFormalIMSS.mes == latest.mes,
+            )
+            .scalar() or 0
+        )
     else:
         empleo = session.query(Vacante).filter(Vacante.estado == estado).count()
 
