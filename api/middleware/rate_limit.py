@@ -5,6 +5,7 @@ Tiers:
   researcher — 300 req/min (API key de investigador)
   premium    — sin límite (instituciones con contrato)
 """
+from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
 
 RATE_LIMITS = {
@@ -16,3 +17,17 @@ RATE_LIMITS = {
 # Dependencias FastAPI listas para usar en routers
 anon_limit = RateLimiter(times=30, seconds=60)
 researcher_limit = RateLimiter(times=300, seconds=60)
+
+
+def dynamic_rate_limiter(tier: str):
+    """Retorna instancia RateLimiter para el tier dado, o None si Redis no está disponible o es premium."""
+    try:
+        if FastAPILimiter.redis is None:
+            return None
+    except AttributeError:
+        return None
+    if tier == "premium":
+        return None
+    elif tier == "researcher":
+        return RateLimiter(times=300, seconds=60)
+    return RateLimiter(times=30, seconds=60)

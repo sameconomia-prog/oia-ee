@@ -1,12 +1,15 @@
 # api/deps.py
+import hashlib
 import os
+from datetime import date
 from typing import Callable
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from pipeline.db import get_session
 from pipeline.db.models import Usuario
+from pipeline.db.models_apikey import ApiKey
 
 _SECRET = os.getenv("JWT_SECRET_KEY", "dev-secret-change-in-prod")
 _ALGORITHM = "HS256"
@@ -55,3 +58,19 @@ def require_roles(*roles: str) -> Callable:
 get_admin_user = require_roles("admin_ies", "superadmin")
 get_researcher_user = require_roles("researcher", "admin_ies", "superadmin")
 get_superadmin_user = require_roles("superadmin")
+
+
+def get_api_key_tier(request: Request, db: Session = Depends(get_db)) -> str:
+    """Lee X-API-Key, valida contra BD, retorna tier. Siempre retorna 'anon' en caso de duda."""
+    raw_key = request.headers.get("X-API-Key", "")
+    if not raw_key:
+        return "anon"
+    key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
+    api_key = db.query(ApiKey).filter_by(key_hash=key_hash).first()
+    if not api_key:
+        return "anon"
+    if api_key.revoked:
+        return "anon"
+    if api_key.expires_at and api_key.expires_at < date.today():
+        return "anon"
+    return api_key.tier
