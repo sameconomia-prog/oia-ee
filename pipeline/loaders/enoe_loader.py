@@ -58,7 +58,7 @@ def _fetch_serie(serie: str, geo_code: str, anio: int, trimestre: int,
     target_period = f"{anio}/{mes:02d}"
     url = f"{_INEGI_API}/{serie}/es/{geo_code}/false/BIE/2.0/{token}.json"
     try:
-        resp = httpx.get(url, timeout=15.0)
+        resp = httpx.get(url, timeout=30.0)
         resp.raise_for_status()
         data = resp.json()
         obs = data.get("Series", [{}])[0].get("Obs", [])
