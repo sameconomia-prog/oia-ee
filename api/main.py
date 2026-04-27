@@ -62,6 +62,7 @@ async def lifespan(app: FastAPI):
         logger.info("redis_connected", url=redis_url)
     except Exception as e:
         logger.warning("redis_unavailable", error=str(e), detail="Rate limiting deshabilitado")
+        FastAPILimiter.redis = None  # ensure dynamic_rate_limiter gracefully skips
 
     # Scheduler
     if os.getenv("ENABLE_SCHEDULER", "false").lower() == "true":
