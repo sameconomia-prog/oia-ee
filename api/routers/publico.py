@@ -5,11 +5,11 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
-from api.deps import get_db
+from api.deps import get_db, rate_limit_public
 from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut, IesDetalleOut, KpisDistribucionOut, KpisBinOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(rate_limit_public)])
 
 _kpis_cache_lock = threading.Lock()
 _kpis_cache: dict = {"data": None, "at": 0.0}

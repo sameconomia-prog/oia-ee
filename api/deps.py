@@ -3,13 +3,14 @@ import hashlib
 import os
 from datetime import date
 from typing import Callable
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from pipeline.db import get_session
 from pipeline.db.models import Usuario
 from pipeline.db.models_apikey import ApiKey
+from api.middleware.rate_limit import dynamic_rate_limiter
 
 _SECRET = os.getenv("JWT_SECRET_KEY", "dev-secret-change-in-prod")
 _ALGORITHM = "HS256"
@@ -74,3 +75,20 @@ def get_api_key_tier(request: Request, db: Session = Depends(get_db)) -> str:
     if api_key.expires_at and api_key.expires_at < date.today():
         return "anon"
     return api_key.tier
+
+
+async def rate_limit_public(
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+) -> None:
+    """Dependency: aplica rate limiting según tier del API key (o anon si no hay key).
+    Graceful degradation: si Redis no está disponible, no hace nada."""
+    tier = get_api_key_tier(request, db)
+    limiter = dynamic_rate_limiter(tier)
+    if limiter is not None:
+        try:
+            await limiter(request=request, response=response)
+        except Exception:
+            # Redis no disponible o error de conexión — graceful degradation
+            pass
