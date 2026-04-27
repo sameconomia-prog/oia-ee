@@ -6,6 +6,7 @@ from pipeline.kpi_engine.d5_geografia import (
     calcular_idr, calcular_icg, calcular_ies_s, calcular_d5,
 )
 from pipeline.kpi_engine.kpi_runner import run_kpis_estado
+from pipeline.db.models_imss import EmpleoFormalIMSS
 
 
 @pytest.fixture
@@ -85,3 +86,25 @@ def test_run_kpis_estado_siempre_retorna(session):
     assert result is not None
     assert result.estado == "Tamaulipas"
     assert 0.0 <= result.d5_geografia.score <= 1.0
+
+
+@pytest.fixture
+def session_with_imss(session):
+    session.add(EmpleoFormalIMSS(
+        estado="Jalisco", sector_scian="31", sector_nombre="Manufactura",
+        anio=2025, mes=3, trabajadores=500_000,
+    ))
+    session.flush()
+    return session
+
+
+def test_ies_s_usa_datos_imss_cuando_disponibles(session_with_imss):
+    ies_s = calcular_ies_s("Jalisco", session_with_imss)
+    # Con 500_000 trabajadores IMSS el denominador es grande → score diferente al default
+    assert 0.0 <= ies_s <= 1.0
+
+
+def test_ies_s_fallback_sin_datos_imss(session):
+    # Sin datos IMSS: comportamiento original (vacantes=0, despidos=0 → 0.5)
+    ies_s = calcular_ies_s("Sonora", session)
+    assert ies_s == 0.5

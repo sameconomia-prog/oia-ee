@@ -1,7 +1,9 @@
 import logging
 from dataclasses import dataclass
+from sqlalchemy import func as sqlalchemy_func
 from sqlalchemy.orm import Session
 from pipeline.db.models import IES, CarreraIES, Noticia, Vacante
+from pipeline.db.models_imss import EmpleoFormalIMSS
 
 logger = logging.getLogger(__name__)
 
@@ -52,16 +54,27 @@ def calcular_icg(estado: str, session: Session) -> float:
 
 
 def calcular_ies_s(estado: str, session: Session) -> float:
-    """IES_S = vacantes_estado / (vacantes_estado + despidos_nacionales + 1).
-    Mide la demanda laboral estatal relativa al riesgo de despido nacional."""
-    vacantes = session.query(Vacante).filter(Vacante.estado == estado).count()
+    """IES_S basado en empleo formal IMSS cuando disponible, vacantes como fallback."""
     despidos_nacionales = (
         session.query(Noticia)
         .filter(Noticia.causa_ia.isnot(None))
         .count()
     )
-    raw = (vacantes - despidos_nacionales) / (vacantes + despidos_nacionales + 1)
-    return round((raw + 1) / 2, 4)  # [-1,1] → [0,1]
+
+    imss_row = (
+        session.query(sqlalchemy_func.sum(EmpleoFormalIMSS.trabajadores))
+        .filter(EmpleoFormalIMSS.estado == estado)
+        .order_by(EmpleoFormalIMSS.anio.desc(), EmpleoFormalIMSS.mes.desc())
+        .first()
+    )
+
+    if imss_row and imss_row[0]:
+        empleo = int(imss_row[0])
+    else:
+        empleo = session.query(Vacante).filter(Vacante.estado == estado).count()
+
+    raw = (empleo - despidos_nacionales) / (empleo + despidos_nacionales + 1)
+    return round((raw + 1) / 2, 4)
 
 
 def calcular_d5(estado: str, session: Session) -> D5Result:
