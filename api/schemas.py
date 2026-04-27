@@ -294,3 +294,38 @@ class VacantePublicoOut(BaseModel):
     nivel_educativo: Optional[str] = None
     experiencia_anios: Optional[int] = None
     fecha_pub: Optional[str] = None
+
+
+class ApiKeyCreateIn(BaseModel):
+    name: str
+    email: str
+    tier: str = "researcher"  # "anon" | "researcher" | "premium"
+    expires_at: Optional[str] = None  # "YYYY-MM-DD" o null
+
+
+class ApiKeyCreateOut(BaseModel):
+    id: str
+    raw_key: str
+    key_prefix: str
+    name: str
+    email: str
+    tier: str
+    expires_at: Optional[str] = None
+
+
+class ApiKeyListItem(BaseModel):
+    id: str
+    key_prefix: str
+    name: str
+    email: str
+    tier: str
+    expires_at: Optional[str] = None
+    revoked: bool
+    created_at: Optional[datetime] = None
+
+    model_config = {"from_attributes": True}
+
+
+class ApiKeyRevokeOut(BaseModel):
+    id: str
+    revoked: bool
