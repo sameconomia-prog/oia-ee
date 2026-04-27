@@ -30,7 +30,7 @@ def run_enoe_ingest(session: Session, anio: int | None = None,
     Si anio/trimestre no se especifican usa el trimestre anterior.
     Retorna {"procesados": N, "insertados": N, "actualizados": N}.
     """
-    if anio is None and trimestre is None:
+    if anio is None or trimestre is None:
         anio, trimestre = _trimestre_anterior()
 
     api_token = os.getenv("INEGI_API_TOKEN", "")
