@@ -122,4 +122,4 @@ app.include_router(predicciones.router, prefix="/predicciones", tags=["prediccio
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "version": "1.0.0"}
+    return {"status": "ok", "version": app.version}
