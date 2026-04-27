@@ -53,17 +53,19 @@ _TRIMESTRE_A_MES = {1: 1, 2: 4, 3: 7, 4: 10}
 
 def _fetch_serie(serie: str, geo_code: str, anio: int, trimestre: int,
                  token: str) -> float | None:
-    """Llama BIE para un indicador + geografía + período. Retorna valor o None."""
+    """Llama BIE para un indicador + geografía. Filtra el período deseado. Retorna valor o None."""
     mes = _TRIMESTRE_A_MES[trimestre]
-    periodo = f"{anio}/{mes:02d}"
-    url = f"{_INEGI_API}/{serie}/es/{geo_code}/{periodo}/{periodo}/false/BIE/2.0/{token}.json"
+    target_period = f"{anio}/{mes:02d}"
+    url = f"{_INEGI_API}/{serie}/es/{geo_code}/false/BIE/2.0/{token}.json"
     try:
         resp = httpx.get(url, timeout=15.0)
         resp.raise_for_status()
         data = resp.json()
         obs = data.get("Series", [{}])[0].get("Obs", [])
-        if obs:
-            return float(obs[0].get("OBS_VALUE", 0) or 0)
+        match = next((o for o in obs if o.get("TIME_PERIOD") == target_period), None)
+        if match:
+            raw = match.get("OBS_VALUE")
+            return float(raw) if raw not in (None, "") else None
     except Exception as e:
         logger.warning("enoe_serie_error", serie=serie, geo=geo_code, error=str(e))
     return None
