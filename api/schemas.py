@@ -1,7 +1,7 @@
 # api/schemas.py
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Literal
 
 
 class NoticiaOut(BaseModel):
@@ -299,7 +299,7 @@ class VacantePublicoOut(BaseModel):
 class ApiKeyCreateIn(BaseModel):
     name: str
     email: str
-    tier: str = "researcher"  # "anon" | "researcher" | "premium"
+    tier: Literal["anon", "researcher", "premium"] = "researcher"
     expires_at: Optional[str] = None  # "YYYY-MM-DD" o null
 
 

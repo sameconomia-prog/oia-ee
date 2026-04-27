@@ -39,7 +39,6 @@ def crear_api_key(
         expires_at=expires_at,
     )
     db.add(api_key)
-    db.flush()
     db.commit()
 
     return ApiKeyCreateOut(
