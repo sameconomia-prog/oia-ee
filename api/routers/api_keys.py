@@ -19,7 +19,7 @@ def crear_api_key(
     db: Session = Depends(get_db),
     _: object = Depends(_require_superadmin),
 ):
-    raw_key = "sk_oa_" + secrets.token_hex(16)
+    raw_key = "sk_oa_" + secrets.token_hex(32)
     key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
     key_prefix = raw_key[:8]
 

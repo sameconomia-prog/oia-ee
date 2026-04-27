@@ -299,7 +299,7 @@ class VacantePublicoOut(BaseModel):
 class ApiKeyCreateIn(BaseModel):
     name: str
     email: str
-    tier: Literal["anon", "researcher", "premium"] = "researcher"
+    tier: Literal["researcher", "premium"] = "researcher"
     expires_at: Optional[str] = None  # "YYYY-MM-DD" o null
 
 
