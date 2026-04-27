@@ -87,8 +87,4 @@ async def rate_limit_public(
     tier = get_api_key_tier(request, db)
     limiter = dynamic_rate_limiter(tier)
     if limiter is not None:
-        try:
-            await limiter(request=request, response=response)
-        except Exception:
-            # Redis no disponible o error de conexión — graceful degradation
-            pass
+        await limiter(request=request, response=response)
