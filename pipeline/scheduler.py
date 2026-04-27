@@ -71,6 +71,15 @@ def run_anuies_loader():
     logger.info("anuies_ingest OK: %s", result)
 
 
+def run_imss_loader():
+    from pipeline.jobs.imss_ingest_job import run_imss_ingest
+    from pipeline.db import get_session
+    with get_session() as session:
+        result = run_imss_ingest(session)
+        session.commit()
+    logger.info("imss_ingest OK: %s", result)
+
+
 scheduler.add_job(
     run_news_scraper,
     trigger=CronTrigger(hour="*/6"),
@@ -100,6 +109,14 @@ scheduler.add_job(
     trigger=CronTrigger(day_of_week="mon", hour=5),
     id="kpi_snapshot",
     name="Snapshot KPIs histórico (semanal)",
+    replace_existing=True,
+)
+
+scheduler.add_job(
+    run_imss_loader,
+    trigger=CronTrigger(day=15, hour=3, minute=0),
+    id="imss_loader",
+    name="Carga IMSS empleo formal mensual",
     replace_existing=True,
 )
 
