@@ -25,7 +25,7 @@ def run_imss_ingest(session: Session, anio: Optional[int] = None,
     Si anio/mes no se especifican usa el mes anterior.
     Retorna {"procesados": N, "insertados": N, "actualizados": N}.
     """
-    if anio is None or mes is None:
+    if anio is None and mes is None:
         anio, mes = _mes_anterior()
 
     records = fetch_imss_empleo(anio, mes)
