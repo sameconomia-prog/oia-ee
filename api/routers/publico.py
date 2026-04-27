@@ -34,7 +34,16 @@ class ResumenPublico(BaseModel):
     noticias_recientes: list[NoticiaOut]
 
 
-@router.get("/resumen", response_model=ResumenPublico)
+@router.get(
+    "/resumen",
+    response_model=ResumenPublico,
+    summary="Resumen del observatorio",
+    description="Retorna totales de IES activas, noticias, vacantes IA y alertas activas, más las 5 noticias más recientes.",
+    openapi_extra={"responses": {"200": {"content": {"application/json": {"example": {
+        "total_ies": 150, "total_noticias": 842, "total_vacantes": 1230,
+        "alertas_activas": 12, "noticias_recientes": []
+    }}}}}},
+)
 def resumen_publico(db: Session = Depends(get_db)):
     from pipeline.db.models import Vacante
     total_ies = db.query(IES).filter_by(activa=True).count()
@@ -56,7 +65,14 @@ def resumen_publico(db: Session = Depends(get_db)):
     )
 
 
-@router.get("/carreras/areas")
+@router.get(
+    "/carreras/areas",
+    summary="Áreas de conocimiento",
+    description="Lista las áreas de conocimiento únicas de todas las carreras activas. Úsalas como filtro en GET /carreras?area=.",
+    openapi_extra={"responses": {"200": {"content": {"application/json": {"example": [
+        "Ciencias de la Salud", "Ingeniería y Tecnología", "Ciencias Sociales"
+    ]}}}}},
+)
 def listar_areas_carreras(db: Session = Depends(get_db)):
     rows = (
         db.query(Carrera.area_conocimiento)
@@ -69,7 +85,21 @@ def listar_areas_carreras(db: Session = Depends(get_db)):
     return [r[0] for r in rows]
 
 
-@router.get("/carreras", response_model=list[CarreraKpiOut])
+@router.get(
+    "/carreras",
+    response_model=list[CarreraKpiOut],
+    summary="Buscar carreras universitarias",
+    description=(
+        "Retorna carreras activas con KPIs D1–D6. "
+        "Parámetros opcionales: `q` (búsqueda por nombre), `area` (filtro por área de conocimiento), "
+        "`skip`/`limit` (paginación). Resultados cacheados 5 minutos."
+    ),
+    openapi_extra={"responses": {"200": {"content": {"application/json": {"example": [
+        {"id": "abc123", "nombre": "Ingeniería en Sistemas", "area_conocimiento": "Ingeniería y Tecnología",
+         "matricula": 1200, "kpi": {"carrera_id": "abc123", "d1_obsolescencia": {"score": 0.72},
+                                    "d2_oportunidades": {"score": 0.55}}}
+    ]}}}}},
+)
 def listar_carreras_publico(
     skip: int = 0,
     limit: int = 50,
@@ -128,7 +158,17 @@ def listar_carreras_publico(
     return result
 
 
-@router.get("/kpis/resumen", response_model=KpisNacionalResumenOut)
+@router.get(
+    "/kpis/resumen",
+    response_model=KpisNacionalResumenOut,
+    summary="KPIs nacionales promedio",
+    description="Promedio nacional de D1–D6 sobre todas las carreras activas. Resultados cacheados 5 minutos.",
+    openapi_extra={"responses": {"200": {"content": {"application/json": {"example": {
+        "total_carreras": 820, "promedio_d1": 0.42, "promedio_d2": 0.58,
+        "promedio_d3": 0.31, "promedio_d6": 0.65,
+        "carreras_riesgo_alto": 124, "carreras_oportunidad_alta": 210
+    }}}}}},
+)
 def resumen_kpis_nacional(db: Session = Depends(get_db)):
     from pipeline.kpi_engine.kpi_runner import run_kpis
 
@@ -175,7 +215,17 @@ def resumen_kpis_nacional(db: Session = Depends(get_db)):
     return result_out
 
 
-@router.get("/estadisticas", response_model=EstadisticasPublicasOut)
+@router.get(
+    "/estadisticas",
+    response_model=EstadisticasPublicasOut,
+    summary="Estadísticas globales del observatorio",
+    description="Totales de IES, carreras, vacantes, noticias, alertas activas y top 3 skills demandados.",
+    openapi_extra={"responses": {"200": {"content": {"application/json": {"example": {
+        "total_ies": 150, "total_carreras": 820, "total_vacantes": 1230,
+        "total_noticias": 842, "alertas_activas": 12,
+        "top_skills": ["Python", "Machine Learning", "Data Science"]
+    }}}}}},
+)
 def estadisticas_publicas(db: Session = Depends(get_db)):
     import json
     from collections import Counter
@@ -316,7 +366,16 @@ def tendencias_nacionales(dias: int = 30, db: Session = Depends(get_db)):
     return resultado
 
 
-@router.get("/vacantes/tendencia")
+@router.get(
+    "/vacantes/tendencia",
+    summary="Tendencia mensual de vacantes IA",
+    description="Conteo de vacantes publicadas por mes. Parámetro `meses` (default 12) limita el historial.",
+    openapi_extra={"responses": {"200": {"content": {"application/json": {"example": [
+        {"mes": "2025-01", "count": 38},
+        {"mes": "2025-02", "count": 45},
+        {"mes": "2025-03", "count": 52}
+    ]}}}}},
+)
 def tendencia_vacantes(meses: int = 12, db: Session = Depends(get_db)):
     from pipeline.db.models import Vacante
     from sqlalchemy import func
@@ -336,7 +395,22 @@ def tendencia_vacantes(meses: int = 12, db: Session = Depends(get_db)):
     return result[-meses:] if len(result) > meses else result
 
 
-@router.get("/vacantes", response_model=list[VacantePublicoOut])
+@router.get(
+    "/vacantes",
+    response_model=list[VacantePublicoOut],
+    summary="Buscar vacantes de trabajo en IA",
+    description=(
+        "Lista vacantes relacionadas con IA/automatización. "
+        "Filtros opcionales: `sector`, `q` (búsqueda por título/empresa/estado). "
+        "`skip`/`limit` para paginación (default limit=25)."
+    ),
+    openapi_extra={"responses": {"200": {"content": {"application/json": {"example": [
+        {"id": "vac001", "titulo": "Data Scientist", "empresa": "BBVA México",
+         "sector": "Finanzas", "skills": ["Python", "SQL"], "estado": "Ciudad de México",
+         "salario_min": 25000, "salario_max": 45000, "nivel_educativo": "Licenciatura",
+         "fecha_pub": "2025-03-15"}
+    ]}}}}},
+)
 def listar_vacantes_publico(
     sector: Optional[str] = None,
     q: Optional[str] = None,
@@ -382,7 +456,17 @@ def listar_vacantes_publico(
     return result
 
 
-@router.get("/vacantes/skills", response_model=list[SkillFreqOut])
+@router.get(
+    "/vacantes/skills",
+    response_model=list[SkillFreqOut],
+    summary="Top skills demandados en vacantes",
+    description="Las habilidades más frecuentes en las vacantes IA activas. Parámetro `top` (default 10).",
+    openapi_extra={"responses": {"200": {"content": {"application/json": {"example": [
+        {"nombre": "Python", "count": 340},
+        {"nombre": "Machine Learning", "count": 210},
+        {"nombre": "SQL", "count": 185}
+    ]}}}}},
+)
 def top_vacantes_skills(top: int = 10, db: Session = Depends(get_db)):
     import json
     from collections import Counter
@@ -400,7 +484,21 @@ def top_vacantes_skills(top: int = 10, db: Session = Depends(get_db)):
     return [SkillFreqOut(nombre=skill, count=count) for skill, count in counter.most_common(top)]
 
 
-@router.get("/vacantes/{vacante_id}", response_model=VacantePublicoOut)
+@router.get(
+    "/vacantes/{vacante_id}",
+    response_model=VacantePublicoOut,
+    summary="Detalle de vacante",
+    description="Retorna todos los campos de una vacante específica por su ID.",
+    openapi_extra={"responses": {
+        "200": {"content": {"application/json": {"example": {
+            "id": "vac001", "titulo": "Data Scientist", "empresa": "BBVA México",
+            "sector": "Finanzas", "skills": ["Python", "SQL"],
+            "estado": "Ciudad de México", "salario_min": 25000, "salario_max": 45000,
+            "nivel_educativo": "Licenciatura", "fecha_pub": "2025-03-15"
+        }}}},
+        "404": {"description": "Vacante no encontrada"},
+    }},
+)
 def detalle_vacante(vacante_id: str, db: Session = Depends(get_db)):
     import json
     from pipeline.db.models import Vacante
