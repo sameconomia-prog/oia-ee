@@ -92,3 +92,16 @@ def test_dynamic_rate_limiter_sin_redis_retorna_none():
 def test_dynamic_rate_limiter_premium_retorna_none():
     result = dynamic_rate_limiter("premium")
     assert result is None
+
+
+def test_dynamic_rate_limiter_premium_con_redis_retorna_none():
+    from unittest.mock import patch, MagicMock
+    with patch("api.middleware.rate_limit.FastAPILimiter.redis", MagicMock()):
+        assert dynamic_rate_limiter("premium") is None
+
+
+def test_dynamic_rate_limiter_researcher_con_redis_retorna_limiter():
+    from unittest.mock import patch, MagicMock
+    with patch("api.middleware.rate_limit.FastAPILimiter.redis", MagicMock()):
+        result = dynamic_rate_limiter("researcher")
+        assert result is not None
