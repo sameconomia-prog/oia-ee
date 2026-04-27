@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
 from apscheduler.schedulers.background import BackgroundScheduler
-from api.routers import noticias, kpis, admin, rector, alertas, escenarios, auth, publico, radar, predicciones
+from api.routers import noticias, kpis, admin, rector, alertas, escenarios, auth, publico, radar, predicciones, api_keys
 from pipeline.db import get_session
 from pipeline.jobs.alert_job import run_alert_job
 from pipeline.jobs.news_ingest_job import run_news_ingest
@@ -83,7 +83,20 @@ async def lifespan(app: FastAPI):
         _scheduler.shutdown()
 
 
-app = FastAPI(title="OIA-EE API", version="0.9.0", lifespan=lifespan)
+app = FastAPI(
+    title="OIA-EE API",
+    version="1.0.0",
+    description=(
+        "Observatorio de Impacto IA en Educación y Empleo (OIA-EE). "
+        "Mide el desplazamiento de carreras universitarias mexicanas por IA "
+        "usando 7 indicadores KPI: D1 Obsolescencia, D2 Oportunidades, "
+        "D3 Mercado Laboral, D4 Institucional, D5 Geografía, D6 Estudiantil, D7 Noticias. "
+        "\n\n**Autenticación:** Endpoints públicos disponibles sin autenticación. "
+        "Para cuotas mayores, incluye el header `X-API-Key` con tu token de acceso."
+    ),
+    contact={"name": "OIA-EE", "email": "sam.economia@gmail.com"},
+    lifespan=lifespan,
+)
 
 _ALLOWED_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGIN", "http://localhost:3000").split(",")]
 app.add_middleware(
@@ -91,7 +104,7 @@ app.add_middleware(
     allow_origins=_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=["Authorization", "Content-Type", "X-API-Key"],
 )
 
 app.include_router(publico.router, prefix="/publico", tags=["publico"])
@@ -99,6 +112,7 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(noticias.router, prefix="/noticias", tags=["noticias"])
 app.include_router(kpis.router, prefix="/kpis", tags=["kpis"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
+app.include_router(api_keys.router, prefix="/admin/api-keys", tags=["admin"])
 app.include_router(rector.router, prefix="/rector", tags=["rector"])
 app.include_router(alertas.router, prefix="/alertas", tags=["alertas"])
 app.include_router(escenarios.router, prefix="/escenarios", tags=["escenarios"])
@@ -108,4 +122,4 @@ app.include_router(predicciones.router, prefix="/predicciones", tags=["prediccio
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "version": "0.9.0"}
+    return {"status": "ok", "version": "1.0.0"}
