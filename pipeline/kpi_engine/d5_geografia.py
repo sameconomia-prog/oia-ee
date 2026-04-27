@@ -4,6 +4,7 @@ from sqlalchemy import func as sqlalchemy_func
 from sqlalchemy.orm import Session
 from pipeline.db.models import IES, CarreraIES, Noticia, Vacante
 from pipeline.db.models_imss import EmpleoFormalIMSS
+from pipeline.db.models_enoe import IndicadorENOE
 
 logger = logging.getLogger(__name__)
 
@@ -54,33 +55,44 @@ def calcular_icg(estado: str, session: Session) -> float:
 
 
 def calcular_ies_s(estado: str, session: Session) -> float:
-    """IES_S basado en empleo formal IMSS cuando disponible, vacantes como fallback."""
+    """IES_S: empleo total por estado en [0,1]. Prioridad: ENOE > IMSS > Vacante."""
     despidos_nacionales = (
         session.query(Noticia)
         .filter(Noticia.causa_ia.isnot(None))
         .count()
     )
 
-    # Find the latest period first (ano, mes), then sum only that period
-    latest = (
-        session.query(EmpleoFormalIMSS.anio, EmpleoFormalIMSS.mes)
-        .filter(EmpleoFormalIMSS.estado == estado)
-        .order_by(EmpleoFormalIMSS.anio.desc(), EmpleoFormalIMSS.mes.desc())
+    # Prioridad 1: ENOE poblacion_ocupada (formal+informal)
+    enoe = (
+        session.query(IndicadorENOE)
+        .filter(IndicadorENOE.estado == estado,
+                IndicadorENOE.poblacion_ocupada.isnot(None))
+        .order_by(IndicadorENOE.anio.desc(), IndicadorENOE.trimestre.desc())
         .first()
     )
-
-    if latest:
-        empleo = int(
-            session.query(sqlalchemy_func.sum(EmpleoFormalIMSS.trabajadores))
-            .filter(
-                EmpleoFormalIMSS.estado == estado,
-                EmpleoFormalIMSS.anio == latest.anio,
-                EmpleoFormalIMSS.mes == latest.mes,
-            )
-            .scalar() or 0
-        )
+    if enoe and enoe.poblacion_ocupada:
+        empleo = enoe.poblacion_ocupada * 1000  # viene en miles
     else:
-        empleo = session.query(Vacante).filter(Vacante.estado == estado).count()
+        # Prioridad 2: IMSS trabajadores (solo formal)
+        latest_imss = (
+            session.query(EmpleoFormalIMSS.anio, EmpleoFormalIMSS.mes)
+            .filter(EmpleoFormalIMSS.estado == estado)
+            .order_by(EmpleoFormalIMSS.anio.desc(), EmpleoFormalIMSS.mes.desc())
+            .first()
+        )
+        if latest_imss:
+            empleo = int(
+                session.query(sqlalchemy_func.sum(EmpleoFormalIMSS.trabajadores))
+                .filter(
+                    EmpleoFormalIMSS.estado == estado,
+                    EmpleoFormalIMSS.anio == latest_imss.anio,
+                    EmpleoFormalIMSS.mes == latest_imss.mes,
+                )
+                .scalar() or 0
+            )
+        else:
+            # Prioridad 3: conteo de vacantes (fallback original)
+            empleo = session.query(Vacante).filter(Vacante.estado == estado).count()
 
     raw = (empleo - despidos_nacionales) / (empleo + despidos_nacionales + 1)
     return round((raw + 1) / 2, 4)

@@ -108,3 +108,45 @@ def test_ies_s_fallback_sin_datos_imss(session):
     # Sin datos IMSS: comportamiento original (vacantes=0, despidos=0 → 0.5)
     ies_s = calcular_ies_s("Sonora", session)
     assert ies_s == 0.5
+
+
+from pipeline.db.models_enoe import IndicadorENOE
+
+
+@pytest.fixture
+def session_con_enoe_e_imss(session):
+    from pipeline.db.models_imss import EmpleoFormalIMSS
+    session.add(EmpleoFormalIMSS(
+        estado="Jalisco", sector_scian="31", sector_nombre="Manufactura",
+        anio=2025, mes=3, trabajadores=500_000,
+    ))
+    session.add(IndicadorENOE(
+        estado="Jalisco", anio=2025, trimestre=1,
+        tasa_desempleo=2.4, poblacion_ocupada=3800,
+    ))
+    session.flush()
+    return session
+
+
+def test_ies_s_prioridad_enoe_sobre_imss(session_con_enoe_e_imss):
+    ies_s = calcular_ies_s("Jalisco", session_con_enoe_e_imss)
+    # ENOE: 3800 * 1000 = 3_800_000 trabajadores → score muy alto
+    assert ies_s > 0.5
+    assert 0.0 <= ies_s <= 1.0
+
+
+def test_ies_s_usa_imss_cuando_no_hay_enoe(session):
+    from pipeline.db.models_imss import EmpleoFormalIMSS
+    session.add(EmpleoFormalIMSS(
+        estado="Sonora", sector_scian="31", sector_nombre="Manufactura",
+        anio=2025, mes=3, trabajadores=200_000,
+    ))
+    session.flush()
+    ies_s = calcular_ies_s("Sonora", session)
+    assert ies_s > 0.5
+    assert 0.0 <= ies_s <= 1.0
+
+
+def test_ies_s_fallback_sin_enoe_ni_imss(session):
+    ies_s = calcular_ies_s("Tlaxcala", session)
+    assert ies_s == 0.5
