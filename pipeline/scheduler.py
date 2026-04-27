@@ -80,6 +80,15 @@ def run_imss_loader():
     logger.info("imss_ingest OK: %s", result)
 
 
+def run_enoe_loader():
+    from pipeline.jobs.enoe_ingest_job import run_enoe_ingest
+    from pipeline.db import get_session
+    with get_session() as session:
+        result = run_enoe_ingest(session)
+        session.commit()
+    logger.info("enoe_ingest OK: %s", result)
+
+
 scheduler.add_job(
     run_news_scraper,
     trigger=CronTrigger(hour="*/6"),
@@ -117,6 +126,14 @@ scheduler.add_job(
     trigger=CronTrigger(day=15, hour=3, minute=0),
     id="imss_loader",
     name="Carga IMSS empleo formal mensual",
+    replace_existing=True,
+)
+
+scheduler.add_job(
+    run_enoe_loader,
+    trigger=CronTrigger(month="1,4,7,10", day=20, hour=4, minute=0),
+    id="enoe_loader",
+    name="Carga INEGI ENOE trimestral",
     replace_existing=True,
 )
 
