@@ -13,6 +13,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from pipeline.db.models import Base
+from pipeline.db import models_imss   # noqa: F401 — registers tables with Base
+from pipeline.db import models_enoe   # noqa: F401 — registers tables with Base
+from pipeline.db import models_apikey # noqa: F401 — registers tables with Base
 from api.main import app
 from api.deps import get_db
 

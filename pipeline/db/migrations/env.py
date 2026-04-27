@@ -11,6 +11,7 @@ from alembic import context
 from pipeline.db.models import Base
 from pipeline.db import models_imss  # noqa: F401 — registers tables with Base
 from pipeline.db import models_enoe  # noqa: F401 — registers tables with Base
+from pipeline.db import models_apikey  # noqa: F401 — registers tables with Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from pipeline.db.models import Base
 from pipeline.db import models_imss  # noqa: F401 — registers tables with Base
 from pipeline.db import models_enoe  # noqa: F401 — registers tables with Base
+from pipeline.db import models_apikey  # noqa: F401 — registers tables with Base
 
 @pytest.fixture(scope="session")
 def engine():
