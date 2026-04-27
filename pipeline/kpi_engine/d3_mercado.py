@@ -3,10 +3,12 @@ import logging
 from dataclasses import dataclass
 from sqlalchemy.orm import Session
 from pipeline.db.models import Noticia, Vacante, CarreraIES
+from pipeline.db.models_enoe import IndicadorENOE
 
 logger = logging.getLogger(__name__)
 
 MAX_VACANTES_D3 = 500
+_TASA_REFERENCIA = 3.5
 EMERGING_SKILLS = frozenset({
     "python", "machine learning", "inteligencia artificial", "ia", "cloud",
     "data science", "nlp", "deep learning", "llm", "big data", "tensorflow",
@@ -23,6 +25,24 @@ class D3Result:
     score: float
 
 
+def calcular_factor_macro(session: Session) -> float:
+    """Factor multiplicador basado en tasa de desempleo nacional ENOE.
+
+    Referencia sana: 3.5%. Por encima → amplifica riesgo TDM. Sin datos → 1.0.
+    """
+    latest = (
+        session.query(IndicadorENOE.anio, IndicadorENOE.trimestre,
+                      IndicadorENOE.tasa_desempleo)
+        .filter(IndicadorENOE.estado == "Nacional",
+                IndicadorENOE.tasa_desempleo.isnot(None))
+        .order_by(IndicadorENOE.anio.desc(), IndicadorENOE.trimestre.desc())
+        .first()
+    )
+    if latest is None or latest.tasa_desempleo is None:
+        return 1.0
+    return round(float(latest.tasa_desempleo) / _TASA_REFERENCIA, 4)
+
+
 def calcular_tdm(session: Session, sector: str | None = None) -> float:
     """Tasa de Desplazamiento por Mercado: despidos_IA / vacantes en sector. [0,1]"""
     q_despidos = session.query(Noticia).filter(Noticia.tipo_impacto == "despido")
@@ -34,7 +54,9 @@ def calcular_tdm(session: Session, sector: str | None = None) -> float:
     n_vacantes = q_vacantes.count()
     if n_vacantes == 0:
         return 0.0
-    return min(1.0, n_despidos / n_vacantes)
+    tdm_raw = n_despidos / n_vacantes
+    factor = calcular_factor_macro(session)
+    return min(1.0, round(tdm_raw * factor, 4))
 
 
 def calcular_tvc(session: Session, sector: str | None = None) -> float:

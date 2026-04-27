@@ -113,3 +113,44 @@ def test_calcular_d3_score_en_rango(session):
     assert result.tvc >= 0.0
     assert 0.0 <= result.brs <= 1.0
     assert 0.0 <= result.ice <= 1.0
+
+
+from pipeline.db.models_enoe import IndicadorENOE
+from pipeline.kpi_engine.d3_mercado import calcular_factor_macro
+
+
+def test_factor_macro_retorna_uno_sin_datos_enoe(session):
+    factor = calcular_factor_macro(session)
+    assert factor == 1.0
+
+
+def test_factor_macro_tasa_igual_referencia(session):
+    session.add(IndicadorENOE(
+        estado="Nacional", anio=2025, trimestre=1, tasa_desempleo=3.5,
+    ))
+    session.flush()
+    factor = calcular_factor_macro(session)
+    assert factor == pytest.approx(1.0, abs=0.001)
+
+
+def test_factor_macro_tasa_alta_amplifica(session):
+    session.add(IndicadorENOE(
+        estado="Nacional", anio=2025, trimestre=1, tasa_desempleo=7.0,
+    ))
+    session.flush()
+    factor = calcular_factor_macro(session)
+    assert factor == pytest.approx(2.0, abs=0.001)
+
+
+def test_calcular_tdm_aplica_factor_macro(session):
+    # Insertar tasa alta → TDM se amplifica
+    session.add(IndicadorENOE(
+        estado="Nacional", anio=2025, trimestre=1, tasa_desempleo=7.0,
+    ))
+    _noticia_despido(session, sector="Tech")
+    _vacante(session, sector="Tech")
+    _vacante(session, sector="Tech")
+    session.flush()
+    tdm = calcular_tdm(session, sector="Tech")
+    # sin factor: 1/2 = 0.5; con factor 2.0: min(1.0, 0.5*2.0) = 1.0
+    assert tdm == 1.0
