@@ -66,3 +66,85 @@ def test_is_ia_related_bert_in_name_is_false():
 def test_is_ia_related_bert_standalone_is_true():
     # "bert" as a standalone word (model name) should match
     assert _is_ia_related("experiencia con BERT y transformers") is True
+
+
+# --- _fetch_page ---
+
+from unittest.mock import MagicMock, patch
+from pipeline.scrapers.occ_scraper import OccScraper
+
+
+def _mock_response(json_data=None, content_type="application/json", raise_exc=None):
+    mock = MagicMock()
+    mock.headers = {"content-type": content_type}
+    if json_data is not None:
+        mock.json.return_value = json_data
+    if raise_exc:
+        mock.raise_for_status.side_effect = raise_exc
+    else:
+        mock.raise_for_status.return_value = None
+    return mock
+
+
+def _ia_vacante_item():
+    return {
+        "titulo": "Machine Learning Engineer",
+        "empresa": "TechCorp",
+        "url": "/empleos/ml-engineer/1234/",
+        "descripcion": "Experiencia con PyTorch y TensorFlow requerida.",
+        "skills": ["Python", "PyTorch"],
+        "salario": "40,000 - 70,000",
+        "estado": "Jalisco",
+        "nivelEstudio": "licenciatura",
+        "fechaPublicacion": "2026-04-15",
+    }
+
+
+def test_fetch_page_returns_ia_vacantes():
+    scraper = OccScraper()
+    payload = {"vacantes": [_ia_vacante_item()], "totalVacantes": 1}
+    with patch("pipeline.scrapers.occ_scraper.httpx.Client") as mock_cls:
+        mock_client = mock_cls.return_value.__enter__.return_value
+        mock_client.get.return_value = _mock_response(json_data=payload)
+        result = scraper._fetch_page(1)
+    assert len(result) == 1
+    assert result[0].titulo == "Machine Learning Engineer"
+    assert result[0].url == "https://www.occ.com.mx/empleos/ml-engineer/1234/"
+    assert result[0].salario_min == 40000
+    assert result[0].salario_max == 70000
+
+
+def test_fetch_page_filters_non_ia():
+    scraper = OccScraper()
+    non_ia = dict(_ia_vacante_item())
+    non_ia["titulo"] = "Vendedor de seguros"
+    non_ia["descripcion"] = "Atención a clientes."
+    payload = {"vacantes": [non_ia], "totalVacantes": 1}
+    with patch("pipeline.scrapers.occ_scraper.httpx.Client") as mock_cls:
+        mock_client = mock_cls.return_value.__enter__.return_value
+        mock_client.get.return_value = _mock_response(json_data=payload)
+        result = scraper._fetch_page(1)
+    assert result == []
+
+
+def test_fetch_page_on_http_error_returns_empty():
+    import httpx as _httpx
+    scraper = OccScraper()
+    with patch("pipeline.scrapers.occ_scraper.httpx.Client") as mock_cls:
+        mock_client = mock_cls.return_value.__enter__.return_value
+        mock_client.get.return_value = _mock_response(
+            raise_exc=_httpx.HTTPError("timeout")
+        )
+        result = scraper._fetch_page(1)
+    assert result == []
+
+
+def test_fetch_page_on_non_json_content_type_returns_empty():
+    scraper = OccScraper()
+    with patch("pipeline.scrapers.occ_scraper.httpx.Client") as mock_cls:
+        mock_client = mock_cls.return_value.__enter__.return_value
+        mock_client.get.return_value = _mock_response(
+            json_data=None, content_type="text/html"
+        )
+        result = scraper._fetch_page(1)
+    assert result == []
