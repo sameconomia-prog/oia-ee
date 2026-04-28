@@ -1,3 +1,4 @@
+// frontend/src/app/carreras/[id]/page.tsx
 'use client'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
@@ -5,6 +6,8 @@ import Link from 'next/link'
 import { getCarreraDetalle, getKpisHistorico } from '@/lib/api'
 import type { CarreraDetalle, HistoricoSerie } from '@/lib/types'
 import FanChart from '@/components/FanChart'
+import Card from '@/components/ui/Card'
+import Badge from '@/components/ui/Badge'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -38,16 +41,16 @@ const KPI_META: { key: ScoreKey; label: string; invert: boolean }[] = [
 function ScoreBar({ label, score, invert }: { label: string; score: number; invert: boolean }) {
   const bad = invert ? score >= 0.6 : score < 0.4
   const ok = invert ? score < 0.4 : score >= 0.6
-  const color = ok ? 'bg-green-500' : bad ? 'bg-red-500' : 'bg-yellow-400'
-  const textColor = ok ? 'text-green-700' : bad ? 'text-red-700' : 'text-yellow-700'
+  const barColor = ok ? 'bg-emerald-500' : bad ? 'bg-red-500' : 'bg-yellow-400'
+  const textColor = ok ? 'text-emerald-700' : bad ? 'text-red-700' : 'text-yellow-700'
   return (
     <div>
       <div className="flex justify-between items-center mb-1">
-        <span className="text-xs font-medium text-gray-600">{label}</span>
+        <span className="text-xs font-medium text-slate-600">{label}</span>
         <span className={`text-sm font-bold font-mono ${textColor}`}>{score.toFixed(3)}</span>
       </div>
-      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${score * 100}%` }} />
+      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full ${barColor}`} style={{ width: `${score * 100}%` }} />
       </div>
     </div>
   )
@@ -55,7 +58,7 @@ function ScoreBar({ label, score, invert }: { label: string; score: number; inve
 
 function MiniLineChart({ d1, d2 }: { d1: HistoricoSerie; d2: HistoricoSerie }) {
   const points = d1.serie
-  if (points.length < 2) return <p className="text-xs text-gray-400 py-4 text-center">Sin datos históricos suficientes.</p>
+  if (points.length < 2) return <p className="text-xs text-slate-400 py-4 text-center">Sin datos históricos suficientes.</p>
   const W = 400, H = 80, PAD = 8
   const allVals = [...d1.serie.map(p => p.valor), ...d2.serie.map(p => p.valor)]
   const minV = Math.min(...allVals, 0), maxV = Math.max(...allVals, 1)
@@ -66,9 +69,16 @@ function MiniLineChart({ d1, d2 }: { d1: HistoricoSerie; d2: HistoricoSerie }) {
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-20">
       <path d={toPath(d1)} fill="none" stroke="#ef4444" strokeWidth="1.5" strokeLinejoin="round" />
-      <path d={toPath(d2)} fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d={toPath(d2)} fill="none" stroke="#4f46e5" strokeWidth="1.5" strokeLinejoin="round" />
     </svg>
   )
+}
+
+const SEMAFORO_VARIANT: Record<string, 'risk' | 'oportunidad' | 'neutro'> = {
+  rojo: 'risk',
+  verde: 'oportunidad',
+  amarillo: 'neutro',
+  sin_datos: 'neutro',
 }
 
 export default function CarreraDetallePage() {
@@ -99,13 +109,13 @@ export default function CarreraDetallePage() {
       .catch(() => {})
   }, [id])
 
-  if (loading) return <p className="text-gray-400 text-sm py-8 text-center">Cargando...</p>
+  if (loading) return <p className="text-slate-400 text-sm py-8 text-center">Cargando...</p>
 
   if (notFound) {
     return (
       <div className="text-center py-16">
-        <p className="text-gray-500 text-sm mb-4">Carrera no encontrada.</p>
-        <Link href="/kpis" className="text-indigo-600 text-sm hover:underline">← Ver KPIs</Link>
+        <p className="text-slate-500 text-sm mb-4">Carrera no encontrada.</p>
+        <Link href="/kpis" className="text-brand-600 text-sm hover:underline">← Ver KPIs</Link>
       </div>
     )
   }
@@ -113,117 +123,106 @@ export default function CarreraDetallePage() {
   const d = detalle!
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-4xl mx-auto">
+      {/* Breadcrumb + título */}
       <div className="mb-6">
-        <Link href="/carreras" className="text-xs text-indigo-600 hover:underline">← Carreras</Link>
-        <h1 className="text-2xl font-bold text-gray-900 mt-2">{d.nombre}</h1>
+        <Link href="/carreras" className="text-xs text-brand-600 hover:underline">← Carreras</Link>
+        <h1 className="text-2xl font-bold text-slate-900 mt-2">{d.nombre}</h1>
         <div className="flex flex-wrap gap-2 mt-2">
-          {d.area_conocimiento && (
-            <span className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-medium">{d.area_conocimiento}</span>
-          )}
-          {d.nivel && (
-            <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 text-xs">{d.nivel}</span>
-          )}
-          {d.duracion_anios && (
-            <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 text-xs">{d.duracion_anios} años</span>
-          )}
+          {d.area_conocimiento && <Badge variant="default">{d.area_conocimiento}</Badge>}
+          {d.nivel && <Badge variant="neutro">{d.nivel}</Badge>}
+          {d.duracion_anios && <Badge variant="neutro">{d.duracion_anios} años</Badge>}
         </div>
       </div>
 
-      {d.kpi && (
-        <div className="bg-white rounded-xl border shadow-sm p-5 mb-6">
-          <h2 className="font-semibold text-gray-800 text-sm mb-4">Indicadores KPI</h2>
-          <div className="space-y-4">
-            {KPI_META.map(({ key, label, invert }) => (
-              <ScoreBar
-                key={key}
-                label={label}
-                score={d.kpi![key].score}
-                invert={invert}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Layout 2 columnas: KPIs izquierda (2/3) + Semáforo derecha (1/3) */}
+      <div className="grid grid-cols-3 gap-6 mb-6">
+        {/* KPI bars — 2/3 */}
+        {d.kpi && (
+          <Card className="col-span-2 p-5">
+            <h2 className="font-semibold text-slate-800 text-sm mb-4">Indicadores KPI</h2>
+            <div className="space-y-4">
+              {KPI_META.map(({ key, label, invert }) => (
+                <ScoreBar key={key} label={label} score={d.kpi![key].score} invert={invert} />
+              ))}
+            </div>
+          </Card>
+        )}
 
+        {/* Semáforo Predictivo — 1/3 */}
+        {semaforoRes && (
+          <Card className="p-5">
+            <h2 className="font-semibold text-slate-800 text-sm mb-4">Proyección D1</h2>
+            <div className="space-y-3">
+              {([['1_año', '1 año'], ['3_años', '3 años'], ['5_años', '5 años']] as [string, string][]).map(([key, label]) => {
+                const s = semaforoRes[key]
+                const colorKey = s?.color ?? 'sin_datos'
+                const variant = SEMAFORO_VARIANT[colorKey] ?? 'neutro'
+                return (
+                  <div key={key} className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-slate-50">
+                    <span className="text-sm font-medium text-slate-700">{label}</span>
+                    <div className="flex items-center gap-2">
+                      {s?.valor_predicho != null && (
+                        <span className="text-xs font-mono text-slate-500">D1 = {s.valor_predicho.toFixed(2)}</span>
+                      )}
+                      <Badge variant={variant}>{colorKey}</Badge>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </Card>
+        )}
+      </div>
+
+      {/* Tendencia histórica */}
       {histD1 && histD2 && (
-        <div className="bg-white rounded-xl border shadow-sm p-5 mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="font-semibold text-gray-800 text-sm">Tendencia histórica</h2>
-            <div className="flex gap-3 text-xs">
+        <Card className="mb-6 p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-slate-800 text-sm">Tendencia histórica</h2>
+            <div className="flex gap-3 text-xs text-slate-500">
               <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-red-500"></span>D1 Obsolescencia</span>
-              <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-blue-500"></span>D2 Oportunidades</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-brand-600"></span>D2 Oportunidades</span>
             </div>
           </div>
           <MiniLineChart d1={histD1} d2={histD2} />
-        </div>
-      )}
-
-      {/* Semáforo Predictivo */}
-      {semaforoRes && (
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">
-            Proyección de Riesgo D1
-          </h2>
-          <div className="flex gap-4">
-            {([['1_año', '1 año'], ['3_años', '3 años'], ['5_años', '5 años']] as [string, string][]).map(([key, label]) => {
-              const s = semaforoRes[key]
-              const colors: Record<string, string> = {
-                verde: 'bg-green-100 text-green-800 border-green-300',
-                amarillo: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-                rojo: 'bg-red-100 text-red-800 border-red-300',
-                sin_datos: 'bg-gray-100 text-gray-500 border-gray-200',
-              }
-              const icons: Record<string, string> = { verde: '🟢', amarillo: '🟡', rojo: '🔴', sin_datos: '⚫' }
-              const colorKey = s?.color ?? 'sin_datos'
-              const cls = colors[colorKey] ?? colors['sin_datos']
-              return (
-                <div key={key} className={`flex-1 p-3 rounded border text-center ${cls}`}>
-                  <div className="text-lg">{icons[colorKey] ?? icons['sin_datos']}</div>
-                  <div className="text-sm font-semibold">{label}</div>
-                  {s?.valor_predicho != null && (
-                    <div className="text-xs mt-1">D1 = {s.valor_predicho.toFixed(2)}</div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
+        </Card>
       )}
 
       {/* Fan Chart D1 */}
       {predData?.predicciones?.D1 && predData.predicciones.D1.length > 0 && (
-        <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+        <Card className="mb-6 p-5">
           <FanChart
             historico={[]}
             predicciones={predData.predicciones.D1}
             kpiNombre="D1"
             titulo="Proyección D1 — Riesgo de Obsolescencia (3 años)"
           />
-        </div>
+        </Card>
       )}
 
+      {/* IES que ofrecen la carrera */}
       {d.instituciones.length > 0 && (
-        <div className="bg-white rounded-xl border shadow-sm">
-          <div className="px-5 py-4 border-b">
-            <h2 className="font-semibold text-gray-800 text-sm">
+        <Card className="p-0 overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-200">
+            <h2 className="font-semibold text-slate-800 text-sm">
               Ofrecida por {d.instituciones.length} institución{d.instituciones.length !== 1 ? 'es' : ''}
             </h2>
           </div>
           {d.instituciones.map(inst => (
-            <div key={inst.ies_id} className="px-5 py-3 border-b last:border-0 flex items-center justify-between">
+            <div key={inst.ies_id} className="px-5 py-3 border-b border-slate-100 last:border-0 flex items-center justify-between">
               <div>
-                <Link href={`/ies/${inst.ies_id}`} className="text-sm font-medium text-indigo-700 hover:underline">
+                <Link href={`/ies/${inst.ies_id}`} className="text-sm font-medium text-brand-700 hover:underline">
                   {inst.ies_nombre}
                 </Link>
-                {inst.ciclo && <p className="text-xs text-gray-400">{inst.ciclo}</p>}
+                {inst.ciclo && <p className="text-xs text-slate-400">{inst.ciclo}</p>}
               </div>
               {inst.matricula != null && (
-                <span className="text-xs text-gray-500">{inst.matricula.toLocaleString()} estudiantes</span>
+                <span className="text-xs text-slate-500">{inst.matricula.toLocaleString()} estudiantes</span>
               )}
             </div>
           ))}
-        </div>
+        </Card>
       )}
     </div>
   )
