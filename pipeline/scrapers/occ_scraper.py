@@ -111,17 +111,17 @@ class OccScraper(BaseScraper):
         seen_urls: set[str] = set()
         for page in range(1, _MAX_PAGES + 1):
             self._wait()
-            vacantes = self._fetch_page(page)
-            if not vacantes:
+            page_results = self._fetch_page(page)
+            if page_results is None:
                 break
-            for v in vacantes:
+            for v in page_results:
                 if v.url not in seen_urls:
                     seen_urls.add(v.url)
                     results.append(v)
         logger.info("occ_scraper: total_ia_related=%d", len(results))
         return results
 
-    def _fetch_page(self, page: int) -> list[OccVacante]:
+    def _fetch_page(self, page: int) -> list[OccVacante] | None:
         try:
             with httpx.Client(timeout=30.0) as client:
                 resp = client.get(
@@ -132,9 +132,11 @@ class OccScraper(BaseScraper):
                 resp.raise_for_status()
                 if "application/json" not in resp.headers.get("content-type", ""):
                     logger.warning("occ_scraper: page %d returned non-JSON", page)
-                    return []
+                    return None
                 data = resp.json()
             raw_vacantes = data.get("vacantes") or []
+            if not raw_vacantes:
+                return None  # server has no more results — stop pagination
             results = []
             for item in raw_vacantes:
                 titulo = item.get("titulo") or ""
@@ -171,7 +173,7 @@ class OccScraper(BaseScraper):
             return results
         except httpx.HTTPError as e:
             logger.error("occ_scraper: HTTP error page %d: %s", page, e)
-            return []
+            return None
         except Exception as e:
             logger.error("occ_scraper: unexpected error page %d: %s", page, e)
-            return []
+            return None

@@ -136,7 +136,7 @@ def test_fetch_page_on_http_error_returns_empty():
             raise_exc=_httpx.HTTPError("timeout")
         )
         result = scraper._fetch_page(1)
-    assert result == []
+    assert result is None
 
 
 def test_fetch_page_on_non_json_content_type_returns_empty():
@@ -147,4 +147,15 @@ def test_fetch_page_on_non_json_content_type_returns_empty():
             json_data=None, content_type="text/html"
         )
         result = scraper._fetch_page(1)
-    assert result == []
+    assert result is None
+
+
+def test_fetch_page_empty_raw_server_returns_none():
+    """Empty server response signals end of pagination — returns None."""
+    scraper = OccScraper()
+    payload = {"vacantes": [], "totalVacantes": 0}
+    with patch("pipeline.scrapers.occ_scraper.httpx.Client") as mock_cls:
+        mock_client = mock_cls.return_value.__enter__.return_value
+        mock_client.get.return_value = _mock_response(json_data=payload)
+        result = scraper._fetch_page(1)
+    assert result is None
