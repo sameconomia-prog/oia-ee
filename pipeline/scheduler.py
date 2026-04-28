@@ -3,7 +3,6 @@ Scheduler de pipelines de ingestión con APScheduler.
 Corre como proceso independiente: python -m pipeline.scheduler
 
 Variables de entorno:
-  STPS_CSV_PATH   — ruta al CSV de vacantes STPS (activa el job diario)
   ANUIES_CSV_PATH — ruta al CSV anual ANUIES (activa el job semanal)
   NEWSAPI_KEY     — API key de NewsAPI
   ANTHROPIC_API_KEY — API key de Anthropic para clasificación
