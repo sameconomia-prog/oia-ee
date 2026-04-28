@@ -1,14 +1,14 @@
 import hashlib
 import pytest
 from datetime import date, timedelta
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from pipeline.db.models import Base
 from pipeline.db import models_apikey  # noqa: F401
 from pipeline.db.models_apikey import ApiKey
 from api.deps import get_api_key_tier
-from api.middleware.rate_limit import dynamic_rate_limiter
+from api.middleware.rate_limit import apply_rate_limit, dynamic_rate_limiter, _mem_limiter, _InMemoryRateLimiter
 
 
 @pytest.fixture
@@ -105,3 +105,59 @@ def test_dynamic_rate_limiter_researcher_con_redis_retorna_limiter():
     with patch("api.middleware.rate_limit.FastAPILimiter.redis", MagicMock()):
         result = dynamic_rate_limiter("researcher")
         assert result is not None
+
+
+# ── InMemoryRateLimiter ────────────────────────────────────────────────────
+
+def test_in_memory_permite_hasta_limite():
+    lim = _InMemoryRateLimiter()
+    for _ in range(3):
+        assert lim.is_allowed("k", times=3, seconds=60) is True
+    assert lim.is_allowed("k", times=3, seconds=60) is False
+
+
+def test_in_memory_claves_independientes():
+    lim = _InMemoryRateLimiter()
+    for _ in range(2):
+        lim.is_allowed("a", times=2, seconds=60)
+    assert lim.is_allowed("b", times=2, seconds=60) is True
+
+
+# ── apply_rate_limit ───────────────────────────────────────────────────────
+
+def _fake_request_with_ip(ip: str = "1.2.3.4") -> MagicMock:
+    req = MagicMock()
+    req.client.host = ip
+    req.headers = {}
+    req.url.path = "/test"
+    req.method = "GET"
+    req.scope = {"type": "http", "path": "/test", "method": "GET"}
+    return req
+
+
+@pytest.mark.asyncio
+async def test_apply_rate_limit_premium_no_bloquea(monkeypatch):
+    import api.middleware.rate_limit as rl
+    monkeypatch.setattr(rl, "_redis_available", lambda: False)
+    monkeypatch.setattr(rl, "_mem_limiter", _InMemoryRateLimiter())
+    req = _fake_request_with_ip("8.8.8.8")
+    resp = MagicMock()
+    for _ in range(100):
+        await rl.apply_rate_limit(req, resp, "premium")
+
+
+@pytest.mark.asyncio
+async def test_apply_rate_limit_anon_bloquea_al_exceder(monkeypatch):
+    import api.middleware.rate_limit as rl
+    monkeypatch.setattr(rl, "_redis_available", lambda: False)
+    lim = _InMemoryRateLimiter()
+    monkeypatch.setattr(rl, "_mem_limiter", lim)
+
+    req = _fake_request_with_ip("9.9.9.9")
+    resp = MagicMock()
+    from fastapi import HTTPException
+    for _ in range(30):
+        await rl.apply_rate_limit(req, resp, "anon")
+    with pytest.raises(HTTPException) as exc:
+        await rl.apply_rate_limit(req, resp, "anon")
+    assert exc.value.status_code == 429

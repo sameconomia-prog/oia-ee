@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from pipeline.db import get_session
 from pipeline.db.models import Usuario
 from pipeline.db.models_apikey import ApiKey
-from api.middleware.rate_limit import dynamic_rate_limiter
+from api.middleware.rate_limit import apply_rate_limit, dynamic_rate_limiter
 
 _SECRET = os.getenv("JWT_SECRET_KEY", "dev-secret-change-in-prod")
 _ALGORITHM = "HS256"
@@ -83,8 +83,6 @@ async def rate_limit_public(
     db: Session = Depends(get_db),
 ) -> None:
     """Dependency: aplica rate limiting según tier del API key (o anon si no hay key).
-    Graceful degradation: si Redis no está disponible, no hace nada."""
+    Usa Redis si está disponible; sliding-window en memoria como fallback."""
     tier = get_api_key_tier(request, db)
-    limiter = dynamic_rate_limiter(tier)
-    if limiter is not None:
-        await limiter(request=request, response=response)
+    await apply_rate_limit(request, response, tier)

@@ -17,7 +17,7 @@ from pipeline.db import models_imss   # noqa: F401 — registers tables with Bas
 from pipeline.db import models_enoe   # noqa: F401 — registers tables with Base
 from pipeline.db import models_apikey # noqa: F401 — registers tables with Base
 from api.main import app
-from api.deps import get_db
+from api.deps import get_db, rate_limit_public
 
 
 @pytest.fixture(scope="session")
@@ -42,10 +42,14 @@ def db_session(test_engine):
 
 @pytest.fixture
 def client(db_session):
+    async def noop_rate_limit() -> None:
+        pass
+
     def override_get_db():
         yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[rate_limit_public] = noop_rate_limit
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
