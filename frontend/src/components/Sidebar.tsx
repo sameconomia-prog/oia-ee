@@ -4,20 +4,39 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { isAuthenticated, clearAuth } from '@/lib/auth'
 
-const links = [
-  { href: '/', label: 'Inicio', icon: '🏠' },
-  { href: '/noticias', label: 'Noticias', icon: '📰' },
-  { href: '/vacantes', label: 'Vacantes', icon: '💼' },
-  { href: '/ies', label: 'Instituciones', icon: '🏫' },
-  { href: '/carreras', label: 'Carreras', icon: '🎓' },
-  { href: '/kpis', label: 'KPIs', icon: '📊' },
-  { href: '/estadisticas', label: 'Estadísticas', icon: '📈' },
-  { href: '/impacto', label: 'Impacto IA', icon: '🌐' },
-  { href: '/comparar', label: 'Comparar', icon: '⚖️' },
-  { href: '/metodologia', label: 'Metodología', icon: '📐' },
-  { href: '/rector', label: 'Rector', icon: '🏛' },
-  { href: '/admin', label: 'Admin', icon: '⚙️' },
+const SECTIONS = [
+  {
+    label: 'Explorar',
+    links: [
+      { href: '/', label: 'Inicio' },
+      { href: '/noticias', label: 'Noticias' },
+      { href: '/vacantes', label: 'Vacantes' },
+      { href: '/ies', label: 'Instituciones' },
+      { href: '/carreras', label: 'Carreras' },
+    ],
+  },
+  {
+    label: 'Análisis',
+    links: [
+      { href: '/kpis', label: 'KPIs' },
+      { href: '/estadisticas', label: 'Estadísticas' },
+      { href: '/impacto', label: 'Impacto IA' },
+      { href: '/comparar', label: 'Comparar IES' },
+      { href: '/metodologia', label: 'Metodología' },
+    ],
+  },
+  {
+    label: 'Acceso',
+    links: [
+      { href: '/rector', label: 'Rector' },
+      { href: '/admin', label: 'Administración' },
+    ],
+  },
 ]
+
+function isActive(href: string, pathname: string) {
+  return href === '/' ? pathname === '/' : pathname.startsWith(href)
+}
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -35,35 +54,42 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-56 bg-gray-900 text-gray-100 min-h-screen flex flex-col shrink-0">
-      <div className="p-4 border-b border-gray-700">
-        <h1 className="font-bold text-lg">OIA-EE</h1>
-        <p className="text-xs text-gray-400">Observatorio IA · Empleo · Educación</p>
+    <aside className="w-56 bg-slate-900 text-slate-100 min-h-screen flex flex-col shrink-0">
+      <div className="p-4 border-b border-slate-700/60">
+        <h1 className="font-bold text-base tracking-tight">OIA-EE</h1>
+        <p className="text-[11px] text-slate-400 mt-0.5">Observatorio IA · Empleo · Educación</p>
       </div>
-      <nav className="flex-1 p-2">
-        {links.map(({ href, label, icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className={`flex items-center gap-3 px-3 py-2 rounded-md mb-1 text-sm transition-colors ${
-              (href === '/' ? pathname === '/' : pathname.startsWith(href))
-                ? 'bg-gray-700 text-white'
-                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-            }`}
-          >
-            <span>{icon}</span>
-            <span>{label}</span>
-          </Link>
+
+      <nav className="flex-1 py-3 px-2 overflow-y-auto">
+        {SECTIONS.map((section) => (
+          <div key={section.label} className="mb-4">
+            <p className="px-3 mb-1 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
+              {section.label}
+            </p>
+            {section.links.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className={`flex items-center px-3 py-1.5 rounded-md mb-0.5 text-sm transition-colors ${
+                  isActive(href, pathname)
+                    ? 'bg-slate-800 text-white border-l-2 border-indigo-400 font-medium pl-[10px]'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
         ))}
       </nav>
+
       {authed && (
-        <div className="p-2 border-t border-gray-700">
+        <div className="p-2 border-t border-slate-700/60">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+            className="w-full flex items-center px-3 py-1.5 rounded-md text-sm text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-colors"
           >
-            <span>🚪</span>
-            <span>Cerrar sesión</span>
+            Cerrar sesión
           </button>
         </div>
       )}
