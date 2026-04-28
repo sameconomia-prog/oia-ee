@@ -55,23 +55,32 @@ _HEADERS = {
 }
 
 
+_SHORT_KWS = frozenset({"bert", "rag", "llm", "rpa", "nlp", "pln", "gpt", "hmi"})
+
+
+def _kw_match(kw: str, text: str) -> bool:
+    if kw in _SHORT_KWS:
+        return bool(re.search(rf"\b{re.escape(kw)}\b", text))
+    return kw in text
+
+
 def _is_ia_related(text: str) -> bool:
     """EXCLUDE → False. TIER1 any match → True. TIER2 ≥2 matches → True."""
     t = text.lower()
-    if any(kw in t for kw in EXCLUDE_KEYWORDS):
+    if any(_kw_match(kw, t) for kw in EXCLUDE_KEYWORDS):
         return False
-    if any(kw in t for kw in TIER1_KEYWORDS):
+    if any(_kw_match(kw, t) for kw in TIER1_KEYWORDS):
         return True
-    return sum(1 for kw in TIER2_KEYWORDS if kw in t) >= 2
+    return sum(1 for kw in TIER2_KEYWORDS if _kw_match(kw, t)) >= 2
 
 
 def _parse_salary(raw: str) -> tuple[Optional[int], Optional[int]]:
     """Extrae (salario_min, salario_max) de texto libre OCC."""
-    nums = [
+    nums = sorted([
         int(m.replace(",", ""))
         for m in re.findall(r"[\d,]+", raw)
         if m.replace(",", "").isdigit() and len(m.replace(",", "")) >= 3
-    ]
+    ])
     if len(nums) >= 2:
         return nums[0], nums[1]
     if len(nums) == 1:
@@ -128,11 +137,11 @@ class OccScraper(BaseScraper):
             raw_vacantes = data.get("vacantes") or []
             results = []
             for item in raw_vacantes:
-                titulo = item.get("titulo", "")
-                descripcion = item.get("descripcion", "")
+                titulo = item.get("titulo") or ""
+                descripcion = item.get("descripcion") or ""
                 if not _is_ia_related(titulo + " " + descripcion):
                     continue
-                raw_url = item.get("url", "")
+                raw_url = item.get("url") or ""
                 abs_url = (
                     OCC_BASE_URL + raw_url if raw_url.startswith("/") else raw_url
                 )
@@ -141,7 +150,7 @@ class OccScraper(BaseScraper):
                     raw_skills = [s.strip() for s in raw_skills.split(",") if s.strip()]
                 sal_min, sal_max = _parse_salary(item.get("salario", ""))
                 fecha_pub: Optional[date] = None
-                raw_date = item.get("fechaPublicacion", "")
+                raw_date = item.get("fechaPublicacion") or ""
                 if raw_date:
                     try:
                         fecha_pub = date.fromisoformat(raw_date[:10])

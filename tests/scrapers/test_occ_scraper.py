@@ -54,3 +54,15 @@ def test_parse_salary_empty():
 
 def test_parse_salary_non_numeric():
     assert _parse_salary("A convenir") == (None, None)
+
+
+# --- word-boundary matching for short keywords ---
+
+def test_is_ia_related_bert_in_name_is_false():
+    # "bert" alone in a name should NOT match
+    assert _is_ia_related("Contador Roberto Bernal buscado") is False
+
+
+def test_is_ia_related_bert_standalone_is_true():
+    # "bert" as a standalone word (model name) should match
+    assert _is_ia_related("experiencia con BERT y transformers") is True
