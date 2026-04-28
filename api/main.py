@@ -14,6 +14,7 @@ from pipeline.jobs.news_ingest_job import run_news_ingest
 from pipeline.jobs.kpi_snapshot_job import run_kpi_snapshot
 from pipeline.jobs.radar_job import run_radar_despidos_job, run_radar_empleos_job, run_obsidian_sync_job
 from pipeline.jobs.forecast_job import run_forecast_job, run_skills_job
+from pipeline.jobs.occ_ingest_job import run_occ_ingest as _occ_ingest
 
 # Sentry — solo en producción
 _SENTRY_DSN = os.getenv("SENTRY_DSN", "")
@@ -52,6 +53,12 @@ def _run_snapshot_job_scheduled() -> None:
         db.commit()
 
 
+def _run_occ_job_scheduled() -> None:
+    with get_session() as db:
+        _occ_ingest(db)
+        db.commit()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Redis para rate limiting (graceful degradation si no está disponible)
@@ -68,6 +75,7 @@ async def lifespan(app: FastAPI):
     if os.getenv("ENABLE_SCHEDULER", "false").lower() == "true":
         _scheduler.add_job(_run_alert_job_scheduled, "cron", hour=3, minute=0)
         _scheduler.add_job(_run_news_job_scheduled, "cron", hour="*/6")
+        _scheduler.add_job(_run_occ_job_scheduled, "cron", hour="*/6", minute=15)
         _scheduler.add_job(_run_snapshot_job_scheduled, "cron", day_of_week="mon", hour=5)
         _scheduler.add_job(run_radar_despidos_job, "cron", hour="*/12")
         _scheduler.add_job(run_radar_empleos_job, "cron", hour="*/12", minute=30)

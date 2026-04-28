@@ -31,17 +31,10 @@ def run_news_scraper():
 
 
 def run_stps_loader():
-    path_env = os.getenv("STPS_CSV_PATH")
-    if not path_env:
-        logger.warning("STPS_CSV_PATH no configurado — job omitido")
-        return
-    from pathlib import Path
-    from pipeline.loaders.stps_loader import StpsLoader
-    from pipeline.jobs.stps_ingest_job import ingest_stps
+    from pipeline.jobs.stps_ingest_job import run_stps_ingest
     from pipeline.db import get_session
-    vacantes = StpsLoader().load_csv(Path(path_env))
     with get_session() as session:
-        result = ingest_stps(vacantes, session)
+        result = run_stps_ingest(session)
         session.commit()
     logger.info("stps_ingest OK: %s", result)
 
