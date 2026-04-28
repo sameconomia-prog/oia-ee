@@ -61,3 +61,53 @@ def test_ingest_lista_vacia(session):
     result = ingest_stps([], session)
     assert result.procesadas == 0
     assert result.insertadas == 0
+
+
+# ── agregar al final de tests/jobs/test_stps_ingest_job.py ──
+import io
+import csv
+from unittest.mock import patch, MagicMock
+from pipeline.jobs.stps_ingest_job import run_stps_ingest
+
+
+def _make_csv_bytes() -> bytes:
+    """CSV mínimo compatible con StpsLoader."""
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=[
+        "titulo", "empresa", "sector", "habilidades",
+        "salario_min", "salario_max", "fecha_publicacion",
+        "estado", "nivel_educativo", "experiencia",
+    ])
+    writer.writeheader()
+    writer.writerow({
+        "titulo": "Data Scientist", "empresa": "Acme", "sector": "Tech",
+        "habilidades": "Python,ML", "salario_min": "40000", "salario_max": "60000",
+        "fecha_publicacion": "2026-04-01", "estado": "CDMX",
+        "nivel_educativo": "licenciatura", "experiencia": "3",
+    })
+    return buf.getvalue().encode("utf-8")
+
+
+def test_run_stps_ingest_auto_download(session):
+    mock_resp = MagicMock()
+    mock_resp.raise_for_status.return_value = None
+    mock_resp.content = _make_csv_bytes()
+    with patch("pipeline.jobs.stps_ingest_job.httpx.get", return_value=mock_resp):
+        result = run_stps_ingest(session)
+    assert result.insertadas == 1
+    assert session.query(Vacante).filter_by(fuente="stps").count() == 1
+
+
+def test_run_stps_ingest_con_path(tmp_path, session):
+    csv_file = tmp_path / "test.csv"
+    csv_file.write_bytes(_make_csv_bytes())
+    result = run_stps_ingest(session, csv_path=csv_file)
+    assert result.insertadas == 1
+
+
+def test_run_stps_ingest_download_error(session):
+    import httpx as _httpx
+    with patch("pipeline.jobs.stps_ingest_job.httpx.get",
+               side_effect=_httpx.HTTPError("timeout")):
+        with pytest.raises(_httpx.HTTPError):
+            run_stps_ingest(session)
