@@ -42,7 +42,6 @@ export default function KpisTable() {
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
-  const [skip, setSkip] = useState(0)
   const [sortKey, setSortKey] = useState<SortKey>('d1')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [error, setError] = useState<string | null>(null)
@@ -53,7 +52,6 @@ export default function KpisTable() {
     getCarrerasPublico({ skip: 0, limit: PAGE_SIZE })
       .then((data) => {
         setRows(data)
-        setSkip(data.length)
         setHasMore(data.length === PAGE_SIZE)
       })
       .catch((e: Error) => setError(e.message))
@@ -61,11 +59,11 @@ export default function KpisTable() {
   }, [])
 
   async function loadMore() {
+    if (loadingMore) return
     setLoadingMore(true)
     try {
-      const data = await getCarrerasPublico({ skip, limit: PAGE_SIZE })
+      const data = await getCarrerasPublico({ skip: rows.length, limit: PAGE_SIZE })
       setRows(prev => [...prev, ...data])
-      setSkip(s => s + data.length)
       setHasMore(data.length === PAGE_SIZE)
     } catch { /* silencioso */ }
     finally { setLoadingMore(false) }
