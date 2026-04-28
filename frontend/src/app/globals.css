@@ -1,4 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* v2 */
+
+@layer base {
+  body {
+    @apply text-slate-900 antialiased;
+  }
+}
