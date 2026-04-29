@@ -34,7 +34,13 @@ export default function LoginPage() {
       const data = await res.json()
       const payloadB64 = data.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
       const payload = JSON.parse(atob(payloadB64.padEnd(payloadB64.length + (4 - payloadB64.length % 4) % 4, '=')))
-      saveAuth(data.access_token, payload.ies_id)
+      // Fetch IES nombre via /auth/me
+      let iesNombre: string | undefined
+      try {
+        const me = await fetch(`${BASE}/auth/me`, { headers: { Authorization: `Bearer ${data.access_token}` } })
+        if (me.ok) { const md = await me.json(); iesNombre = md.ies_nombre }
+      } catch { /* silencioso */ }
+      saveAuth(data.access_token, payload.ies_id, iesNombre, payload.rol)
       router.push('/rector')
     } catch {
       setError('Error de conexión con el servidor')

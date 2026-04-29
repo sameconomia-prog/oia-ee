@@ -46,3 +46,21 @@ def test_login_usuario_inactivo(client, db_session):
     db_session.flush()
     resp = client.post("/auth/login", data={"username": "rector_inactivo", "password": "pass"})
     assert resp.status_code == 401
+
+
+def test_get_me_retorna_usuario(client, db_session):
+    user, ies = _create_user(db_session, "me_test", "pass123")
+    login = client.post("/auth/login", data={"username": "me_test", "password": "pass123"})
+    token = login.json()["access_token"]
+    resp = client.get("/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["username"] == "me_test"
+    assert data["ies_id"] == ies.id
+    assert "rol" in data
+    assert "ies_nombre" in data
+
+
+def test_get_me_sin_token_retorna_401(client, db_session):
+    resp = client.get("/auth/me")
+    assert resp.status_code == 401

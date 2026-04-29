@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { isAuthenticated, clearAuth } from '@/lib/auth'
+import { isAuthenticated, clearAuth, getStoredIesNombre, getStoredRol } from '@/lib/auth'
 
 const SECTIONS = [
   {
@@ -31,6 +31,7 @@ const SECTIONS = [
     links: [
       { href: '/rector', label: 'Rector' },
       { href: '/admin', label: 'Administración' },
+      { href: '/admin/usuarios', label: 'Usuarios' },
     ],
   },
 ]
@@ -43,9 +44,13 @@ export default function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [authed, setAuthed] = useState(false)
+  const [iesNombre, setIesNombre] = useState<string | null>(null)
+  const [rol, setRol] = useState<string | null>(null)
 
   useEffect(() => {
     setAuthed(isAuthenticated())
+    setIesNombre(getStoredIesNombre())
+    setRol(getStoredRol())
   }, [pathname])
 
   function handleLogout() {
@@ -85,13 +90,26 @@ export default function Sidebar() {
       </nav>
 
       {authed && (
-        <div className="p-2 border-t border-slate-700/60">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center px-3 py-1.5 rounded-md text-sm text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-colors"
-          >
-            Cerrar sesión
-          </button>
+        <div className="border-t border-slate-700/60">
+          {iesNombre && (
+            <div className="px-3 py-2.5 bg-slate-800/60">
+              <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-0.5">Institución</p>
+              <p className="text-xs font-medium text-slate-200 leading-tight truncate">{iesNombre}</p>
+              {rol && (
+                <span className="inline-block mt-1 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-indigo-500/30 text-indigo-300 uppercase tracking-wide">
+                  {rol.replace('_', ' ')}
+                </span>
+              )}
+            </div>
+          )}
+          <div className="p-2">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center px-3 py-1.5 rounded-md text-sm text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-colors"
+            >
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       )}
     </aside>

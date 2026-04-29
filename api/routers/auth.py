@@ -8,8 +8,8 @@ from jose import jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from api.deps import get_db
-from pipeline.db.models import Usuario, RefreshToken
+from api.deps import get_db, get_current_user
+from pipeline.db.models import Usuario, RefreshToken, IES
 
 router = APIRouter()
 
@@ -83,3 +83,20 @@ def logout(body: RefreshRequest, db: Session = Depends(get_db)):
         rt.revocado = True
         db.commit()
     return {"detail": "Sesión cerrada"}
+
+
+@router.get("/me")
+def get_me(
+    current_user: Usuario = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    ies = db.query(IES).filter_by(id=current_user.ies_id).first()
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email,
+        "rol": current_user.rol,
+        "ies_id": current_user.ies_id,
+        "ies_nombre": ies.nombre if ies else None,
+        "ies_nombre_corto": ies.nombre_corto if ies else None,
+    }

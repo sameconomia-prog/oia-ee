@@ -5,7 +5,7 @@ from fastapi import APIRouter, Header, HTTPException, Depends, status
 from pydantic import BaseModel
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-from api.deps import get_db
+from api.deps import get_db, get_superadmin_user
 from api.schemas import CrearUsuarioIn, UsuarioOut
 from pipeline.db.models import IES, Usuario
 from pipeline.ingest_gdelt import run_gdelt_pipeline
@@ -162,6 +162,73 @@ def crear_usuario(
         email=body.email,
     )
     db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+# ── Gestión de usuarios (JWT superadmin) ─────────────────────────────────
+
+
+class PatchUsuarioIn(BaseModel):
+    rol: str | None = None
+    activo: bool | None = None
+    email: str | None = None
+
+
+@router.get("/usuarios/list", response_model=list[UsuarioOut])
+def listar_usuarios_jwt(
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(get_superadmin_user),
+):
+    """Lista todos los usuarios (superadmin via JWT)."""
+    return db.query(Usuario).order_by(Usuario.ies_id, Usuario.username).all()
+
+
+@router.post("/usuarios/crear", response_model=UsuarioOut, status_code=status.HTTP_201_CREATED)
+def crear_usuario_jwt(
+    body: CrearUsuarioIn,
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(get_superadmin_user),
+):
+    """Crea usuario (superadmin via JWT)."""
+    if not db.query(IES).filter_by(id=body.ies_id).first():
+        raise HTTPException(status_code=404, detail="IES no encontrada")
+    if db.query(Usuario).filter_by(username=body.username).first():
+        raise HTTPException(status_code=409, detail="Username ya existe")
+    user = Usuario(
+        username=body.username,
+        hashed_password=_pwd.hash(body.password),
+        ies_id=body.ies_id,
+        email=body.email,
+        rol=body.rol if hasattr(body, "rol") and body.rol else "admin_ies",
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.patch("/usuarios/{usuario_id}", response_model=UsuarioOut)
+def actualizar_usuario(
+    usuario_id: str,
+    body: PatchUsuarioIn,
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(get_superadmin_user),
+):
+    """Actualiza rol/activo/email de un usuario (superadmin via JWT)."""
+    user = db.query(Usuario).filter_by(id=usuario_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    ROLES_VALIDOS = {"viewer", "researcher", "admin_ies", "superadmin"}
+    if body.rol is not None:
+        if body.rol not in ROLES_VALIDOS:
+            raise HTTPException(status_code=422, detail=f"Rol inválido. Válidos: {ROLES_VALIDOS}")
+        user.rol = body.rol
+    if body.activo is not None:
+        user.activo = body.activo
+    if body.email is not None:
+        user.email = body.email
     db.commit()
     db.refresh(user)
     return user
