@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
 from apscheduler.schedulers.background import BackgroundScheduler
-from api.routers import noticias, kpis, admin, rector, alertas, escenarios, auth, publico, radar, predicciones, api_keys
+from api.routers import noticias, kpis, admin, rector, alertas, escenarios, auth, publico, radar, predicciones, api_keys, skill_graph
 from pipeline.db import get_session
 from pipeline.jobs.alert_job import run_alert_job
 from pipeline.jobs.news_ingest_job import run_news_ingest
@@ -126,6 +126,7 @@ app.include_router(alertas.router, prefix="/alertas", tags=["alertas"])
 app.include_router(escenarios.router, prefix="/escenarios", tags=["escenarios"])
 app.include_router(radar.router, prefix="/radar", tags=["radar"])
 app.include_router(predicciones.router, prefix="/predicciones", tags=["predicciones"])
+app.include_router(skill_graph.router, tags=["skill-graph"])
 
 
 @app.get("/health")
