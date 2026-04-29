@@ -6,8 +6,10 @@ import Link from 'next/link'
 import { getCarreraDetalle, getKpisHistorico } from '@/lib/api'
 import type { CarreraDetalle, HistoricoSerie } from '@/lib/types'
 import FanChart from '@/components/FanChart'
+import SkillTreemap from '@/components/SkillTreemap'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
+import SectionHeader from '@/components/ui/SectionHeader'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -200,6 +202,15 @@ export default function CarreraDetallePage() {
           />
         </Card>
       )}
+
+      {/* Mapa de Skills P5 */}
+      <Card className="mb-6 p-5">
+        <SectionHeader
+          title="Mapa de Skills — Impacto IA"
+          subtitle="Skills demandadas en vacantes y su nivel de exposición a automatización"
+        />
+        <SkillTreemap carreraId={id} />
+      </Card>
 
       {/* IES que ofrecen la carrera */}
       {d.instituciones.length > 0 && (

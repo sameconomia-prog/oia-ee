@@ -1,4 +1,4 @@
-import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult, CarreraKpi, KpisNacionalResumen, SkillFreq, VacantePublico, TopRiesgoItem, TendenciaNacional, CarreraDetalle, IesDetalle, EstadisticasPublicas, KpisDistribucion, VacanteTendencia, ImpactoData } from './types'
+import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult, CarreraKpi, KpisNacionalResumen, SkillFreq, VacantePublico, TopRiesgoItem, TendenciaNacional, CarreraDetalle, IesDetalle, EstadisticasPublicas, KpisDistribucion, VacanteTendencia, ImpactoData, SkillGraphData } from './types'
 import { getToken } from './auth'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
@@ -346,6 +346,12 @@ export async function getEscenarios(
   if (options.limit !== undefined) q.set('limit', String(options.limit))
   const qs = q.toString()
   const res = await fetch(`${BASE}/escenarios/${qs ? `?${qs}` : ''}`, { headers: authHeaders() })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
+export async function getSkillGraph(carreraId: string, topN = 20): Promise<SkillGraphData> {
+  const res = await fetch(`${BASE}/carreras/${carreraId}/skill-graph?top_n=${topN}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }

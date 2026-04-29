@@ -391,3 +391,21 @@ export interface ImpactoData {
   ocupaciones_mayor_riesgo: ImpactoOcupacion[]
   ocupaciones_mayor_oportunidad: ImpactoOcupacion[]
 }
+
+export type IaLabel = 'automated' | 'augmented' | 'resilient'
+
+export interface SkillNode {
+  name: string
+  weight: number
+  ia_score: number
+  ia_label: IaLabel
+  trend_12m: number
+}
+
+export interface SkillGraphData {
+  carrera_id: string
+  carrera_nombre: string | null
+  skill_count: number
+  pct_en_transicion: number
+  skills: SkillNode[]
+}
