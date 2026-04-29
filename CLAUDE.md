@@ -107,3 +107,40 @@ tests/
     ├── test_escenarios.py, test_kpis*.py, test_noticias.py
     ├── test_publico.py, test_rector.py
 ```
+
+---
+
+## Design Tokens — OIA-EE
+
+### Colores semáforo KPI (mismo estándar Humanitas)
+```
+verde:  color #10B981 | bg #ECFDF5 | text #065F46  → riesgo bajo / oportunidad alta
+ámbar:  color #F59E0B | bg #FFFBEB | text #92400E  → riesgo medio
+rojo:   color #EF4444 | bg #FEF2F2 | text #991B1B  → riesgo alto / alerta
+```
+
+### FanChart — bandas de confianza (Recharts directo, no Tremor)
+```
+banda 50%:  fill #3B82F6  opacity 0.35  → intervalo central
+banda 80%:  fill #3B82F6  opacity 0.20  → intervalo medio
+banda 95%:  fill #3B82F6  opacity 0.10  → intervalo exterior
+línea central: stroke #1D4ED8  strokeWidth 2
+```
+
+### Tipografía
+- Cuerpo: `Inter` (fallback: system-ui)
+- Datos/KPIs: `Montserrat` (peso 600)
+- Tablas: monospace para valores numéricos (`font-mono`)
+
+### Brand OIA-EE
+- Primario: `#1D4ED8` (azul académico)
+- Acento: `#3B82F6`
+- Fondo neutro: `#F8FAFC`
+
+### Espaciado y bordes
+- Border-radius: `8px` (cards), `4px` (badges)
+- Padding card: `p-4` a `p-6`
+- Sombra: `shadow-sm`
+
+### Regla para Claude Code
+Para gráficas de forecasting usa Recharts directamente — Tremor no soporta `ReferenceArea` custom necesaria para las bandas de confianza. Usa los opacities de arriba para mantener jerarquía visual clara entre bandas.
