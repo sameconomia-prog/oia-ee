@@ -62,7 +62,7 @@ const PRICING = [
     usd: '~$42,000+ USD',
     desc: 'Multi-campus, integración SIIA y white-label.',
     features: ['Multi-campus', 'Integración SIIA', 'White-label', 'SLA 99.9%', 'Ejecutivo dedicado', 'Estudio de pertinencia ad-hoc'],
-    cta: 'Contactar ventas',
+    cta: 'Solicitar estudio',
     highlight: false,
   },
 ]
@@ -85,6 +85,7 @@ export default function DemoPage() {
         </div>
         <div className="flex items-center gap-4">
           <Link href="/ranking" className="text-sm text-slate-600 hover:text-indigo-700">Ver ranking</Link>
+          <Link href="/pertinencia" className="text-sm text-slate-600 hover:text-indigo-700">Solicitar estudio</Link>
           <Link href="/login" className="text-sm text-slate-600 hover:text-indigo-700">Iniciar sesión</Link>
           <a
             href="mailto:sam.economia@gmail.com?subject=Solicitud%20Demo%20OIA-EE"
@@ -211,12 +212,21 @@ export default function DemoPage() {
                   </li>
                 ))}
               </ul>
-              <a
-                href="mailto:sam.economia@gmail.com?subject=Solicitud%20Demo%20OIA-EE"
-                className={`text-center py-2.5 px-4 rounded-lg font-semibold text-sm transition-colors ${p.highlight ? 'bg-white text-indigo-700 hover:bg-indigo-50' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
-              >
-                {p.cta}
-              </a>
+              {p.tier === 'Enterprise' ? (
+                <Link
+                  href="/pertinencia"
+                  className={`text-center py-2.5 px-4 rounded-lg font-semibold text-sm transition-colors bg-indigo-600 text-white hover:bg-indigo-700`}
+                >
+                  {p.cta}
+                </Link>
+              ) : (
+                <a
+                  href="mailto:sam.economia@gmail.com?subject=Solicitud%20Demo%20OIA-EE"
+                  className={`text-center py-2.5 px-4 rounded-lg font-semibold text-sm transition-colors ${p.highlight ? 'bg-white text-indigo-700 hover:bg-indigo-50' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                >
+                  {p.cta}
+                </a>
+              )}
             </div>
           ))}
         </div>

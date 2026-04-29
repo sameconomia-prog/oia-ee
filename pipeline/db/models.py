@@ -175,6 +175,18 @@ class RefreshToken(Base):
     usuario     = relationship("Usuario")
 
 
+class SolicitudPertinencia(Base):
+    __tablename__ = "solicitudes_pertinencia"
+    id               = Column(String(36), primary_key=True, default=_uuid)
+    nombre_contacto  = Column(String(200), nullable=False)
+    email_contacto   = Column(String(200), nullable=False)
+    ies_nombre       = Column(String(300), nullable=False)
+    carrera_nombre   = Column(String(300), nullable=False)
+    mensaje          = Column(Text, nullable=True)
+    estado           = Column(String(30), nullable=False, default="pendiente")
+    created_at       = Column(DateTime(timezone=True), default=datetime.utcnow)
+
+
 # Importar modelos del Radar para que Alembic los detecte
 from pipeline.db.models_radar import EventoIADespido, EventoIAEmpleo, SkillEmergente  # noqa: F401
 from pipeline.db.models_predictor import PrediccionKpi  # noqa: F401
