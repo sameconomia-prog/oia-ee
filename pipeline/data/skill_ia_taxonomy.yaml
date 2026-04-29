@@ -1,0 +1,99 @@
+# Clasificación de skills por impacto de IA.
+# Fuentes: Frey-Osborne (2013), Eloundou et al./OpenAI (2023), O*NET Task Importance
+# Niveles: automated (IA lo hace hoy) | augmented (humano+IA) | resilient (difícil automatizar)
+
+automated:
+  - captura de datos
+  - entrada de datos
+  - digitación
+  - transcripción
+  - facturación
+  - conciliación bancaria
+  - contabilidad básica
+  - procesamiento de nómina
+  - clasificación de documentos
+  - generación de reportes
+  - excel básico
+  - word
+  - powerpoint
+  - atención a clientes básica
+  - soporte técnico nivel 1
+  - traducción básica
+  - redacción de correos
+  - programación básica
+  - sql básico
+  - testing manual
+
+augmented:
+  - python
+  - sql
+  - machine learning
+  - inteligencia artificial
+  - data science
+  - análisis de datos
+  - visualización de datos
+  - tableau
+  - power bi
+  - excel avanzado
+  - estadística
+  - econometría
+  - programación
+  - desarrollo web
+  - javascript
+  - react
+  - java
+  - c++
+  - cloud
+  - aws
+  - azure
+  - docker
+  - kubernetes
+  - devops
+  - diseño gráfico
+  - diseño ux
+  - diseño ui
+  - fotografía
+  - edición de video
+  - contabilidad avanzada
+  - auditoría
+  - análisis financiero
+  - finanzas corporativas
+  - marketing digital
+  - seo
+  - gestión de proyectos
+  - scrum
+  - investigación
+  - redacción avanzada
+  - análisis jurídico
+  - diagnóstico médico básico
+  - administración de redes
+  - ciberseguridad
+
+resilient:
+  - liderazgo
+  - negociación
+  - toma de decisiones estratégicas
+  - gestión de equipos
+  - mentoría
+  - inteligencia emocional
+  - resolución de conflictos
+  - pensamiento crítico
+  - creatividad
+  - innovación
+  - emprendimiento
+  - ventas consultivas
+  - relaciones públicas
+  - comunicación ejecutiva
+  - ética profesional
+  - psicología clínica
+  - terapia
+  - cirugía
+  - diagnóstico médico complejo
+  - investigación científica avanzada
+  - filosofía
+  - pedagogía avanzada
+  - trabajo social
+  - gestión de crisis
+  - arquitectura
+  - diseño urbano
+  - derecho litigioso
