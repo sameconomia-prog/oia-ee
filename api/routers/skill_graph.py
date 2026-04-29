@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from api.deps import get_db, rate_limit_public
-from pipeline.skill_graph.builder import build_skill_graph
+from pipeline.skill_graph.builder import build_skill_graph, build_global_skill_graph
 
 router = APIRouter(dependencies=[Depends(rate_limit_public)])
 
@@ -16,3 +16,11 @@ def get_skill_graph(
     if result["carrera_nombre"] is None:
         raise HTTPException(status_code=404, detail="Carrera no encontrada")
     return result
+
+
+@router.get("/skills/global")
+def get_global_skill_graph(
+    top_n: int = Query(50, ge=10, le=100),
+    db: Session = Depends(get_db),
+):
+    return build_global_skill_graph(db, top_n=top_n)

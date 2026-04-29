@@ -21,6 +21,7 @@ const SECTIONS = [
       { href: '/kpis', label: 'KPIs' },
       { href: '/estadisticas', label: 'Estadísticas' },
       { href: '/impacto', label: 'Impacto IA' },
+      { href: '/skills', label: 'Skills IA' },
       { href: '/comparar', label: 'Comparar IES' },
       { href: '/metodologia', label: 'Metodología' },
     ],

@@ -99,3 +99,39 @@ def build_skill_graph(carrera_id: str, db: Session, top_n: int = 20) -> dict:
         "pct_en_transicion": pct,
         "skills": skills_out,
     }
+
+
+def build_global_skill_graph(db: Session, top_n: int = 50) -> dict:
+    """Grafo de skills del mercado nacional (todas las vacantes)."""
+    all_vacantes = db.query(Vacante).all()
+
+    counter: Counter = Counter()
+    for v in all_vacantes:
+        for skill in _parse_skills(v.skills):
+            counter[skill] += 1
+
+    if not counter:
+        return {"skill_count": 0, "pct_en_transicion": 0.0, "skills": []}
+
+    top_skills = counter.most_common(top_n)
+    total_mentions = sum(counter.values())
+
+    skills_out = [
+        {
+            "name": skill_name,
+            "weight": round(count / total_mentions, 4),
+            "ia_score": get_ia_score(skill_name),
+            "ia_label": get_ia_label(skill_name),
+            "trend_12m": _skill_trend(skill_name, all_vacantes),
+        }
+        for skill_name, count in top_skills
+    ]
+
+    en_transicion = [s for s in skills_out if s["ia_label"] in ("automated", "augmented")]
+    pct = round(len(en_transicion) / len(skills_out), 2) if skills_out else 0.0
+
+    return {
+        "skill_count": len(skills_out),
+        "pct_en_transicion": pct,
+        "skills": skills_out,
+    }
