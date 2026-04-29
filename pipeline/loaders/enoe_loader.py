@@ -1,51 +1,53 @@
 # pipeline/loaders/enoe_loader.py
-"""Descarga indicadores ENOE del INEGI vía API BIE (token gratuito)."""
+"""Descarga indicadores ENOE del INEGI vía API de Indicadores v2.0 (fuente BISE)."""
 from datetime import date
 import httpx
 import structlog
 
 logger = structlog.get_logger()
 
-_INEGI_API = "https://www.inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/INDICATOR"
-# Series BIE ENOE
+_INEGI_API = (
+    "https://www.inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/INDICATOR"
+)
+# Series ENOE (Encuesta Nacional de Ocupación y Empleo)
 _SERIE_TDA = "6200093677"   # Tasa de desocupación abierta (%) — trimestral
 _SERIE_POB = "6200093696"   # Población ocupada total (miles de personas) — trimestral
 
-# Códigos de área geográfica BIE: 070000=Nacional, 070001=Ags ... 070032=Zac
+# Códigos de área geográfica v2.0: 00=Nacional, 01=Ags ... 32=Zac
 _GEOGRAFIAS: dict[str, str] = {
-    "Nacional":             "070000",
-    "Aguascalientes":       "070001",
-    "Baja California":      "070002",
-    "Baja California Sur":  "070003",
-    "Campeche":             "070004",
-    "Coahuila":             "070005",
-    "Colima":               "070006",
-    "Chiapas":              "070007",
-    "Chihuahua":            "070008",
-    "Ciudad de México":     "070009",
-    "Durango":              "070010",
-    "Guanajuato":           "070011",
-    "Guerrero":             "070012",
-    "Hidalgo":              "070013",
-    "Jalisco":              "070014",
-    "México":               "070015",
-    "Michoacán":            "070016",
-    "Morelos":              "070017",
-    "Nayarit":              "070018",
-    "Nuevo León":           "070019",
-    "Oaxaca":               "070020",
-    "Puebla":               "070021",
-    "Querétaro":            "070022",
-    "Quintana Roo":         "070023",
-    "San Luis Potosí":      "070024",
-    "Sinaloa":              "070025",
-    "Sonora":               "070026",
-    "Tabasco":              "070027",
-    "Tamaulipas":           "070028",
-    "Tlaxcala":             "070029",
-    "Veracruz":             "070030",
-    "Yucatán":              "070031",
-    "Zacatecas":            "070032",
+    "Nacional":             "00",
+    "Aguascalientes":       "01",
+    "Baja California":      "02",
+    "Baja California Sur":  "03",
+    "Campeche":             "04",
+    "Coahuila":             "05",
+    "Colima":               "06",
+    "Chiapas":              "07",
+    "Chihuahua":            "08",
+    "Ciudad de México":     "09",
+    "Durango":              "10",
+    "Guanajuato":           "11",
+    "Guerrero":             "12",
+    "Hidalgo":              "13",
+    "Jalisco":              "14",
+    "México":               "15",
+    "Michoacán":            "16",
+    "Morelos":              "17",
+    "Nayarit":              "18",
+    "Nuevo León":           "19",
+    "Oaxaca":               "20",
+    "Puebla":               "21",
+    "Querétaro":            "22",
+    "Quintana Roo":         "23",
+    "San Luis Potosí":      "24",
+    "Sinaloa":              "25",
+    "Sonora":               "26",
+    "Tabasco":              "27",
+    "Tamaulipas":           "28",
+    "Tlaxcala":             "29",
+    "Veracruz":             "30",
+    "Yucatán":              "31",
+    "Zacatecas":            "32",
 }
 
 _TRIMESTRE_A_MES = {1: 1, 2: 4, 3: 7, 4: 10}
@@ -53,15 +55,19 @@ _TRIMESTRE_A_MES = {1: 1, 2: 4, 3: 7, 4: 10}
 
 def _fetch_serie(serie: str, geo_code: str, anio: int, trimestre: int,
                  token: str) -> float | None:
-    """Llama BIE para un indicador + geografía. Filtra el período deseado. Retorna valor o None."""
+    """Llama API BISE para un indicador + geografía. Filtra el período deseado."""
     mes = _TRIMESTRE_A_MES[trimestre]
     target_period = f"{anio}/{mes:02d}"
-    url = f"{_INEGI_API}/{serie}/es/{geo_code}/false/BIE/2.0/{token}.json"
+    url = (
+        f"{_INEGI_API}/{serie}/es/{geo_code}/false/BISE/2.0/{token}"
+        "?type=json"
+    )
     try:
         resp = httpx.get(url, timeout=30.0)
         resp.raise_for_status()
         data = resp.json()
-        obs = data.get("Series", [{}])[0].get("Obs", [])
+        # v2.0 usa OBSERVATIONS (antes era Obs)
+        obs = data.get("Series", [{}])[0].get("OBSERVATIONS", [])
         match = next((o for o in obs if o.get("TIME_PERIOD") == target_period), None)
         if match:
             raw = match.get("OBS_VALUE")
