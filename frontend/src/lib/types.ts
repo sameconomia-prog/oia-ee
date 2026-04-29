@@ -392,6 +392,49 @@ export interface ImpactoData {
   ocupaciones_mayor_oportunidad: ImpactoOcupacion[]
 }
 
+export interface TopRiesgoItemOut {
+  carrera_id: string
+  nombre: string
+  d1_score: number
+  d2_score: number
+  matricula: number | null
+  area_conocimiento: string | null
+}
+
+export interface PertinenciaSolicitud {
+  nombre_contacto: string
+  ies_nombre: string
+  carrera_nombre: string
+  fecha_solicitud: string
+}
+
+export interface PertinenciaCarrera {
+  id: string
+  nombre: string
+  area_conocimiento: string | null
+  nivel: string | null
+  duracion_anios: number | null
+  matricula_total: number | null
+  instituciones_count: number
+}
+
+export interface PertinenciaSemaforo {
+  d1_score: number
+  proyeccion_1a: string
+  proyeccion_3a: string
+  proyeccion_5a: string
+}
+
+export interface PertinenciaReportData {
+  solicitud: PertinenciaSolicitud
+  carrera: PertinenciaCarrera
+  kpi: KpiResult | null
+  skills: SkillGraphData | null
+  semaforo: PertinenciaSemaforo | null
+  comparables: TopRiesgoItemOut[]
+  nacional: { promedio_d1: number; promedio_d2: number; promedio_d3: number }
+}
+
 export type IaLabel = 'automated' | 'augmented' | 'resilient'
 
 export interface SkillNode {

@@ -1,4 +1,4 @@
-import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult, CarreraKpi, KpisNacionalResumen, SkillFreq, VacantePublico, TopRiesgoItem, TendenciaNacional, CarreraDetalle, IesDetalle, EstadisticasPublicas, KpisDistribucion, VacanteTendencia, ImpactoData, SkillGraphData } from './types'
+import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult, CarreraKpi, KpisNacionalResumen, SkillFreq, VacantePublico, TopRiesgoItem, TendenciaNacional, CarreraDetalle, IesDetalle, EstadisticasPublicas, KpisDistribucion, VacanteTendencia, ImpactoData, SkillGraphData, TopRiesgoItemOut, PertinenciaReportData } from './types'
 import { getToken } from './auth'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
@@ -354,4 +354,73 @@ export async function getSkillGraph(carreraId: string, topN = 20): Promise<Skill
   const res = await fetch(`${BASE}/carreras/${carreraId}/skill-graph?top_n=${topN}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
+}
+
+export async function getPrediccionSemaforo(
+  carreraId: string,
+): Promise<{ d1_score: number; proyeccion_1a: string; proyeccion_3a: string; proyeccion_5a: string } | null> {
+  const res = await fetch(`${BASE}/predicciones/carrera/${carreraId}/semaforo`, { headers: authHeaders() })
+  if (res.status === 404 || res.status === 422) return null
+  if (!res.ok) return null
+  return await res.json()
+}
+
+export async function getRankingComparativo(area: string | null, n = 30): Promise<TopRiesgoItemOut[]> {
+  const qs = new URLSearchParams({ n: String(n), orden: 'd1' })
+  if (area) qs.set('area', area)
+  const res = await fetch(`${BASE}/publico/kpis/ranking?${qs}`)
+  if (!res.ok) return []
+  return await res.json()
+}
+
+export async function buscarCarreras(q: string): Promise<{ id: string; nombre: string; area_conocimiento: string | null }[]> {
+  const res = await fetch(`${BASE}/publico/carreras?q=${encodeURIComponent(q)}&limit=5`)
+  if (!res.ok) return []
+  const data = await res.json()
+  return Array.isArray(data) ? data : (data.carreras ?? [])
+}
+
+export async function fetchPertinenciaReportData(
+  carreraId: string,
+  solicitud: PertinenciaReportData['solicitud'],
+): Promise<PertinenciaReportData> {
+  const [detalle, kpisNacional] = await Promise.all([
+    getCarreraDetalle(carreraId),
+    getKpisNacionalResumen(),
+  ])
+
+  const [skills, semaforo, comparables] = await Promise.all([
+    getSkillGraph(carreraId, 40).catch(() => null),
+    getPrediccionSemaforo(carreraId),
+    getRankingComparativo(detalle.area_conocimiento, 30),
+  ])
+
+  const matriculaTotal = detalle.instituciones.reduce((s, i) => s + (i.matricula ?? 0), 0)
+
+  return {
+    solicitud,
+    carrera: {
+      id: carreraId,
+      nombre: detalle.nombre,
+      area_conocimiento: detalle.area_conocimiento,
+      nivel: detalle.nivel,
+      duracion_anios: detalle.duracion_anios,
+      matricula_total: matriculaTotal || null,
+      instituciones_count: detalle.instituciones.length,
+    },
+    kpi: detalle.kpi,
+    skills,
+    semaforo: semaforo ? {
+      d1_score: semaforo.d1_score,
+      proyeccion_1a: semaforo.proyeccion_1a,
+      proyeccion_3a: semaforo.proyeccion_3a,
+      proyeccion_5a: semaforo.proyeccion_5a,
+    } : null,
+    comparables,
+    nacional: {
+      promedio_d1: kpisNacional.promedio_d1,
+      promedio_d2: kpisNacional.promedio_d2,
+      promedio_d3: kpisNacional.promedio_d3,
+    },
+  }
 }

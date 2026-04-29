@@ -34,6 +34,7 @@ const SECTIONS = [
       { href: '/rector', label: 'Rector' },
       { href: '/admin', label: 'Administración' },
       { href: '/admin/usuarios', label: 'Usuarios' },
+      { href: '/admin/pertinencia', label: 'Pertinencia' },
     ],
   },
 ]
