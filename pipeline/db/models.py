@@ -190,3 +190,4 @@ class SolicitudPertinencia(Base):
 # Importar modelos del Radar para que Alembic los detecte
 from pipeline.db.models_radar import EventoIADespido, EventoIAEmpleo, SkillEmergente  # noqa: F401
 from pipeline.db.models_predictor import PrediccionKpi  # noqa: F401
+from pipeline.db.models_siia import SiiaMatricula, SiiaToken  # noqa: F401
