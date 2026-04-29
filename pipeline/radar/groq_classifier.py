@@ -1,24 +1,21 @@
 # pipeline/radar/groq_classifier.py
-"""LLM call via Groq Free Tier (llama-3.1-8b-instant)."""
+"""Clasificador LLM con fallback automático (8 proveedores gratuitos).
+
+Prioridad: Groq → DeepSeek → Qwen → ZAI → OpenRouter → Cerebras → Cohere → Mistral.
+Si todos fallan, retorna None — extractor.py intenta Claude Haiku como último recurso.
+"""
 from typing import Optional
 import structlog
-from groq import Groq
+from pipeline.ai_router import FallbackClient
 
 logger = structlog.get_logger()
 
-_GROQ_MODEL = "llama-3.1-8b-instant"
-
 
 def call_groq(prompt: str, api_key: str) -> Optional[str]:
-    """Llama a Groq API. Retorna texto crudo o None en error."""
+    """Llama al stack de LLMs con fallback. api_key ignorado — usa env vars."""
     try:
-        client = Groq(api_key=api_key, timeout=10.0)
-        resp = client.chat.completions.create(
-            model=_GROQ_MODEL,
-            max_tokens=512,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return resp.choices[0].message.content
-    except Exception as e:
-        logger.error("groq_call_failed", error=str(e))
+        client = FallbackClient()
+        return client.chat(prompt, system="")
+    except RuntimeError as e:
+        logger.error("fallback_all_failed", error=str(e))
         return None
