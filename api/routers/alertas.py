@@ -62,3 +62,13 @@ def marcar_leida(
     alerta.leida = True
     db.commit()
     return AlertaLeidaOut(id=alerta.id, leida=bool(alerta.leida))
+
+
+@router.get("/count")
+def count_no_leidas(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user),
+):
+    """Retorna el número de alertas no leídas del usuario actual."""
+    count = db.query(Alerta).filter_by(ies_id=current_user.ies_id, leida=False).count()
+    return {"count": count}

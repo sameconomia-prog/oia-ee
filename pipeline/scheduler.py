@@ -81,6 +81,14 @@ def run_enoe_loader():
     logger.info("enoe_ingest OK: %s", result)
 
 
+def run_resumen_semanal():
+    from pipeline.services.resumen_semanal import send_resumen_semanal
+    from pipeline.db import get_session
+    with get_session() as session:
+        result = send_resumen_semanal(session)
+    logger.info("resumen_semanal OK: %s", result)
+
+
 scheduler.add_job(
     run_news_scraper,
     trigger=CronTrigger(hour="*/6"),
@@ -126,6 +134,14 @@ scheduler.add_job(
     trigger=CronTrigger(month="1,4,7,10", day=20, hour=4, minute=0),
     id="enoe_loader",
     name="Carga INEGI ENOE trimestral",
+    replace_existing=True,
+)
+
+scheduler.add_job(
+    run_resumen_semanal,
+    trigger=CronTrigger(day_of_week="mon", hour=8, minute=0),
+    id="resumen_semanal",
+    name="Resumen semanal email a admin_ies",
     replace_existing=True,
 )
 

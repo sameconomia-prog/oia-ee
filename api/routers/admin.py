@@ -232,3 +232,13 @@ def actualizar_usuario(
     db.commit()
     db.refresh(user)
     return user
+
+
+@router.post("/resumen-semanal/trigger")
+def trigger_resumen_semanal(
+    db: Session = Depends(get_db),
+    _: None = Depends(_require_admin),
+):
+    """Dispara el envío del resumen semanal manualmente."""
+    from pipeline.services.resumen_semanal import send_resumen_semanal
+    return send_resumen_semanal(db)

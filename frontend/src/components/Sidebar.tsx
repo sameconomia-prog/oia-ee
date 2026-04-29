@@ -2,7 +2,9 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { isAuthenticated, clearAuth, getStoredIesNombre, getStoredRol } from '@/lib/auth'
+import { isAuthenticated, clearAuth, getStoredIesNombre, getStoredRol, getToken } from '@/lib/auth'
+
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
 const SECTIONS = [
   {
@@ -46,11 +48,22 @@ export default function Sidebar() {
   const [authed, setAuthed] = useState(false)
   const [iesNombre, setIesNombre] = useState<string | null>(null)
   const [rol, setRol] = useState<string | null>(null)
+  const [alertCount, setAlertCount] = useState(0)
 
   useEffect(() => {
-    setAuthed(isAuthenticated())
+    const isAuth = isAuthenticated()
+    setAuthed(isAuth)
     setIesNombre(getStoredIesNombre())
     setRol(getStoredRol())
+    if (isAuth) {
+      const token = getToken()
+      fetch(`${BASE}/alertas/count`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : { count: 0 })
+        .then(d => setAlertCount(d.count))
+        .catch(() => {})
+    } else {
+      setAlertCount(0)
+    }
   }, [pathname])
 
   function handleLogout() {
@@ -76,13 +89,18 @@ export default function Sidebar() {
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center px-3 py-1.5 rounded-md mb-0.5 text-sm transition-colors ${
+                className={`flex items-center justify-between px-3 py-1.5 rounded-md mb-0.5 text-sm transition-colors ${
                   isActive(href, pathname)
                     ? 'bg-slate-800 text-white border-l-2 border-indigo-400 font-medium pl-[10px]'
                     : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
                 }`}
               >
-                {label}
+                <span>{label}</span>
+                {href === '/rector' && authed && alertCount > 0 && (
+                  <span className="ml-1.5 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] text-center">
+                    {alertCount > 99 ? '99+' : alertCount}
+                  </span>
+                )}
               </Link>
             ))}
           </div>
