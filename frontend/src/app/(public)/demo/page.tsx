@@ -84,6 +84,7 @@ export default function DemoPage() {
           <span className="text-slate-400 text-sm ml-2">Observatorio IA · Empleo · Educación</span>
         </div>
         <div className="flex items-center gap-4">
+          <Link href="/ranking" className="text-sm text-slate-600 hover:text-indigo-700">Ver ranking</Link>
           <Link href="/login" className="text-sm text-slate-600 hover:text-indigo-700">Iniciar sesión</Link>
           <a
             href="mailto:sam.economia@gmail.com?subject=Solicitud%20Demo%20OIA-EE"

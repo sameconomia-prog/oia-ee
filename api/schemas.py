@@ -273,6 +273,7 @@ class TopRiesgoItemOut(BaseModel):
     d1_score: float
     d2_score: float
     matricula: Optional[int] = None
+    area_conocimiento: Optional[str] = None
 
 
 class EstadisticasPublicasOut(BaseModel):

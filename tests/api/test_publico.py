@@ -620,3 +620,44 @@ def test_vacantes_tendencia_con_datos(client, db_session):
     assert "2024-02" in meses
     jan = next(d for d in data if d["mes"] == "2024-01")
     assert jan["count"] == 2
+
+
+# --- Tests ranking endpoint ---
+
+def test_ranking_retorna_200_vacio(client, db_session):
+    resp = client.get("/publico/kpis/ranking")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_ranking_d1_con_datos(client, db_session):
+    from pipeline.db.models import Carrera, CarreraIES, IES
+    ies = IES(nombre="IES Ranking", nombre_corto="IES")
+    db_session.add(ies)
+    db_session.flush()
+    c1 = Carrera(nombre_norm="ingeniería industrial", area_conocimiento="Ingeniería")
+    c2 = Carrera(nombre_norm="medicina", area_conocimiento="Salud")
+    db_session.add_all([c1, c2])
+    db_session.flush()
+    db_session.add(CarreraIES(carrera_id=c1.id, ies_id=ies.id, ciclo="2024A"))
+    db_session.add(CarreraIES(carrera_id=c2.id, ies_id=ies.id, ciclo="2024A"))
+    db_session.flush()
+    resp = client.get("/publico/kpis/ranking?n=10&orden=d1")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data, list)
+    for item in data:
+        assert "carrera_id" in item
+        assert "d1_score" in item
+        assert "d2_score" in item
+        assert "area_conocimiento" in item
+
+
+def test_ranking_max_100(client, db_session):
+    resp = client.get("/publico/kpis/ranking?n=200")
+    assert resp.status_code == 200
+
+
+def test_ranking_d2_orden(client, db_session):
+    resp = client.get("/publico/kpis/ranking?orden=d2")
+    assert resp.status_code == 200

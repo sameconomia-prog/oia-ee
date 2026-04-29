@@ -274,6 +274,7 @@ def top_carreras_riesgo(n: int = 5, db: Session = Depends(get_db)):
                 d1_score=result.d1_obsolescencia.score,
                 d2_score=result.d2_oportunidades.score,
                 matricula=cie.matricula if cie else None,
+                area_conocimiento=carrera.area_conocimiento if carrera else None,
             ))
 
     items.sort(key=lambda x: x.d1_score, reverse=True)
@@ -297,10 +298,48 @@ def top_carreras_oportunidades(n: int = 5, db: Session = Depends(get_db)):
                 d1_score=result.d1_obsolescencia.score,
                 d2_score=result.d2_oportunidades.score,
                 matricula=cie.matricula if cie else None,
+                area_conocimiento=carrera.area_conocimiento if carrera else None,
             ))
 
     items.sort(key=lambda x: x.d2_score, reverse=True)
     return items[:n]
+
+
+@router.get("/kpis/ranking", response_model=list[TopRiesgoItemOut])
+def ranking_carreras(
+    n: int = 50,
+    orden: str = "d1",
+    area: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """Ranking completo de carreras por D1 (riesgo) o D2 (oportunidad). Público."""
+    from pipeline.kpi_engine.kpi_runner import run_kpis
+    from sqlalchemy import text as sql_text
+
+    carrera_ids = [r[0] for r in db.query(CarreraIES.carrera_id).distinct().all()]
+    items = []
+    for cid in carrera_ids:
+        carrera = db.query(Carrera).filter_by(id=cid).first()
+        if not carrera:
+            continue
+        if area and carrera.area_conocimiento != area:
+            continue
+        cie = db.query(CarreraIES).filter_by(carrera_id=cid).first()
+        result = run_kpis(cid, db)
+        if result:
+            items.append(TopRiesgoItemOut(
+                carrera_id=cid,
+                nombre=carrera.nombre_norm.title(),
+                d1_score=result.d1_obsolescencia.score,
+                d2_score=result.d2_oportunidades.score,
+                matricula=cie.matricula if cie else None,
+                area_conocimiento=carrera.area_conocimiento,
+            ))
+
+    reverse = orden != "d2"
+    key_fn = (lambda x: x.d1_score) if orden == "d1" else (lambda x: x.d2_score)
+    items.sort(key=key_fn, reverse=reverse)
+    return items[:min(n, 100)]
 
 
 @router.get("/kpis/distribucion", response_model=KpisDistribucionOut)
