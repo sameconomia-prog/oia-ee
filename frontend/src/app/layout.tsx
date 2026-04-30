@@ -22,6 +22,13 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'es_MX',
     siteName: 'OIA-EE',
+    url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://oia-ee.mx',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'OIA-EE — Observatorio IA · Empleo · Educación',
+    description: '312 IES analizadas. 847 carreras monitoreadas. El impacto de la IA en la educación superior de México.',
+    creator: '@oiaee_mx',
   },
 }
 
