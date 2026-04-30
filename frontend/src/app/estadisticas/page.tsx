@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getEstadisticasPublicas, getKpisDistribucion, getVacantesTendencia, getNoticiasTendencia } from '@/lib/api'
-import type { EstadisticasPublicas, KpisDistribucion, VacanteTendencia } from '@/lib/types'
+import { getEstadisticasPublicas, getKpisDistribucion, getVacantesTendencia, getNoticiasTendencia, getBenchmarkResumen } from '@/lib/api'
+import type { EstadisticasPublicas, KpisDistribucion, VacanteTendencia, BenchmarkResumen } from '@/lib/types'
 
 function StatBox({ label, value, color, href }: { label: string; value: number | string; color: string; href?: string }) {
   const inner = (
@@ -64,6 +64,7 @@ export default function EstadisticasPage() {
   const [distribucion, setDistribucion] = useState<KpisDistribucion | null>(null)
   const [vacTendencia, setVacTendencia] = useState<VacanteTendencia[]>([])
   const [notTendencia, setNotTendencia] = useState<VacanteTendencia[]>([])
+  const [benchResumen, setBenchResumen] = useState<BenchmarkResumen | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -75,6 +76,7 @@ export default function EstadisticasPage() {
       .catch(() => {})
     getVacantesTendencia(12).then(setVacTendencia).catch(() => {})
     getNoticiasTendencia(12).then(setNotTendencia).catch(() => {})
+    getBenchmarkResumen().then(setBenchResumen).catch(() => {})
   }, [])
 
   return (
@@ -151,10 +153,49 @@ export default function EstadisticasPage() {
             </div>
           )}
 
+          {benchResumen && (
+            <div className="bg-white rounded-xl border shadow-sm p-5 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-semibold text-gray-800 text-sm">Benchmarks Globales</h2>
+                <Link href="/benchmarks" className="text-xs text-indigo-600 hover:underline">Ver detalle →</Link>
+              </div>
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold font-mono text-slate-900">{benchResumen.total_carreras}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Carreras analizadas</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold font-mono text-slate-900">{benchResumen.total_fuentes}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Fuentes internacionales</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold font-mono text-slate-900">{benchResumen.total_skills}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Skills evaluadas</p>
+                </div>
+              </div>
+              <div className="flex gap-4 text-xs">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-red-400"></span>
+                  <span className="text-slate-600">{benchResumen.skills_declining} declining</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span className="text-slate-600">{benchResumen.skills_growing} growing</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
+                  <span className="text-slate-600">{benchResumen.skills_mixed_stable} mixed</span>
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
             {[
               { href: '/kpis', label: 'Ver rankings KPI' },
               { href: '/comparar', label: 'Comparar instituciones' },
+              { href: '/benchmarks', label: 'Benchmarks Globales' },
+              { href: '/pertinencia', label: 'Solicitar análisis' },
             ].map(({ href, label }) => (
               <Link
                 key={href}
