@@ -446,6 +446,12 @@ export async function getBenchmarkCareerDetail(slug: string): Promise<import('./
   return res.json()
 }
 
+export async function getBenchmarkResumen(): Promise<import('./types').BenchmarkResumen> {
+  const res = await fetch(`${BASE}/publico/benchmarks/resumen`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
 export async function marcarTodasAlertas(): Promise<{ marcadas: number }> {
   const res = await fetch(`${BASE}/alertas/leer-todas`, {
     method: 'PUT',

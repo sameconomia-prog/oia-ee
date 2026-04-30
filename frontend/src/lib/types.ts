@@ -502,3 +502,14 @@ export interface BenchmarkCareerDetail {
   area: string
   skills: SkillConvergencia[]
 }
+
+export interface BenchmarkResumen {
+  total_carreras: number
+  total_fuentes: number
+  total_skills: number
+  skills_declining: number
+  skills_growing: number
+  skills_mixed_stable: number
+  skills_sin_datos: number
+  acciones: Record<string, number>
+}

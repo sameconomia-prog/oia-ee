@@ -32,6 +32,7 @@ const SECTIONS = [
       { href: '/comparar', label: 'Comparar IES' },
       { href: '/metodologia', label: 'Metodología' },
       { href: '/comparativo-global', label: 'Comparativo Global' },
+      { href: '/benchmarks', label: 'Benchmarks Globales' },
     ],
   },
   {
