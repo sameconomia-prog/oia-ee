@@ -542,3 +542,21 @@ export interface SkillIndexItem {
   consenso_pct: number
   carreras: string[]
 }
+
+export interface SourceHallazgo {
+  career_slug: string
+  career_nombre: string
+  skill_id: string
+  skill_nombre: string
+  skill_tipo: string
+  direccion: ConvergenceDirection
+  horizonte_impacto: string
+  hallazgo: string
+  dato_clave: string
+  cita_textual: string
+}
+
+export interface SourceDetail extends BenchmarkSource {
+  total_hallazgos: number
+  hallazgos: SourceHallazgo[]
+}

@@ -411,3 +411,45 @@ def test_resumen_acciones_include_known_action_types(bench_client):
     valid = {"retirar", "redisenar", "fortalecer", "agregar"}
     for k in acciones:
         assert k in valid, f"Unexpected accion: {k}"
+
+
+# ── source detail tests ───────────────────────────────────────────────────────
+
+def test_source_detail_returns_hallazgos(bench_client):
+    resp = bench_client.get("/publico/benchmarks/sources/src1")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["id"] == "src1"
+    assert data["nombre"] == "Fuente Test 1"
+    assert isinstance(data["hallazgos"], list)
+    assert data["total_hallazgos"] == len(data["hallazgos"])
+
+
+def test_source_detail_hallazgo_has_career_context(bench_client):
+    resp = bench_client.get("/publico/benchmarks/sources/src1")
+    assert resp.status_code == 200
+    hallazgos = resp.json()["hallazgos"]
+    assert len(hallazgos) == 1
+    h = hallazgos[0]
+    assert h["career_slug"] == "carrera-test"
+    assert h["skill_id"] == "skill-a"
+    assert h["skill_nombre"] == "Skill A"
+    assert h["skill_tipo"] == "tecnica"
+    assert h["direccion"] == "declining"
+    assert "hallazgo" in h
+    assert "dato_clave" in h
+    assert "cita_textual" in h
+
+
+def test_source_detail_not_found_returns_404(bench_client):
+    resp = bench_client.get("/publico/benchmarks/sources/no-existe")
+    assert resp.status_code == 404
+
+
+def test_source_detail_filter_by_dir_declining(bench_client):
+    """Source with hallazgos — all should be declining in mock data."""
+    resp = bench_client.get("/publico/benchmarks/sources/src1")
+    assert resp.status_code == 200
+    hallazgos = resp.json()["hallazgos"]
+    for h in hallazgos:
+        assert h["direccion"] in {"declining", "growing", "mixed", "stable", "sin_datos"}

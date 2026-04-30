@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { BenchmarkSource } from '@/lib/types'
 
 const TIPO_LABEL: Record<string, string> = {
@@ -45,14 +46,22 @@ export default function SourceCards({ sources }: { sources: BenchmarkSource[] })
           <p className="text-sm font-medium text-gray-800 leading-snug flex-1">
             {source.dato_clave}
           </p>
-          <a
-            href={source.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 text-xs text-blue-600 hover:underline"
-          >
-            Ver reporte →
-          </a>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <Link
+              href={`/benchmarks/fuentes/${source.id}`}
+              className="text-xs text-brand-600 hover:underline font-medium"
+            >
+              Ver hallazgos →
+            </Link>
+            <a
+              href={source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-slate-400 hover:underline"
+            >
+              Reporte ↗
+            </a>
+          </div>
         </div>
       ))}
     </div>

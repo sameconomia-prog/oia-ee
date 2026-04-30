@@ -80,6 +80,33 @@ class SkillIndexItemOut(BaseModel):
     carreras: list[str]
 
 
+class SourceHallazgoOut(BaseModel):
+    career_slug: str
+    career_nombre: str
+    skill_id: str
+    skill_nombre: str
+    skill_tipo: str
+    direccion: str
+    horizonte_impacto: str
+    hallazgo: str
+    dato_clave: str
+    cita_textual: str
+
+
+class SourceDetailOut(BaseModel):
+    id: str
+    nombre: str
+    año: int
+    metodologia: str
+    tipo_evidencia: str
+    dato_clave: str
+    confianza: str
+    peso_geografico: str
+    url: str
+    total_hallazgos: int
+    hallazgos: list[SourceHallazgoOut]
+
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _build_skill_convergencia(skill: dict, skill_index: dict, sources: dict) -> SkillConvergenciaOut:
@@ -135,6 +162,48 @@ def get_sources():
         )
         for s in sources.values()
     ]
+
+
+@router.get("/sources/{source_id}", response_model=SourceDetailOut,
+            summary="Detalle de fuente con todos sus hallazgos")
+def get_source_detail(source_id: str):
+    sources, career_map, skill_index = load_benchmarks()
+    if source_id not in sources:
+        raise HTTPException(status_code=404, detail=f"Fuente '{source_id}' no encontrada")
+    src = sources[source_id]
+    hallazgos: list[SourceHallazgoOut] = []
+    for carrera in career_map["carreras"]:
+        for skill in carrera["skills"]:
+            sid = skill["id"]
+            by_fuente = skill_index.get(sid, {})
+            if source_id in by_fuente:
+                h = by_fuente[source_id]
+                hallazgos.append(SourceHallazgoOut(
+                    career_slug=carrera["slug"],
+                    career_nombre=carrera["nombre"],
+                    skill_id=sid,
+                    skill_nombre=skill["nombre"],
+                    skill_tipo=skill["tipo"],
+                    direccion=h["direccion"],
+                    horizonte_impacto=h["horizonte_impacto"],
+                    hallazgo=h["hallazgo"],
+                    dato_clave=h["dato_clave"],
+                    cita_textual=h["cita_textual"],
+                ))
+    fuente = src["fuente"]
+    return SourceDetailOut(
+        id=fuente["id"],
+        nombre=fuente["nombre"],
+        año=fuente["año"],
+        metodologia=fuente["metodologia"],
+        tipo_evidencia=fuente["tipo_evidencia"],
+        dato_clave=fuente["dato_clave"],
+        confianza=fuente["confianza"],
+        peso_geografico=fuente["peso_geografico"],
+        url=fuente["url"],
+        total_hallazgos=len(hallazgos),
+        hallazgos=hallazgos,
+    )
 
 
 def _compute_urgencia(carrera: dict, skill_index: dict) -> int:

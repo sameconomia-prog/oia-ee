@@ -464,6 +464,12 @@ export async function getBenchmarkSkillsIndex(): Promise<import('./types').Skill
   return res.json()
 }
 
+export async function getBenchmarkSourceDetail(sourceId: string): Promise<import('./types').SourceDetail> {
+  const res = await fetch(`${BASE}/publico/benchmarks/sources/${sourceId}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
 export async function marcarTodasAlertas(): Promise<{ marcadas: number }> {
   const res = await fetch(`${BASE}/alertas/leer-todas`, {
     method: 'PUT',
