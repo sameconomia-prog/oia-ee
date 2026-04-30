@@ -11,8 +11,9 @@ import ComparacionModal from './ComparacionModal'
 import TendenciasPanel from './TendenciasPanel'
 import RectorNoticiasPanel from './RectorNoticiasPanel'
 import BenchmarkPanel from './BenchmarkPanel'
+import RiesgoOportunidadMatrix from './RiesgoOportunidadMatrix'
 
-type Tab = 'carreras' | 'escenarios' | 'tendencias' | 'noticias' | 'benchmark'
+type Tab = 'carreras' | 'matriz' | 'benchmark' | 'tendencias' | 'escenarios' | 'noticias'
 
 export default function RectorDashboard({ iesId }: { iesId: string }) {
   const [data, setData] = useState<RectorData | null>(null)
@@ -63,6 +64,7 @@ export default function RectorDashboard({ iesId }: { iesId: string }) {
           <div className="flex gap-4 mb-3 border-b">
             {([
               ['carreras', 'Carreras'],
+              ['matriz', 'Matriz Riesgo-Oportunidad'],
               ['benchmark', 'Benchmark Nacional'],
               ['tendencias', 'Tendencias'],
               ['escenarios', 'Historial Escenarios'],
@@ -78,6 +80,7 @@ export default function RectorDashboard({ iesId }: { iesId: string }) {
             ))}
           </div>
           {tab === 'carreras' && <RectorCarrerasTable carreras={data.carreras} iesId={iesId} />}
+          {tab === 'matriz' && <RiesgoOportunidadMatrix carreras={data.carreras} />}
           {tab === 'benchmark' && <BenchmarkPanel iesId={iesId} />}
           {tab === 'tendencias' && <TendenciasPanel carreras={data.carreras} />}
           {tab === 'escenarios' && <EscenariosPanel iesId={iesId} onComparar={setComparando} />}

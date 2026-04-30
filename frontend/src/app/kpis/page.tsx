@@ -6,11 +6,13 @@ import EstadoKpiSection from '@/components/EstadoKpiSection'
 import NoticiasKpiSection from '@/components/NoticiasKpiSection'
 import EstadoRankingNacional from '@/components/EstadoRankingNacional'
 import CarrerasRankingPanel from '@/components/CarrerasRankingPanel'
+import MatrizKpiPublica from '@/components/MatrizKpiPublica'
 
-type Tab = 'carreras' | 'estado' | 'ranking_d5' | 'noticias' | 'ranking_carreras'
+type Tab = 'carreras' | 'matriz' | 'estado' | 'ranking_d5' | 'noticias' | 'ranking_carreras'
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'carreras', label: 'D1–D3–D6 por Carrera' },
+  { key: 'matriz', label: 'Matriz D1×D2' },
   { key: 'estado', label: 'D5 Geografía por Estado' },
   { key: 'ranking_d5', label: 'D5 Ranking Nacional' },
   { key: 'ranking_carreras', label: 'Ranking Carreras' },
@@ -39,6 +41,7 @@ export default function KpisPage() {
         ))}
       </div>
       {tab === 'carreras' && <KpisTable />}
+      {tab === 'matriz' && <MatrizKpiPublica />}
       {tab === 'estado' && <EstadoKpiSection />}
       {tab === 'ranking_d5' && <EstadoRankingNacional />}
       {tab === 'ranking_carreras' && <CarrerasRankingPanel />}
