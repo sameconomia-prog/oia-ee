@@ -156,11 +156,17 @@ export default function BenchmarksPage() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="mb-6">
+      <div className="mb-6 flex items-start justify-between">
         <SectionHeader
           title="Benchmarks Globales"
           subtitle="Convergencia de 5 fuentes internacionales sobre la exposición de habilidades a la automatización por IA"
         />
+        <Link
+          href="/benchmarks/comparar"
+          className="shrink-0 ml-6 text-xs text-brand-600 border border-brand-200 px-3 py-1.5 rounded hover:bg-brand-50 transition-colors font-medium mt-1"
+        >
+          Comparar carreras →
+        </Link>
       </div>
 
       {resumen && (
