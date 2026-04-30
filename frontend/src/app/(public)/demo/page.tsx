@@ -251,6 +251,11 @@ export default function DemoPage() {
       <footer className="border-t border-slate-100 py-8 px-6 text-center text-xs text-slate-400">
         <p>© {new Date().getFullYear()} OIA-EE — Observatorio de Impacto IA en Educación y Empleo · México</p>
         <p className="mt-1">sam.economia@gmail.com · Todos los datos son públicos (IMSS, INEGI, ANUIES, SEP, OCC México)</p>
+        <p className="mt-2">
+          <Link href="/privacidad" className="hover:text-indigo-700">Aviso de privacidad</Link>
+          {' · '}
+          <Link href="/terminos" className="hover:text-indigo-700">Términos de servicio</Link>
+        </p>
       </footer>
     </div>
   )

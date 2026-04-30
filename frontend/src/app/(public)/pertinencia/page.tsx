@@ -205,6 +205,11 @@ export default function PertinenciaPage() {
 
       <footer className="border-t border-slate-100 py-6 px-6 text-center text-xs text-slate-400 mt-8">
         <p>© {new Date().getFullYear()} OIA-EE — Observatorio de Impacto IA en Educación y Empleo</p>
+        <p className="mt-1">
+          <Link href="/privacidad" className="hover:text-indigo-700">Aviso de privacidad</Link>
+          {' · '}
+          <Link href="/terminos" className="hover:text-indigo-700">Términos de servicio</Link>
+        </p>
       </footer>
     </div>
   )
