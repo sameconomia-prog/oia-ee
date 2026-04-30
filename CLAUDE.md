@@ -45,7 +45,7 @@ OIA-EE/
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
 ## Estado actual (Sprint 119, 2026-04-30)
-- 437 pytest · 61 Jest · 0 errores TypeScript · 47 artículos investigaciones
+- 437 pytest · 61 Jest · 0 errores TypeScript · 49 artículos investigaciones
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
