@@ -161,12 +161,20 @@ export default function BenchmarksPage() {
           title="Benchmarks Globales"
           subtitle="Convergencia de 5 fuentes internacionales sobre la exposición de habilidades a la automatización por IA"
         />
-        <Link
-          href="/benchmarks/comparar"
-          className="shrink-0 ml-6 text-xs text-brand-600 border border-brand-200 px-3 py-1.5 rounded hover:bg-brand-50 transition-colors font-medium mt-1"
-        >
-          Comparar carreras →
-        </Link>
+        <div className="flex gap-2 mt-1">
+          <Link
+            href="/benchmarks/skills"
+            className="shrink-0 text-xs text-brand-600 border border-brand-200 px-3 py-1.5 rounded hover:bg-brand-50 transition-colors font-medium"
+          >
+            Índice de skills →
+          </Link>
+          <Link
+            href="/benchmarks/comparar"
+            className="shrink-0 text-xs text-brand-600 border border-brand-200 px-3 py-1.5 rounded hover:bg-brand-50 transition-colors font-medium"
+          >
+            Comparar →
+          </Link>
+        </div>
       </div>
 
       {resumen && (

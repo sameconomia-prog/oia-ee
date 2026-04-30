@@ -69,6 +69,16 @@ class SkillCrossSourceOut(BaseModel):
     hallazgos: list[SkillHallazgoOut]
 
 
+class SkillIndexItemOut(BaseModel):
+    skill_id: str
+    skill_nombre: str
+    skill_tipo: str
+    direccion_global: str
+    fuentes_con_datos: int
+    consenso_pct: int
+    carreras: list[str]
+
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _build_skill_convergencia(skill: dict, skill_index: dict, sources: dict) -> SkillConvergenciaOut:
@@ -187,6 +197,43 @@ def get_resumen():
         "skills_sin_datos": direction_counts["sin_datos"],
         "acciones": dict(accion_counts),
     }
+
+
+@router.get("/skills", response_model=list[SkillIndexItemOut], summary="Índice de todas las skills")
+def get_skills_index():
+    """Lista todas las skills con su dirección global y en qué carreras aparecen."""
+    sources, career_map, skill_index = load_benchmarks()
+    skill_careers: dict[str, list[str]] = {}
+    skill_meta: dict[str, dict] = {}
+    for carrera in career_map["carreras"]:
+        for skill in carrera["skills"]:
+            sid = skill["id"]
+            skill_careers.setdefault(sid, []).append(carrera["slug"])
+            if sid not in skill_meta:
+                skill_meta[sid] = skill
+
+    result = []
+    for sid, skill in skill_meta.items():
+        by_fuente = skill_index.get(sid, {})
+        global_dir = compute_direction(by_fuente)
+        fuentes_con_datos = len(by_fuente)
+        if fuentes_con_datos and global_dir not in ("sin_datos", "mixed"):
+            agreeing = sum(1 for h in by_fuente.values() if h["direccion"] == global_dir)
+            consenso_pct = round(agreeing / fuentes_con_datos * 100)
+        elif global_dir == "mixed":
+            consenso_pct = 50
+        else:
+            consenso_pct = 0
+        result.append(SkillIndexItemOut(
+            skill_id=sid,
+            skill_nombre=skill["nombre"],
+            skill_tipo=skill["tipo"],
+            direccion_global=global_dir,
+            fuentes_con_datos=fuentes_con_datos,
+            consenso_pct=consenso_pct,
+            carreras=skill_careers.get(sid, []),
+        ))
+    return sorted(result, key=lambda s: (s.direccion_global, s.skill_nombre))
 
 
 @router.get("/skills/{skill_id}", response_model=SkillCrossSourceOut,

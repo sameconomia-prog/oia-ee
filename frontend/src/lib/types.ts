@@ -530,3 +530,13 @@ export interface SkillCrossSource {
   skill_id: string
   hallazgos: SkillHallazgo[]
 }
+
+export interface SkillIndexItem {
+  skill_id: string
+  skill_nombre: string
+  skill_tipo: string
+  direccion_global: ConvergenceDirection
+  fuentes_con_datos: number
+  consenso_pct: number
+  carreras: string[]
+}
