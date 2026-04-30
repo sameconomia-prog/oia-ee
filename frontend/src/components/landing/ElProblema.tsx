@@ -21,7 +21,7 @@ export default function ElProblema() {
               Vulnerabilidad ante la Automatización (IVA) superior a 0.5 — la mitad de sus
               egresados compite con ocupaciones en riesgo de automatización parcial o total.
             </p>
-            <Link href="/plataforma/carreras" className="text-[#1D4ED8] font-medium text-sm hover:underline">
+            <Link href="/plataforma" className="text-[#1D4ED8] font-medium text-sm hover:underline">
               Ver ranking de carreras →
             </Link>
           </div>
@@ -34,7 +34,7 @@ export default function ElProblema() {
               demanda de skills emergentes, entidades con menor densidad industrial enfrentan
               desplazamiento sin oferta educativa alternativa.
             </p>
-            <Link href="/plataforma/estadisticas" className="text-[#1D4ED8] font-medium text-sm hover:underline">
+            <Link href="/estadisticas" className="text-[#1D4ED8] font-medium text-sm hover:underline">
               Ver distribución por estado →
             </Link>
           </div>
