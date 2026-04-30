@@ -1,7 +1,9 @@
 'use client'
-import { useState } from 'react'
-import type { CarreraKpi } from '@/lib/types'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import type { CarreraKpi, BenchmarkCareerSummary } from '@/lib/types'
 import { dotColor, textColor } from '@/lib/kpi-colors'
+import { getBenchmarkCareers } from '@/lib/api'
 import SimuladorModal from './SimuladorModal'
 
 type SortKey = 'd1' | 'd2'
@@ -35,6 +37,20 @@ function Dash() {
   return <span className="text-xs text-gray-400">—</span>
 }
 
+function UrgenciaBadge({ score, slug }: { score: number; slug: string }) {
+  const { label, color } =
+    score >= 60 ? { label: 'Alta', color: 'bg-red-100 text-red-800' } :
+    score >= 30 ? { label: 'Mod.', color: 'bg-amber-100 text-amber-800' } :
+    { label: 'Baja', color: 'bg-green-100 text-green-800' }
+  return (
+    <Link href={`/benchmarks/${slug}`} title={`Urgencia curricular global: ${score}/100`}>
+      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${color} hover:opacity-80`}>
+        {label}
+      </span>
+    </Link>
+  )
+}
+
 export default function RectorCarrerasTable({
   carreras,
   iesId,
@@ -45,6 +61,17 @@ export default function RectorCarrerasTable({
   const [sortKey, setSortKey] = useState<SortKey>('d1')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [simulando, setSimulando] = useState<string | null>(null)
+  const [benchmarkMap, setBenchmarkMap] = useState<Record<string, BenchmarkCareerSummary>>({})
+
+  useEffect(() => {
+    getBenchmarkCareers()
+      .then(list => {
+        const map: Record<string, BenchmarkCareerSummary> = {}
+        for (const b of list) map[b.slug] = b
+        setBenchmarkMap(map)
+      })
+      .catch(() => {})
+  }, [])
 
   function handleSort(key: SortKey) {
     if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
@@ -126,6 +153,7 @@ export default function RectorCarrerasTable({
               <th colSpan={5} className="px-2 py-1.5 border-b border-l-4 border-l-green-300 bg-green-50 text-green-800 tracking-wide">
                 D2 — OPORTUNIDADES
               </th>
+              <th className="px-2 py-2 border-b text-gray-500 text-xs" rowSpan={2}>Global</th>
               <th className="px-2 py-2 border-b text-gray-500 text-xs" rowSpan={2}>Acción</th>
             </tr>
             <tr className="text-xs text-center text-gray-500 bg-gray-50">
@@ -152,9 +180,10 @@ export default function RectorCarrerasTable({
             </tr>
           </thead>
           <tbody>
-            {sorted.map(({ id, nombre, matricula, kpi }) => {
+            {sorted.map(({ id, nombre, matricula, kpi, benchmark_slug }) => {
               const d1 = kpi?.d1_obsolescencia
               const d2 = kpi?.d2_oportunidades
+              const bench = benchmark_slug ? benchmarkMap[benchmark_slug] : null
               return (
                 <tr key={id} className="border-b hover:bg-gray-50 text-center">
                   <td className="px-3 py-2 text-left text-xs font-semibold text-gray-800">{nombre}</td>
@@ -188,6 +217,11 @@ export default function RectorCarrerasTable({
                   </td>
                   <td className="px-2 py-2 bg-green-50/50">
                     {d2 ? <Sub value={d2.iea} isD1={false} /> : <Dash />}
+                  </td>
+                  <td className="px-2 py-2">
+                    {bench ? (
+                      <UrgenciaBadge score={bench.urgencia_curricular} slug={bench.slug} />
+                    ) : <Dash />}
                   </td>
                   <td className="px-2 py-2">
                     <button
