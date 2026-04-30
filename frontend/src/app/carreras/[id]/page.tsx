@@ -96,6 +96,9 @@ const BENCHMARK_ARTICLE_MAP: Record<string, string> = {
   'contaduria': '2026-04-contaduria-ia-2030',
   'diseno-grafico': '2026-04-diseno-grafico-ia-2030',
   'ingenieria-sistemas': '2026-04-ingenieros-software-ia',
+  'comunicacion': '2026-04-comunicacion-ia-2030',
+  'educacion': '2026-04-educacion-ia-2030',
+  'economia': '2026-04-economia-ia-2030',
 }
 
 export default function CarreraDetallePage() {
