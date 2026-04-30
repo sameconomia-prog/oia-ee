@@ -336,3 +336,78 @@ def test_skills_index_carreras_contains_career_slug(bench_client):
     data = resp.json()
     skill_a = next(s for s in data if s["skill_id"] == "skill-a")
     assert "carrera-test" in skill_a["carreras"]
+
+
+# ── urgencia_curricular tests ─────────────────────────────────────────────────
+
+def test_career_summary_has_urgencia_curricular(bench_client):
+    resp = bench_client.get("/publico/benchmarks/careers")
+    assert resp.status_code == 200
+    career = resp.json()[0]
+    assert "urgencia_curricular" in career
+    assert isinstance(career["urgencia_curricular"], int)
+    assert 0 <= career["urgencia_curricular"] <= 100
+
+
+def test_urgencia_above_zero_with_declining_skill_and_coverage(bench_client):
+    """skill-a is declining with 1 source → urgencia should be > 0."""
+    resp = bench_client.get("/publico/benchmarks/careers")
+    assert resp.status_code == 200
+    career = resp.json()[0]
+    # 1 declining out of 2 skills, consenso 100% → pct=0.5, avg_c=1.0 → 50
+    assert career["urgencia_curricular"] > 0
+
+
+def test_urgencia_zero_when_no_declining_skills(tmp_path):
+    _write_source(tmp_path, "s1", ["skill-g"], "growing")
+    data = {
+        "carreras": [{
+            "slug": "all-growing",
+            "nombre": "Carrera Growing",
+            "area": "test",
+            "skills": [{"id": "skill-g", "nombre": "Skill G", "tipo": "tecnica",
+                        "accion_curricular": "fortalecer"}],
+        }]
+    }
+    (tmp_path / "career_skills_map.yaml").write_text(
+        __import__("yaml").dump(data, allow_unicode=True), encoding="utf-8"
+    )
+    sources, career_map, skill_index = _load_all_yaml(tmp_path)
+    from api.routers.benchmarks import _compute_urgencia
+    carrera = career_map["carreras"][0]
+    assert _compute_urgencia(carrera, skill_index) == 0
+
+
+def test_urgencia_zero_when_no_skills():
+    from api.routers.benchmarks import _compute_urgencia
+    empty_carrera = {"skills": []}
+    assert _compute_urgencia(empty_carrera, {}) == 0
+
+
+def test_urgencia_zero_when_declining_has_no_coverage(tmp_path):
+    """Declining skill but zero sources → consenso not computed → urgencia=0."""
+    _write_career_map(tmp_path, ["skill-orphan-check"])
+    (tmp_path / "sources").mkdir(parents=True, exist_ok=True)
+    sources, career_map, skill_index = _load_all_yaml(tmp_path)
+    from api.routers.benchmarks import _compute_urgencia
+    # No coverage → compute_direction → sin_datos → urgencia=0
+    assert _compute_urgencia(career_map["carreras"][0], skill_index) == 0
+
+
+def test_compute_direction_100_percent_growing():
+    hallazgos = {
+        "s1": {"direccion": "growing"},
+        "s2": {"direccion": "growing"},
+        "s3": {"direccion": "growing"},
+    }
+    assert compute_direction(hallazgos) == "growing"
+
+
+def test_resumen_acciones_include_known_action_types(bench_client):
+    resp = bench_client.get("/publico/benchmarks/resumen")
+    assert resp.status_code == 200
+    acciones = resp.json()["acciones"]
+    assert isinstance(acciones, dict)
+    valid = {"retirar", "redisenar", "fortalecer", "agregar"}
+    for k in acciones:
+        assert k in valid, f"Unexpected accion: {k}"
