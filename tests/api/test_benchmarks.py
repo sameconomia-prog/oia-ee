@@ -242,3 +242,31 @@ def test_resumen_estructura(bench_client):
     assert "skills_sin_datos" in data
     assert "acciones" in data
     assert isinstance(data["acciones"], dict)
+
+
+def test_skill_cross_source_returns_hallazgos(bench_client):
+    resp = bench_client.get("/publico/benchmarks/skills/skill-a")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["skill_id"] == "skill-a"
+    assert isinstance(data["hallazgos"], list)
+    assert len(data["hallazgos"]) == 1
+    h = data["hallazgos"][0]
+    assert h["fuente_id"] == "src1"
+    assert h["direccion"] == "declining"
+    assert "hallazgo" in h
+    assert "dato_clave" in h
+    assert "cita_textual" in h
+
+
+def test_skill_cross_source_sin_cobertura_returns_empty(bench_client):
+    resp = bench_client.get("/publico/benchmarks/skills/skill-b")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["skill_id"] == "skill-b"
+    assert data["hallazgos"] == []
+
+
+def test_skill_cross_source_not_found_returns_404(bench_client):
+    resp = bench_client.get("/publico/benchmarks/skills/skill-inexistente")
+    assert resp.status_code == 404
