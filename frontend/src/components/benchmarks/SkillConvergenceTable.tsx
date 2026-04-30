@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import Link from 'next/link'
 import type { BenchmarkSource, SkillConvergencia, ConvergenceDirection } from '@/lib/types'
 import ConvergenceIcon from './ConvergenceIcon'
@@ -42,6 +42,12 @@ export default function SkillConvergenceTable({
 }) {
   const [sort, setSort] = useState<SortKey>('default')
   const [filterDir, setFilterDir] = useState<ConvergenceDirection | 'all'>('all')
+  const [groupByTipo, setGroupByTipo] = useState(false)
+
+  const TIPO_ORDER: Record<string, number> = { tecnica: 0, digital: 1, transversal: 2, social: 3 }
+  const TIPO_LABEL: Record<string, string> = {
+    tecnica: 'Técnicas', digital: 'Digitales', transversal: 'Transversales', social: 'Sociales',
+  }
 
   const sorted = useMemo(() => {
     let list = filterDir === 'all'
@@ -52,8 +58,12 @@ export default function SkillConvergenceTable({
     if (sort === 'declining') list.sort((a, b) => DIR_ORDER[a.direccion_global] - DIR_ORDER[b.direccion_global])
     else if (sort === 'growing') list.sort((a, b) => DIR_ORDER[b.direccion_global] - DIR_ORDER[a.direccion_global])
     else if (sort === 'consenso') list.sort((a, b) => b.consenso_pct - a.consenso_pct || b.fuentes_con_datos - a.fuentes_con_datos)
+
+    if (groupByTipo) {
+      list.sort((a, b) => (TIPO_ORDER[a.skill_tipo] ?? 9) - (TIPO_ORDER[b.skill_tipo] ?? 9))
+    }
     return list
-  }, [skills, sort, filterDir])
+  }, [skills, sort, filterDir, groupByTipo])
 
   const btnBase = 'text-[11px] px-2 py-1 rounded border transition-colors'
   const btnActive = 'bg-brand-600 text-white border-brand-600'
@@ -82,6 +92,13 @@ export default function SkillConvergenceTable({
             {label}
           </button>
         ))}
+        <button
+          onClick={() => setGroupByTipo(g => !g)}
+          className={`ml-2 ${btnBase} ${groupByTipo ? btnActive : btnInactive}`}
+          title="Agrupar por tipo de habilidad"
+        >
+          Por tipo
+        </button>
         <span className="ml-auto text-[11px] text-slate-400">{sorted.length} skills</span>
       </div>
 
@@ -109,44 +126,50 @@ export default function SkillConvergenceTable({
             </tr>
           </thead>
           <tbody>
-            {sorted.map((skill, i) => (
-              <tr
-                key={skill.skill_id}
-                className={`border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
-              >
-                <td className="px-4 py-3">
-                  {careerSlug ? (
-                    <Link
-                      href={`/benchmarks/skills/${skill.skill_id}?from=${careerSlug}&nombre=${encodeURIComponent(skill.skill_nombre)}`}
-                      className="font-medium text-brand-700 hover:underline"
-                    >
-                      {skill.skill_nombre}
-                    </Link>
-                  ) : (
-                    <div className="font-medium text-gray-900">{skill.skill_nombre}</div>
+            {sorted.map((skill, i) => {
+              const showTipoHeader = groupByTipo && (i === 0 || sorted[i - 1].skill_tipo !== skill.skill_tipo)
+              const colSpan = sources.length + 3
+              return (
+                <React.Fragment key={skill.skill_id}>
+                  {showTipoHeader && (
+                    <tr className="bg-slate-100 border-b border-slate-200">
+                      <td colSpan={colSpan} className="px-4 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                        {TIPO_LABEL[skill.skill_tipo] ?? skill.skill_tipo}
+                      </td>
+                    </tr>
                   )}
-                  <div className="text-xs text-gray-400 capitalize mt-0.5">{skill.skill_tipo}</div>
-                </td>
-                {sources.map((s) => (
-                  <td key={s.id} className="text-center px-3 py-3">
-                    <ConvergenceIcon
-                      direction={
-                        (skill.convergencia_por_fuente[s.id] ?? 'sin_datos') as ConvergenceDirection
-                      }
-                    />
-                  </td>
-                ))}
-                <td className="text-center px-3 py-3">
-                  <ConvergenceIcon direction={skill.direccion_global} />
-                </td>
-                <td className="text-center px-2 py-3">
-                  <ConsensoBadge pct={skill.consenso_pct} fuentes={skill.fuentes_con_datos} />
-                </td>
-                <td className="px-4 py-3">
-                  <CurriculumBadge accion={skill.accion_curricular} />
-                </td>
-              </tr>
-            ))}
+                  <tr className={`border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+                    <td className="px-4 py-3">
+                      {careerSlug ? (
+                        <Link
+                          href={`/benchmarks/skills/${skill.skill_id}?from=${careerSlug}&nombre=${encodeURIComponent(skill.skill_nombre)}`}
+                          className="font-medium text-brand-700 hover:underline"
+                        >
+                          {skill.skill_nombre}
+                        </Link>
+                      ) : (
+                        <div className="font-medium text-gray-900">{skill.skill_nombre}</div>
+                      )}
+                      {!groupByTipo && <div className="text-xs text-gray-400 capitalize mt-0.5">{skill.skill_tipo}</div>}
+                    </td>
+                    {sources.map((s) => (
+                      <td key={s.id} className="text-center px-3 py-3">
+                        <ConvergenceIcon direction={(skill.convergencia_por_fuente[s.id] ?? 'sin_datos') as ConvergenceDirection} />
+                      </td>
+                    ))}
+                    <td className="text-center px-3 py-3">
+                      <ConvergenceIcon direction={skill.direccion_global} />
+                    </td>
+                    <td className="text-center px-2 py-3">
+                      <ConsensoBadge pct={skill.consenso_pct} fuentes={skill.fuentes_con_datos} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <CurriculumBadge accion={skill.accion_curricular} />
+                    </td>
+                  </tr>
+                </React.Fragment>
+              )
+            })}
           </tbody>
         </table>
       </div>
