@@ -70,3 +70,48 @@ hallazgos:
     cita_textual: "Market Research Analysts and Marketing Specialists: 0.61 probability of computerisation [Appendix, p. 61]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: fo2013-redactores
+    ocupacion_original: "Writers and Authors"
+    ocupacion_codigo_oficial: "O*NET: 27-3043.00"
+    skills_afectadas:
+      - redaccion-contenido
+      - narrativa-periodistica
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: largo
+    hallazgo: "Los escritores y periodistas tienen riesgo moderado (38%) — la creatividad narrativa y el juicio editorial protegen el perfil"
+    dato_clave: "Probabilidad de automatización: 0.38 para Writers and Authors"
+    cita_textual: "Writers and Authors: 0.38 probability of computerisation — originality and social intelligence bottlenecks reduce automation risk [Appendix, p. 73]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: fo2013-economistas
+    ocupacion_original: "Economists"
+    ocupacion_codigo_oficial: "O*NET: 19-3011.00"
+    skills_afectadas:
+      - modelado-econometrico
+      - macroeconomia-aplicada
+    direccion: growing
+    taxonomia_oia: resilient
+    horizonte_impacto: largo
+    hallazgo: "Los economistas tienen probabilidad muy baja de automatización (0.11) — el juicio, la negociación y la interpretación son bottlenecks clave"
+    dato_clave: "Probabilidad de automatización: 0.11 para Economists"
+    cita_textual: "Economists: 0.11 probability of computerisation — negotiation, persuasion and originality constitute strong bottlenecks [Appendix, p. 60]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: fo2013-docentes-secundaria
+    ocupacion_original: "Secondary School Teachers"
+    ocupacion_codigo_oficial: "O*NET: 25-2031.00"
+    skills_afectadas:
+      - docencia-presencial
+      - evaluacion-aprendizaje
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: largo
+    hallazgo: "Los docentes de educación media tienen riesgo moderado-bajo (0.37) — la interacción social y el desarrollo de habilidades sociales constituyen bottlenecks"
+    dato_clave: "Probabilidad de automatización: 0.37 para Secondary School Teachers"
+    cita_textual: "Secondary School Teachers: 0.37 probability of computerisation — social perceptiveness and guiding complex learning reduce automation risk [Appendix, p. 70]"
+    divergencia_oia: false
+    nota_divergencia: null
