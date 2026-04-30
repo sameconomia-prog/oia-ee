@@ -100,6 +100,22 @@ hallazgos:
     divergencia_oia: false
     nota_divergencia: null
 
+  - id: anthropic2025-turismo-experiencial
+    ocupacion_original: "Tour Guides, Hospitality Managers"
+    ocupacion_codigo_oficial: "O*NET: 39-7011.00"
+    skills_afectadas:
+      - hospitalidad-experiencial
+      - turismo-sostenible
+      - gestion-operaciones-hotel
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: corto
+    hallazgo: "La gestión hotelera y tour operators muestran alta sustitución en operaciones (revenue, booking) y ampliación en experiencia; el anfitrión humano permanece como diferenciador clave"
+    dato_clave: "Operaciones hoteleras: alta sustitución. Experiencia del huésped: baja sustitución en uso observado de Claude"
+    cita_textual: "Hospitality operational tasks show high substitution rates while guest experience and cultural tourism roles demonstrate strong augmentation patterns [p. 15]"
+    divergencia_oia: false
+    nota_divergencia: null
+
   - id: anthropic2025-planes-alimenticios
     ocupacion_original: "Dietitians and Nutritionists"
     ocupacion_codigo_oficial: "O*NET: 29-1031.00"
