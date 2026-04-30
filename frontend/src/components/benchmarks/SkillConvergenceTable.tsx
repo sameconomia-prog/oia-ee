@@ -42,6 +42,7 @@ export default function SkillConvergenceTable({
 }) {
   const [sort, setSort] = useState<SortKey>('default')
   const [filterDir, setFilterDir] = useState<ConvergenceDirection | 'all'>('all')
+  const [filterAccion, setFilterAccion] = useState<string>('all')
   const [groupByTipo, setGroupByTipo] = useState(false)
 
   const TIPO_ORDER: Record<string, number> = { tecnica: 0, digital: 1, transversal: 2, social: 3 }
@@ -55,6 +56,8 @@ export default function SkillConvergenceTable({
       : skills.filter(s => s.direccion_global === filterDir ||
           (filterDir === 'mixed' && s.direccion_global === 'stable'))
 
+    if (filterAccion !== 'all') list = list.filter(s => s.accion_curricular === filterAccion)
+
     if (sort === 'declining') list.sort((a, b) => DIR_ORDER[a.direccion_global] - DIR_ORDER[b.direccion_global])
     else if (sort === 'growing') list.sort((a, b) => DIR_ORDER[b.direccion_global] - DIR_ORDER[a.direccion_global])
     else if (sort === 'consenso') list.sort((a, b) => b.consenso_pct - a.consenso_pct || b.fuentes_con_datos - a.fuentes_con_datos)
@@ -63,7 +66,7 @@ export default function SkillConvergenceTable({
       list.sort((a, b) => (TIPO_ORDER[a.skill_tipo] ?? 9) - (TIPO_ORDER[b.skill_tipo] ?? 9))
     }
     return list
-  }, [skills, sort, filterDir, groupByTipo])
+  }, [skills, sort, filterDir, filterAccion, groupByTipo])
 
   const btnBase = 'text-[11px] px-2 py-1 rounded border transition-colors'
   const btnActive = 'bg-brand-600 text-white border-brand-600'
@@ -89,6 +92,19 @@ export default function SkillConvergenceTable({
         ] as [ConvergenceDirection | 'all', string][]).map(([dir, label]) => (
           <button key={dir} onClick={() => setFilterDir(dir)}
             className={`${btnBase} ${filterDir === dir ? btnActive : btnInactive}`}>
+            {label}
+          </button>
+        ))}
+        <span className="ml-2 text-[10px] text-slate-500 uppercase tracking-widest">Acción:</span>
+        {([
+          ['all', 'Todas'],
+          ['retirar', 'Retirar'],
+          ['redisenar', 'Rediseñar'],
+          ['fortalecer', 'Fortalecer'],
+          ['agregar', 'Agregar'],
+        ] as [string, string][]).map(([accion, label]) => (
+          <button key={accion} onClick={() => setFilterAccion(accion)}
+            className={`${btnBase} ${filterAccion === accion ? btnActive : btnInactive}`}>
             {label}
           </button>
         ))}
