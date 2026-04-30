@@ -38,6 +38,7 @@ const SECTIONS = [
       { href: '/admin/pertinencia', label: 'Pertinencia' },
       { href: '/admin/siia', label: 'SIIA Enterprise' },
       { href: '/admin/whitelabel', label: 'White-label' },
+      { href: '/admin/api-keys', label: 'API Keys' },
     ],
   },
 ]
