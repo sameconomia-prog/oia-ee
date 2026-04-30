@@ -58,6 +58,22 @@ const TIPO_LABELS: Record<string, string> = {
   social: 'Social',
 }
 
+type SortMode = 'default' | 'urgencia' | 'consenso' | 'nombre'
+
+const DIR_ORDER: Record<string, number> = { declining: 0, mixed: 1, stable: 1, growing: 2, sin_datos: 3 }
+
+function urgenciaScore(s: SkillIndexItem): number {
+  return s.direccion_global === 'declining' ? s.consenso_pct : 0
+}
+
+function sortSkills(list: SkillIndexItem[], mode: SortMode): SkillIndexItem[] {
+  const copy = [...list]
+  if (mode === 'urgencia') return copy.sort((a, b) => urgenciaScore(b) - urgenciaScore(a) || DIR_ORDER[a.direccion_global] - DIR_ORDER[b.direccion_global])
+  if (mode === 'consenso') return copy.sort((a, b) => b.consenso_pct - a.consenso_pct || b.fuentes_con_datos - a.fuentes_con_datos)
+  if (mode === 'nombre') return copy.sort((a, b) => a.skill_nombre.localeCompare(b.skill_nombre, 'es'))
+  return copy
+}
+
 export default function SkillsIndexPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -71,6 +87,7 @@ export default function SkillsIndexPage() {
   )
   const [filterCareer, setFilterCareer] = useState<string>(() => searchParams.get('carrera') ?? 'all')
   const [filterTipo, setFilterTipo] = useState<string>(() => searchParams.get('tipo') ?? 'all')
+  const [sortMode, setSortMode] = useState<SortMode>(() => (searchParams.get('sort') as SortMode) ?? 'default')
 
   useEffect(() => {
     Promise.all([getBenchmarkSkillsIndex(), getBenchmarkCareers()])
@@ -81,7 +98,7 @@ export default function SkillsIndexPage() {
   const updateParams = useCallback((updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString())
     Object.entries(updates).forEach(([k, v]) => {
-      if (v === 'all' || v === '') params.delete(k)
+      if (v === 'all' || v === 'default' || v === '') params.delete(k)
       else params.set(k, v)
     })
     router.replace(`?${params.toString()}`, { scroll: false })
@@ -91,17 +108,21 @@ export default function SkillsIndexPage() {
   const setCareer = (v: string) => { setFilterCareer(v); updateParams({ carrera: v }) }
   const setTipo = (v: string) => { setFilterTipo(v); updateParams({ tipo: v }) }
   const setQ = (v: string) => { setQuery(v); updateParams({ q: v }) }
+  const setSort = (v: SortMode) => { setSortMode(v); updateParams({ sort: v }) }
 
   const careerBySlug = useMemo(() => Object.fromEntries(careers.map(c => [c.slug, c])), [careers])
 
-  const filtered = useMemo(() => skills.filter(s => {
-    if (query && !s.skill_nombre.toLowerCase().includes(query.toLowerCase()) &&
-        !s.skill_id.toLowerCase().includes(query.toLowerCase())) return false
-    if (filterDir !== 'all' && s.direccion_global !== filterDir) return false
-    if (filterCareer !== 'all' && !s.carreras.includes(filterCareer)) return false
-    if (filterTipo !== 'all' && s.skill_tipo !== filterTipo) return false
-    return true
-  }), [skills, query, filterDir, filterCareer, filterTipo])
+  const filtered = useMemo(() => {
+    const base = skills.filter(s => {
+      if (query && !s.skill_nombre.toLowerCase().includes(query.toLowerCase()) &&
+          !s.skill_id.toLowerCase().includes(query.toLowerCase())) return false
+      if (filterDir !== 'all' && s.direccion_global !== filterDir) return false
+      if (filterCareer !== 'all' && !s.carreras.includes(filterCareer)) return false
+      if (filterTipo !== 'all' && s.skill_tipo !== filterTipo) return false
+      return true
+    })
+    return sortSkills(base, sortMode)
+  }, [skills, query, filterDir, filterCareer, filterTipo, sortMode])
 
   const tiposPresentes = useMemo(() => {
     const tipos = new Set(skills.map(s => s.skill_tipo))
@@ -192,6 +213,16 @@ export default function SkillsIndexPage() {
             ))}
           </div>
         )}
+        <div className="flex gap-1.5 items-center">
+          <span className="text-[10px] text-slate-400 uppercase tracking-widest">Ordenar:</span>
+          <select value={sortMode} onChange={e => setSort(e.target.value as SortMode)}
+            className="text-[11px] border border-slate-200 rounded px-2 py-1.5 bg-white text-slate-600">
+            <option value="default">Default</option>
+            <option value="urgencia">Mayor urgencia</option>
+            <option value="consenso">Mayor consenso</option>
+            <option value="nombre">Nombre A–Z</option>
+          </select>
+        </div>
       </div>
 
       <p className="text-[11px] text-slate-400 mb-3">{filtered.length} habilidad{filtered.length !== 1 ? 'es' : ''}</p>
