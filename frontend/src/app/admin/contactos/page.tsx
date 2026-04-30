@@ -44,10 +44,9 @@ export default function AdminContactosPage() {
   async function load() {
     setLoading(true)
     try {
-      const qs = tipoFilter ? `?tipo=${tipoFilter}` : ''
-      const res = await fetch(`${BASE}/publico/contacto${qs}`, {
-        headers: { 'x-admin-key': ADMIN_KEY },
-      })
+      const params = new URLSearchParams({ x_admin_key: ADMIN_KEY })
+      if (tipoFilter) params.set('tipo', tipoFilter)
+      const res = await fetch(`${BASE}/publico/contacto?${params}`)
       if (!res.ok) throw new Error(`${res.status}`)
       setContactos(await res.json())
     } catch {
@@ -55,6 +54,17 @@ export default function AdminContactosPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function cambiarEstado(id: string, estado: string) {
+    const params = new URLSearchParams({ x_admin_key: ADMIN_KEY })
+    const res = await fetch(`${BASE}/publico/contacto/${id}?${params}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado }),
+    })
+    if (!res.ok) return
+    setContactos(prev => prev.map(c => c.id === id ? { ...c, estado } : c))
   }
 
   useEffect(() => { load() }, [tipoFilter]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -155,9 +165,15 @@ export default function AdminContactosPage() {
                   </td>
                   <td className="px-4 py-3 text-slate-500 text-xs">{c.area_interes ?? '—'}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${ESTADO_COLOR[c.estado] ?? 'bg-slate-100 text-slate-600'}`}>
-                      {c.estado}
-                    </span>
+                    <select
+                      value={c.estado}
+                      onChange={e => cambiarEstado(c.id, e.target.value)}
+                      className={`text-xs font-semibold px-2 py-0.5 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-300 ${ESTADO_COLOR[c.estado] ?? 'bg-slate-100 text-slate-600'}`}
+                    >
+                      {['nuevo', 'contactado', 'calificado', 'cerrado', 'descartado'].map(e => (
+                        <option key={e} value={e}>{e}</option>
+                      ))}
+                    </select>
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-400 font-mono">
                     {c.created_at?.slice(0, 10) ?? '—'}

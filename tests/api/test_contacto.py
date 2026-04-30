@@ -81,6 +81,30 @@ def test_listar_contactos_con_key(client, db_session, monkeypatch):
     assert len(resp.json()) >= 1
 
 
+def test_patch_estado_contacto(client, db_session, monkeypatch):
+    monkeypatch.setenv("ADMIN_API_KEY", "patchkey")
+    resp = client.post("/publico/contacto", json=_payload_ies())
+    cid = resp.json()["id"]
+    patch = client.patch(f"/publico/contacto/{cid}?x_admin_key=patchkey", json={"estado": "contactado"})
+    assert patch.status_code == 200
+    assert patch.json()["estado"] == "contactado"
+
+
+def test_patch_estado_invalido_devuelve_422(client, db_session, monkeypatch):
+    monkeypatch.setenv("ADMIN_API_KEY", "patchkey2")
+    resp = client.post("/publico/contacto", json=_payload_ies())
+    cid = resp.json()["id"]
+    patch = client.patch(f"/publico/contacto/{cid}?x_admin_key=patchkey2", json={"estado": "inexistente"})
+    assert patch.status_code == 422
+
+
+def test_patch_sin_key_devuelve_401(client, db_session):
+    resp = client.post("/publico/contacto", json=_payload_ies())
+    cid = resp.json()["id"]
+    patch = client.patch(f"/publico/contacto/{cid}", json={"estado": "contactado"})
+    assert patch.status_code == 401
+
+
 def test_listar_contactos_filtro_tipo(client, db_session, monkeypatch):
     monkeypatch.setenv("ADMIN_API_KEY", "testkey456")
     client.post("/publico/contacto", json=_payload_ies())

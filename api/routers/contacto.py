@@ -75,6 +75,31 @@ def crear_contacto(body: ContactoIn, db: Session = Depends(get_db)):
     return {"id": contacto.id, "estado": contacto.estado}
 
 
+class ContactoEstado(BaseModel):
+    estado: str
+
+
+@router.patch("/contacto/{contacto_id}")
+def actualizar_estado_contacto(
+    contacto_id: str,
+    body: ContactoEstado,
+    db: Session = Depends(get_db),
+    x_admin_key: str | None = None,
+):
+    admin_key = os.getenv("ADMIN_API_KEY", "")
+    if not admin_key or x_admin_key != admin_key:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    contacto = db.query(Contacto).filter(Contacto.id == contacto_id).first()
+    if not contacto:
+        raise HTTPException(status_code=404, detail="Contacto no encontrado")
+    estados_validos = {"nuevo", "contactado", "calificado", "cerrado", "descartado"}
+    if body.estado not in estados_validos:
+        raise HTTPException(status_code=422, detail=f"Estado inválido. Válidos: {', '.join(estados_validos)}")
+    contacto.estado = body.estado
+    db.commit()
+    return {"id": contacto.id, "estado": contacto.estado}
+
+
 @router.get("/contacto")
 def listar_contactos(
     tipo: str | None = None,
