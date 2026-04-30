@@ -41,6 +41,7 @@ const SECTIONS = [
       { href: '/admin/siia', label: 'SIIA Enterprise' },
       { href: '/admin/whitelabel', label: 'White-label' },
       { href: '/admin/api-keys', label: 'API Keys' },
+      { href: '/admin/widget', label: 'Widget Embed' },
     ],
   },
 ]

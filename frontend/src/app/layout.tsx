@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
+import { headers } from 'next/headers'
 import './globals.css'
 import Sidebar from '@/components/Sidebar'
 import WhiteLabelApplier from '@/components/WhiteLabelApplier'
@@ -22,7 +23,19 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const hdrs = await headers()
+  const pathname = hdrs.get('x-pathname') ?? hdrs.get('next-url') ?? ''
+  const isEmbed = pathname.startsWith('/embed')
+
+  if (isEmbed) {
+    return (
+      <html lang="es" className={cn("font-sans", GeistSans.variable)}>
+        <body className="bg-white">{children}</body>
+      </html>
+    )
+  }
+
   return (
     <html lang="es" className={cn("font-sans", GeistSans.variable)}>
       <body className="flex min-h-screen bg-slate-50 font-sans">
