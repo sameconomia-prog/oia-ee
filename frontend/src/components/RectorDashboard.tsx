@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { getRectorData } from '@/lib/api'
+import { getRectorData, getBenchmarkCareers } from '@/lib/api'
 import { generarReporteRector } from '@/lib/reporte-pdf'
-import type { RectorData, EscenarioHistorial } from '@/lib/types'
+import type { RectorData, EscenarioHistorial, BenchmarkCareerSummary } from '@/lib/types'
 import AlertasPanel from './AlertasPanel'
 import IesKpiCard from './IesKpiCard'
 import RectorCarrerasTable from './RectorCarrerasTable'
@@ -21,12 +21,20 @@ export default function RectorDashboard({ iesId }: { iesId: string }) {
   const [error, setError] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('carreras')
   const [comparando, setComparando] = useState<EscenarioHistorial[] | null>(null)
+  const [benchmarkMap, setBenchmarkMap] = useState<Record<string, BenchmarkCareerSummary>>({})
 
   useEffect(() => {
     getRectorData(iesId)
       .then(setData)
       .catch((e: unknown) => setError(e instanceof Error ? e.message : 'Error'))
       .finally(() => setLoading(false))
+    getBenchmarkCareers()
+      .then(list => {
+        const m: Record<string, BenchmarkCareerSummary> = {}
+        for (const b of list) m[b.slug] = b
+        setBenchmarkMap(m)
+      })
+      .catch(() => {})
   }, [iesId])
 
   if (loading) return <p className="text-gray-400 py-8">Cargando dashboard...</p>
@@ -46,7 +54,7 @@ export default function RectorDashboard({ iesId }: { iesId: string }) {
           )}
         </div>
         <button
-          onClick={() => generarReporteRector(data)}
+          onClick={() => generarReporteRector(data, benchmarkMap)}
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded hover:bg-gray-50 text-gray-600 transition-colors"
           aria-label="Descargar PDF"
         >

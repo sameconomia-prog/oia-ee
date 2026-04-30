@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import type { RectorData, CarreraKpi } from './types'
+import type { RectorData, CarreraKpi, BenchmarkCareerSummary } from './types'
 
 // ── Paleta ────────────────────────────────────────────────────────────────
 const INDIGO    = [79, 70, 229]  as [number, number, number]
@@ -420,15 +420,100 @@ function pagAlertas(doc: jsPDF, data: RectorData, fecha: string) {
   }
 }
 
+// ── Página 5: Benchmarks Globales ────────────────────────────────────────
+function pagBenchmarks(
+  doc: jsPDF,
+  data: RectorData,
+  benchmarkMap: Record<string, BenchmarkCareerSummary>,
+  fecha: string,
+  pageNum: number,
+  totalPages: number,
+) {
+  doc.addPage()
+  addPageHeader(doc, 'Benchmarks Globales', data.ies.nombre_corto ?? data.ies.nombre, pageNum, totalPages)
+  addPageFooter(doc, fecha)
+
+  doc.setFontSize(13)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(...INDIGO)
+  doc.text('Urgencia Curricular Global', 14, 25)
+  doc.setFontSize(8)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(...GRAY)
+  doc.text('Convergencia de 5 fuentes internacionales (WEF · McKinsey · CEPAL · Frey-Osborne · Anthropic) sobre la exposición de habilidades a la IA', 14, 31)
+
+  const carrerasConBench = data.carreras
+    .filter(c => c.benchmark_slug && benchmarkMap[c.benchmark_slug])
+    .map(c => ({ ...c, bench: benchmarkMap[c.benchmark_slug!]! }))
+    .sort((a, b) => b.bench.urgencia_curricular - a.bench.urgencia_curricular)
+
+  if (carrerasConBench.length === 0) {
+    doc.setFontSize(9)
+    doc.setTextColor(...GRAY)
+    doc.text('No hay datos de benchmarks globales para las carreras de esta institución.', 14, 40)
+    return
+  }
+
+  const rows = carrerasConBench.map(c => {
+    const u = c.bench.urgencia_curricular
+    const urgLabel = u >= 60 ? 'ALTA' : u >= 30 ? 'MODERADA' : 'BAJA'
+    return [
+      { content: c.nombre, styles: { fontStyle: 'normal' as const } },
+      { content: `${u}/100`, styles: { halign: 'center' as const } },
+      urgLabel,
+      { content: String(c.bench.skills_declining), styles: { halign: 'center' as const } },
+      { content: String(c.bench.skills_growing), styles: { halign: 'center' as const } },
+      { content: String(c.bench.skills_mixed), styles: { halign: 'center' as const } },
+      { content: String(c.bench.total_skills), styles: { halign: 'center' as const } },
+    ]
+  })
+
+  autoTable(doc, {
+    startY: 35,
+    head: [['Carrera', 'Urgencia', 'Nivel', 'Declining ↓', 'Growing ↑', 'Mixed', 'Total']],
+    body: rows,
+    theme: 'striped',
+    headStyles: { fillColor: INDIGO, fontSize: 7.5, halign: 'center', textColor: WHITE },
+    bodyStyles: { fontSize: 7.5 },
+    alternateRowStyles: { fillColor: [248, 250, 252] },
+    columnStyles: {
+      0: { cellWidth: 72 },
+      1: { cellWidth: 22, halign: 'center' },
+      2: { cellWidth: 24, halign: 'center', fontStyle: 'bold' },
+      3: { cellWidth: 22, halign: 'center' },
+      4: { cellWidth: 22, halign: 'center' },
+      5: { cellWidth: 18, halign: 'center' },
+      6: { cellWidth: 14, halign: 'center' },
+    },
+    margin: { left: 8, right: 8 },
+    didParseCell(h) {
+      if (h.section !== 'body' || h.column.index !== 2) return
+      const v = h.cell.raw as string
+      h.cell.styles.textColor = v === 'ALTA' ? RED : v === 'MODERADA' ? AMBER : GREEN
+    },
+  })
+
+  const lastY = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8
+  doc.setFontSize(7)
+  doc.setTextColor(...GRAY)
+  doc.text('Urgencia curricular = % skills en declive × consenso promedio de fuentes (0–100). Alta ≥ 60 · Moderada 30–59 · Baja < 30', 14, lastY)
+}
+
 // ── Export principal ──────────────────────────────────────────────────────
-export function generarReporteRector(data: RectorData): void {
+export function generarReporteRector(
+  data: RectorData,
+  benchmarkMap: Record<string, BenchmarkCareerSummary> = {},
+): void {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' })
   const fecha = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' })
+  const hasBench = data.carreras.some(c => c.benchmark_slug && benchmarkMap[c.benchmark_slug ?? ''])
+  const totalPages = hasBench ? 5 : 4
 
   pagPortada(doc, data, fecha)
   pagKpis(doc, data, fecha)
   pagCartera(doc, data, fecha)
   pagAlertas(doc, data, fecha)
+  if (hasBench) pagBenchmarks(doc, data, benchmarkMap, fecha, 5, totalPages)
 
   const nombre = `reporte-${data.ies.nombre_corto ?? data.ies.id}-${new Date().toISOString().slice(0, 10)}.pdf`
   doc.save(nombre)
