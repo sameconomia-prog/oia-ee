@@ -17,6 +17,12 @@ export default function LeadMagnetModal({ isOpen, onClose, pdfUrl, titulo }: Lea
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setEnviado(true)
+    // Guardar lead en backend (best-effort, no bloquea la descarga)
+    fetch('/api/lead-magnet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, titulo }),
+    }).catch(() => {})
     setTimeout(() => {
       window.open(pdfUrl, '_blank')
       onClose()

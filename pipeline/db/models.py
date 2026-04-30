@@ -201,6 +201,20 @@ class Lead(Base):
     created_at  = Column(DateTime(timezone=True), default=datetime.utcnow)
 
 
+class Contacto(Base):
+    __tablename__ = "contactos"
+    id           = Column(String(36), primary_key=True, default=_uuid)
+    tipo         = Column(String(20), nullable=False)          # 'ies' | 'gobierno'
+    nombre       = Column(String(200), nullable=False)
+    cargo        = Column(String(100), nullable=True)
+    institucion  = Column(String(300), nullable=False)
+    email        = Column(String(200), nullable=False)
+    area_interes = Column(String(50), nullable=True)           # solo tipo gobierno
+    mensaje      = Column(Text, nullable=True)
+    estado       = Column(String(30), nullable=False, default="nuevo")
+    created_at   = Column(DateTime(timezone=True), default=datetime.utcnow)
+
+
 # Importar modelos del Radar para que Alembic los detecte
 from pipeline.db.models_radar import EventoIADespido, EventoIAEmpleo, SkillEmergente  # noqa: F401
 from pipeline.db.models_predictor import PrediccionKpi  # noqa: F401
