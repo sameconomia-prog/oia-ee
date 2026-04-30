@@ -1,0 +1,31 @@
+---
+titulo: "Cómo calculamos el IVA: 31 indicadores, 7 dimensiones y las fuentes detrás del número"
+tipo: metodologia
+fecha: "2026-04-22"
+resumen: "El Índice de Vulnerabilidad ante la Automatización (IVA) es el indicador central de OIA-EE. Esta nota explica su fórmula, sus fuentes de datos y sus limitaciones."
+tags: ["metodologia", "IVA", "KPIs", "transparencia"]
+acceso: abierto
+---
+
+# Cómo calculamos el IVA
+
+El **Índice de Vulnerabilidad ante la Automatización (IVA)** es una puntuación entre 0 y 1 que estima qué tan expuesta está una carrera al reemplazo o transformación radical de sus ocupaciones de egresados por la inteligencia artificial.
+
+## La fórmula
+
+```
+IVA = 0.5 · P_aut + 0.3 · BES − 0.2 · P_aug
+```
+
+Donde:
+- **P_aut** — probabilidad de automatización promedio de las ocupaciones ONET de egresados típicos (fuente: Frey & Osborne, actualizado con datos STPS México)
+- **BES** — Brecha de Skills: proporción de skills que el mercado demanda y que el plan de estudios no cubre
+- **P_aug** — probabilidad de augmentación (que la IA amplíe, no reemplace, la ocupación)
+
+## Por qué estas fuentes
+
+ONET es la base de datos de ocupaciones más completa disponible. La adaptamos al mercado mexicano cruzándola con datos de vacantes de OCC Mundial y el Observatorio Laboral de la STPS. Ninguna fuente sola es suficiente — por eso los pesos.
+
+## Limitaciones que reconocemos
+
+El IVA es un indicador de exposición, no de resultado. Una IES con IVA alto puede tener egresados empleados si tiene lazos fuertes con empleadores. Lo que el IVA mide es el riesgo estructural, no el desempeño individual.
