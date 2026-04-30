@@ -84,6 +84,7 @@ export interface CarreraKpi {
   area_conocimiento?: string | null
   matricula: number | null
   kpi: KpiResult | null
+  benchmark_slug?: string | null
 }
 
 export interface AlertaItem {

@@ -107,6 +107,7 @@ class CarreraKpiOut(BaseModel):
     area_conocimiento: Optional[str] = None
     matricula: Optional[int] = None
     kpi: Optional[KpiOut] = None
+    benchmark_slug: Optional[str] = None
 
 
 class IesDetalleOut(BaseModel):

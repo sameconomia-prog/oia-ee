@@ -194,12 +194,20 @@ export default function CarrerasListPage() {
               <Link href={`/carreras/${c.id}`} className="text-sm font-medium text-gray-800 hover:text-indigo-700 hover:underline">
                 {c.nombre}
               </Link>
-              <div className="flex gap-2 items-center mt-0.5">
+              <div className="flex gap-2 items-center mt-0.5 flex-wrap">
                 {c.area_conocimiento && (
                   <span className="text-xs text-indigo-500">{c.area_conocimiento}</span>
                 )}
                 {c.matricula != null && (
                   <span className="text-xs text-gray-400">{c.matricula.toLocaleString()} estudiantes</span>
+                )}
+                {c.benchmark_slug && (
+                  <Link href={`/benchmarks/${c.benchmark_slug}`}
+                    className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-violet-50 text-violet-700 hover:bg-violet-100 transition-colors"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    Benchmark →
+                  </Link>
                 )}
               </div>
             </div>

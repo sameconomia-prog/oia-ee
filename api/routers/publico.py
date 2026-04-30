@@ -178,6 +178,7 @@ def listar_carreras_publico(
             area_conocimiento=carrera.area_conocimiento,
             matricula=cie.matricula if cie else None,
             kpi=kpi_out,
+            benchmark_slug=_match_benchmark_slug(carrera.nombre_norm),
         ))
 
     with _carreras_cache_lock:
@@ -624,6 +625,7 @@ def carreras_de_ies(ies_id: str, db: Session = Depends(get_db)):
             nombre=carrera.nombre_norm.title(),
             matricula=cie.matricula,
             kpi=kpi_out,
+            benchmark_slug=_match_benchmark_slug(carrera.nombre_norm),
         ))
     return result
 
