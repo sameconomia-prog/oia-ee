@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { getBenchmarkSkillCrossSource } from '@/lib/api'
-import type { SkillCrossSource, ConvergenceDirection } from '@/lib/types'
+import { getBenchmarkSkillCrossSource, getBenchmarkSkillsIndex, getBenchmarkCareers } from '@/lib/api'
+import type { SkillCrossSource, SkillIndexItem, BenchmarkCareerSummary, ConvergenceDirection } from '@/lib/types'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import ConvergenceIcon from '@/components/benchmarks/ConvergenceIcon'
@@ -26,61 +26,125 @@ const DIR_LABEL: Record<string, string> = {
 }
 
 const HORIZONTE_LABEL: Record<string, string> = {
-  corto: 'Corto plazo (< 3 años)',
-  medio: 'Medio plazo (3–7 años)',
-  largo: 'Largo plazo (> 7 años)',
+  corto: 'Corto plazo (≤2 años)',
+  mediano: 'Mediano plazo (3–5 años)',
+  largo: 'Largo plazo (>5 años)',
 }
 
 export default function SkillCrossSourcePage() {
   const { skill_id } = useParams<{ skill_id: string }>()
   const searchParams = useSearchParams()
   const backSlug = searchParams.get('from')
-  const skillNombre = searchParams.get('nombre')
+  const skillNombreParam = searchParams.get('nombre')
 
-  const [data, setData] = useState<SkillCrossSource | null>(null)
+  const [cross, setCross] = useState<SkillCrossSource | null>(null)
+  const [indexItem, setIndexItem] = useState<SkillIndexItem | null>(null)
+  const [careerMap, setCareerMap] = useState<Record<string, BenchmarkCareerSummary>>({})
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
     if (!skill_id) return
-    getBenchmarkSkillCrossSource(skill_id)
-      .then(setData)
+    Promise.all([
+      getBenchmarkSkillCrossSource(skill_id),
+      getBenchmarkSkillsIndex(),
+      getBenchmarkCareers(),
+    ])
+      .then(([c, idx, careers]) => {
+        setCross(c)
+        setIndexItem(idx.find(s => s.skill_id === skill_id) ?? null)
+        setCareerMap(Object.fromEntries(careers.map(ca => [ca.slug, ca])))
+      })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
   }, [skill_id])
 
   if (loading) return <p className="text-slate-400 text-sm py-8 text-center">Cargando...</p>
 
-  if (notFound || !data) {
+  if (notFound || !cross) {
     return (
       <div className="text-center py-16">
         <p className="text-slate-500 text-sm mb-4">Skill no encontrada.</p>
-        <Link href="/benchmarks" className="text-brand-600 text-sm hover:underline">← Benchmarks globales</Link>
+        <Link href="/benchmarks/skills" className="text-brand-600 text-sm hover:underline">← Índice de skills</Link>
       </div>
     )
   }
 
-  const backHref = backSlug ? `/benchmarks/${backSlug}` : '/benchmarks'
+  const nombre = indexItem?.skill_nombre ?? skillNombreParam ?? skill_id
+  const tipo = indexItem?.skill_tipo
+  const direccion = (indexItem?.direccion_global ?? 'sin_datos') as ConvergenceDirection
+  const fuentes = indexItem?.fuentes_con_datos ?? 0
+  const consenso = indexItem?.consenso_pct ?? 0
+  const carreras = indexItem?.carreras ?? []
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="mb-6">
-        <Link href={backHref} className="text-xs text-brand-600 hover:underline">← {backSlug ? `Benchmarks: ${backSlug}` : 'Benchmarks Globales'}</Link>
-        <h1 className="text-2xl font-bold text-slate-900 mt-2">
-          {skillNombre ?? skill_id}
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          {data.hallazgos.length} fuente{data.hallazgos.length !== 1 ? 's' : ''} con datos para esta habilidad
-        </p>
+      {/* Breadcrumb */}
+      <div className="mb-5 flex items-center gap-1.5 text-xs text-slate-400 flex-wrap">
+        <Link href="/benchmarks" className="text-brand-600 hover:underline">Benchmarks</Link>
+        <span>/</span>
+        {backSlug ? (
+          <>
+            <Link href={`/benchmarks/${backSlug}`} className="text-brand-600 hover:underline">
+              {careerMap[backSlug]?.nombre ?? backSlug}
+            </Link>
+            <span>/</span>
+          </>
+        ) : (
+          <>
+            <Link href="/benchmarks/skills" className="text-brand-600 hover:underline">Skills</Link>
+            <span>/</span>
+          </>
+        )}
+        <span className="text-slate-600 truncate max-w-[200px]">{nombre}</span>
       </div>
 
-      {data.hallazgos.length === 0 ? (
+      {/* Header */}
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-slate-900">{nombre}</h1>
+        {tipo && <p className="text-sm text-slate-500 mt-0.5 capitalize">{tipo}</p>}
+      </div>
+
+      {/* Stats */}
+      <Card className="mb-5 p-4">
+        <div className="flex items-center gap-8 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-slate-500 uppercase tracking-widest">Dirección global</span>
+            <ConvergenceIcon direction={direccion} />
+            <Badge variant={DIR_VARIANT[direccion] ?? 'neutro'}>
+              {DIR_LABEL[direccion] ?? direccion}
+            </Badge>
+          </div>
+          <div>
+            <span className="text-[11px] text-slate-500 uppercase tracking-widest block mb-0.5">Fuentes con datos</span>
+            <span className="text-xl font-bold font-mono text-slate-800">
+              {fuentes}<span className="text-xs text-slate-400 font-normal">/5</span>
+            </span>
+          </div>
+          <div>
+            <span className="text-[11px] text-slate-500 uppercase tracking-widest block mb-0.5">Consenso</span>
+            <span className="text-xl font-bold font-mono text-slate-800">
+              {fuentes > 0 ? `${consenso}%` : '—'}
+            </span>
+          </div>
+        </div>
+      </Card>
+
+      {/* Hallazgos */}
+      <h2 className="text-sm font-semibold text-slate-700 mb-3">
+        Hallazgos por fuente
+        <span className="ml-2 text-[11px] font-normal text-slate-400">
+          ({cross.hallazgos.length} fuente{cross.hallazgos.length !== 1 ? 's' : ''} con datos)
+        </span>
+      </h2>
+
+      {cross.hallazgos.length === 0 ? (
         <Card className="p-8 text-center">
           <p className="text-slate-400 text-sm">Esta habilidad no tiene cobertura en las fuentes actuales.</p>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {data.hallazgos.map(h => (
+        <div className="space-y-4 mb-6">
+          {cross.hallazgos.map(h => (
             <Card key={h.fuente_id} className="p-5">
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -99,10 +163,12 @@ export default function SkillCrossSourcePage() {
 
               <p className="text-sm text-slate-700 leading-relaxed mb-3">{h.hallazgo}</p>
 
-              <div className="bg-slate-50 rounded-md p-3 mb-3">
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mb-1">Dato clave</p>
-                <p className="text-sm font-semibold text-slate-800">{h.dato_clave}</p>
-              </div>
+              {h.dato_clave && (
+                <div className="bg-slate-50 rounded-md p-3 mb-3">
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mb-1">Dato clave</p>
+                  <p className="text-sm font-semibold text-slate-800">{h.dato_clave}</p>
+                </div>
+              )}
 
               {h.cita_textual && (
                 <blockquote className="border-l-2 border-brand-300 pl-3 text-xs text-slate-500 italic leading-relaxed">
@@ -111,6 +177,27 @@ export default function SkillCrossSourcePage() {
               )}
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Carreras */}
+      {carreras.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-sm font-semibold text-slate-700 mb-3">
+            Carreras que incluyen esta habilidad
+            <span className="ml-2 text-[11px] font-normal text-slate-400">({carreras.length})</span>
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {carreras.map(slug => (
+              <Link
+                key={slug}
+                href={`/benchmarks/${slug}`}
+                className="text-xs bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 px-3 py-1.5 rounded-full transition-colors border border-slate-200 hover:border-brand-200"
+              >
+                {careerMap[slug]?.nombre ?? slug}
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </div>
