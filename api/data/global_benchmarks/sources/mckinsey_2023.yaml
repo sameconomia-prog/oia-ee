@@ -101,3 +101,49 @@ hallazgos:
     cita_textual: "Educational content development and instructional design are strongly augmented by generative AI tools [p. 44]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: mck2023-turismo-operaciones
+    ocupacion_original: "Hotel, Motel, and Resort Desk Clerks"
+    ocupacion_codigo_oficial: "SOC: 43-4081"
+    skills_afectadas:
+      - revenue-management
+      - atencion-cliente-basica
+      - gestion-operaciones-hotel
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: medio
+    hallazgo: "Las operaciones hoteleras de back-office tienen alta automatizabilidad técnica; el revenue management automatizado ya supera al humano en precisión"
+    dato_clave: "65% del tiempo laboral en operaciones hoteleras estándar es técnicamente automatizable"
+    cita_textual: "Hotel and hospitality operational roles show 65% technical automation potential — front-office and revenue functions facing significant displacement [p. 38]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: mck2023-politica-publica
+    ocupacion_original: "Policy Analysts and Government Workers"
+    ocupacion_codigo_oficial: "SOC: 19-3094"
+    skills_afectadas:
+      - analisis-politico
+      - investigacion-politica-documental
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "Los analistas de política pública amplifican su productividad con IA: síntesis de legislación, análisis comparado y modelado de políticas son acelerados por GenAI"
+    dato_clave: "Análisis de política pública con GenAI: 3× más documentos procesados por analista"
+    cita_textual: "Government policy and research roles show strong augmentation — AI speeds document analysis while human judgment guides policy recommendations [p. 31]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: mck2023-nutricion-basica
+    ocupacion_original: "Dietitians and Nutritionists"
+    ocupacion_codigo_oficial: "SOC: 29-1031"
+    skills_afectadas:
+      - planes-alimenticios-basicos
+      - evaluacion-nutricional
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "Los planes dietéticos básicos tienen alta automatizabilidad técnica con apps de IA; la evaluación clínica nutricional compleja se beneficia de ampliación"
+    dato_clave: "70% de tareas de elaboración de planes nutricionales estándar son técnicamente automatizables"
+    cita_textual: "Nutrition and dietetics roles show mixed outcomes — basic dietary planning faces automation while clinical nutrition assessment shows augmentation [p. 41]"
+    divergencia_oia: false
+    nota_divergencia: null
