@@ -187,6 +187,20 @@ class SolicitudPertinencia(Base):
     created_at       = Column(DateTime(timezone=True), default=datetime.utcnow)
 
 
+class Lead(Base):
+    __tablename__ = "leads"
+    id          = Column(String(36), primary_key=True, default=_uuid)
+    nombre      = Column(String(200), nullable=False)
+    cargo       = Column(String(100), nullable=True)
+    ies_nombre  = Column(String(300), nullable=False)
+    email       = Column(String(200), nullable=False)
+    telefono    = Column(String(30), nullable=True)
+    mensaje     = Column(Text, nullable=True)
+    origen      = Column(String(50), nullable=False, default="demo")
+    estado      = Column(String(30), nullable=False, default="nuevo")
+    created_at  = Column(DateTime(timezone=True), default=datetime.utcnow)
+
+
 # Importar modelos del Radar para que Alembic los detecte
 from pipeline.db.models_radar import EventoIADespido, EventoIAEmpleo, SkillEmergente  # noqa: F401
 from pipeline.db.models_predictor import PrediccionKpi  # noqa: F401

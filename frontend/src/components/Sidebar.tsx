@@ -17,6 +17,7 @@ const SECTIONS = [
       { href: '/carreras', label: 'Carreras' },
       { href: '/recomienda', label: 'Recomendador' },
       { href: '/planes', label: 'Planes y Precios' },
+      { href: '/solicitar-demo', label: 'Solicitar Demo' },
     ],
   },
   {
@@ -44,6 +45,7 @@ const SECTIONS = [
       { href: '/admin/whitelabel', label: 'White-label' },
       { href: '/admin/api-keys', label: 'API Keys' },
       { href: '/admin/widget', label: 'Widget Embed' },
+      { href: '/admin/leads', label: 'Leads Demo' },
     ],
   },
 ]
