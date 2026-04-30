@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { getPublicoIes, getCarrerasDeIes } from '@/lib/api'
 import ComparacionIES from '@/components/ComparacionIES'
+import ComparacionResumenChart from '@/components/ComparacionResumenChart'
 import type { CarreraKpi } from '@/lib/types'
 
 type IesOpcion = { id: string; nombre: string; nombre_corto?: string }
@@ -82,6 +83,17 @@ function CompararContent() {
             iesANombre={ies.find(i => i.id === iesAId)?.nombre ?? iesAId}
             iesBNombre={ies.find(i => i.id === iesBId)?.nombre ?? iesBId}
           />
+
+          {/* Gráfica comparativa de promedios */}
+          {carrerasComunes.length > 0 && (
+            <div className="mt-6">
+              <ComparacionResumenChart
+                iesANombre={ies.find(i => i.id === iesAId)?.nombre_corto ?? ies.find(i => i.id === iesAId)?.nombre ?? iesAId}
+                iesBNombre={ies.find(i => i.id === iesBId)?.nombre_corto ?? ies.find(i => i.id === iesBId)?.nombre ?? iesBId}
+                carrerasComunes={carrerasComunes}
+              />
+            </div>
+          )}
 
           {/* Carreras en común */}
           {carrerasComunes.length > 0 && (
