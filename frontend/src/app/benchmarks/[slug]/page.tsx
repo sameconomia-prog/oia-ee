@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { getBenchmarkCareerDetail, getBenchmarkSources } from '@/lib/api'
 import type { BenchmarkCareerDetail, BenchmarkSource } from '@/lib/types'
 import SkillConvergenceTable from '@/components/benchmarks/SkillConvergenceTable'
+import CurriculumActionSummary from '@/components/benchmarks/CurriculumActionSummary'
 import Card from '@/components/ui/Card'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Badge from '@/components/ui/Badge'
@@ -160,6 +161,11 @@ export default function BenchmarkCareerPage() {
           </button>
         </div>
         <SkillConvergenceTable skills={detail.skills} sources={sources} careerSlug={slug} />
+      </Card>
+
+      {/* Curricular recommendations */}
+      <Card className="mb-6 p-5">
+        <CurriculumActionSummary skills={detail.skills} />
       </Card>
 
       {/* Sources legend */}
