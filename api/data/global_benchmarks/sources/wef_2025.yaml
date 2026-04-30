@@ -134,6 +134,22 @@ hallazgos:
     divergencia_oia: false
     nota_divergencia: null
 
+  - id: wef2025-ingenieria-civil
+    ocupacion_original: "Civil Engineers"
+    ocupacion_codigo_oficial: "ISCO-08: 2142"
+    skills_afectadas:
+      - modelado-bim
+      - gestion-proyectos-construccion
+      - calculo-estructural
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "Los ingenieros civiles adoptan BIM e IA para diseño estructural, pero la gestión de proyectos en campo y la supervisión mantienen alta resiliencia"
+    dato_clave: "El BIM con IA reduce 30% el tiempo de diseño estructural; la demanda de ingenieros civiles con BIM crece 25% anual"
+    cita_textual: "Civil engineers show augmentation patterns — BIM and AI tools enhance design and project planning while field supervision and complex problem-solving remain human [p. 48]"
+    divergencia_oia: false
+    nota_divergencia: null
+
   - id: wef2025-nutricion-clinica
     ocupacion_original: "Nutrition and Dietetics Technicians"
     ocupacion_codigo_oficial: "ISCO-08: 2267"

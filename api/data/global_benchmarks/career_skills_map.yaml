@@ -410,3 +410,28 @@ carreras:
         nombre: "Investigación en nutrición y epidemiología"
         tipo: tecnica
         accion_curricular: fortalecer
+
+  - slug: ingenieria-civil
+    nombre: "Ingeniería Civil"
+    area: ingenieria_tecnologia
+    skills:
+      - id: calculo-estructural
+        nombre: "Cálculo y diseño estructural"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: modelado-bim
+        nombre: "Modelado BIM y diseño asistido"
+        tipo: digital
+        accion_curricular: agregar
+      - id: gestion-proyectos-construccion
+        nombre: "Gestión de proyectos de construcción"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: supervision-campo
+        nombre: "Supervisión de obra y trabajo en campo"
+        tipo: social
+        accion_curricular: fortalecer
+      - id: topografia-levantamiento
+        nombre: "Topografía y levantamiento territorial"
+        tipo: tecnica
+        accion_curricular: redisenar

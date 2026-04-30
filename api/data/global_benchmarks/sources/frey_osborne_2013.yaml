@@ -116,6 +116,21 @@ hallazgos:
     divergencia_oia: false
     nota_divergencia: null
 
+  - id: fo2013-ingenieros-civiles
+    ocupacion_original: "Civil Engineers"
+    ocupacion_codigo_oficial: "O*NET: 17-2051.00"
+    skills_afectadas:
+      - calculo-estructural
+      - topografia-levantamiento
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: largo
+    hallazgo: "Los ingenieros civiles tienen riesgo moderado-bajo de automatización (0.40) — el cálculo estructural básico es automatizable pero el juicio de campo y la resolución de problemas complejos in situ no"
+    dato_clave: "Probabilidad de automatización: 0.40 para Civil Engineers"
+    cita_textual: "Civil Engineers: 0.40 probability of computerisation — structural calculations automatable; field judgment and problem-solving under physical constraints constitute bottlenecks [Appendix, p. 59]"
+    divergencia_oia: false
+    nota_divergencia: null
+
   - id: fo2013-politicos
     ocupacion_original: "Political Scientists"
     ocupacion_codigo_oficial: "O*NET: 19-3094.00"

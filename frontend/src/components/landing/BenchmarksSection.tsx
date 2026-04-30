@@ -5,7 +5,7 @@ const CAREERS = [
   'Derecho', 'Medicina', 'Arquitectura', 'Enfermería', 'Mercadotecnia',
   'Psicología', 'Administración', 'Contaduría', 'Diseño Gráfico',
   'Ing. Sistemas', 'Comunicación', 'Economía', 'Educación',
-  'Turismo', 'Ciencias Políticas', 'Nutrición',
+  'Turismo', 'Ciencias Políticas', 'Nutrición', 'Ing. Civil',
 ]
 
 const SOURCES = [
@@ -25,7 +25,7 @@ export default function BenchmarksSection() {
             Benchmarks Globales
           </span>
           <h2 className="text-3xl font-bold text-white mb-4">
-            16 carreras analizadas con datos internacionales
+            17 carreras analizadas con datos internacionales
           </h2>
           <p className="text-slate-400 max-w-2xl mx-auto text-base leading-relaxed">
             Cruzamos 5 fuentes de investigación internacional para determinar si las habilidades
@@ -36,7 +36,7 @@ export default function BenchmarksSection() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-6 mb-10 text-center">
           {[
-            { n: '16', label: 'Carreras analizadas' },
+            { n: '17', label: 'Carreras analizadas' },
             { n: '5', label: 'Fuentes internacionales' },
             { n: '80+', label: 'Skills evaluadas' },
           ].map(s => (

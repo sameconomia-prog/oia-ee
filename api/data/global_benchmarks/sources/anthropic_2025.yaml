@@ -100,6 +100,21 @@ hallazgos:
     divergencia_oia: false
     nota_divergencia: null
 
+  - id: anthropic2025-ingenieria-civil-bim
+    ocupacion_original: "Civil and Structural Engineers"
+    ocupacion_codigo_oficial: "O*NET: 17-2051.00"
+    skills_afectadas:
+      - modelado-bim
+      - calculo-estructural
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "El modelado BIM con IA y el cálculo estructural asistido son casos de ampliación clara: los ingenieros civiles que dominan estas herramientas multiplican su productividad"
+    dato_clave: "BIM + IA entre las herramientas con mayor ampliación en ingeniería según uso observado de Claude"
+    cita_textual: "Structural engineering and BIM modeling tasks show strong augmentation — AI accelerates design iteration and structural analysis while human judgment validates outputs [p. 11]"
+    divergencia_oia: false
+    nota_divergencia: null
+
   - id: anthropic2025-turismo-experiencial
     ocupacion_original: "Tour Guides, Hospitality Managers"
     ocupacion_codigo_oficial: "O*NET: 39-7011.00"
