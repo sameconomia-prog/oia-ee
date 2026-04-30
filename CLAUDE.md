@@ -45,10 +45,13 @@ OIA-EE/
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
 ## Estado actual (Sprint 117, 2026-04-30)
-- 424 pytest pasando
+- 231 pytest + 60 Jest = 291 tests pasando
 - 0 errores TypeScript
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
-- Pendiente: Railway deploy (ver .env.example para env vars)
+- Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
+- Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
+- Railway PENDIENTE redeploy manual desde dashboard (railway up falla por timeout de red local)
+  → Ir a Railway dashboard → oia-ee → oia-api → Settings → redeploy último commit
 
 ## Nuevas rutas backend (Sprints 46-89)
 - `GET /publico/vacantes` — lista vacantes con filtro ?sector=
