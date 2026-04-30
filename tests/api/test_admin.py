@@ -98,6 +98,10 @@ def test_get_status_con_key_devuelve_conteos(client, db_session, monkeypatch):
     assert "vacantes" in data
     assert "alertas" in data
     assert data["ies"] >= 1
+    assert "pertinencia_total" in data
+    assert "pertinencia_pendientes" in data
+    assert "contactos" in data
+    assert "leads" in data
 
 
 # --- GET /admin/ies ---

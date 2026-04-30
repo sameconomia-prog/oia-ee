@@ -86,7 +86,7 @@ def get_status(
     db: Session = Depends(get_db),
     _: None = Depends(_require_admin),
 ):
-    from pipeline.db.models import Carrera, CarreraIES, Alerta, Vacante, Noticia
+    from pipeline.db.models import Carrera, CarreraIES, Alerta, Vacante, Noticia, SolicitudPertinencia, Lead, Contacto
     return {
         "ies": db.query(IES).count(),
         "carreras": db.query(Carrera).count(),
@@ -94,6 +94,10 @@ def get_status(
         "noticias": db.query(Noticia).count(),
         "vacantes": db.query(Vacante).count(),
         "alertas": db.query(Alerta).count(),
+        "pertinencia_total": db.query(SolicitudPertinencia).count(),
+        "pertinencia_pendientes": db.query(SolicitudPertinencia).filter_by(estado="pendiente").count(),
+        "contactos": db.query(Contacto).count(),
+        "leads": db.query(Lead).count(),
     }
 
 
