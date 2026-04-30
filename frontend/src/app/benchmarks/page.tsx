@@ -1,7 +1,8 @@
 // frontend/src/app/benchmarks/page.tsx
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { getBenchmarkCareers, getBenchmarkResumen } from '@/lib/api'
 import type { BenchmarkCareerSummary, BenchmarkResumen } from '@/lib/types'
 import Card from '@/components/ui/Card'
@@ -165,17 +166,33 @@ function exportCSV(careers: BenchmarkCareerSummary[]) {
 }
 
 export default function BenchmarksPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
   const [careers, setCareers] = useState<BenchmarkCareerSummary[]>([])
   const [resumen, setResumen] = useState<BenchmarkResumen | null>(null)
   const [loading, setLoading] = useState(true)
-  const [filterArea, setFilterArea] = useState<string>('all')
-  const [sortMode, setSortMode] = useState<SortMode>('default')
+  const [filterArea, setFilterArea] = useState<string>(() => searchParams.get('area') ?? 'all')
+  const [sortMode, setSortMode] = useState<SortMode>(() => (searchParams.get('sort') as SortMode) ?? 'default')
 
   useEffect(() => {
     Promise.all([getBenchmarkCareers(), getBenchmarkResumen()])
       .then(([c, r]) => { setCareers(c); setResumen(r) })
       .finally(() => setLoading(false))
   }, [])
+
+  const updateParams = useCallback((updates: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString())
+    Object.entries(updates).forEach(([k, v]) => {
+      if (v === 'all' || v === 'default' || v === '') params.delete(k)
+      else params.set(k, v)
+    })
+    const qs = params.toString()
+    router.replace(qs ? `?${qs}` : '?', { scroll: false })
+  }, [router, searchParams])
+
+  const setArea = (v: string) => { setFilterArea(v); updateParams({ area: v }) }
+  const setSort = (v: SortMode) => { setSortMode(v); updateParams({ sort: v }) }
 
   if (loading) return <p className="text-slate-400 text-sm py-8 text-center">Cargando benchmarks...</p>
 
@@ -253,11 +270,11 @@ export default function BenchmarksPage() {
 
       {/* Area filter */}
       <div className="flex flex-wrap gap-1.5 mb-4">
-        <button onClick={() => setFilterArea('all')} className={`${btnBase} ${filterArea === 'all' ? btnActive : btnInactive}`}>
+        <button onClick={() => setArea('all')} className={`${btnBase} ${filterArea === 'all' ? btnActive : btnInactive}`}>
           Todas ({careers.length})
         </button>
         {areas.map(a => (
-          <button key={a} onClick={() => setFilterArea(a)} className={`${btnBase} ${filterArea === a ? btnActive : btnInactive}`}>
+          <button key={a} onClick={() => setArea(a)} className={`${btnBase} ${filterArea === a ? btnActive : btnInactive}`}>
             {AREA_LABELS[a] ?? a} ({careers.filter(c => c.area === a).length})
           </button>
         ))}
@@ -272,7 +289,7 @@ export default function BenchmarksPage() {
           <span className="text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Ordenar:</span>
           <select
             value={sortMode}
-            onChange={e => setSortMode(e.target.value as SortMode)}
+            onChange={e => setSort(e.target.value as SortMode)}
             className="text-[11px] border border-slate-200 rounded px-2 py-1 text-slate-600 bg-white"
           >
             <option value="default">Default</option>
