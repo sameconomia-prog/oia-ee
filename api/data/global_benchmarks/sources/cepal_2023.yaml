@@ -41,3 +41,34 @@ hallazgos:
     cita_textual: "Occupations requiring physical presence and human judgment—particularly in healthcare—show resilience across Latin American labor markets [p. 52]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: cep2023-derecho
+    ocupacion_original: "Abogados y notarios"
+    ocupacion_codigo_oficial: "CIUO-08: 2611"
+    skills_afectadas:
+      - negociacion-juridica
+      - estrategia-litigio
+    direccion: stable
+    taxonomia_oia: resilient
+    horizonte_impacto: largo
+    hallazgo: "Las habilidades de negociación y litigio en el contexto latinoamericano son resilientes por la complejidad institucional local"
+    dato_clave: "Solo el 11% de tareas jurídicas de alta complejidad en ALC son automatizables"
+    cita_textual: "Legal professionals requiring human judgment and institutional knowledge show low automation risk in ALC context [p. 61]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: cep2023-enfermeria
+    ocupacion_original: "Profesionales de enfermería y partería"
+    ocupacion_codigo_oficial: "CIUO-08: 2221"
+    skills_afectadas:
+      - cuidado-paciente
+      - triage
+      - comunicacion-equipo-salud
+    direccion: stable
+    taxonomia_oia: resilient
+    horizonte_impacto: largo
+    hallazgo: "La enfermería en ALC muestra alta resiliencia ante la automatización por la demanda de contacto humano y presencia física"
+    dato_clave: "El 91% de tareas de cuidado directo del paciente requieren presencia física no replicable por IA"
+    cita_textual: "Nursing and direct patient care occupations demonstrate resilience in ALC due to physical presence requirements and high human interaction [p. 58]"
+    divergencia_oia: false
+    nota_divergencia: null

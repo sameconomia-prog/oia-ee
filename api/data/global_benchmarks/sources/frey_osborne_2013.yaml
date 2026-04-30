@@ -41,3 +41,32 @@ hallazgos:
     cita_textual: "Computer Programmers: 0.48 probability of computerisation — creativity and complex problem-solving reduce risk [Appendix, p. 58]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: fo2013-auditores
+    ocupacion_original: "Accountants and Auditors"
+    ocupacion_codigo_oficial: "O*NET: 13-2011.00"
+    skills_afectadas:
+      - auditoria
+      - analisis-fiscal
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: largo
+    hallazgo: "Los auditores y contadores tienen probabilidad del 94% de automatización según el modelo original Frey-Osborne"
+    dato_clave: "Probabilidad de automatización: 0.94 para Accountants and Auditors"
+    cita_textual: "Accountants and Auditors: 0.94 probability of computerisation [Appendix, p. 57]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: fo2013-marketing-data
+    ocupacion_original: "Market Research Analysts"
+    ocupacion_codigo_oficial: "O*NET: 13-1161.00"
+    skills_afectadas:
+      - analisis-datos-mercado
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: largo
+    hallazgo: "Los analistas de investigación de mercados tienen 61% de probabilidad de automatización"
+    dato_clave: "Probabilidad de automatización: 0.61 para Market Research Analysts"
+    cita_textual: "Market Research Analysts and Marketing Specialists: 0.61 probability of computerisation [Appendix, p. 61]"
+    divergencia_oia: false
+    nota_divergencia: null
