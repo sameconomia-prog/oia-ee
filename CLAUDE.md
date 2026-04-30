@@ -44,8 +44,8 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 119, 2026-04-30)
-- 443 pytest · 61 Jest · 0 errores TypeScript · 54 artículos investigaciones
+## Estado actual (Sprint 120, 2026-04-30)
+- 454 pytest · 0 errores TypeScript · 54 artículos investigaciones
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
@@ -97,18 +97,22 @@ OIA-EE/
 - `/vacantes` — mini bar chart de tendencia mensual de vacantes IA
 - `/estadisticas` — barras de distribución D1/D2 por rango (Bajo/Medio/Alto) + mini bar charts tendencia noticias y vacantes
 
-## Benchmarks Globales (Sprint 119)
+## Benchmarks Globales (Sprint 120)
 - `GET /publico/benchmarks/sources` — lista las 5 fuentes internacionales
-- `GET /publico/benchmarks/careers` — resumen de 17 carreras con conteo de skills por dirección
+- `GET /publico/benchmarks/sources/{source_id}` — detalle de fuente con todos sus hallazgos (career + skill context)
+- `GET /publico/benchmarks/careers` — resumen de 17 carreras con urgencia_curricular (0–100)
 - `GET /publico/benchmarks/careers/{slug}` — detalle con matriz de convergencia completa
 - `GET /publico/benchmarks/skills` — índice de las 88 skills con dirección global, consenso% y carreras
 - `GET /publico/benchmarks/skills/{skill_id}` — hallazgos cross-source para una skill
 - `GET /publico/benchmarks/resumen` — estadísticas agregadas globales
 - Datos en `api/data/global_benchmarks/` (YAML estático): 17 carreras, 5 fuentes, 88 skills
 - Carreras: contaduria, diseno-grafico, ingenieria-sistemas, administracion-empresas, medicina, derecho, psicologia, mercadotecnia, arquitectura, enfermeria, comunicacion, economia, educacion, turismo, ciencias-politicas, nutricion, ingenieria-civil
-- Páginas: `/benchmarks`, `/benchmarks/[slug]`, `/benchmarks/skills`, `/benchmarks/skills/[skill_id]`, `/benchmarks/comparar`
-- SkillConvergenceTable: sort (riesgo/oportunidad/consenso) + filter (declining/growing/mixed); consenso_pct badge
+- Páginas: `/benchmarks`, `/benchmarks/[slug]`, `/benchmarks/skills`, `/benchmarks/skills/[skill_id]`, `/benchmarks/comparar`, `/benchmarks/fuentes`, `/benchmarks/fuentes/[source_id]`
+- SkillConvergenceTable: sort (riesgo/oportunidad/consenso) + filter (declining/growing/mixed/acción) + agrupar por tipo
 - CurriculumActionSummary: recomendaciones en /benchmarks/[slug] agrupadas por acción (retirar/rediseñar/fortalecer/agregar)
+- Skills index: filter por dir/tipo/carrera + sort por urgencia/consenso/nombre + URL params persistentes
+- Benchmarks index: filter por área + sort por urgencia/riesgo/oportunidad/nombre + URL params persistentes
+- urgencia_curricular: pct_declining × avg_consenso_declining / 100, rango 0–100
 - `POST /pertinencia/solicitud` — registro de solicitudes de estudio de pertinencia (público)
 - Página `/pertinencia` — formulario público de solicitud de estudio gratuito
 
