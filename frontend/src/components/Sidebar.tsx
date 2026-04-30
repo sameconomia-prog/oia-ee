@@ -38,6 +38,7 @@ const SECTIONS = [
     label: 'Acceso',
     links: [
       { href: '/rector', label: 'Rector' },
+      { href: '/rector/alertas', label: 'Alertas' },
       { href: '/simulador', label: 'Simulador' },
       { href: '/admin', label: 'Administración' },
       { href: '/admin/usuarios', label: 'Usuarios' },

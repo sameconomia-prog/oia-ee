@@ -64,6 +64,21 @@ def marcar_leida(
     return AlertaLeidaOut(id=alerta.id, leida=bool(alerta.leida))
 
 
+@router.put("/leer-todas")
+def marcar_todas_leidas(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user),
+):
+    """Marca todas las alertas de la IES del usuario como leídas."""
+    updated = (
+        db.query(Alerta)
+        .filter_by(ies_id=current_user.ies_id, leida=False)
+        .update({"leida": True})
+    )
+    db.commit()
+    return {"marcadas": updated}
+
+
 @router.get("/count")
 def count_no_leidas(
     db: Session = Depends(get_db),
