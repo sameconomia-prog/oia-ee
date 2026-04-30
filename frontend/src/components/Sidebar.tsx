@@ -35,6 +35,8 @@ const SECTIONS = [
       { href: '/admin', label: 'Administración' },
       { href: '/admin/usuarios', label: 'Usuarios' },
       { href: '/admin/pertinencia', label: 'Pertinencia' },
+      { href: '/admin/siia', label: 'SIIA Enterprise' },
+      { href: '/admin/whitelabel', label: 'White-label' },
     ],
   },
 ]
