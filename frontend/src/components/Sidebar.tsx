@@ -27,6 +27,7 @@ const SECTIONS = [
       { href: '/tendencias', label: 'Tendencias' },
       { href: '/impacto', label: 'Impacto IA' },
       { href: '/skills', label: 'Skills IA' },
+      { href: '/ranking-ies', label: 'Ranking IES' },
       { href: '/comparar', label: 'Comparar IES' },
       { href: '/metodologia', label: 'Metodología' },
     ],
