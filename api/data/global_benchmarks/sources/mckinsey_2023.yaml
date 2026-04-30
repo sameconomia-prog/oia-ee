@@ -57,3 +57,47 @@ hallazgos:
     cita_textual: "Healthcare documentation and routine medication management show high technical automation potential [p. 41]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: mck2023-redaccion-contenido
+    ocupacion_original: "Content Writers, Copywriters"
+    ocupacion_codigo_oficial: "SOC: 27-3043"
+    skills_afectadas:
+      - redaccion-contenido
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: corto
+    hallazgo: "La GenAI impacta directamente la redacción de contenido: artículos, copys y boletines son automatizables en más del 70% de sus tareas constitutivas"
+    dato_clave: "75% del contenido de marketing escrito es técnicamente automatizable"
+    cita_textual: "Writing and content generation tasks face 70–80% technical automation potential from generative AI tools [p. 36]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: mck2023-economia-datos
+    ocupacion_original: "Economists, Economic Analysts"
+    ocupacion_codigo_oficial: "SOC: 19-3011"
+    skills_afectadas:
+      - analisis-datos-economicos
+      - investigacion-economica
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "Los economistas con dominio de herramientas de análisis de datos aumentan su productividad con IA; la interpretación y la consultoría estratégica permanecen humanas"
+    dato_clave: "Roles de análisis económico con 2–3× incremento de productividad con GenAI"
+    cita_textual: "Economic analysis roles see significant augmentation rather than displacement — AI handles data processing, humans provide judgment [p. 29]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: mck2023-docencia-virtual
+    ocupacion_original: "Instructional Designers, E-Learning Specialists"
+    ocupacion_codigo_oficial: "SOC: 25-9031"
+    skills_afectadas:
+      - diseno-instruccional
+      - educacion-virtual
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "Los diseñadores instruccionales que integran IA generativa producen contenido educativo con 40% menos tiempo, ampliando su capacidad de impacto"
+    dato_clave: "Diseño instruccional con GenAI: 40% reducción en tiempo de producción de contenido"
+    cita_textual: "Educational content development and instructional design are strongly augmented by generative AI tools [p. 44]"
+    divergencia_oia: false
+    nota_divergencia: null

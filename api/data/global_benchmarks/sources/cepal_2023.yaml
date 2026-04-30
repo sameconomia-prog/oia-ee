@@ -72,3 +72,48 @@ hallazgos:
     cita_textual: "Nursing and direct patient care occupations demonstrate resilience in ALC due to physical presence requirements and high human interaction [p. 58]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: cepal2023-comunicacion-estrategica
+    ocupacion_original: "Comunicadores, relacionistas públicos"
+    ocupacion_codigo_oficial: "CIUO-08: 2432"
+    skills_afectadas:
+      - comunicacion-estrategica
+      - narrativa-periodistica
+    direccion: growing
+    taxonomia_oia: resilient
+    horizonte_impacto: medio
+    hallazgo: "La comunicación estratégica y el periodismo investigativo en ALC mantienen alta resiliencia; la demanda de comunicadores que gestionen reputación digital crece"
+    dato_clave: "75% de empleadores en ALC priorizan habilidades de comunicación estratégica ante la IA"
+    cita_textual: "Strategic communication and public affairs roles show resilience in ALC — organizations increasingly need humans to manage AI-generated content risks [p. 63]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: cepal2023-consultoria-economica
+    ocupacion_original: "Economistas, asesores de política económica"
+    ocupacion_codigo_oficial: "CIUO-08: 2631"
+    skills_afectadas:
+      - consultoria-economica
+      - macroeconomia-aplicada
+    direccion: growing
+    taxonomia_oia: resilient
+    horizonte_impacto: largo
+    hallazgo: "Los economistas con capacidad de interpretación de política y asesoría pública en ALC mantienen alta demanda; la IA amplía sus capacidades analíticas sin reemplazar el juicio"
+    dato_clave: "Economistas entre los 10 roles con menor riesgo de desplazamiento en México (índice 0.28)"
+    cita_textual: "Economic policy advisory roles in ALC demonstrate strong resilience — human judgment in policy interpretation remains irreplaceable [p. 44]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: cepal2023-educacion-basica
+    ocupacion_original: "Docentes, maestros de educación básica y media"
+    ocupacion_codigo_oficial: "CIUO-08: 2330"
+    skills_afectadas:
+      - docencia-presencial
+      - tutoria-personalizada
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "La docencia presencial muestra resiliencia por su función social y de acompañamiento, pero la IA reemplazará tareas administrativas y evaluativas rutinarias"
+    dato_clave: "El 38% de tareas docentes rutinarias son automatizables en ALC; la función pedagógica central permanece"
+    cita_textual: "Teaching occupations in ALC show mixed outcomes — administrative and assessment tasks face automation while relational and mentoring functions grow in value [p. 71]"
+    divergencia_oia: false
+    nota_divergencia: null
