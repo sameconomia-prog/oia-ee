@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { BenchmarkSource, SkillConvergencia, ConvergenceDirection } from '@/lib/types'
 import ConvergenceIcon from './ConvergenceIcon'
 import CurriculumBadge from './CurriculumBadge'
@@ -9,9 +10,11 @@ function shortSourceName(nombre: string): string {
 export default function SkillConvergenceTable({
   skills,
   sources,
+  careerSlug,
 }: {
   skills: SkillConvergencia[]
   sources: BenchmarkSource[]
+  careerSlug?: string
 }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200">
@@ -41,7 +44,16 @@ export default function SkillConvergenceTable({
               className={`border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
             >
               <td className="px-4 py-3">
-                <div className="font-medium text-gray-900">{skill.skill_nombre}</div>
+                {careerSlug ? (
+                  <Link
+                    href={`/benchmarks/skills/${skill.skill_id}?from=${careerSlug}&nombre=${encodeURIComponent(skill.skill_nombre)}`}
+                    className="font-medium text-brand-700 hover:underline"
+                  >
+                    {skill.skill_nombre}
+                  </Link>
+                ) : (
+                  <div className="font-medium text-gray-900">{skill.skill_nombre}</div>
+                )}
                 <div className="text-xs text-gray-400 capitalize mt-0.5">{skill.skill_tipo}</div>
               </td>
               {sources.map((s) => (

@@ -513,3 +513,18 @@ export interface BenchmarkResumen {
   skills_sin_datos: number
   acciones: Record<string, number>
 }
+
+export interface SkillHallazgo {
+  fuente_id: string
+  fuente_nombre: string
+  direccion: ConvergenceDirection
+  horizonte_impacto: string
+  hallazgo: string
+  dato_clave: string
+  cita_textual: string
+}
+
+export interface SkillCrossSource {
+  skill_id: string
+  hallazgos: SkillHallazgo[]
+}

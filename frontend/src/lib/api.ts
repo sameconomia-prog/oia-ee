@@ -452,6 +452,12 @@ export async function getBenchmarkResumen(): Promise<import('./types').Benchmark
   return res.json()
 }
 
+export async function getBenchmarkSkillCrossSource(skillId: string): Promise<import('./types').SkillCrossSource> {
+  const res = await fetch(`${BASE}/publico/benchmarks/skills/${skillId}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
 export async function marcarTodasAlertas(): Promise<{ marcadas: number }> {
   const res = await fetch(`${BASE}/alertas/leer-todas`, {
     method: 'PUT',
