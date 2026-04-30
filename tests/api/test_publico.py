@@ -504,6 +504,23 @@ def test_detalle_carrera_con_datos(client, db_session):
     assert isinstance(data["instituciones"], list)
     assert len(data["instituciones"]) >= 1
     assert "ies_nombre" in data["instituciones"][0]
+    assert "benchmark_slug" in data
+
+
+def test_detalle_carrera_benchmark_slug_match(client, db_session):
+    from pipeline.db.models import IES, CarreraIES
+    ies = IES(nombre="UNAM", nombre_corto="UNAM")
+    db_session.add(ies)
+    db_session.flush()
+    carrera = Carrera(nombre_norm="derecho", area_conocimiento="Ciencias Sociales")
+    db_session.add(carrera)
+    db_session.flush()
+    db_session.add(CarreraIES(carrera_id=carrera.id, ies_id=ies.id, ciclo="2024A"))
+    db_session.flush()
+    resp = client.get(f"/publico/carreras/{carrera.id}")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["benchmark_slug"] == "derecho"
 
 
 def test_ies_busqueda_q(client, db_session):
