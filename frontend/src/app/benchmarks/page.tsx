@@ -121,11 +121,22 @@ const AREA_LABELS: Record<string, string> = {
   ingenieria_y_tecnologia: 'Ingeniería y Tecnología',
 }
 
+type SortMode = 'default' | 'risk' | 'opportunity' | 'name'
+
+function sortCareers(list: BenchmarkCareerSummary[], mode: SortMode): BenchmarkCareerSummary[] {
+  const copy = [...list]
+  if (mode === 'risk') return copy.sort((a, b) => (b.skills_declining / b.total_skills) - (a.skills_declining / a.total_skills))
+  if (mode === 'opportunity') return copy.sort((a, b) => (b.skills_growing / b.total_skills) - (a.skills_growing / a.total_skills))
+  if (mode === 'name') return copy.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
+  return copy
+}
+
 export default function BenchmarksPage() {
   const [careers, setCareers] = useState<BenchmarkCareerSummary[]>([])
   const [resumen, setResumen] = useState<BenchmarkResumen | null>(null)
   const [loading, setLoading] = useState(true)
   const [filterArea, setFilterArea] = useState<string>('all')
+  const [sortMode, setSortMode] = useState<SortMode>('default')
 
   useEffect(() => {
     Promise.all([getBenchmarkCareers(), getBenchmarkResumen()])
@@ -136,7 +147,8 @@ export default function BenchmarksPage() {
   if (loading) return <p className="text-slate-400 text-sm py-8 text-center">Cargando benchmarks...</p>
 
   const areas = Array.from(new Set(careers.map(c => c.area))).sort()
-  const filtered = filterArea === 'all' ? careers : careers.filter(c => c.area === filterArea)
+  const base = filterArea === 'all' ? careers : careers.filter(c => c.area === filterArea)
+  const filtered = sortCareers(base, sortMode)
 
   const btnBase = 'text-[11px] px-2.5 py-1 rounded-full border transition-colors whitespace-nowrap'
   const btnActive = 'bg-brand-600 text-white border-brand-600'
@@ -190,15 +202,28 @@ export default function BenchmarksPage() {
         ))}
       </div>
 
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-700">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold text-slate-700 shrink-0">
           {filtered.length} carrera{filtered.length !== 1 ? 's' : ''}
           {filterArea !== 'all' && <span className="font-normal text-slate-400"> · {AREA_LABELS[filterArea] ?? filterArea}</span>}
         </h2>
-        <div className="flex gap-2 text-[11px] text-slate-400">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block"></span>Declining</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>Growing</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-400 inline-block"></span>Mixed</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Ordenar:</span>
+          <select
+            value={sortMode}
+            onChange={e => setSortMode(e.target.value as SortMode)}
+            className="text-[11px] border border-slate-200 rounded px-2 py-1 text-slate-600 bg-white"
+          >
+            <option value="default">Default</option>
+            <option value="risk">Mayor riesgo</option>
+            <option value="opportunity">Mayor oportunidad</option>
+            <option value="name">Nombre A–Z</option>
+          </select>
+          <div className="flex gap-2 text-[11px] text-slate-400 ml-2">
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block"></span>Declining</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>Growing</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-400 inline-block"></span>Mixed</span>
+          </div>
         </div>
       </div>
 
