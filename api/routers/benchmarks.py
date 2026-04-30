@@ -150,6 +150,31 @@ def get_career_detail(career_slug: str):
     )
 
 
+@router.get("/resumen", summary="Resumen estadístico de todos los benchmarks globales")
+def get_resumen():
+    """Estadísticas agregadas: carreras, fuentes, skills por dirección."""
+    sources, career_map, skill_index = load_benchmarks()
+    carreras = career_map.get("carreras", [])
+    total_skills = sum(len(c["skills"]) for c in carreras)
+    direction_counts: Counter = Counter()
+    accion_counts: Counter = Counter()
+    for c in carreras:
+        for skill in c["skills"]:
+            d = compute_direction(skill_index.get(skill["id"], {}))
+            direction_counts[d] += 1
+            accion_counts[skill.get("accion_curricular", "sin_datos")] += 1
+    return {
+        "total_carreras": len(carreras),
+        "total_fuentes": len(sources),
+        "total_skills": total_skills,
+        "skills_declining": direction_counts["declining"],
+        "skills_growing": direction_counts["growing"],
+        "skills_mixed_stable": direction_counts["mixed"] + direction_counts["stable"],
+        "skills_sin_datos": direction_counts["sin_datos"],
+        "acciones": dict(accion_counts),
+    }
+
+
 @router.get("/skills/{skill_id}", response_model=SkillCrossSourceOut,
             summary="Hallazgos de todas las fuentes para una skill")
 def get_skill_cross_source(skill_id: str):

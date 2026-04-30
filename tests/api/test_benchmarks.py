@@ -227,3 +227,18 @@ def test_curriculum_action_is_one_of_four_valid_values(bench_client):
 def test_career_not_found_returns_404(bench_client):
     resp = bench_client.get("/publico/benchmarks/careers/no-existe")
     assert resp.status_code == 404
+
+
+def test_resumen_estructura(bench_client):
+    resp = bench_client.get("/publico/benchmarks/resumen")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_carreras"] == 1
+    assert data["total_fuentes"] == 1
+    assert data["total_skills"] == 2
+    assert "skills_declining" in data
+    assert "skills_growing" in data
+    assert "skills_mixed_stable" in data
+    assert "skills_sin_datos" in data
+    assert "acciones" in data
+    assert isinstance(data["acciones"], dict)
