@@ -7,9 +7,13 @@ describe('Hero', () => {
     expect(screen.getByText(/312 IES analizadas/)).toBeInTheDocument()
   })
 
-  it('renderiza los dos CTAs', () => {
+  it('renderiza el CTA de descarga como botón', () => {
     render(<Hero totalIes={312} totalCarreras={847} />)
-    expect(screen.getByRole('link', { name: /Descargar Reporte 2026/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Descargar Reporte 2026/i })).toBeInTheDocument()
+  })
+
+  it('renderiza el CTA de contacto como link', () => {
+    render(<Hero totalIes={312} totalCarreras={847} />)
     expect(screen.getByRole('link', { name: /Solicitar análisis/i })).toBeInTheDocument()
   })
 })

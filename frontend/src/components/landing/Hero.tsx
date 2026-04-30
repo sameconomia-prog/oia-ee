@@ -1,4 +1,7 @@
+'use client'
+import { useState } from 'react'
 import Link from 'next/link'
+import LeadMagnetModal from './LeadMagnetModal'
 
 interface HeroProps {
   totalIes: number
@@ -6,6 +9,8 @@ interface HeroProps {
 }
 
 export default function Hero({ totalIes, totalCarreras }: HeroProps) {
+  const [open, setOpen] = useState(false)
+
   return (
     <section className="bg-[#F8FAFC] pt-16 pb-20 px-4">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -23,12 +28,12 @@ export default function Hero({ totalIes, totalCarreras }: HeroProps) {
             qué programas necesitan adaptarse ante la IA — y cuáles ya perdieron la carrera.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link
-              href="/pdfs/oia-ee-reporte-2026.pdf"
+            <button
+              onClick={() => setOpen(true)}
               className="inline-flex items-center justify-center px-6 py-3 bg-[#1D4ED8] text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
             >
               Descargar Reporte 2026 →
-            </Link>
+            </button>
             <Link
               href="#contacto"
               className="inline-flex items-center justify-center px-6 py-3 border-2 border-[#1D4ED8] text-[#1D4ED8] font-semibold rounded-lg hover:bg-blue-50 transition-colors"
@@ -55,6 +60,13 @@ export default function Hero({ totalIes, totalCarreras }: HeroProps) {
           </div>
         </div>
       </div>
+
+      <LeadMagnetModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        pdfUrl="/pdfs/oia-ee-reporte-2026.pdf"
+        titulo="Reporte 2026 — Impacto IA en Educación Superior México"
+      />
     </section>
   )
 }
