@@ -134,6 +134,21 @@ hallazgos:
     divergencia_oia: false
     nota_divergencia: null
 
+  - id: wef2025-nutricion-clinica
+    ocupacion_original: "Nutrition and Dietetics Technicians"
+    ocupacion_codigo_oficial: "ISCO-08: 2267"
+    skills_afectadas:
+      - nutricion-clinica-especializada
+      - educacion-alimentaria
+    direccion: growing
+    taxonomia_oia: resilient
+    horizonte_impacto: medio
+    hallazgo: "La nutrición clínica especializada y la educación alimentaria crecen en demanda ante las enfermedades crónicas; la IA facilita personalización pero no reemplaza el juicio clínico"
+    dato_clave: "Nutricionistas clínicos entre roles de salud con proyección positiva ante pandemia de obesidad y diabetes"
+    cita_textual: "Clinical nutrition and specialized dietary therapy roles show resilience due to complex patient management and chronic disease management needs [p. 52]"
+    divergencia_oia: false
+    nota_divergencia: null
+
   - id: wef2025-politicos-analistas
     ocupacion_original: "Policy and Planning Managers"
     ocupacion_codigo_oficial: "ISCO-08: 1349"

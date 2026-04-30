@@ -26,7 +26,7 @@ def test_ids_fuentes_esperados(data):
 def test_numero_carreras(data):
     _, career_map, _ = data
     carreras = career_map.get("carreras", [])
-    assert len(carreras) == 15, f"Se esperaban 15 carreras, se encontraron {len(carreras)}"
+    assert len(carreras) == 16, f"Se esperaban 16 carreras, se encontraron {len(carreras)}"
 
 
 def test_slugs_carreras_esperados(data):
@@ -36,7 +36,7 @@ def test_slugs_carreras_esperados(data):
         "contaduria", "diseno-grafico", "ingenieria-sistemas",
         "administracion-empresas", "medicina",
         "derecho", "psicologia", "mercadotecnia", "arquitectura", "enfermeria",
-        "comunicacion", "economia", "educacion", "turismo", "ciencias-politicas",
+        "comunicacion", "economia", "educacion", "turismo", "ciencias-politicas", "nutricion",
     }
     assert slugs == expected
 

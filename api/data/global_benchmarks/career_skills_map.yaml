@@ -385,3 +385,28 @@ carreras:
         nombre: "Comunicación pública y política"
         tipo: social
         accion_curricular: fortalecer
+
+  - slug: nutricion
+    nombre: "Nutrición y Dietética"
+    area: ciencias_salud
+    skills:
+      - id: planes-alimenticios-basicos
+        nombre: "Elaboración de planes alimenticios básicos"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: nutricion-clinica-especializada
+        nombre: "Nutrición clínica y terapéutica especializada"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: evaluacion-nutricional
+        nombre: "Evaluación y diagnóstico nutricional"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: educacion-alimentaria
+        nombre: "Educación y comunicación alimentaria"
+        tipo: social
+        accion_curricular: fortalecer
+      - id: investigacion-nutricional
+        nombre: "Investigación en nutrición y epidemiología"
+        tipo: tecnica
+        accion_curricular: fortalecer
