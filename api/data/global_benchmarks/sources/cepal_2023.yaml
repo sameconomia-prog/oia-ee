@@ -164,3 +164,19 @@ hallazgos:
     cita_textual: "Teaching occupations in ALC show mixed outcomes — administrative and assessment tasks face automation while relational and mentoring functions grow in value [p. 71]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: cepal2023-ingenieria-civil-bim
+    ocupacion_original: "Ingenieros civiles y de construcción en ALC"
+    ocupacion_codigo_oficial: "CIUO-08: 2142"
+    skills_afectadas:
+      - modelado-bim
+      - calculo-estructural
+      - gestion-proyectos-construccion
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "La digitalización del sector construcción en ALC impulsa la demanda de ingenieros con BIM y gestión de proyectos inteligentes; México y Colombia lideran adopción regional"
+    dato_clave: "La demanda de ingenieros civiles con BIM en ALC creció 41% entre 2021-2023; México entre los países con mayor déficit de profesionales certificados"
+    cita_textual: "Civil engineering in ALC is undergoing rapid digital transformation — BIM adoption and smart project management create growing demand for digitally-skilled engineers [p. 39]"
+    divergencia_oia: false
+    nota_divergencia: null

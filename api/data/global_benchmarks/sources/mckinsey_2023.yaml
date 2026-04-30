@@ -102,6 +102,22 @@ hallazgos:
     divergencia_oia: false
     nota_divergencia: null
 
+  - id: mck2023-ingenieria-civil-bim
+    ocupacion_original: "Civil Engineers"
+    ocupacion_codigo_oficial: "SOC: 17-2051"
+    skills_afectadas:
+      - modelado-bim
+      - calculo-estructural
+      - gestion-proyectos-construccion
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "El BIM impulsado por IA y los gemelos digitales transforman el diseño estructural; la gestión de proyectos se amplía pero la supervisión de campo mantiene alta resiliencia"
+    dato_clave: "Los ingenieros civiles con BIM aumentan productividad en diseño un 35%; demanda de profesionales con BIM crece 28% anual"
+    cita_textual: "Civil engineering design and planning are strongly augmented by AI and BIM tools — field supervision and stakeholder management remain human-dependent [p. 33]"
+    divergencia_oia: false
+    nota_divergencia: null
+
   - id: mck2023-turismo-operaciones
     ocupacion_original: "Hotel, Motel, and Resort Desk Clerks"
     ocupacion_codigo_oficial: "SOC: 43-4081"
