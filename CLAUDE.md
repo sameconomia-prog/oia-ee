@@ -97,6 +97,18 @@ OIA-EE/
 - `/vacantes` — mini bar chart de tendencia mensual de vacantes IA
 - `/estadisticas` — barras de distribución D1/D2 por rango (Bajo/Medio/Alto) + mini bar charts tendencia noticias y vacantes
 
+## Benchmarks Globales (Sprint 119)
+- `GET /publico/benchmarks/sources` — lista las 5 fuentes internacionales
+- `GET /publico/benchmarks/careers` — resumen de 13 carreras con conteo de skills por dirección
+- `GET /publico/benchmarks/careers/{slug}` — detalle con matriz de convergencia completa
+- `GET /publico/benchmarks/skills/{skill_id}` — hallazgos cross-source para una skill
+- `GET /publico/benchmarks/resumen` — estadísticas agregadas globales
+- Datos en `api/data/global_benchmarks/` (YAML estático): 13 carreras, 5 fuentes, ~50 skills
+- Carreras: contaduria, diseno-grafico, ingenieria-sistemas, administracion-empresas, medicina, derecho, psicologia, mercadotecnia, arquitectura, enfermeria, comunicacion, economia, educacion
+- Páginas: `/benchmarks`, `/benchmarks/[slug]`, `/benchmarks/skills/[skill_id]`
+- `POST /pertinencia/solicitud` — registro de solicitudes de estudio de pertinencia (público)
+- Página `/pertinencia` — formulario público de solicitud de estudio gratuito
+
 ## Tests
 ```
 tests/
