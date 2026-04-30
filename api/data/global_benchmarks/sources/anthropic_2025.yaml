@@ -70,3 +70,47 @@ hallazgos:
     cita_textual: "Creative content generation and 3D visualization show high direct substitution rates in observed Claude usage [p. 16]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: anthropic2025-redaccion-contenido
+    ocupacion_original: "Writers, Authors, Journalists"
+    ocupacion_codigo_oficial: "O*NET: 27-3043.00"
+    skills_afectadas:
+      - redaccion-contenido
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: corto
+    hallazgo: "La redacción de contenido estándar (artículos, posts, boletines) muestra alta sustitución directa por Claude y GPT"
+    dato_clave: "Escritura y redacción es la 2ª categoría con mayor tasa de sustitución observada (22.4%)"
+    cita_textual: "Writing and content creation tasks show 22.4% direct substitution rate in Claude usage patterns [p. 8]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: anthropic2025-analisis-economico
+    ocupacion_original: "Economists, Financial Analysts"
+    ocupacion_codigo_oficial: "O*NET: 19-3011.00"
+    skills_afectadas:
+      - analisis-datos-economicos
+      - investigacion-economica
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "El análisis económico se amplifica con IA: los economistas usan LLMs para procesar grandes volúmenes de datos y literatura, aumentando su productividad 3-5x"
+    dato_clave: "Análisis de datos y research entre las categorías con mayor complementariedad (ampliación)"
+    cita_textual: "Data analysis and research tasks show high augmentation — AI increases economist throughput without substituting judgment [p. 12]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: anthropic2025-diseno-instruccional
+    ocupacion_original: "Instructional Designers, Curriculum Developers"
+    ocupacion_codigo_oficial: "O*NET: 25-9031.00"
+    skills_afectadas:
+      - diseno-instruccional
+      - educacion-virtual
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "El diseño instruccional con IA permite personalización masiva de contenidos; crecimiento en demanda de diseñadores que dominan herramientas IA pedagógicas"
+    dato_clave: "Contenido educativo entre categorías de mayor ampliación en uso observado de Claude"
+    cita_textual: "Educational content development shows strong augmentation patterns — AI speeds content generation while human expertise guides pedagogy [p. 14]"
+    divergencia_oia: false
+    nota_divergencia: null

@@ -260,3 +260,78 @@ carreras:
         nombre: "Comunicación interprofesional en salud"
         tipo: social
         accion_curricular: fortalecer
+
+  - slug: comunicacion
+    nombre: "Comunicación y Periodismo"
+    area: ciencias_sociales
+    skills:
+      - id: redaccion-contenido
+        nombre: "Redacción y producción de contenido"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: narrativa-periodistica
+        nombre: "Narrativa periodística e investigación"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: comunicacion-estrategica
+        nombre: "Comunicación estratégica y relaciones públicas"
+        tipo: transversal
+        accion_curricular: fortalecer
+      - id: produccion-multimedia
+        nombre: "Producción multimedia y audiovisual"
+        tipo: digital
+        accion_curricular: redisenar
+      - id: analisis-audiencias
+        nombre: "Análisis de audiencias y datos"
+        tipo: digital
+        accion_curricular: fortalecer
+
+  - slug: economia
+    nombre: "Economía"
+    area: ciencias_economico_administrativas
+    skills:
+      - id: modelado-econometrico
+        nombre: "Modelado econométrico y estadístico"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: analisis-datos-economicos
+        nombre: "Análisis de datos económicos"
+        tipo: digital
+        accion_curricular: fortalecer
+      - id: consultoria-economica
+        nombre: "Consultoría y asesoría económica"
+        tipo: transversal
+        accion_curricular: fortalecer
+      - id: macroeconomia-aplicada
+        nombre: "Macroeconomía y política económica"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: investigacion-economica
+        nombre: "Investigación económica y documental"
+        tipo: tecnica
+        accion_curricular: redisenar
+
+  - slug: educacion
+    nombre: "Ciencias de la Educación"
+    area: ciencias_sociales
+    skills:
+      - id: diseno-instruccional
+        nombre: "Diseño instruccional y curricular"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: docencia-presencial
+        nombre: "Docencia y enseñanza presencial"
+        tipo: social
+        accion_curricular: redisenar
+      - id: evaluacion-aprendizaje
+        nombre: "Evaluación y diagnóstico del aprendizaje"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: tutoria-personalizada
+        nombre: "Tutoría y acompañamiento estudiantil"
+        tipo: social
+        accion_curricular: fortalecer
+      - id: educacion-virtual
+        nombre: "Educación virtual y e-learning"
+        tipo: digital
+        accion_curricular: agregar

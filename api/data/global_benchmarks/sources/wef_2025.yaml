@@ -88,3 +88,48 @@ hallazgos:
     cita_textual: "Digital marketing analytics and campaign optimization roles face high displacement from AI tools [p. 58]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: wef2025-comunicacion-contenido
+    ocupacion_original: "Media, Communications Specialists"
+    ocupacion_codigo_oficial: "ISCO-08: 2642"
+    skills_afectadas:
+      - redaccion-contenido
+      - produccion-multimedia
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: corto
+    hallazgo: "La producción de contenido rutinario es automatizable, pero la narrativa contextualizada y el periodismo de investigación crecen en valor"
+    dato_clave: "75% de medios encuestados adoptarán IA en redacción básica para 2027"
+    cita_textual: "Media roles face divergent outcomes — automated content production vs. growing demand for verified, contextual journalism [p. 63]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: wef2025-economia-datos
+    ocupacion_original: "Economists and Related Analysts"
+    ocupacion_codigo_oficial: "ISCO-08: 2631"
+    skills_afectadas:
+      - analisis-datos-economicos
+      - modelado-econometrico
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "Los economistas con habilidades en datos y modelado cuantitativo tienen demanda creciente; la IA amplía su capacidad de análisis"
+    dato_clave: "Analistas económicos entre los 10 roles de mayor crecimiento para 2030"
+    cita_textual: "Analytical and data roles, including economists, see strong growth as AI augments rather than replaces human judgment [p. 31]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: wef2025-educacion-virtual
+    ocupacion_original: "Teaching Professionals"
+    ocupacion_codigo_oficial: "ISCO-08: 2330"
+    skills_afectadas:
+      - educacion-virtual
+      - tutoria-personalizada
+    direccion: growing
+    taxonomia_oia: resilient
+    horizonte_impacto: medio
+    hallazgo: "Los roles de docencia especializada y tutoría personalizada crecen ante la expansión del e-learning; la IA actúa como copiloto pedagógico"
+    dato_clave: "La demanda de profesionales en e-learning crece 22% anual en LATAM"
+    cita_textual: "Education professionals with digital and adaptive teaching skills see strong demand growth [p. 44]"
+    divergencia_oia: false
+    nota_divergencia: null
