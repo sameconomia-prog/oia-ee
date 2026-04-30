@@ -4,6 +4,27 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import LeadMagnetWrapper from '@/components/landing/LeadMagnetWrapper'
+import BenchmarkMiniCard from '@/components/benchmarks/BenchmarkMiniCard'
+
+const BENCHMARK_FROM_ARTICLE: Record<string, string> = {
+  '2026-04-derecho-ia-2030': 'derecho',
+  '2026-04-medicina-ia-mexico': 'medicina',
+  '2026-04-arquitectura-ia-2030': 'arquitectura',
+  '2026-04-enfermeria-ia-2030': 'enfermeria',
+  '2026-04-mercadotecnia-ia-2030': 'mercadotecnia',
+  '2026-04-psicologia-ia-2030': 'psicologia',
+  '2026-04-administracion-ia-2030': 'administracion-empresas',
+  '2026-04-contaduria-ia-2030': 'contaduria',
+  '2026-04-diseno-grafico-ia-2030': 'diseno-grafico',
+  '2026-04-ingenieros-software-ia': 'ingenieria-sistemas',
+  '2026-04-comunicacion-ia-2030': 'comunicacion',
+  '2026-04-economia-ia-2030': 'economia',
+  '2026-04-educacion-ia-2030': 'educacion',
+  '2026-04-turismo-ia-2030': 'turismo',
+  '2026-04-ciencias-politicas-ia-2030': 'ciencias-politicas',
+  '2026-04-nutricion-ia-2030': 'nutricion',
+  '2026-04-ingenieria-civil-ia-2030': 'ingenieria-civil',
+}
 
 interface Props {
   params: { slug: string }
@@ -38,6 +59,7 @@ export default function InvestigacionDetallePage({ params }: Props) {
   if (!data) notFound()
 
   const { meta, content } = data
+  const benchmarkSlug = BENCHMARK_FROM_ARTICLE[params.slug] ?? null
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -104,6 +126,8 @@ export default function InvestigacionDetallePage({ params }: Props) {
           </div>
         )}
       </div>
+
+      {benchmarkSlug && <BenchmarkMiniCard slug={benchmarkSlug} />}
 
       {meta.acceso === 'lead_magnet' && meta.pdf_url && (
         <LeadMagnetWrapper pdfUrl={meta.pdf_url} titulo={meta.titulo} />
