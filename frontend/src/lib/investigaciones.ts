@@ -11,6 +11,7 @@ export interface InvestigacionFrontmatter {
   tipo: TipoInvestigacion
   fecha: string
   resumen: string
+  autor?: string
   cover_image?: string
   tags: string[]
   pdf_url?: string

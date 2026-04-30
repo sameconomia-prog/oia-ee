@@ -22,14 +22,35 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://oia-ee.mx'
+
 export default function InvestigacionDetallePage({ params }: Props) {
   const data = getInvestigacionBySlug(params.slug)
   if (!data) notFound()
 
   const { meta, content } = data
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: meta.titulo,
+    description: meta.resumen,
+    datePublished: meta.fecha,
+    author: { '@type': 'Person', name: meta.autor ?? 'Samuel Aguilar' },
+    publisher: {
+      '@type': 'Organization',
+      name: 'OIA-EE',
+      url: BASE_URL,
+    },
+    url: `${BASE_URL}/investigaciones/${params.slug}`,
+  }
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="mb-8">
         <span className="text-[#1D4ED8] text-sm font-semibold uppercase tracking-wide">
           {getTipoLabel(meta.tipo)}

@@ -36,8 +36,23 @@ export default async function LandingPage() {
     iva_promedio: 0.42,
   }
 
+  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://oia-ee.mx'
+  const orgJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'OIA-EE — Observatorio de Impacto IA en Educación y Empleo',
+    url: BASE_URL,
+    description: 'Monitoreamos 312 IES, 847 carreras y miles de vacantes para anticipar el impacto de la IA en la educación superior mexicana.',
+    foundingDate: '2026',
+    contactPoint: { '@type': 'ContactPoint', email: 'sam.economia@gmail.com' },
+  }
+
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+      />
       <Hero totalIes={tickerData.total_ies} totalCarreras={tickerData.total_carreras} />
       <TickerDatos data={tickerData} />
       <CoberturaPrensa enabled={false} />
