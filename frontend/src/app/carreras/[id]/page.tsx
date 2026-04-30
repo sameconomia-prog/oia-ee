@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getCarreraDetalle, getKpisHistorico } from '@/lib/api'
-import type { CarreraDetalle, HistoricoSerie } from '@/lib/types'
+import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources } from '@/lib/api'
+import type { CarreraDetalle, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource } from '@/lib/types'
 import FanChart from '@/components/FanChart'
 import SkillTreemap from '@/components/SkillTreemap'
 import KpiRadarChart from '@/components/KpiRadarChart'
+import SkillConvergenceTable from '@/components/benchmarks/SkillConvergenceTable'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import SectionHeader from '@/components/ui/SectionHeader'
@@ -93,11 +94,19 @@ export default function CarreraDetallePage() {
   const [histD2, setHistD2] = useState<HistoricoSerie | null>(null)
   const [predData, setPredData] = useState<PredData | null>(null)
   const [semaforoRes, setSemaforoRes] = useState<SemaforoData | null>(null)
+  const [benchmarkDetail, setBenchmarkDetail] = useState<BenchmarkCareerDetail | null>(null)
+  const [benchmarkSources, setBenchmarkSources] = useState<BenchmarkSource[]>([])
 
   useEffect(() => {
     if (!id) return
     getCarreraDetalle(id)
-      .then(setDetalle)
+      .then(d => {
+        setDetalle(d)
+        if (d.benchmark_slug) {
+          getBenchmarkCareerDetail(d.benchmark_slug).then(setBenchmarkDetail).catch(() => {})
+          getBenchmarkSources().then(setBenchmarkSources).catch(() => {})
+        }
+      })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
     getKpisHistorico(id, 'd1_score', 30).then(setHistD1).catch(() => {})
@@ -215,6 +224,20 @@ export default function CarreraDetallePage() {
         />
         <SkillTreemap carreraId={id} />
       </Card>
+
+      {/* Benchmarks globales */}
+      {benchmarkDetail && benchmarkSources.length > 0 && (
+        <Card className="mb-6 p-5">
+          <SectionHeader
+            title="Benchmarks Globales"
+            subtitle="Convergencia de 5 fuentes internacionales sobre las habilidades de esta carrera"
+          />
+          <SkillConvergenceTable skills={benchmarkDetail.skills} sources={benchmarkSources} />
+          <p className="text-xs text-slate-400 mt-3">
+            Fuentes: WEF 2025 · McKinsey 2023 · Frey-Osborne 2013 · CEPAL 2023 · Anthropic 2025
+          </p>
+        </Card>
+      )}
 
       {/* IES que ofrecen la carrera */}
       {d.instituciones.length > 0 && (

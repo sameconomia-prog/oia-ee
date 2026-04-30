@@ -134,6 +134,7 @@ class CarreraDetalleOut(BaseModel):
     duracion_anios: Optional[int] = None
     kpi: Optional[KpiOut] = None
     instituciones: list[CarreraIesItemOut] = []
+    benchmark_slug: Optional[str] = None
 
 
 class AlertaItemOut(BaseModel):

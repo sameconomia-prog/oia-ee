@@ -256,6 +256,7 @@ export interface CarreraDetalle {
   duracion_anios: number | null
   kpi: KpiResult | null
   instituciones: CarreraIesItem[]
+  benchmark_slug: string | null
 }
 
 export interface TendenciaNacional {

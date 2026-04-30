@@ -1,5 +1,6 @@
 # api/routers/publico.py
 import time
+import unicodedata
 import threading
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
@@ -8,6 +9,33 @@ from sqlalchemy.orm import Session
 from api.deps import get_db, rate_limit_public
 from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut, IesDetalleOut, KpisDistribucionOut, KpisBinOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
+
+
+def _nombre_to_slug(nombre: str) -> str:
+    """Normaliza un nombre de carrera a slug: sin acentos, minúsculas, guiones."""
+    s = unicodedata.normalize("NFKD", nombre).encode("ascii", "ignore").decode()
+    s = s.lower().strip()
+    s = " ".join(s.split())  # collapse spaces
+    return s.replace(" ", "-").replace("/", "-")
+
+
+def _match_benchmark_slug(nombre_norm: str) -> Optional[str]:
+    """Devuelve el slug de benchmark si el nombre de carrera coincide con alguno."""
+    from api.benchmarks_loader import load_benchmarks
+    try:
+        _, career_map, _ = load_benchmarks()
+        known = {c["slug"] for c in career_map.get("carreras", [])}
+    except Exception:
+        return None
+    slug = _nombre_to_slug(nombre_norm)
+    if slug in known:
+        return slug
+    # Try first word match for compound names (e.g. "ingeniería industrial" → "ingenieria-industrial")
+    for known_slug in known:
+        if slug == known_slug or slug.startswith(known_slug) or known_slug.startswith(slug.split("-")[0]):
+            if known_slug in slug or slug in known_slug:
+                return known_slug
+    return None
 
 router = APIRouter(dependencies=[Depends(rate_limit_public)])
 
@@ -653,6 +681,7 @@ def detalle_carrera(carrera_id: str, db: Session = Depends(get_db)):
         duracion_anios=carrera.duracion_anios,
         kpi=kpi_out,
         instituciones=instituciones,
+        benchmark_slug=_match_benchmark_slug(carrera.nombre_norm),
     )
 
 
