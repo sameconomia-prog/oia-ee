@@ -10,6 +10,29 @@ import Card from '@/components/ui/Card'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Badge from '@/components/ui/Badge'
 
+function exportCSV(detail: BenchmarkCareerDetail, sources: BenchmarkSource[]) {
+  const header = ['Habilidad', 'Tipo', ...sources.map(s => s.nombre.split('—')[0].trim()), 'Global', 'Consenso%', 'Acción'].join(',')
+  const rows = detail.skills.map(skill => {
+    const sourceCols = sources.map(s => skill.convergencia_por_fuente[s.id] ?? 'sin_datos')
+    return [
+      `"${skill.skill_nombre}"`,
+      skill.skill_tipo,
+      ...sourceCols,
+      skill.direccion_global,
+      skill.consenso_pct,
+      skill.accion_curricular,
+    ].join(',')
+  })
+  const csv = [header, ...rows].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `benchmark-${detail.slug}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 const ARTICLE_MAP: Record<string, string> = {
   'derecho': '2026-04-derecho-ia-2030',
   'medicina': '2026-04-medicina-ia-mexico',
@@ -124,13 +147,19 @@ export default function BenchmarkCareerPage() {
 
       {/* Convergence table */}
       <Card className="mb-6 p-5">
-        <SectionHeader
-          title="Matriz de convergencia por fuente"
-          subtitle={`${sources.length} fuentes internacionales · ${detail.skills.length} habilidades analizadas`}
-        />
-        <div className="mt-4">
-          <SkillConvergenceTable skills={detail.skills} sources={sources} careerSlug={slug} />
+        <div className="flex items-start justify-between mb-4">
+          <SectionHeader
+            title="Matriz de convergencia por fuente"
+            subtitle={`${sources.length} fuentes internacionales · ${detail.skills.length} habilidades analizadas`}
+          />
+          <button
+            onClick={() => exportCSV(detail, sources)}
+            className="shrink-0 ml-4 text-xs text-brand-600 border border-brand-200 px-3 py-1.5 rounded hover:bg-brand-50 transition-colors font-medium"
+          >
+            Descargar CSV
+          </button>
         </div>
+        <SkillConvergenceTable skills={detail.skills} sources={sources} careerSlug={slug} />
       </Card>
 
       {/* Sources legend */}
