@@ -1,7 +1,8 @@
 // frontend/src/app/benchmarks/skills/page.tsx
 'use client'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { getBenchmarkSkillsIndex, getBenchmarkCareers } from '@/lib/api'
 import type { SkillIndexItem, BenchmarkCareerSummary, ConvergenceDirection } from '@/lib/types'
 import ConvergenceIcon from '@/components/benchmarks/ConvergenceIcon'
@@ -50,19 +51,46 @@ function exportSkillsCSV(skills: SkillIndexItem[], careerBySlug: Record<string, 
   URL.revokeObjectURL(url)
 }
 
+const TIPO_LABELS: Record<string, string> = {
+  tecnica: 'Técnica',
+  digital: 'Digital',
+  transversal: 'Transversal',
+  social: 'Social',
+}
+
 export default function SkillsIndexPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
   const [skills, setSkills] = useState<SkillIndexItem[]>([])
   const [careers, setCareers] = useState<BenchmarkCareerSummary[]>([])
   const [loading, setLoading] = useState(true)
-  const [query, setQuery] = useState('')
-  const [filterDir, setFilterDir] = useState<ConvergenceDirection | 'all'>('all')
-  const [filterCareer, setFilterCareer] = useState<string>('all')
+  const [query, setQuery] = useState(() => searchParams.get('q') ?? '')
+  const [filterDir, setFilterDir] = useState<ConvergenceDirection | 'all'>(
+    () => (searchParams.get('dir') as ConvergenceDirection | 'all') ?? 'all'
+  )
+  const [filterCareer, setFilterCareer] = useState<string>(() => searchParams.get('carrera') ?? 'all')
+  const [filterTipo, setFilterTipo] = useState<string>(() => searchParams.get('tipo') ?? 'all')
 
   useEffect(() => {
     Promise.all([getBenchmarkSkillsIndex(), getBenchmarkCareers()])
       .then(([s, c]) => { setSkills(s); setCareers(c) })
       .finally(() => setLoading(false))
   }, [])
+
+  const updateParams = useCallback((updates: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString())
+    Object.entries(updates).forEach(([k, v]) => {
+      if (v === 'all' || v === '') params.delete(k)
+      else params.set(k, v)
+    })
+    router.replace(`?${params.toString()}`, { scroll: false })
+  }, [router, searchParams])
+
+  const setDir = (v: ConvergenceDirection | 'all') => { setFilterDir(v); updateParams({ dir: v }) }
+  const setCareer = (v: string) => { setFilterCareer(v); updateParams({ carrera: v }) }
+  const setTipo = (v: string) => { setFilterTipo(v); updateParams({ tipo: v }) }
+  const setQ = (v: string) => { setQuery(v); updateParams({ q: v }) }
 
   const careerBySlug = useMemo(() => Object.fromEntries(careers.map(c => [c.slug, c])), [careers])
 
@@ -71,8 +99,14 @@ export default function SkillsIndexPage() {
         !s.skill_id.toLowerCase().includes(query.toLowerCase())) return false
     if (filterDir !== 'all' && s.direccion_global !== filterDir) return false
     if (filterCareer !== 'all' && !s.carreras.includes(filterCareer)) return false
+    if (filterTipo !== 'all' && s.skill_tipo !== filterTipo) return false
     return true
-  }), [skills, query, filterDir, filterCareer])
+  }), [skills, query, filterDir, filterCareer, filterTipo])
+
+  const tiposPresentes = useMemo(() => {
+    const tipos = new Set(skills.map(s => s.skill_tipo))
+    return ['tecnica', 'digital', 'transversal', 'social'].filter(t => tipos.has(t))
+  }, [skills])
 
   const counts = useMemo(() => {
     const all = skills
@@ -113,35 +147,50 @@ export default function SkillsIndexPage() {
       </Card>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2 mb-3 items-center">
-        <input
-          type="text"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder="Buscar habilidad…"
-          className="text-xs border border-slate-200 rounded-lg px-3 py-1.5 w-48 bg-white text-slate-700"
-        />
-        <div className="flex gap-1.5 flex-wrap">
-          {([['all', 'Todas'], ['declining', 'Declining'], ['growing', 'Growing'], ['mixed', 'Mixed']] as [string, string][]).map(([d, l]) => (
-            <button key={d} onClick={() => setFilterDir(d as ConvergenceDirection | 'all')}
-              className={`${btnBase} ${filterDir === d ? btnActive : btnInactive}`}>{l}</button>
-          ))}
-        </div>
-        <select
-          value={filterCareer}
-          onChange={e => setFilterCareer(e.target.value)}
-          className="text-xs border border-slate-200 rounded px-2 py-1.5 bg-white text-slate-600 ml-auto"
-        >
-          <option value="all">Todas las carreras</option>
-          {careers.map(c => <option key={c.slug} value={c.slug}>{c.nombre.split('/')[0].trim()}</option>)}
-        </select>
-        {skills.length > 0 && (
-          <button
-            onClick={() => exportSkillsCSV(filtered, careerBySlug)}
-            className="text-xs text-slate-600 border border-slate-200 px-3 py-1.5 rounded hover:bg-slate-50 transition-colors whitespace-nowrap"
+      <div className="space-y-2 mb-3">
+        <div className="flex flex-wrap gap-2 items-center">
+          <input
+            type="text"
+            value={query}
+            onChange={e => setQ(e.target.value)}
+            placeholder="Buscar habilidad…"
+            className="text-xs border border-slate-200 rounded-lg px-3 py-1.5 w-48 bg-white text-slate-700"
+          />
+          <div className="flex gap-1.5 flex-wrap">
+            {([['all', 'Todas'], ['declining', 'Declining'], ['growing', 'Growing'], ['mixed', 'Mixed']] as [string, string][]).map(([d, l]) => (
+              <button key={d} onClick={() => setDir(d as ConvergenceDirection | 'all')}
+                className={`${btnBase} ${filterDir === d ? btnActive : btnInactive}`}>{l}</button>
+            ))}
+          </div>
+          <select
+            value={filterCareer}
+            onChange={e => setCareer(e.target.value)}
+            className="text-xs border border-slate-200 rounded px-2 py-1.5 bg-white text-slate-600 ml-auto"
           >
-            ↓ CSV ({filtered.length})
-          </button>
+            <option value="all">Todas las carreras</option>
+            {careers.map(c => <option key={c.slug} value={c.slug}>{c.nombre.split('/')[0].trim()}</option>)}
+          </select>
+          {skills.length > 0 && (
+            <button
+              onClick={() => exportSkillsCSV(filtered, careerBySlug)}
+              className="text-xs text-slate-600 border border-slate-200 px-3 py-1.5 rounded hover:bg-slate-50 transition-colors whitespace-nowrap"
+            >
+              ↓ CSV ({filtered.length})
+            </button>
+          )}
+        </div>
+        {tiposPresentes.length > 0 && (
+          <div className="flex gap-1.5 flex-wrap items-center">
+            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Tipo:</span>
+            <button onClick={() => setTipo('all')}
+              className={`${btnBase} ${filterTipo === 'all' ? btnActive : btnInactive}`}>Todos</button>
+            {tiposPresentes.map(t => (
+              <button key={t} onClick={() => setTipo(t)}
+                className={`${btnBase} ${filterTipo === t ? btnActive : btnInactive}`}>
+                {TIPO_LABELS[t] ?? t}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
