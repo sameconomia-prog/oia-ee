@@ -8,6 +8,7 @@ import type { BenchmarkCareerDetail, BenchmarkSource } from '@/lib/types'
 import SkillConvergenceTable from '@/components/benchmarks/SkillConvergenceTable'
 import CurriculumActionSummary from '@/components/benchmarks/CurriculumActionSummary'
 import HorizonteTimeline from '@/components/benchmarks/HorizonteTimeline'
+import SkillTipoMatrix from '@/components/benchmarks/SkillTipoMatrix'
 import Card from '@/components/ui/Card'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Badge from '@/components/ui/Badge'
@@ -162,6 +163,11 @@ export default function BenchmarkCareerPage() {
           </button>
         </div>
         <SkillConvergenceTable skills={detail.skills} sources={sources} careerSlug={slug} />
+      </Card>
+
+      {/* Tipo × direction matrix */}
+      <Card className="mb-6 p-5">
+        <SkillTipoMatrix skills={detail.skills} />
       </Card>
 
       {/* Curricular recommendations */}
