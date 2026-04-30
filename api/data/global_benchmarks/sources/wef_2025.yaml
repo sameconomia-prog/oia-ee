@@ -134,6 +134,21 @@ hallazgos:
     divergencia_oia: false
     nota_divergencia: null
 
+  - id: wef2025-politicos-analistas
+    ocupacion_original: "Policy and Planning Managers"
+    ocupacion_codigo_oficial: "ISCO-08: 1349"
+    skills_afectadas:
+      - analisis-politico
+      - comunicacion-publica
+    direccion: growing
+    taxonomia_oia: resilient
+    horizonte_impacto: medio
+    hallazgo: "Los analistas de política y gestores de relaciones públicas gubernamentales muestran alta resiliencia; la IA amplía su capacidad analítica sin reemplazar el juicio político"
+    dato_clave: "Roles de política pública entre los de mayor crecimiento en sector gobierno para 2030"
+    cita_textual: "Government and policy roles benefit from AI augmentation — decision-making under political complexity remains a human domain [p. 39]"
+    divergencia_oia: false
+    nota_divergencia: null
+
   - id: wef2025-turismo-hospitalidad
     ocupacion_original: "Hotel and Restaurant Managers"
     ocupacion_codigo_oficial: "ISCO-08: 1412"

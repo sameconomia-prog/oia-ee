@@ -22,6 +22,8 @@ const ARTICLE_MAP: Record<string, string> = {
   'comunicacion': '2026-04-comunicacion-ia-2030',
   'economia': '2026-04-economia-ia-2030',
   'educacion': '2026-04-educacion-ia-2030',
+  'turismo': '2026-04-turismo-ia-2030',
+  'ciencias-politicas': '2026-04-ciencias-politicas-ia-2030',
 }
 
 const DIR_LABEL: Record<string, { label: string; variant: 'risk' | 'oportunidad' | 'neutro' }> = {

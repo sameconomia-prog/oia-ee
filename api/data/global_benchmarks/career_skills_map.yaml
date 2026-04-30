@@ -360,3 +360,28 @@ carreras:
         nombre: "Turismo sostenible y responsable"
         tipo: transversal
         accion_curricular: agregar
+
+  - slug: ciencias-politicas
+    nombre: "Ciencias Políticas y Relaciones Internacionales"
+    area: ciencias_sociales
+    skills:
+      - id: analisis-politico
+        nombre: "Análisis político y de coyuntura"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: negociacion-diplomatica
+        nombre: "Negociación y diplomacia"
+        tipo: social
+        accion_curricular: fortalecer
+      - id: analisis-datos-politicos
+        nombre: "Análisis de datos y ciencia de datos políticos"
+        tipo: digital
+        accion_curricular: agregar
+      - id: investigacion-politica-documental
+        nombre: "Investigación política y documental"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: comunicacion-publica
+        nombre: "Comunicación pública y política"
+        tipo: social
+        accion_curricular: fortalecer
