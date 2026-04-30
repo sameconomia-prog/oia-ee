@@ -303,3 +303,36 @@ def test_skill_100_percent_consenso_when_all_agree(tmp_path):
     out = _build_skill_convergencia(skill_def, skill_index, sources)
     assert out.consenso_pct == 100
     assert out.fuentes_con_datos == 3
+
+
+def test_skills_index_returns_all_skills(bench_client):
+    resp = bench_client.get("/publico/benchmarks/skills")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data, list)
+    assert len(data) == 2  # skill-a and skill-b in mock data
+    ids = {s["skill_id"] for s in data}
+    assert "skill-a" in ids
+    assert "skill-b" in ids
+
+
+def test_skills_index_item_structure(bench_client):
+    resp = bench_client.get("/publico/benchmarks/skills")
+    assert resp.status_code == 200
+    item = resp.json()[0]
+    assert "skill_id" in item
+    assert "skill_nombre" in item
+    assert "skill_tipo" in item
+    assert "direccion_global" in item
+    assert "fuentes_con_datos" in item
+    assert "consenso_pct" in item
+    assert "carreras" in item
+    assert isinstance(item["carreras"], list)
+
+
+def test_skills_index_carreras_contains_career_slug(bench_client):
+    resp = bench_client.get("/publico/benchmarks/skills")
+    assert resp.status_code == 200
+    data = resp.json()
+    skill_a = next(s for s in data if s["skill_id"] == "skill-a")
+    assert "carrera-test" in skill_a["carreras"]

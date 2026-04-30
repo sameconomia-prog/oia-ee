@@ -45,7 +45,7 @@ OIA-EE/
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
 ## Estado actual (Sprint 119, 2026-04-30)
-- 440 pytest · 61 Jest · 0 errores TypeScript · 54 artículos investigaciones
+- 443 pytest · 61 Jest · 0 errores TypeScript · 54 artículos investigaciones
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
@@ -101,11 +101,14 @@ OIA-EE/
 - `GET /publico/benchmarks/sources` — lista las 5 fuentes internacionales
 - `GET /publico/benchmarks/careers` — resumen de 17 carreras con conteo de skills por dirección
 - `GET /publico/benchmarks/careers/{slug}` — detalle con matriz de convergencia completa
+- `GET /publico/benchmarks/skills` — índice de las 88 skills con dirección global, consenso% y carreras
 - `GET /publico/benchmarks/skills/{skill_id}` — hallazgos cross-source para una skill
 - `GET /publico/benchmarks/resumen` — estadísticas agregadas globales
 - Datos en `api/data/global_benchmarks/` (YAML estático): 17 carreras, 5 fuentes, 88 skills
 - Carreras: contaduria, diseno-grafico, ingenieria-sistemas, administracion-empresas, medicina, derecho, psicologia, mercadotecnia, arquitectura, enfermeria, comunicacion, economia, educacion, turismo, ciencias-politicas, nutricion, ingenieria-civil
-- Páginas: `/benchmarks`, `/benchmarks/[slug]`, `/benchmarks/skills/[skill_id]`
+- Páginas: `/benchmarks`, `/benchmarks/[slug]`, `/benchmarks/skills`, `/benchmarks/skills/[skill_id]`, `/benchmarks/comparar`
+- SkillConvergenceTable: sort (riesgo/oportunidad/consenso) + filter (declining/growing/mixed); consenso_pct badge
+- CurriculumActionSummary: recomendaciones en /benchmarks/[slug] agrupadas por acción (retirar/rediseñar/fortalecer/agregar)
 - `POST /pertinencia/solicitud` — registro de solicitudes de estudio de pertinencia (público)
 - Página `/pertinencia` — formulario público de solicitud de estudio gratuito
 
