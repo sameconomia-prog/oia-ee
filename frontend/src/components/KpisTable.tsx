@@ -91,6 +91,22 @@ export default function KpisTable() {
     return sortDir === 'desc' ? ' ↓' : ' ↑'
   }
 
+  function exportCSV() {
+    const headers = ['Carrera', 'D1 Score', 'IVA', 'BES', 'VAC', 'D2 Score', 'IOE', 'IHE', 'IEA', 'D3 Score', 'D6 Score']
+    const rows = sorted.map(({ nombre, kpi }) => {
+      const d1 = kpi!.d1_obsolescencia, d2 = kpi!.d2_oportunidades
+      const d3 = kpi!.d3_mercado, d6 = kpi!.d6_estudiantil
+      return [nombre, d1.score, d1.iva, d1.bes, d1.vac, d2.score, d2.ioe, d2.ihe, d2.iea, d3.score, d6.score]
+        .map(v => typeof v === 'number' ? v.toFixed(4) : `"${v}"`)
+    })
+    const csv = [headers.map(h => `"${h}"`).join(','), ...rows.map(r => r.join(','))].join('\n')
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = `kpis-${new Date().toISOString().slice(0,10)}.csv`; a.click()
+    URL.revokeObjectURL(url)
+  }
+
   if (loading) return <p className="text-slate-400 py-8">Cargando KPIs...</p>
   if (error) return <p className="text-red-500 py-8">Error: {error}</p>
   if (sorted.length === 0)
@@ -98,6 +114,14 @@ export default function KpisTable() {
 
   return (
     <div>
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={exportCSV}
+          className="text-xs px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors"
+        >
+          ↓ Exportar CSV ({sorted.length})
+        </button>
+      </div>
       <div className="overflow-x-auto rounded-xl border border-slate-200">
         <table className="w-full text-sm border-collapse">
           <thead>
