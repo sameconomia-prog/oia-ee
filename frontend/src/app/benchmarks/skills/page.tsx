@@ -29,6 +29,27 @@ function ConsensoBar({ pct, fuentes }: { pct: number; fuentes: number }) {
   )
 }
 
+function exportSkillsCSV(skills: SkillIndexItem[], careerBySlug: Record<string, BenchmarkCareerSummary>) {
+  const header = 'ID,Habilidad,Tipo,Dirección global,Fuentes con datos,Consenso %,Carreras'
+  const rows = skills.map(s => [
+    s.skill_id,
+    `"${s.skill_nombre}"`,
+    s.skill_tipo,
+    s.direccion_global,
+    s.fuentes_con_datos,
+    s.consenso_pct,
+    `"${s.carreras.map(slug => careerBySlug[slug]?.nombre ?? slug).join('; ')}"`,
+  ].join(','))
+  const csv = [header, ...rows].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `benchmark-skills-${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export default function SkillsIndexPage() {
   const [skills, setSkills] = useState<SkillIndexItem[]>([])
   const [careers, setCareers] = useState<BenchmarkCareerSummary[]>([])
@@ -114,6 +135,14 @@ export default function SkillsIndexPage() {
           <option value="all">Todas las carreras</option>
           {careers.map(c => <option key={c.slug} value={c.slug}>{c.nombre.split('/')[0].trim()}</option>)}
         </select>
+        {skills.length > 0 && (
+          <button
+            onClick={() => exportSkillsCSV(filtered, careerBySlug)}
+            className="text-xs text-slate-600 border border-slate-200 px-3 py-1.5 rounded hover:bg-slate-50 transition-colors whitespace-nowrap"
+          >
+            ↓ CSV ({filtered.length})
+          </button>
+        )}
       </div>
 
       <p className="text-[11px] text-slate-400 mb-3">{filtered.length} habilidad{filtered.length !== 1 ? 'es' : ''}</p>
