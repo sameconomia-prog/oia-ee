@@ -7,6 +7,7 @@ import { getBenchmarkCareerDetail, getBenchmarkSources } from '@/lib/api'
 import type { BenchmarkCareerDetail, BenchmarkSource } from '@/lib/types'
 import SkillConvergenceTable from '@/components/benchmarks/SkillConvergenceTable'
 import CurriculumActionSummary from '@/components/benchmarks/CurriculumActionSummary'
+import HorizonteTimeline from '@/components/benchmarks/HorizonteTimeline'
 import Card from '@/components/ui/Card'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Badge from '@/components/ui/Badge'
@@ -166,6 +167,11 @@ export default function BenchmarkCareerPage() {
       {/* Curricular recommendations */}
       <Card className="mb-6 p-5">
         <CurriculumActionSummary skills={detail.skills} />
+      </Card>
+
+      {/* Horizonte timeline */}
+      <Card className="mb-6 p-5">
+        <HorizonteTimeline skills={detail.skills} />
       </Card>
 
       {/* Sources legend */}
