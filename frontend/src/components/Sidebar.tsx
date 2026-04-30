@@ -15,6 +15,7 @@ const SECTIONS = [
       { href: '/vacantes', label: 'Vacantes' },
       { href: '/ies', label: 'Instituciones' },
       { href: '/carreras', label: 'Carreras' },
+      { href: '/recomienda', label: 'Recomendador' },
       { href: '/planes', label: 'Planes y Precios' },
     ],
   },
