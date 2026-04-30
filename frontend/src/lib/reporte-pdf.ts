@@ -155,7 +155,7 @@ function pagPortada(doc: jsPDF, data: RectorData, fecha: string) {
 // ── Página 2: KPIs por carrera ────────────────────────────────────────────
 function pagKpis(doc: jsPDF, data: RectorData, fecha: string) {
   doc.addPage()
-  addPageHeader(doc, 'KPIs por Carrera', data.ies.nombre_corto ?? data.ies.nombre, 2, 3)
+  addPageHeader(doc, 'KPIs por Carrera', data.ies.nombre_corto ?? data.ies.nombre, 2, 4)
   addPageFooter(doc, fecha)
 
   // Título sección
@@ -239,10 +239,91 @@ function pagKpis(doc: jsPDF, data: RectorData, fecha: string) {
   }
 }
 
-// ── Página 3: Alertas + Recomendaciones ──────────────────────────────────
+// ── Página 3: Cartera — Matriz Riesgo × Oportunidad ─────────────────────
+function pagCartera(doc: jsPDF, data: RectorData, fecha: string) {
+  doc.addPage()
+  const iesLabel = data.ies.nombre_corto ?? data.ies.nombre
+  addPageHeader(doc, 'Cartera de Carreras', iesLabel, 3, 4)
+  addPageFooter(doc, fecha)
+
+  doc.setFontSize(13)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(...INDIGO)
+  doc.text('Matriz Riesgo × Oportunidad', 14, 25)
+  doc.setFontSize(8)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(...GRAY)
+  doc.text('Clasificación de carreras por D1 (riesgo de obsolescencia) y D2 (oportunidad de empleabilidad)', 14, 31)
+
+  type Q = 'estrella' | 'transformacion' | 'estable' | 'riesgo'
+  const buckets: Record<Q, CarreraKpi[]> = { estrella: [], transformacion: [], estable: [], riesgo: [] }
+  data.carreras.forEach(c => {
+    if (!c.kpi) return
+    const d1 = c.kpi.d1_obsolescencia.score
+    const d2 = c.kpi.d2_oportunidades.score
+    if (d1 < 0.5 && d2 >= 0.5) buckets.estrella.push(c)
+    else if (d1 >= 0.5 && d2 >= 0.5) buckets.transformacion.push(c)
+    else if (d1 < 0.5 && d2 < 0.5)  buckets.estable.push(c)
+    else buckets.riesgo.push(c)
+  })
+
+  const QUADS: { key: Q; label: string; sub: string; color: [number,number,number]; bg: [number,number,number]; x: number; y: number }[] = [
+    { key: 'estrella',      label: 'Estrella',          sub: 'Bajo riesgo · Alta oportunidad',   color: GREEN,  bg: [236,253,245], x: 14,   y: 38 },
+    { key: 'transformacion',label: 'En Transformación', sub: 'Alto riesgo · Alta oportunidad',   color: AMBER,  bg: [255,251,235], x: 118,  y: 38 },
+    { key: 'riesgo',        label: 'En Riesgo',         sub: 'Alto riesgo · Baja oportunidad',   color: RED,    bg: [254,242,242], x: 118,  y: 132 },
+    { key: 'estable',       label: 'Estable',            sub: 'Bajo riesgo · Baja oportunidad', color: INDIGO, bg: [239,246,255], x: 14,   y: 132 },
+  ]
+
+  const QW = 92, QH = 86
+
+  QUADS.forEach(q => {
+    doc.setFillColor(...q.bg)
+    doc.roundedRect(q.x, q.y, QW, QH, 2, 2, 'F')
+    doc.setFillColor(...q.color)
+    doc.roundedRect(q.x, q.y, QW, 1.5, 0.5, 0.5, 'F')
+
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(...q.color)
+    doc.text(`${q.label} (${buckets[q.key].length})`, q.x + 4, q.y + 9)
+    doc.setFontSize(6.5)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(...GRAY)
+    doc.text(q.sub, q.x + 4, q.y + 15)
+
+    const items = buckets[q.key].slice(0, 8)
+    items.forEach((c, i) => {
+      const name = c.nombre.length > 34 ? c.nombre.slice(0, 32) + '…' : c.nombre
+      const d1 = c.kpi!.d1_obsolescencia.score.toFixed(2)
+      const d2 = c.kpi!.d2_oportunidades.score.toFixed(2)
+      doc.setFontSize(7)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(...DARK)
+      doc.text(`• ${name}`, q.x + 4, q.y + 22 + i * 7)
+      doc.setTextColor(...GRAY)
+      doc.setFontSize(6)
+      doc.text(`D1:${d1} D2:${d2}`, q.x + QW - 4, q.y + 22 + i * 7, { align: 'right' })
+    })
+    if (buckets[q.key].length > 8) {
+      doc.setFontSize(6.5)
+      doc.setTextColor(...GRAY)
+      doc.text(`+ ${buckets[q.key].length - 8} más`, q.x + 4, q.y + QH - 5)
+    }
+  })
+
+  // Etiquetas ejes
+  doc.setFontSize(7)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(...INDIGO)
+  doc.text('← D2 Oportunidad →', 8, 86, { angle: 90 })
+  doc.text('← D1 Riesgo →', 14 + QW / 2, H - 68, { align: 'center' })
+  doc.text('← D1 Riesgo →', 118 + QW / 2, H - 68, { align: 'center' })
+}
+
+// ── Página 4: Alertas + Recomendaciones ──────────────────────────────────
 function pagAlertas(doc: jsPDF, data: RectorData, fecha: string) {
   doc.addPage()
-  addPageHeader(doc, 'Alertas y Recomendaciones', data.ies.nombre_corto ?? data.ies.nombre, 3, 3)
+  addPageHeader(doc, 'Alertas y Recomendaciones', data.ies.nombre_corto ?? data.ies.nombre, 4, 4)
   addPageFooter(doc, fecha)
 
   doc.setFontSize(13)
@@ -346,6 +427,7 @@ export function generarReporteRector(data: RectorData): void {
 
   pagPortada(doc, data, fecha)
   pagKpis(doc, data, fecha)
+  pagCartera(doc, data, fecha)
   pagAlertas(doc, data, fecha)
 
   const nombre = `reporte-${data.ies.nombre_corto ?? data.ies.id}-${new Date().toISOString().slice(0, 10)}.pdf`
