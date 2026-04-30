@@ -494,6 +494,8 @@ export interface SkillConvergencia {
   convergencia_por_fuente: Record<string, ConvergenceDirection | null>
   direccion_global: ConvergenceDirection
   horizonte_dominante: 'corto' | 'medio' | 'largo' | null
+  fuentes_con_datos: number
+  consenso_pct: number
 }
 
 export interface BenchmarkCareerDetail {

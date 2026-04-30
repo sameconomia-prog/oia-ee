@@ -7,6 +7,22 @@ function shortSourceName(nombre: string): string {
   return nombre.split('—')[0].trim().split(' ').slice(0, 2).join(' ')
 }
 
+function ConsensoBadge({ pct, fuentes }: { pct: number; fuentes: number }) {
+  const color =
+    pct >= 80 ? 'text-emerald-700 bg-emerald-50' :
+    pct >= 50 ? 'text-yellow-700 bg-yellow-50' :
+    'text-slate-500 bg-slate-100'
+  return (
+    <span
+      className={`inline-flex flex-col items-center leading-none text-[10px] font-semibold px-1.5 py-1 rounded ${color}`}
+      title={`${fuentes} fuente${fuentes !== 1 ? 's' : ''} con datos`}
+    >
+      <span className="text-xs font-bold">{fuentes > 0 ? `${pct}%` : '—'}</span>
+      <span className="opacity-60">{fuentes}/5</span>
+    </span>
+  )
+}
+
 export default function SkillConvergenceTable({
   skills,
   sources,
@@ -31,6 +47,9 @@ export default function SkillConvergenceTable({
             ))}
             <th className="text-center px-3 py-3 font-semibold text-gray-700 whitespace-nowrap text-xs">
               Global
+            </th>
+            <th className="text-center px-2 py-3 font-semibold text-gray-600 whitespace-nowrap text-xs">
+              Consenso
             </th>
             <th className="text-left px-4 py-3 font-semibold text-gray-700 whitespace-nowrap">
               Acción
@@ -67,6 +86,9 @@ export default function SkillConvergenceTable({
               ))}
               <td className="text-center px-3 py-3">
                 <ConvergenceIcon direction={skill.direccion_global} />
+              </td>
+              <td className="text-center px-2 py-3">
+                <ConsensoBadge pct={skill.consenso_pct} fuentes={skill.fuentes_con_datos} />
               </td>
               <td className="px-4 py-3">
                 <CurriculumBadge accion={skill.accion_curricular} />

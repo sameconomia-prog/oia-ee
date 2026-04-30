@@ -38,7 +38,7 @@ export default function BenchmarksSection() {
           {[
             { n: '17', label: 'Carreras analizadas' },
             { n: '5', label: 'Fuentes internacionales' },
-            { n: '80+', label: 'Skills evaluadas' },
+            { n: '88', label: 'Skills evaluadas' },
           ].map(s => (
             <div key={s.n} className="bg-slate-800/60 rounded-xl p-5 border border-slate-700/50">
               <p className="text-4xl font-bold font-mono text-indigo-400">{s.n}</p>

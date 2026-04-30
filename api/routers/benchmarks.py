@@ -43,6 +43,8 @@ class SkillConvergenciaOut(BaseModel):
     convergencia_por_fuente: dict[str, Optional[str]]
     direccion_global: str
     horizonte_dominante: Optional[str]
+    fuentes_con_datos: int
+    consenso_pct: int
 
 
 class CareerDetailOut(BaseModel):
@@ -80,14 +82,26 @@ def _build_skill_convergencia(skill: dict, skill_index: dict, sources: dict) -> 
     horizontes = [h["horizonte_impacto"] for h in by_fuente.values()]
     horizonte_dominante = Counter(horizontes).most_common(1)[0][0] if horizontes else None
 
+    global_dir = compute_direction(by_fuente)
+    fuentes_con_datos = len(by_fuente)
+    if fuentes_con_datos and global_dir not in ("sin_datos", "mixed"):
+        agreeing = sum(1 for h in by_fuente.values() if h["direccion"] == global_dir)
+        consenso_pct = round(agreeing / fuentes_con_datos * 100)
+    elif global_dir == "mixed":
+        consenso_pct = 50
+    else:
+        consenso_pct = 0
+
     return SkillConvergenciaOut(
         skill_id=skill_id,
         skill_nombre=skill["nombre"],
         skill_tipo=skill["tipo"],
         accion_curricular=skill["accion_curricular"],
         convergencia_por_fuente=convergencia,
-        direccion_global=compute_direction(by_fuente),
+        direccion_global=global_dir,
         horizonte_dominante=horizonte_dominante,
+        fuentes_con_datos=fuentes_con_datos,
+        consenso_pct=consenso_pct,
     )
 
 
