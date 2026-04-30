@@ -5,6 +5,8 @@ import './globals.css'
 import Sidebar from '@/components/Sidebar'
 import WhiteLabelApplier from '@/components/WhiteLabelApplier'
 import BusquedaGlobal from '@/components/BusquedaGlobal'
+import Navbar from '@/components/landing/Navbar'
+import Footer from '@/components/landing/Footer'
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -28,10 +30,24 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const pathname = hdrs.get('x-pathname') ?? hdrs.get('next-url') ?? ''
   const isEmbed = pathname.startsWith('/embed')
 
+  const isLanding = pathname === '/' || pathname.startsWith('/investigaciones')
+
   if (isEmbed) {
     return (
       <html lang="es" className={cn("font-sans", GeistSans.variable)}>
         <body className="bg-white">{children}</body>
+      </html>
+    )
+  }
+
+  if (isLanding) {
+    return (
+      <html lang="es" className={cn("font-sans", GeistSans.variable)}>
+        <body className="bg-[#F8FAFC] font-sans">
+          <Navbar />
+          {children}
+          <Footer />
+        </body>
       </html>
     )
   }
