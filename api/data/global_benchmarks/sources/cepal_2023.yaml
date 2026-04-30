@@ -103,6 +103,53 @@ hallazgos:
     divergencia_oia: false
     nota_divergencia: null
 
+  - id: cepal2023-turismo-hospitalidad
+    ocupacion_original: "Trabajadores de hoteles y restaurantes en ALC"
+    ocupacion_codigo_oficial: "CIUO-08: 5120"
+    skills_afectadas:
+      - hospitalidad-experiencial
+      - turismo-sostenible
+    direccion: growing
+    taxonomia_oia: resilient
+    horizonte_impacto: largo
+    hallazgo: "La hospitalidad experiencial y el turismo sostenible en ALC crecen con la demanda de turismo cultural y responsable post-COVID; la IA no puede replicar la experiencia humana del anfitrión"
+    dato_clave: "El turismo representa el 6.8% del PIB en México; sector en recuperación con énfasis en diferenciación experiencial"
+    cita_textual: "Tourism hospitality workers in ALC show resilience in experiential and sustainable roles — AI automates logistics but cannot replace authentic human hospitality [p. 67]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: cepal2023-politica-negociacion
+    ocupacion_original: "Funcionarios de gobierno y diplomáticos en ALC"
+    ocupacion_codigo_oficial: "CIUO-08: 1120"
+    skills_afectadas:
+      - negociacion-diplomatica
+      - comunicacion-publica
+      - analisis-datos-politicos
+    direccion: growing
+    taxonomia_oia: resilient
+    horizonte_impacto: largo
+    hallazgo: "Los funcionarios de gobierno y diplomáticos en ALC muestran alta resiliencia; la IA amplía su capacidad analítica pero el juicio político, la negociación y la representación permanecen humanos"
+    dato_clave: "Diplomáticos y analistas de política entre los roles con menor riesgo de desplazamiento en CEPAL (índice 0.15)"
+    cita_textual: "Government officials and diplomats in ALC demonstrate strong resilience — political negotiation, coalition building, and diplomatic representation cannot be automated [p. 51]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: cepal2023-nutricion-salud
+    ocupacion_original: "Nutricionistas y dietistas en ALC"
+    ocupacion_codigo_oficial: "CIUO-08: 2267"
+    skills_afectadas:
+      - nutricion-clinica-especializada
+      - educacion-alimentaria
+      - investigacion-nutricional
+    direccion: growing
+    taxonomia_oia: resilient
+    horizonte_impacto: medio
+    hallazgo: "La pandemia de obesidad y diabetes en ALC aumenta la demanda de nutricionistas clínicos especializados; la IA actúa como herramienta de apoyo, no de reemplazo"
+    dato_clave: "México tiene la 2ª tasa más alta de obesidad adulta en ALC (36.9%); demanda de nutricionistas clínicos creciente"
+    cita_textual: "Clinical nutritionists in ALC benefit from rising chronic disease burden — AI tools augment their capacity without replacing clinical judgment and patient interaction [p. 58]"
+    divergencia_oia: false
+    nota_divergencia: null
+
   - id: cepal2023-educacion-basica
     ocupacion_original: "Docentes, maestros de educación básica y media"
     ocupacion_codigo_oficial: "CIUO-08: 2330"
