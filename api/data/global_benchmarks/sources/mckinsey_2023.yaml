@@ -42,3 +42,18 @@ hallazgos:
     cita_textual: "Software engineers using generative AI tools show significant productivity gains rather than displacement [p. 28]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: mck2023-documentacion-salud
+    ocupacion_original: "Healthcare Support Workers"
+    ocupacion_codigo_oficial: "SOC: 31-0000"
+    skills_afectadas:
+      - documentacion-clinica
+      - administracion-medicamentos
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: medio
+    hallazgo: "La documentación clínica rutinaria y la verificación de medicamentos son técnicamente automatizables con GenAI"
+    dato_clave: "55% del tiempo de enfermería en tareas documentales es automatizable"
+    cita_textual: "Healthcare documentation and routine medication management show high technical automation potential [p. 41]"
+    divergencia_oia: false
+    nota_divergencia: null

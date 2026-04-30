@@ -57,3 +57,34 @@ hallazgos:
     cita_textual: "Creative and design roles show divergent outcomes depending on the level of conceptual vs. production work [p. 61]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: wef2025-derecho-ia
+    ocupacion_original: "Legal Professionals"
+    ocupacion_codigo_oficial: "ISCO-08: 2611"
+    skills_afectadas:
+      - revision-documentos
+      - investigacion-juridica
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: corto
+    hallazgo: "La revisión de contratos y la investigación jurídica documental serán automatizadas por IA en el corto plazo"
+    dato_clave: "Alta exposición de paralegales y asistentes jurídicos al desplazamiento"
+    cita_textual: "Legal research and document review represent highly automatable tasks in the legal sector [p. 52]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: wef2025-marketing-ia
+    ocupacion_original: "Marketing Specialists"
+    ocupacion_codigo_oficial: "ISCO-08: 2431"
+    skills_afectadas:
+      - analisis-datos-mercado
+      - seo-sem
+      - marketing-digital
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: corto
+    hallazgo: "El análisis de datos de mercado y la gestión de SEO/SEM son altamente automatizables con IA generativa"
+    dato_clave: "Las tareas rutinarias de marketing digital tienen 65% de automatizabilidad técnica"
+    cita_textual: "Digital marketing analytics and campaign optimization roles face high displacement from AI tools [p. 58]"
+    divergencia_oia: false
+    nota_divergencia: null

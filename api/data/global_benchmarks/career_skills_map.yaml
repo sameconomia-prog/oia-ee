@@ -135,3 +135,128 @@ carreras:
         nombre: "Toma de decisiones clínicas complejas"
         tipo: transversal
         accion_curricular: fortalecer
+
+  - slug: derecho
+    nombre: "Derecho / Ciencias Jurídicas"
+    area: ciencias_sociales_y_humanidades
+    skills:
+      - id: revision-documentos
+        nombre: "Revisión y análisis de documentos legales"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: investigacion-juridica
+        nombre: "Investigación jurídica y doctrina"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: estrategia-litigio
+        nombre: "Estrategia de litigio y argumentación"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: negociacion-juridica
+        nombre: "Negociación y resolución de conflictos"
+        tipo: social
+        accion_curricular: fortalecer
+      - id: etica-juridica
+        nombre: "Ética profesional y deontología jurídica"
+        tipo: transversal
+        accion_curricular: fortalecer
+
+  - slug: psicologia
+    nombre: "Psicología"
+    area: ciencias_sociales_y_humanidades
+    skills:
+      - id: evaluacion-psicologica
+        nombre: "Evaluación y diagnóstico psicológico"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: terapia-cognitivo-conductual
+        nombre: "Terapia cognitivo-conductual"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: psicologia-clinica
+        nombre: "Psicología clínica y psicoterapia"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: intervencion-crisis
+        nombre: "Intervención en crisis"
+        tipo: social
+        accion_curricular: fortalecer
+      - id: investigacion-psicologica
+        nombre: "Investigación y metodología psicológica"
+        tipo: tecnica
+        accion_curricular: fortalecer
+
+  - slug: mercadotecnia
+    nombre: "Mercadotecnia / Marketing"
+    area: ciencias_economico_administrativas
+    skills:
+      - id: marketing-digital
+        nombre: "Marketing digital y redes sociales"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: analisis-datos-mercado
+        nombre: "Análisis de datos de mercado"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: estrategia-marca
+        nombre: "Estrategia de marca y posicionamiento"
+        tipo: transversal
+        accion_curricular: fortalecer
+      - id: creative-content
+        nombre: "Creación de contenido y copywriting"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: seo-sem
+        nombre: "SEO / SEM y analítica web"
+        tipo: digital
+        accion_curricular: retirar
+
+  - slug: arquitectura
+    nombre: "Arquitectura / Diseño Arquitectónico"
+    area: ingenieria_y_tecnologia
+    skills:
+      - id: diseno-arquitectonico
+        nombre: "Diseño arquitectónico y espacial"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: renderizado-3d
+        nombre: "Renderizado 3D y visualización"
+        tipo: digital
+        accion_curricular: redisenar
+      - id: gestion-proyectos-arq
+        nombre: "Gestión de proyectos de construcción"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: normativa-construccion
+        nombre: "Normativa y reglamentos de construcción"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: diseno-sustentable
+        nombre: "Diseño sustentable y bioclimático"
+        tipo: transversal
+        accion_curricular: agregar
+
+  - slug: enfermeria
+    nombre: "Enfermería"
+    area: ciencias_de_la_salud
+    skills:
+      - id: cuidado-paciente
+        nombre: "Cuidado directo del paciente"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: triage
+        nombre: "Triage y valoración clínica"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: administracion-medicamentos
+        nombre: "Administración de medicamentos"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: documentacion-clinica
+        nombre: "Documentación clínica y registros"
+        tipo: digital
+        accion_curricular: retirar
+      - id: comunicacion-equipo-salud
+        nombre: "Comunicación interprofesional en salud"
+        tipo: social
+        accion_curricular: fortalecer

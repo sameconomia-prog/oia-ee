@@ -55,3 +55,18 @@ hallazgos:
     cita_textual: "Image generation tasks show high substitution rates with users directly replacing design production work [p. 15]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: ant2025-contenido-generativo
+    ocupacion_original: "Content Creators, Technical Writers, Architects (3D)"
+    ocupacion_codigo_oficial: "O*NET: 27-3042.00, 17-1011.00"
+    skills_afectadas:
+      - creative-content
+      - renderizado-3d
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: corto
+    hallazgo: "La generación de contenido escrito y la visualización 3D básica están siendo directamente sustituidas por herramientas IA"
+    dato_clave: "El copywriting y el renderizado básico son las 2ª y 4ª categorías con mayor sustitución observada"
+    cita_textual: "Creative content generation and 3D visualization show high direct substitution rates in observed Claude usage [p. 16]"
+    divergencia_oia: false
+    nota_divergencia: null
