@@ -1,9 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { getIesDetalle, getKpisNacionalResumen } from '@/lib/api'
-import type { IesDetalle, KpisNacionalResumen } from '@/lib/types'
+import Link from 'next/link'
+import { getIesDetalle, getKpisNacionalResumen, getBenchmarkCareers } from '@/lib/api'
+import type { IesDetalle, KpisNacionalResumen, CarreraKpi, BenchmarkCareerSummary } from '@/lib/types'
 
-interface Props { iesId: string }
+interface Props { iesId: string; carreras?: CarreraKpi[] }
 
 function CompareBar({
   label, iesVal, nacVal, invert = false,
@@ -58,20 +59,38 @@ function InsightBadge({ text, good }: { text: string; good: boolean }) {
   )
 }
 
-export default function BenchmarkPanel({ iesId }: Props) {
+export default function BenchmarkPanel({ iesId, carreras = [] }: Props) {
   const [ies, setIes] = useState<IesDetalle | null>(null)
   const [nac, setNac] = useState<KpisNacionalResumen | null>(null)
   const [loading, setLoading] = useState(true)
+  const [benchMap, setBenchMap] = useState<Record<string, BenchmarkCareerSummary>>({})
 
   useEffect(() => {
     Promise.all([getIesDetalle(iesId), getKpisNacionalResumen()])
       .then(([i, n]) => { setIes(i); setNac(n) })
       .catch(() => {})
       .finally(() => setLoading(false))
+    getBenchmarkCareers()
+      .then(list => {
+        const m: Record<string, BenchmarkCareerSummary> = {}
+        for (const b of list) m[b.slug] = b
+        setBenchMap(m)
+      })
+      .catch(() => {})
   }, [iesId])
 
   if (loading) return <p className="text-slate-400 text-sm py-6">Cargando benchmarks...</p>
   if (!ies || !nac) return <p className="text-red-500 text-sm py-6">No se pudo cargar el benchmark.</p>
+
+  // Build urgencia breakdown for this IES's careers that have a global benchmark
+  const carrerasConBench = carreras
+    .filter(c => c.benchmark_slug && benchMap[c.benchmark_slug])
+    .map(c => ({ ...c, bench: benchMap[c.benchmark_slug!]! }))
+    .sort((a, b) => b.bench.urgencia_curricular - a.bench.urgencia_curricular)
+
+  const urgAlta = carrerasConBench.filter(c => c.bench.urgencia_curricular >= 60).length
+  const urgMod = carrerasConBench.filter(c => c.bench.urgencia_curricular >= 30 && c.bench.urgencia_curricular < 60).length
+  const urgBaja = carrerasConBench.filter(c => c.bench.urgencia_curricular < 30).length
 
   const d1Good = ies.promedio_d1 <= nac.promedio_d1
   const d2Good = ies.promedio_d2 >= nac.promedio_d2
@@ -137,6 +156,53 @@ export default function BenchmarkPanel({ iesId }: Props) {
           </div>
         </div>
       </div>
+
+      {carrerasConBench.length > 0 && (
+        <div className="mt-6 pt-6 border-t border-slate-200">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">
+            Urgencia curricular global — {carrerasConBench.length} carrera{carrerasConBench.length !== 1 ? 's' : ''} con benchmark
+          </p>
+          <div className="flex gap-4 mb-4 text-xs">
+            {urgAlta > 0 && (
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-red-400 shrink-0"></span>
+                <span className="text-slate-600 font-medium">{urgAlta} alta urgencia</span>
+              </span>
+            )}
+            {urgMod > 0 && (
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
+                <span className="text-slate-600">{urgMod} moderada</span>
+              </span>
+            )}
+            {urgBaja > 0 && (
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-400 shrink-0"></span>
+                <span className="text-slate-600">{urgBaja} baja</span>
+              </span>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            {carrerasConBench.slice(0, 5).map(c => {
+              const score = c.bench.urgencia_curricular
+              const barColor = score >= 60 ? 'bg-red-400' : score >= 30 ? 'bg-amber-400' : 'bg-green-400'
+              const scoreColor = score >= 60 ? 'text-red-700' : score >= 30 ? 'text-amber-700' : 'text-green-700'
+              return (
+                <div key={c.id} className="flex items-center gap-3">
+                  <span className="text-xs text-slate-700 w-40 truncate shrink-0">{c.nombre}</span>
+                  <div className="flex-1 bg-slate-100 rounded-full h-2">
+                    <div className={`h-2 rounded-full ${barColor}`} style={{ width: `${score}%` }} />
+                  </div>
+                  <span className={`text-xs font-mono font-bold w-8 text-right shrink-0 ${scoreColor}`}>{score}</span>
+                  <Link href={`/benchmarks/${c.bench.slug}`} className="text-[10px] text-brand-600 hover:underline shrink-0">
+                    Ver →
+                  </Link>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

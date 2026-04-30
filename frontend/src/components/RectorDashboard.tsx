@@ -81,7 +81,7 @@ export default function RectorDashboard({ iesId }: { iesId: string }) {
           </div>
           {tab === 'carreras' && <RectorCarrerasTable carreras={data.carreras} iesId={iesId} />}
           {tab === 'matriz' && <RiesgoOportunidadMatrix carreras={data.carreras} />}
-          {tab === 'benchmark' && <BenchmarkPanel iesId={iesId} />}
+          {tab === 'benchmark' && <BenchmarkPanel iesId={iesId} carreras={data.carreras} />}
           {tab === 'tendencias' && <TendenciasPanel carreras={data.carreras} />}
           {tab === 'escenarios' && <EscenariosPanel iesId={iesId} onComparar={setComparando} />}
           {tab === 'noticias' && <RectorNoticiasPanel />}
