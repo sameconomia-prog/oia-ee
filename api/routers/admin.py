@@ -14,6 +14,7 @@ from pipeline.jobs.news_ingest_job import run_news_ingest
 from pipeline.jobs.kpi_snapshot_job import run_kpi_snapshot
 from pipeline.seed_demo import run_seed_demo
 from api.routers.publico import _clear_kpis_cache
+from api.benchmarks_loader import load_benchmarks
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -132,6 +133,7 @@ def clear_cache(
     _: None = Depends(_require_admin),
 ):
     _clear_kpis_cache()
+    load_benchmarks.cache_clear()
     return {"ok": True}
 
 
