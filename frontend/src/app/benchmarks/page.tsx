@@ -47,6 +47,19 @@ function MiniBar({ value, total, color }: { value: number; total: number; color:
   )
 }
 
+function UrgenciaBadge({ score }: { score: number }) {
+  const { label, color } =
+    score >= 60 ? { label: 'Alta urgencia', color: 'bg-red-100 text-red-800' } :
+    score >= 30 ? { label: 'Moderada', color: 'bg-amber-100 text-amber-800' } :
+    { label: 'Baja', color: 'bg-green-100 text-green-800' }
+  return (
+    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${color}`}
+      title={`Urgencia curricular: ${score}/100`}>
+      {label}
+    </span>
+  )
+}
+
 function CareerCard({ career }: { career: BenchmarkCareerSummary }) {
   const article = ARTICLE_MAP[career.slug]
   const total = career.total_skills
@@ -54,8 +67,11 @@ function CareerCard({ career }: { career: BenchmarkCareerSummary }) {
   return (
     <Card className="p-4 flex flex-col gap-3">
       <div>
-        <h3 className="text-sm font-semibold text-slate-800 leading-tight">{career.nombre}</h3>
-        <p className="text-[11px] text-slate-400 mt-0.5">{career.area}</p>
+        <div className="flex items-start justify-between gap-2 mb-0.5">
+          <h3 className="text-sm font-semibold text-slate-800 leading-tight">{career.nombre}</h3>
+          <UrgenciaBadge score={career.urgencia_curricular} />
+        </div>
+        <p className="text-[11px] text-slate-400">{career.area}</p>
       </div>
 
       <div className="space-y-1.5">

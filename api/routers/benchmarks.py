@@ -33,6 +33,7 @@ class CareerSummaryOut(BaseModel):
     skills_growing: int
     skills_mixed: int
     skills_sin_datos: int
+    urgencia_curricular: int
 
 
 class SkillConvergenciaOut(BaseModel):
@@ -136,6 +137,25 @@ def get_sources():
     ]
 
 
+def _compute_urgencia(carrera: dict, skill_index: dict) -> int:
+    """Score 0-100: % declining × average consenso of declining skills."""
+    skills = carrera["skills"]
+    if not skills:
+        return 0
+    declining_consensos = []
+    for skill in skills:
+        by_fuente = skill_index.get(skill["id"], {})
+        d = compute_direction(by_fuente)
+        if d == "declining" and by_fuente:
+            agreeing = sum(1 for h in by_fuente.values() if h["direccion"] == "declining")
+            declining_consensos.append(round(agreeing / len(by_fuente) * 100))
+    if not declining_consensos:
+        return 0
+    pct_declining = len(declining_consensos) / len(skills)
+    avg_consenso = sum(declining_consensos) / len(declining_consensos) / 100
+    return round(pct_declining * avg_consenso * 100)
+
+
 @router.get("/careers", response_model=list[CareerSummaryOut], summary="Resumen de carreras")
 def get_careers():
     sources, career_map, skill_index = load_benchmarks()
@@ -155,6 +175,7 @@ def get_careers():
             skills_growing=counts["growing"],
             skills_mixed=counts["mixed"] + counts["stable"],
             skills_sin_datos=counts["sin_datos"],
+            urgencia_curricular=_compute_urgencia(carrera, skill_index),
         ))
     return result
 

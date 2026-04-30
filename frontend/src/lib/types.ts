@@ -479,6 +479,7 @@ export interface BenchmarkCareerSummary {
   skills_growing: number
   skills_mixed: number
   skills_sin_datos: number
+  urgencia_curricular: number
 }
 
 export type ConvergenceDirection =
