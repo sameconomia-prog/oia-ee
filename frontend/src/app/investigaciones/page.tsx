@@ -21,11 +21,31 @@ const TIPOS: TipoInvestigacion[] = ['reporte', 'analisis', 'carta', 'nota', 'met
 export default function InvestigacionesPage({
   searchParams,
 }: {
-  searchParams: { tipo?: string }
+  searchParams: { tipo?: string; q?: string }
 }) {
   const todas = getAllInvestigaciones()
   const filtro = searchParams.tipo as TipoInvestigacion | undefined
-  const investigaciones = filtro ? todas.filter(i => i.tipo === filtro) : todas
+  const query = searchParams.q?.toLowerCase().trim() ?? ''
+
+  const investigaciones = todas.filter(i => {
+    if (filtro && i.tipo !== filtro) return false
+    if (query) {
+      return (
+        i.titulo.toLowerCase().includes(query) ||
+        i.resumen.toLowerCase().includes(query) ||
+        i.tags?.some(t => t.toLowerCase().includes(query))
+      )
+    }
+    return true
+  })
+
+  const buildUrl = (params: Record<string, string | undefined>) => {
+    const p = new URLSearchParams()
+    if (params.tipo) p.set('tipo', params.tipo)
+    if (params.q) p.set('q', params.q)
+    const qs = p.toString()
+    return `/investigaciones${qs ? `?${qs}` : ''}`
+  }
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-16">
@@ -36,10 +56,31 @@ export default function InvestigacionesPage({
         </p>
       </div>
 
+      {/* Búsqueda y filtros */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        <form method="get" action="/investigaciones" className="flex-1">
+          {filtro && <input type="hidden" name="tipo" value={filtro} />}
+          <div className="relative">
+            <input
+              type="text"
+              name="q"
+              defaultValue={searchParams.q ?? ''}
+              placeholder="Buscar por tema, carrera, habilidad…"
+              className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3B82F6] bg-white"
+            />
+            <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#1D4ED8]">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1 0 3 9.5a7.5 7.5 0 0 0 13.65 7.15z" />
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+
       {/* Filtros por tipo */}
       <div className="flex flex-wrap gap-2 mb-10">
         <Link
-          href="/investigaciones"
+          href={buildUrl({ q: searchParams.q })}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${!filtro ? 'bg-[#1D4ED8] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
         >
           Todos
@@ -47,13 +88,23 @@ export default function InvestigacionesPage({
         {TIPOS.map(tipo => (
           <Link
             key={tipo}
-            href={`/investigaciones?tipo=${tipo}`}
+            href={buildUrl({ tipo, q: searchParams.q })}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${filtro === tipo ? 'bg-[#1D4ED8] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
           >
             {getTipoLabel(tipo)}
           </Link>
         ))}
       </div>
+
+      {query && (
+        <p className="text-sm text-gray-500 mb-6">
+          {investigaciones.length} resultado{investigaciones.length !== 1 ? 's' : ''} para{' '}
+          <strong className="text-gray-700">"{searchParams.q}"</strong>{' '}
+          <Link href={buildUrl({ tipo: searchParams.tipo })} className="text-[#1D4ED8] hover:underline ml-1">
+            Limpiar búsqueda
+          </Link>
+        </p>
+      )}
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -80,7 +131,14 @@ export default function InvestigacionesPage({
       </div>
 
       {investigaciones.length === 0 && (
-        <p className="text-center text-gray-400 py-16">No hay investigaciones en esta categoría aún.</p>
+        <div className="text-center py-16">
+          <p className="text-gray-400 mb-2">No hay investigaciones{query ? ` sobre "${searchParams.q}"` : ' en esta categoría'} aún.</p>
+          {(query || filtro) && (
+            <Link href="/investigaciones" className="text-[#1D4ED8] text-sm hover:underline">
+              Ver todas las investigaciones
+            </Link>
+          )}
+        </div>
       )}
     </main>
   )
