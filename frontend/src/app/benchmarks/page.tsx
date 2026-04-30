@@ -207,6 +207,12 @@ export default function BenchmarksPage() {
           >
             Comparar →
           </Link>
+          <Link
+            href="/benchmarks/fuentes"
+            className="shrink-0 text-xs text-brand-600 border border-brand-200 px-3 py-1.5 rounded hover:bg-brand-50 transition-colors font-medium"
+          >
+            Fuentes →
+          </Link>
           {careers.length > 0 && (
             <button
               onClick={() => exportCSV(careers)}
