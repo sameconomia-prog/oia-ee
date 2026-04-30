@@ -48,6 +48,7 @@ const SECTIONS = [
       { href: '/admin/api-keys', label: 'API Keys' },
       { href: '/admin/widget', label: 'Widget Embed' },
       { href: '/admin/leads', label: 'Leads Demo' },
+      { href: '/admin/contactos', label: 'Contactos' },
     ],
   },
 ]
