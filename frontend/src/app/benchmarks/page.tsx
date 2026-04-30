@@ -148,6 +148,22 @@ function sortCareers(list: BenchmarkCareerSummary[], mode: SortMode): BenchmarkC
   return copy
 }
 
+function exportCSV(careers: BenchmarkCareerSummary[]) {
+  const header = 'Slug,Carrera,Area,Urgencia,Declining,Growing,Mixed,Sin datos,Total'
+  const rows = careers.map(c =>
+    [c.slug, `"${c.nombre}"`, `"${c.area}"`, c.urgencia_curricular,
+     c.skills_declining, c.skills_growing, c.skills_mixed, c.skills_sin_datos, c.total_skills].join(',')
+  )
+  const csv = [header, ...rows].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `benchmarks-globales-${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export default function BenchmarksPage() {
   const [careers, setCareers] = useState<BenchmarkCareerSummary[]>([])
   const [resumen, setResumen] = useState<BenchmarkResumen | null>(null)
@@ -191,6 +207,14 @@ export default function BenchmarksPage() {
           >
             Comparar →
           </Link>
+          {careers.length > 0 && (
+            <button
+              onClick={() => exportCSV(careers)}
+              className="shrink-0 text-xs text-slate-600 border border-slate-200 px-3 py-1.5 rounded hover:bg-slate-50 transition-colors font-medium"
+            >
+              ↓ CSV
+            </button>
+          )}
         </div>
       </div>
 
