@@ -7,6 +7,7 @@ import CoberturaPrensa from '@/components/landing/CoberturaPrensa'
 import ElProblema from '@/components/landing/ElProblema'
 import ComoFunciona from '@/components/landing/ComoFunciona'
 import InvestigacionesGrid from '@/components/landing/InvestigacionesGrid'
+import BenchmarksSection from '@/components/landing/BenchmarksSection'
 import SobreElAnalista from '@/components/landing/SobreElAnalista'
 import FormularioContacto from '@/components/landing/FormularioContacto'
 import type { Metadata } from 'next'
@@ -59,6 +60,7 @@ export default async function LandingPage() {
       <ElProblema />
       <ComoFunciona />
       <InvestigacionesGrid investigaciones={investigaciones} />
+      <BenchmarksSection />
       <SobreElAnalista />
       <FormularioContacto />
     </main>
