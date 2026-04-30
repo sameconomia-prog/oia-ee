@@ -137,12 +137,13 @@ const AREA_LABELS: Record<string, string> = {
   ingenieria_y_tecnologia: 'Ingeniería y Tecnología',
 }
 
-type SortMode = 'default' | 'risk' | 'opportunity' | 'name'
+type SortMode = 'default' | 'risk' | 'opportunity' | 'urgencia' | 'name'
 
 function sortCareers(list: BenchmarkCareerSummary[], mode: SortMode): BenchmarkCareerSummary[] {
   const copy = [...list]
   if (mode === 'risk') return copy.sort((a, b) => (b.skills_declining / b.total_skills) - (a.skills_declining / a.total_skills))
   if (mode === 'opportunity') return copy.sort((a, b) => (b.skills_growing / b.total_skills) - (a.skills_growing / a.total_skills))
+  if (mode === 'urgencia') return copy.sort((a, b) => b.urgencia_curricular - a.urgencia_curricular)
   if (mode === 'name') return copy.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
   return copy
 }
@@ -245,6 +246,7 @@ export default function BenchmarksPage() {
             className="text-[11px] border border-slate-200 rounded px-2 py-1 text-slate-600 bg-white"
           >
             <option value="default">Default</option>
+            <option value="urgencia">Mayor urgencia</option>
             <option value="risk">Mayor riesgo</option>
             <option value="opportunity">Mayor oportunidad</option>
             <option value="name">Nombre A–Z</option>
