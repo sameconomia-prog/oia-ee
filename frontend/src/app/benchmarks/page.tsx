@@ -112,10 +112,20 @@ function ResumenStat({ label, value, sub }: { label: string; value: number; sub?
   )
 }
 
+const AREA_LABELS: Record<string, string> = {
+  artes_y_humanidades: 'Artes y Humanidades',
+  ciencias_de_la_salud: 'Ciencias de la Salud',
+  ciencias_economico_administrativas: 'Económico-Administrativas',
+  ciencias_sociales: 'Ciencias Sociales',
+  ciencias_sociales_y_humanidades: 'Sociales y Humanidades',
+  ingenieria_y_tecnologia: 'Ingeniería y Tecnología',
+}
+
 export default function BenchmarksPage() {
   const [careers, setCareers] = useState<BenchmarkCareerSummary[]>([])
   const [resumen, setResumen] = useState<BenchmarkResumen | null>(null)
   const [loading, setLoading] = useState(true)
+  const [filterArea, setFilterArea] = useState<string>('all')
 
   useEffect(() => {
     Promise.all([getBenchmarkCareers(), getBenchmarkResumen()])
@@ -124,6 +134,13 @@ export default function BenchmarksPage() {
   }, [])
 
   if (loading) return <p className="text-slate-400 text-sm py-8 text-center">Cargando benchmarks...</p>
+
+  const areas = Array.from(new Set(careers.map(c => c.area))).sort()
+  const filtered = filterArea === 'all' ? careers : careers.filter(c => c.area === filterArea)
+
+  const btnBase = 'text-[11px] px-2.5 py-1 rounded-full border transition-colors whitespace-nowrap'
+  const btnActive = 'bg-brand-600 text-white border-brand-600'
+  const btnInactive = 'bg-white text-slate-600 border-slate-200 hover:border-brand-400'
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -161,8 +178,23 @@ export default function BenchmarksPage() {
         </Card>
       )}
 
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-700">Carreras ({careers.length})</h2>
+      {/* Area filter */}
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        <button onClick={() => setFilterArea('all')} className={`${btnBase} ${filterArea === 'all' ? btnActive : btnInactive}`}>
+          Todas ({careers.length})
+        </button>
+        {areas.map(a => (
+          <button key={a} onClick={() => setFilterArea(a)} className={`${btnBase} ${filterArea === a ? btnActive : btnInactive}`}>
+            {AREA_LABELS[a] ?? a} ({careers.filter(c => c.area === a).length})
+          </button>
+        ))}
+      </div>
+
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-slate-700">
+          {filtered.length} carrera{filtered.length !== 1 ? 's' : ''}
+          {filterArea !== 'all' && <span className="font-normal text-slate-400"> · {AREA_LABELS[filterArea] ?? filterArea}</span>}
+        </h2>
         <div className="flex gap-2 text-[11px] text-slate-400">
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block"></span>Declining</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>Growing</span>
@@ -171,7 +203,7 @@ export default function BenchmarksPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-        {careers.map(c => <CareerCard key={c.slug} career={c} />)}
+        {filtered.map(c => <CareerCard key={c.slug} career={c} />)}
       </div>
 
       <p className="text-xs text-slate-400 mt-6 text-center">
