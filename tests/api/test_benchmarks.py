@@ -270,3 +270,36 @@ def test_skill_cross_source_sin_cobertura_returns_empty(bench_client):
 def test_skill_cross_source_not_found_returns_404(bench_client):
     resp = bench_client.get("/publico/benchmarks/skills/skill-inexistente")
     assert resp.status_code == 404
+
+
+def test_skill_convergencia_has_consenso_fields(bench_client):
+    resp = bench_client.get("/publico/benchmarks/careers/carrera-test")
+    assert resp.status_code == 200
+    skills = resp.json()["skills"]
+    skill_a = next(s for s in skills if s["skill_id"] == "skill-a")
+    assert "consenso_pct" in skill_a
+    assert "fuentes_con_datos" in skill_a
+    assert skill_a["fuentes_con_datos"] == 1
+    assert 0 <= skill_a["consenso_pct"] <= 100
+
+
+def test_skill_sin_datos_consenso_is_zero(bench_client):
+    resp = bench_client.get("/publico/benchmarks/careers/carrera-test")
+    assert resp.status_code == 200
+    skills = resp.json()["skills"]
+    skill_b = next(s for s in skills if s["skill_id"] == "skill-b")
+    assert skill_b["fuentes_con_datos"] == 0
+    assert skill_b["consenso_pct"] == 0
+
+
+def test_skill_100_percent_consenso_when_all_agree(tmp_path):
+    _write_source(tmp_path, "s1", ["skill-x"], "declining")
+    _write_source(tmp_path, "s2", ["skill-x"], "declining")
+    _write_source(tmp_path, "s3", ["skill-x"], "declining")
+    _write_career_map(tmp_path, ["skill-x"])
+    sources, career_map, skill_index = _load_all_yaml(tmp_path)
+    from api.routers.benchmarks import _build_skill_convergencia
+    skill_def = career_map["carreras"][0]["skills"][0]
+    out = _build_skill_convergencia(skill_def, skill_index, sources)
+    assert out.consenso_pct == 100
+    assert out.fuentes_con_datos == 3
