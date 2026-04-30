@@ -10,7 +10,7 @@ const SECTIONS = [
   {
     label: 'Explorar',
     links: [
-      { href: '/', label: 'Inicio' },
+      { href: '/plataforma', label: 'Inicio' },
       { href: '/noticias', label: 'Noticias' },
       { href: '/vacantes', label: 'Vacantes' },
       { href: '/ies', label: 'Instituciones' },
@@ -45,7 +45,7 @@ const SECTIONS = [
 ]
 
 function isActive(href: string, pathname: string) {
-  return href === '/' ? pathname === '/' : pathname.startsWith(href)
+  return href === '/plataforma' ? pathname === '/plataforma' : pathname.startsWith(href)
 }
 
 export default function Sidebar() {
