@@ -7,6 +7,7 @@ import { getCarreraDetalle, getKpisHistorico } from '@/lib/api'
 import type { CarreraDetalle, HistoricoSerie } from '@/lib/types'
 import FanChart from '@/components/FanChart'
 import SkillTreemap from '@/components/SkillTreemap'
+import KpiRadarChart from '@/components/KpiRadarChart'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import SectionHeader from '@/components/ui/SectionHeader'
@@ -139,14 +140,17 @@ export default function CarreraDetallePage() {
 
       {/* Layout 2 columnas: KPIs izquierda (2/3) + Semáforo derecha (1/3) */}
       <div className="grid grid-cols-3 gap-6 mb-6">
-        {/* KPI bars — 2/3 */}
+        {/* KPI bars + radar — 2/3 */}
         {d.kpi && (
           <Card className="col-span-2 p-5">
             <h2 className="font-semibold text-slate-800 text-sm mb-4">Indicadores KPI</h2>
-            <div className="space-y-4">
-              {KPI_META.map(({ key, label, invert }) => (
-                <ScoreBar key={key} label={label} score={d.kpi![key].score} invert={invert} />
-              ))}
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-4">
+                {KPI_META.map(({ key, label, invert }) => (
+                  <ScoreBar key={key} label={label} score={d.kpi![key].score} invert={invert} />
+                ))}
+              </div>
+              <KpiRadarChart kpi={d.kpi} />
             </div>
           </Card>
         )}
