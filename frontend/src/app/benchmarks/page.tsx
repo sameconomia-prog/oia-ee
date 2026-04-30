@@ -75,14 +75,22 @@ function CareerCard({ career }: { career: BenchmarkCareerSummary }) {
         )}
       </div>
 
-      {article && (
+      <div className="flex items-center justify-between mt-auto pt-1 border-t border-slate-100">
         <Link
-          href={`/investigaciones/${article}`}
-          className="text-xs text-brand-600 hover:underline font-medium mt-auto pt-1 border-t border-slate-100"
+          href={`/benchmarks/${career.slug}`}
+          className="text-xs text-brand-600 hover:underline font-medium"
         >
-          Leer análisis →
+          Ver matriz →
         </Link>
-      )}
+        {article && (
+          <Link
+            href={`/investigaciones/${article}`}
+            className="text-xs text-slate-400 hover:underline"
+          >
+            Análisis
+          </Link>
+        )}
+      </div>
     </Card>
   )
 }
