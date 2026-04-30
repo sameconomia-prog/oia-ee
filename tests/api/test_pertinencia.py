@@ -106,3 +106,53 @@ def test_patch_solicitud_inexistente_devuelve_404(client, db_session):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert resp.status_code == 404
+
+
+def test_patch_solicitud_completada_dispara_notificacion(client, db_session, monkeypatch):
+    monkeypatch.setenv("RESEND_API_KEY", "test-key-resend")
+    with patch("api.routers.pertinencia._send_confirmation"):
+        post_resp = client.post("/pertinencia/solicitud", json=PAYLOAD)
+    sol_id = post_resp.json()["id"]
+    token = _superadmin_token(client, db_session)
+    with patch("api.routers.pertinencia._notify_estado_change") as mock_notify:
+        resp = client.patch(
+            f"/pertinencia/solicitudes/{sol_id}",
+            json={"estado": "completada"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    assert resp.status_code == 200
+    mock_notify.assert_called_once()
+    args = mock_notify.call_args
+    assert args[0][1] == "completada"
+
+
+def test_patch_solicitud_sin_cambio_no_notifica(client, db_session):
+    with patch("api.routers.pertinencia._send_confirmation"):
+        post_resp = client.post("/pertinencia/solicitud", json=PAYLOAD)
+    sol_id = post_resp.json()["id"]
+    token = _superadmin_token(client, db_session)
+    # Marcar como pendiente (ya está pendiente → sin cambio)
+    with patch("api.routers.pertinencia._notify_estado_change") as mock_notify:
+        resp = client.patch(
+            f"/pertinencia/solicitudes/{sol_id}",
+            json={"estado": "pendiente"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    assert resp.status_code == 200
+    mock_notify.assert_not_called()
+
+
+def test_notify_estado_change_sin_resend_key_no_llama_httpx(monkeypatch):
+    from api.routers.pertinencia import _notify_estado_change
+    from pipeline.db.models import SolicitudPertinencia
+    monkeypatch.setenv("RESEND_API_KEY", "")
+    sol = SolicitudPertinencia(
+        nombre_contacto="Ana",
+        email_contacto="ana@test.mx",
+        ies_nombre="UNAM",
+        carrera_nombre="Derecho",
+        estado="pendiente",
+    )
+    with patch("httpx.post") as mock_post:
+        _notify_estado_change(sol, "completada")
+    mock_post.assert_not_called()

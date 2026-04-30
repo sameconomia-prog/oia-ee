@@ -114,6 +114,60 @@ class PatchSolicitudIn(BaseModel):
     estado: str
 
 
+_ESTADO_EMAIL: dict[str, tuple[str, str]] = {
+    "en_revision": (
+        "Tu solicitud de pertinencia está en revisión — OIA-EE",
+        "<p>Hola {nombre},</p>"
+        "<p>Nuestro equipo ya está trabajando en el Estudio de Pertinencia para "
+        "<strong>{carrera}</strong> en <strong>{ies}</strong>.</p>"
+        "<p>Te enviaremos el reporte en los próximos días hábiles.</p>"
+        "<p>— Equipo OIA-EE</p>",
+    ),
+    "completada": (
+        "Tu Estudio de Pertinencia está listo — OIA-EE",
+        "<p>Hola {nombre},</p>"
+        "<p>Tu Estudio de Pertinencia para <strong>{carrera}</strong> en "
+        "<strong>{ies}</strong> está terminado.</p>"
+        "<p>Nuestro equipo se pondrá en contacto contigo hoy para enviarte el reporte PDF "
+        "y agendar la sesión de presentación.</p>"
+        "<p>— Equipo OIA-EE</p>",
+    ),
+    "rechazada": (
+        "Actualización sobre tu solicitud — OIA-EE",
+        "<p>Hola {nombre},</p>"
+        "<p>Lamentablemente no pudimos procesar tu solicitud para <strong>{carrera}</strong> "
+        "en este momento. Nuestro equipo se pondrá en contacto contigo para coordinar una solución.</p>"
+        "<p>— Equipo OIA-EE</p>",
+    ),
+}
+
+
+def _notify_estado_change(sol: SolicitudPertinencia, nuevo_estado: str) -> None:
+    if not RESEND_API_KEY or nuevo_estado not in _ESTADO_EMAIL:
+        return
+    subject, body_tpl = _ESTADO_EMAIL[nuevo_estado]
+    body = body_tpl.format(
+        nombre=sol.nombre_contacto,
+        carrera=sol.carrera_nombre,
+        ies=sol.ies_nombre,
+    )
+    try:
+        import httpx
+        httpx.post(
+            "https://api.resend.com/emails",
+            json={
+                "from": "OIA-EE <noreply@oia-ee.mx>",
+                "to": [sol.email_contacto],
+                "subject": subject,
+                "html": body,
+            },
+            headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+            timeout=10,
+        )
+    except Exception as exc:
+        logger.warning("pertinencia_estado_notify_failed", error=str(exc))
+
+
 @router.patch("/pertinencia/solicitudes/{solicitud_id}", dependencies=[Depends(get_superadmin_user)])
 def actualizar_solicitud(
     solicitud_id: str,
@@ -126,6 +180,9 @@ def actualizar_solicitud(
     estados_validos = {"pendiente", "en_revision", "completada", "rechazada"}
     if body.estado not in estados_validos:
         raise HTTPException(status_code=422, detail=f"Estado debe ser uno de: {', '.join(estados_validos)}")
+    prev_estado = sol.estado
     sol.estado = body.estado
     db.commit()
+    if body.estado != prev_estado:
+        _notify_estado_change(sol, body.estado)
     return {"id": sol.id, "estado": sol.estado}
