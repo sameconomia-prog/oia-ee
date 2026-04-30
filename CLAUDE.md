@@ -44,8 +44,8 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 114, 2026-04-25)
-- 223 pytest + 48 Jest = 271 tests pasando
+## Estado actual (Sprint 117, 2026-04-30)
+- 424 pytest pasando
 - 0 errores TypeScript
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Pendiente: Railway deploy (ver .env.example para env vars)
