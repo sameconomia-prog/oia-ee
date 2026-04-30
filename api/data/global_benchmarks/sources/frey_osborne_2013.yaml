@@ -115,3 +115,18 @@ hallazgos:
     cita_textual: "Secondary School Teachers: 0.37 probability of computerisation — social perceptiveness and guiding complex learning reduce automation risk [Appendix, p. 70]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: fo2013-hotel-managers
+    ocupacion_original: "Lodging Managers"
+    ocupacion_codigo_oficial: "O*NET: 11-9081.00"
+    skills_afectadas:
+      - revenue-management
+      - gestion-operaciones-hotel
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: largo
+    hallazgo: "La gestión operativa hotelera y el revenue management tienen probabilidad alta de automatización (0.64)"
+    dato_clave: "Probabilidad de automatización: 0.64 para Lodging Managers"
+    cita_textual: "Lodging Managers: 0.64 probability of computerisation — revenue optimization and operational scheduling are highly automatable [Appendix, p. 64]"
+    divergencia_oia: false
+    nota_divergencia: null

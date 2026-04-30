@@ -335,3 +335,28 @@ carreras:
         nombre: "Educación virtual y e-learning"
         tipo: digital
         accion_curricular: agregar
+
+  - slug: turismo
+    nombre: "Turismo y Administración Hotelera"
+    area: ciencias_sociales
+    skills:
+      - id: revenue-management
+        nombre: "Revenue management y fijación de precios"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: atencion-cliente-basica
+        nombre: "Atención al cliente y recepción básica"
+        tipo: social
+        accion_curricular: redisenar
+      - id: hospitalidad-experiencial
+        nombre: "Hospitalidad y experiencia del huésped"
+        tipo: social
+        accion_curricular: fortalecer
+      - id: gestion-operaciones-hotel
+        nombre: "Gestión de operaciones hoteleras"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: turismo-sostenible
+        nombre: "Turismo sostenible y responsable"
+        tipo: transversal
+        accion_curricular: agregar

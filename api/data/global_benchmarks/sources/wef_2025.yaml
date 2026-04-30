@@ -133,3 +133,19 @@ hallazgos:
     cita_textual: "Education professionals with digital and adaptive teaching skills see strong demand growth [p. 44]"
     divergencia_oia: false
     nota_divergencia: null
+
+  - id: wef2025-turismo-hospitalidad
+    ocupacion_original: "Hotel and Restaurant Managers"
+    ocupacion_codigo_oficial: "ISCO-08: 1412"
+    skills_afectadas:
+      - hospitalidad-experiencial
+      - atencion-cliente-basica
+      - revenue-management
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: corto
+    hallazgo: "El turismo muestra asimetría: atención básica y revenue management declinantes, hospitalidad experiencial y turismo sostenible crecientes"
+    dato_clave: "El 45% de tareas de recepción y back-office hotelero son técnicamente automatizables en 3 años"
+    cita_textual: "Hospitality roles show divergent outcomes — operational tasks face automation while experience and relationship management grow in value [p. 67]"
+    divergencia_oia: false
+    nota_divergencia: null
