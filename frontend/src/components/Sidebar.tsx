@@ -85,6 +85,20 @@ export default function Sidebar() {
         <p className="text-[11px] text-slate-400 mt-0.5">Observatorio IA · Empleo · Educación</p>
       </div>
 
+      {/* Search trigger */}
+      <div className="px-2 py-2 border-b border-slate-700/60">
+        <button
+          onClick={() => window.dispatchEvent(new Event('oia:buscar'))}
+          className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-slate-400 bg-slate-800/60 hover:bg-slate-700/60 transition-colors"
+        >
+          <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
+          <span className="flex-1 text-left">Buscar…</span>
+          <kbd className="text-[10px] border border-slate-600 rounded px-1 py-0.5 font-mono text-slate-500">⌘K</kbd>
+        </button>
+      </div>
+
       <nav className="flex-1 py-3 px-2 overflow-y-auto">
         {SECTIONS.map((section) => (
           <div key={section.label} className="mb-4">

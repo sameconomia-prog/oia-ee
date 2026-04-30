@@ -3,6 +3,7 @@ import { GeistSans } from 'geist/font/sans'
 import './globals.css'
 import Sidebar from '@/components/Sidebar'
 import WhiteLabelApplier from '@/components/WhiteLabelApplier'
+import BusquedaGlobal from '@/components/BusquedaGlobal'
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className={cn("font-sans", GeistSans.variable)}>
       <body className="flex min-h-screen bg-slate-50 font-sans">
         <WhiteLabelApplier />
+        <BusquedaGlobal />
         <Sidebar />
         <main className="flex-1 p-6 overflow-auto">{children}</main>
       </body>

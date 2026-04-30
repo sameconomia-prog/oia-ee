@@ -296,8 +296,9 @@ export async function getCarreraDetalle(carreraId: string): Promise<CarreraDetal
   return await res.json()
 }
 
-export async function getIesPublico(): Promise<import('./types').IesInfo[]> {
-  const res = await fetch(`${BASE}/publico/ies`)
+export async function getIesPublico(params: { q?: string } = {}): Promise<import('./types').IesInfo[]> {
+  const qs = params.q ? `?q=${encodeURIComponent(params.q)}` : ''
+  const res = await fetch(`${BASE}/publico/ies${qs}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }
