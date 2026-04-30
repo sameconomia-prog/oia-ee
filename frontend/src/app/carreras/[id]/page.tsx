@@ -100,6 +100,9 @@ const BENCHMARK_ARTICLE_MAP: Record<string, string> = {
   'educacion': '2026-04-educacion-ia-2030',
   'economia': '2026-04-economia-ia-2030',
   'turismo': '2026-04-turismo-ia-2030',
+  'ciencias-politicas': '2026-04-ciencias-politicas-ia-2030',
+  'nutricion': '2026-04-nutricion-ia-2030',
+  'ingenieria-civil': '2026-04-ingenieria-civil-ia-2030',
 }
 
 export default function CarreraDetallePage() {
@@ -259,10 +262,21 @@ export default function CarreraDetallePage() {
               </Link>
             )}
           </div>
-          <SkillConvergenceTable skills={benchmarkDetail.skills} sources={benchmarkSources} />
-          <p className="text-xs text-slate-400 mt-3">
-            Fuentes: WEF 2025 · McKinsey 2023 · Frey-Osborne 2013 · CEPAL 2023 · Anthropic 2025
-          </p>
+          <SkillConvergenceTable
+            skills={benchmarkDetail.skills}
+            sources={benchmarkSources}
+            careerSlug={d.benchmark_slug ?? undefined}
+          />
+          <div className="flex items-center justify-between mt-3">
+            <p className="text-xs text-slate-400">
+              Fuentes: WEF 2025 · McKinsey 2023 · Frey-Osborne 2013 · CEPAL 2023 · Anthropic 2025
+            </p>
+            {d.benchmark_slug && (
+              <Link href={`/benchmarks/${d.benchmark_slug}`} className="text-xs text-brand-600 hover:underline font-medium">
+                Ver benchmark completo →
+              </Link>
+            )}
+          </div>
         </Card>
       )}
 
