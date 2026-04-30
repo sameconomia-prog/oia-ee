@@ -1,9 +1,10 @@
 'use client'
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCarrerasPublico, getIesPublico, getVacantesPublico } from '@/lib/api'
+import { getCarrerasPublico, getIesPublico, getVacantesPublico, getBenchmarkSkillsIndex } from '@/lib/api'
+import type { SkillIndexItem } from '@/lib/types'
 
-type Tipo = 'carrera' | 'ies' | 'vacante'
+type Tipo = 'carrera' | 'ies' | 'vacante' | 'skill'
 
 interface Resultado {
   tipo: Tipo
@@ -17,19 +18,22 @@ const TIPO_LABEL: Record<Tipo, string> = {
   carrera: 'Carrera',
   ies: 'Institución',
   vacante: 'Vacante',
+  skill: 'Habilidad',
 }
 
 const TIPO_CLASS: Record<Tipo, string> = {
   carrera: 'bg-indigo-50 text-indigo-700',
   ies: 'bg-emerald-50 text-emerald-700',
   vacante: 'bg-blue-50 text-blue-700',
+  skill: 'bg-violet-50 text-violet-700',
 }
 
 const ACCESOS_RAPIDOS: { href: string; label: string }[] = [
   { href: '/kpis', label: 'KPIs del Observatorio' },
   { href: '/carreras', label: 'Explorar Carreras' },
   { href: '/ies', label: 'Instituciones' },
-  { href: '/impacto', label: 'Mapa de Impacto IA' },
+  { href: '/benchmarks', label: 'Benchmarks Globales' },
+  { href: '/benchmarks/skills', label: 'Índice de Habilidades' },
   { href: '/estadisticas', label: 'Estadísticas' },
   { href: '/vacantes', label: 'Vacantes IA' },
 ]
@@ -42,6 +46,7 @@ export default function BusquedaGlobal() {
   const [sel, setSel] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+  const skillsRef = useRef<SkillIndexItem[]>([])
 
   // Cmd+K global + custom event from Sidebar
   useEffect(() => {
@@ -60,13 +65,16 @@ export default function BusquedaGlobal() {
     }
   }, [])
 
-  // Focus input when modal opens
+  // Focus input when modal opens + prefetch skills index
   useEffect(() => {
     if (open) {
       setQ('')
       setResultados([])
       setSel(0)
       setTimeout(() => inputRef.current?.focus(), 30)
+      if (skillsRef.current.length === 0) {
+        getBenchmarkSkillsIndex().then(s => { skillsRef.current = s }).catch(() => {})
+      }
     }
   }, [open])
 
@@ -83,23 +91,33 @@ export default function BusquedaGlobal() {
         ])
         const r: Resultado[] = []
         if (carreras.status === 'fulfilled') {
-          carreras.value.slice(0, 5).forEach(c => r.push({
+          carreras.value.slice(0, 4).forEach(c => r.push({
             tipo: 'carrera', id: c.id, titulo: c.nombre,
             subtitulo: null, href: `/carreras/${c.id}`,
           }))
         }
         if (ies.status === 'fulfilled') {
-          ies.value.slice(0, 4).forEach(i => r.push({
+          ies.value.slice(0, 3).forEach(i => r.push({
             tipo: 'ies', id: i.id, titulo: i.nombre,
             subtitulo: i.nombre_corto, href: `/ies/${i.id}`,
           }))
         }
         if (vacantes.status === 'fulfilled') {
-          vacantes.value.slice(0, 4).forEach(v => r.push({
+          vacantes.value.slice(0, 3).forEach(v => r.push({
             tipo: 'vacante', id: v.id, titulo: v.titulo,
             subtitulo: v.empresa, href: `/vacantes/${v.id}`,
           }))
         }
+        // Client-side skill search
+        const qLow = q.toLowerCase()
+        skillsRef.current
+          .filter(s => s.skill_nombre.toLowerCase().includes(qLow) || s.skill_id.includes(qLow))
+          .slice(0, 3)
+          .forEach(s => r.push({
+            tipo: 'skill', id: s.skill_id, titulo: s.skill_nombre,
+            subtitulo: `${s.direccion_global} · ${s.fuentes_con_datos}/5 fuentes`,
+            href: `/benchmarks/skills/${s.skill_id}`,
+          }))
         setResultados(r)
         setSel(0)
       } finally {
@@ -151,7 +169,7 @@ export default function BusquedaGlobal() {
             value={q}
             onChange={e => setQ(e.target.value)}
             onKeyDown={onInputKey}
-            placeholder="Buscar carreras, instituciones, vacantes…"
+            placeholder="Buscar carreras, instituciones, habilidades…"
             className="flex-1 py-4 text-sm bg-transparent outline-none placeholder:text-slate-400 text-slate-800"
           />
           {loading && (
