@@ -80,8 +80,8 @@ export default function FormularioContacto() {
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Institución *</label>
-            <input required value={form.institucion} onChange={set('institucion')}
+            <label htmlFor="institucion" className="block text-sm font-medium text-gray-700 mb-1">Institución *</label>
+            <input id="institucion" required value={form.institucion} onChange={set('institucion')}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B82F6]" />
           </div>
           <div>
@@ -91,8 +91,8 @@ export default function FormularioContacto() {
           </div>
           {tab === 'gobierno' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Área de interés</label>
-              <select value={form.area_interes} onChange={set('area_interes')}
+              <label htmlFor="area-interes" className="block text-sm font-medium text-gray-700 mb-1">Área de interés</label>
+              <select id="area-interes" value={form.area_interes} onChange={set('area_interes')}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B82F6]">
                 <option value="politica_publica">Política pública</option>
                 <option value="investigacion">Investigación</option>
