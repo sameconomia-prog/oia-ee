@@ -122,7 +122,7 @@ export default function BenchmarkCareerPage() {
           subtitle={`${sources.length} fuentes internacionales · ${detail.skills.length} habilidades analizadas`}
         />
         <div className="mt-4">
-          <SkillConvergenceTable skills={detail.skills} sources={sources} />
+          <SkillConvergenceTable skills={detail.skills} sources={sources} careerSlug={slug} />
         </div>
       </Card>
 
