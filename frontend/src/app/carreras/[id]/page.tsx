@@ -85,6 +85,19 @@ const SEMAFORO_VARIANT: Record<string, 'risk' | 'oportunidad' | 'neutro'> = {
   sin_datos: 'neutro',
 }
 
+const BENCHMARK_ARTICLE_MAP: Record<string, string> = {
+  'derecho': '2026-04-derecho-ia-2030',
+  'medicina': '2026-04-medicina-ia-mexico',
+  'arquitectura': '2026-04-arquitectura-ia-2030',
+  'enfermeria': '2026-04-enfermeria-ia-2030',
+  'mercadotecnia': '2026-04-mercadotecnia-ia-2030',
+  'psicologia': '2026-04-psicologia-ia-2030',
+  'administracion-empresas': '2026-04-administracion-ia-2030',
+  'contaduria': '2026-04-contaduria-ia-2030',
+  'diseno-grafico': '2026-04-diseno-grafico-ia-2030',
+  'ingenieria-sistemas': '2026-04-ingenieros-software-ia',
+}
+
 export default function CarreraDetallePage() {
   const { id } = useParams<{ id: string }>()
   const [detalle, setDetalle] = useState<CarreraDetalle | null>(null)
@@ -228,10 +241,20 @@ export default function CarreraDetallePage() {
       {/* Benchmarks globales */}
       {benchmarkDetail && benchmarkSources.length > 0 && (
         <Card className="mb-6 p-5">
-          <SectionHeader
-            title="Benchmarks Globales"
-            subtitle="Convergencia de 5 fuentes internacionales sobre las habilidades de esta carrera"
-          />
+          <div className="flex items-start justify-between mb-4">
+            <SectionHeader
+              title="Benchmarks Globales"
+              subtitle="Convergencia de 5 fuentes internacionales sobre las habilidades de esta carrera"
+            />
+            {d.benchmark_slug && BENCHMARK_ARTICLE_MAP[d.benchmark_slug] && (
+              <Link
+                href={`/investigaciones/${BENCHMARK_ARTICLE_MAP[d.benchmark_slug]}`}
+                className="shrink-0 text-xs text-brand-600 hover:underline font-medium ml-4"
+              >
+                Leer análisis completo →
+              </Link>
+            )}
+          </div>
           <SkillConvergenceTable skills={benchmarkDetail.skills} sources={benchmarkSources} />
           <p className="text-xs text-slate-400 mt-3">
             Fuentes: WEF 2025 · McKinsey 2023 · Frey-Osborne 2013 · CEPAL 2023 · Anthropic 2025
