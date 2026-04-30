@@ -16,6 +16,7 @@ const SECTIONS = [
       { href: '/ies', label: 'Instituciones' },
       { href: '/carreras', label: 'Carreras' },
       { href: '/recomienda', label: 'Recomendador' },
+      { href: '/pertinencia', label: 'Estudio de Pertinencia' },
       { href: '/planes', label: 'Planes y Precios' },
       { href: '/solicitar-demo', label: 'Solicitar Demo' },
     ],
