@@ -661,3 +661,49 @@ def test_ranking_max_100(client, db_session):
 def test_ranking_d2_orden(client, db_session):
     resp = client.get("/publico/kpis/ranking?orden=d2")
     assert resp.status_code == 200
+
+
+# --- Tests /impacto ---
+
+def test_impacto_vacio(client):
+    resp = client.get("/publico/impacto")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "resumen" in data
+    assert "total_noticias_despido" in data["resumen"]
+    assert "total_empleados_afectados" in data["resumen"]
+    assert "total_noticias_positivas" in data["resumen"]
+    assert "total_vacantes_ia" in data["resumen"]
+    assert isinstance(data["despidos_por_sector"], list)
+    assert isinstance(data["top_skills_demandados"], list)
+    assert isinstance(data["ocupaciones_mayor_riesgo"], list)
+    assert isinstance(data["ocupaciones_mayor_oportunidad"], list)
+
+
+def test_impacto_con_datos(client, db_session):
+    db_session.add(Noticia(
+        titulo="Meta despide 10k empleados por IA",
+        url="https://example.com/meta",
+        tipo_impacto="despido_masivo",
+        sector="tecnología",
+        pais="EE.UU.",
+        n_empleados=10000,
+        causa_ia="LLMs",
+    ))
+    db_session.add(Noticia(
+        titulo="Google crea 5k empleos IA",
+        url="https://example.com/google",
+        tipo_impacto="adopcion_ia",
+        sector="tecnología",
+        pais="EE.UU.",
+    ))
+    db_session.add(Ocupacion(onet_code="43-3031.00", nombre="Contador", p_automatizacion=0.94, p_augmentacion=0.10))
+    db_session.flush()
+    resp = client.get("/publico/impacto")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["resumen"]["total_noticias_despido"] >= 1
+    assert data["resumen"]["total_empleados_afectados"] >= 10000
+    assert data["resumen"]["total_noticias_positivas"] >= 1
+    assert any(s["sector"] == "tecnología" for s in data["despidos_por_sector"])
+    assert len(data["ocupaciones_mayor_riesgo"]) >= 1
