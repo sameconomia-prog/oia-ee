@@ -425,3 +425,23 @@ export async function fetchPertinenciaReportData(
     },
   }
 }
+
+// ── Benchmark Global ──────────────────────────────────────────────────────────
+
+export async function getBenchmarkSources(): Promise<import('./types').BenchmarkSource[]> {
+  const res = await fetch(`${BASE}/publico/benchmarks/sources`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+export async function getBenchmarkCareers(): Promise<import('./types').BenchmarkCareerSummary[]> {
+  const res = await fetch(`${BASE}/publico/benchmarks/careers`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+export async function getBenchmarkCareerDetail(slug: string): Promise<import('./types').BenchmarkCareerDetail> {
+  const res = await fetch(`${BASE}/publico/benchmarks/careers/${slug}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}

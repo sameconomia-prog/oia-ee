@@ -1,0 +1,137 @@
+carreras:
+  - slug: contaduria
+    nombre: "Contaduría Pública"
+    area: ciencias_economico_administrativas
+    skills:
+      - id: contabilidad-basica
+        nombre: "Contabilidad y registro financiero"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: conciliacion-bancaria
+        nombre: "Conciliación bancaria"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: generacion-reportes
+        nombre: "Generación de reportes financieros"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: analisis-fiscal
+        nombre: "Análisis fiscal y declaraciones"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: auditoria
+        nombre: "Auditoría"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: pensamiento-critico
+        nombre: "Pensamiento crítico"
+        tipo: transversal
+        accion_curricular: fortalecer
+      - id: comunicacion-escrita
+        nombre: "Comunicación escrita"
+        tipo: transversal
+        accion_curricular: fortalecer
+
+  - slug: diseno-grafico
+    nombre: "Diseño Gráfico / Comunicación Visual"
+    area: artes_y_humanidades
+    skills:
+      - id: diseno-visual
+        nombre: "Diseño visual y composición"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: ilustracion-digital
+        nombre: "Ilustración digital"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: branding
+        nombre: "Branding e identidad corporativa"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: comunicacion-visual
+        nombre: "Comunicación visual estratégica"
+        tipo: transversal
+        accion_curricular: fortalecer
+      - id: pensamiento-creativo
+        nombre: "Pensamiento creativo y conceptual"
+        tipo: transversal
+        accion_curricular: fortalecer
+      - id: herramientas-diseno
+        nombre: "Manejo de herramientas de diseño"
+        tipo: digital
+        accion_curricular: redisenar
+
+  - slug: ingenieria-sistemas
+    nombre: "Ingeniería en Sistemas / Software"
+    area: ingenieria_y_tecnologia
+    skills:
+      - id: programacion
+        nombre: "Programación y desarrollo de software"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: arquitectura-software
+        nombre: "Arquitectura de software"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: bases-de-datos
+        nombre: "Bases de datos y modelado"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: pensamiento-algoritmico
+        nombre: "Pensamiento algorítmico y resolución de problemas"
+        tipo: transversal
+        accion_curricular: fortalecer
+      - id: trabajo-en-equipo
+        nombre: "Trabajo en equipo y metodologías ágiles"
+        tipo: social
+        accion_curricular: fortalecer
+
+  - slug: administracion-empresas
+    nombre: "Administración de Empresas"
+    area: ciencias_economico_administrativas
+    skills:
+      - id: analisis-financiero
+        nombre: "Análisis financiero y toma de decisiones"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: gestion-proyectos
+        nombre: "Gestión de proyectos"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: liderazgo
+        nombre: "Liderazgo y gestión de equipos"
+        tipo: social
+        accion_curricular: fortalecer
+      - id: estrategia-empresarial
+        nombre: "Estrategia empresarial"
+        tipo: transversal
+        accion_curricular: fortalecer
+      - id: comunicacion-oral
+        nombre: "Comunicación oral y negociación"
+        tipo: social
+        accion_curricular: fortalecer
+
+  - slug: medicina
+    nombre: "Medicina / Ciencias de la Salud"
+    area: ciencias_de_la_salud
+    skills:
+      - id: diagnostico-clinico
+        nombre: "Diagnóstico clínico"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: medicina-basada-evidencia
+        nombre: "Medicina basada en evidencia"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: comunicacion-empatica
+        nombre: "Comunicación empática con pacientes"
+        tipo: social
+        accion_curricular: fortalecer
+      - id: procedimientos-clinicos
+        nombre: "Procedimientos clínicos"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: toma-decisiones-criticas
+        nombre: "Toma de decisiones clínicas complejas"
+        tipo: transversal
+        accion_curricular: fortalecer

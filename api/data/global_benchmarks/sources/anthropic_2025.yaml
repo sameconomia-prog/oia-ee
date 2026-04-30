@@ -1,0 +1,57 @@
+fuente:
+  id: anthropic2025
+  nombre: "Anthropic Economic Index 2025"
+  año: 2025
+  metodologia: uso_observado
+  tipo_evidencia: observacion
+  dato_clave: "El 36.8% de las tareas analizadas muestran automatización directa"
+  muestra: "Millones de interacciones reales con Claude, 113 industrias"
+  cobertura: global
+  url: "https://www.anthropic.com/news/the-anthropic-economic-index"
+  confianza: alta
+  peso_geografico: global
+
+hallazgos:
+  - id: ant2025-tareas-cognitivas
+    ocupacion_original: "Financial clerks and analysts"
+    ocupacion_codigo_oficial: "O*NET: 43-3031.00"
+    skills_afectadas:
+      - contabilidad-basica
+      - analisis-financiero
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: corto
+    hallazgo: "Los usuarios ya reemplazan tareas de análisis financiero rutinario con Claude"
+    dato_clave: "36.8% automatización directa observada en tareas cognitivas de oficina"
+    cita_textual: "We observe direct task substitution most heavily in data entry, basic analysis, and routine reporting tasks [p. 8]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: ant2025-programacion
+    ocupacion_original: "Software Developers"
+    ocupacion_codigo_oficial: "O*NET: 15-1252.00"
+    skills_afectadas:
+      - programacion
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: corto
+    hallazgo: "La programación es la habilidad más augmentada — los usuarios logran más, no son reemplazados"
+    dato_clave: "52% de las interacciones de programación son de augmentación (no sustitución)"
+    cita_textual: "Software development shows the clearest pattern of augmentation... users accomplish more per hour [p. 12]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: ant2025-diseno-generativo
+    ocupacion_original: "Graphic Designers, Illustrators"
+    ocupacion_codigo_oficial: "O*NET: 27-1024.00"
+    skills_afectadas:
+      - diseno-visual
+      - ilustracion-digital
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: corto
+    hallazgo: "La producción de imágenes y diseños rutinarios es sustituida por IA generativa"
+    dato_clave: "El diseño visual es la 3ª categoría con mayor tasa de sustitución observada"
+    cita_textual: "Image generation tasks show high substitution rates with users directly replacing design production work [p. 15]"
+    divergencia_oia: false
+    nota_divergencia: null

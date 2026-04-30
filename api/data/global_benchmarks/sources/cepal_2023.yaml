@@ -1,0 +1,43 @@
+fuente:
+  id: cepal2023
+  nombre: "CEPAL — Impacto de la IA en el mercado laboral de ALC 2023"
+  año: 2023
+  metodologia: modelado_economico
+  tipo_evidencia: regional
+  dato_clave: "El 34% de los empleos en ALC tienen alta exposición a la automatización"
+  muestra: "12 países de América Latina y el Caribe, datos PIAAC y encuestas nacionales"
+  cobertura: latam
+  url: "https://www.cepal.org/es/publicaciones/ia-empleo-latam"
+  confianza: media
+  peso_geografico: latam
+
+hallazgos:
+  - id: cep2023-admin-oficina
+    ocupacion_original: "Empleados de contabilidad y finanzas"
+    ocupacion_codigo_oficial: "CIUO-08: 4312"
+    skills_afectadas:
+      - contabilidad-basica
+      - analisis-financiero
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: medio
+    hallazgo: "Los roles administrativos y contables en ALC tienen alta exposición a la automatización"
+    dato_clave: "El 34% de empleos ALC en riesgo alto son roles de oficina y contabilidad"
+    cita_textual: "Los empleados de contabilidad y actividades afines concentran la mayor proporción de tareas automatizables en la región [p. 47]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: cep2023-salud
+    ocupacion_original: "Profesionales de la salud"
+    ocupacion_codigo_oficial: "CIUO-08: 2211"
+    skills_afectadas:
+      - diagnostico-clinico
+      - medicina-basada-evidencia
+    direccion: stable
+    taxonomia_oia: resilient
+    horizonte_impacto: largo
+    hallazgo: "Los profesionales de salud en ALC muestran baja exposición a desplazamiento por IA"
+    dato_clave: "Solo el 8% de tareas médicas son técnicamente automatizables en el corto plazo"
+    cita_textual: "Occupations requiring physical presence and human judgment—particularly in healthcare—show resilience across Latin American labor markets [p. 52]"
+    divergencia_oia: false
+    nota_divergencia: null

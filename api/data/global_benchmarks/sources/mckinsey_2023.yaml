@@ -1,0 +1,44 @@
+fuente:
+  id: mckinsey2023
+  nombre: "McKinsey Global Institute — The Economic Potential of Generative AI 2023"
+  año: 2023
+  metodologia: analisis_tareas
+  tipo_evidencia: prediccion
+  dato_clave: "El 60–70% de las horas laborales actuales son técnicamente automatizables"
+  muestra: "2,100 ocupaciones, 800 tareas modeladas"
+  cobertura: global
+  url: "https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/the-economic-potential-of-generative-ai"
+  confianza: alta
+  peso_geografico: global
+
+hallazgos:
+  - id: mck2023-procesamiento-datos
+    ocupacion_original: "Office Support Workers"
+    ocupacion_codigo_oficial: "SOC: 43-0000"
+    skills_afectadas:
+      - contabilidad-basica
+      - conciliacion-bancaria
+      - analisis-financiero
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: medio
+    hallazgo: "Las tareas de procesamiento rutinario de datos financieros son altamente automatizables con GenAI"
+    dato_clave: "57% del tiempo de trabajo en roles de oficina es técnicamente automatizable"
+    cita_textual: "Data collection and processing activities—including financial data entry and reconciliation—are among the most automatable [p. 34]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: mck2023-software
+    ocupacion_original: "Software Developers"
+    ocupacion_codigo_oficial: "SOC: 15-1252"
+    skills_afectadas:
+      - programacion
+      - arquitectura-software
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "Los desarrolladores de software aumentan su productividad con GenAI, no son desplazados"
+    dato_clave: "Los desarrolladores con GenAI completan tareas 2× más rápido"
+    cita_textual: "Software engineers using generative AI tools show significant productivity gains rather than displacement [p. 28]"
+    divergencia_oia: false
+    nota_divergencia: null

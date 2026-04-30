@@ -1,0 +1,59 @@
+fuente:
+  id: wef2025
+  nombre: "World Economic Forum — Future of Jobs 2025"
+  año: 2025
+  metodologia: encuesta_empleadores
+  tipo_evidencia: prediccion
+  dato_clave: "92 millones de empleos serán desplazados para 2030"
+  muestra: "1,000+ empleadores, 22 sectores, 55 economías"
+  cobertura: global
+  url: "https://www.weforum.org/reports/future-of-jobs-2025"
+  confianza: alta
+  peso_geografico: global
+
+hallazgos:
+  - id: wef2025-contabilidad-admin
+    ocupacion_original: "Accounting, Bookkeeping and Payroll Clerks"
+    ocupacion_codigo_oficial: "ISCO-08: 4311"
+    skills_afectadas:
+      - contabilidad-basica
+      - conciliacion-bancaria
+      - generacion-reportes
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: corto
+    hallazgo: "Las funciones de registro contable rutinario serán automatizadas en 2-3 años"
+    dato_clave: "92M empleos desplazados en roles de registro y datos"
+    cita_textual: "Clerical and secretarial workers face the highest displacement risk... [p. 47]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: wef2025-programacion
+    ocupacion_original: "Software and Applications Developers"
+    ocupacion_codigo_oficial: "ISCO-08: 2512"
+    skills_afectadas:
+      - programacion
+      - arquitectura-software
+    direccion: growing
+    taxonomia_oia: resilient
+    horizonte_impacto: medio
+    hallazgo: "La demanda de desarrolladores de software crece a pesar de la automatización de tareas repetitivas"
+    dato_clave: "19M nuevos empleos en tecnología para 2030"
+    cita_textual: "Technology roles continue to grow... AI and machine learning specialists top the list [p. 23]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: wef2025-diseno-creativo
+    ocupacion_original: "Graphic Designers"
+    ocupacion_codigo_oficial: "ISCO-08: 2166"
+    skills_afectadas:
+      - diseno-visual
+      - ilustracion-digital
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: corto
+    hallazgo: "La IA generativa desplaza la producción de diseño rutinario pero amplifica las capacidades creativas estratégicas"
+    dato_clave: "40% de tareas de diseño visual serán automatizables en 3 años"
+    cita_textual: "Creative and design roles show divergent outcomes depending on the level of conceptual vs. production work [p. 61]"
+    divergencia_oia: false
+    nota_divergencia: null

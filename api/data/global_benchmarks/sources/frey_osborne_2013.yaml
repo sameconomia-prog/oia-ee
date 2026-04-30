@@ -1,0 +1,43 @@
+fuente:
+  id: freyosborne2013
+  nombre: "Frey & Osborne — The Future of Employment 2013"
+  año: 2013
+  metodologia: revision_literatura
+  tipo_evidencia: prediccion
+  dato_clave: "El 47% de los empleos en EE.UU. tienen alta probabilidad de automatización"
+  muestra: "702 ocupaciones O*NET, expertos en ML"
+  cobertura: global
+  url: "https://www.oxfordmartin.ox.ac.uk/downloads/academic/The_Future_of_Employment.pdf"
+  confianza: media
+  peso_geografico: global
+
+hallazgos:
+  - id: fo2013-contabilidad
+    ocupacion_original: "Bookkeeping, Accounting, and Auditing Clerks"
+    ocupacion_codigo_oficial: "O*NET: 43-3031.00"
+    skills_afectadas:
+      - contabilidad-basica
+      - conciliacion-bancaria
+      - generacion-reportes
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: largo
+    hallazgo: "Las funciones de registro contable tienen probabilidad del 98% de automatización"
+    dato_clave: "Probabilidad de automatización: 98% para Bookkeeping clerks"
+    cita_textual: "Bookkeeping, Accounting, and Auditing Clerks: 0.98 probability of computerisation [Appendix, p. 57]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: fo2013-software
+    ocupacion_original: "Computer Programmers"
+    ocupacion_codigo_oficial: "O*NET: 15-1251.00"
+    skills_afectadas:
+      - programacion
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: largo
+    hallazgo: "Los programadores tienen riesgo moderado (48%) — la complejidad creativa protege"
+    dato_clave: "Probabilidad de automatización: 0.48 para Computer Programmers"
+    cita_textual: "Computer Programmers: 0.48 probability of computerisation — creativity and complex problem-solving reduce risk [Appendix, p. 58]"
+    divergencia_oia: false
+    nota_divergencia: null

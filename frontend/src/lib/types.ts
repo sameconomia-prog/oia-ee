@@ -452,3 +452,52 @@ export interface SkillGraphData {
   pct_en_transicion: number
   skills: SkillNode[]
 }
+
+
+// ── Benchmark Global types ────────────────────────────────────────────────────
+
+export interface BenchmarkSource {
+  id: string
+  nombre: string
+  año: number
+  metodologia: string
+  tipo_evidencia: 'prediccion' | 'observacion' | 'regional'
+  dato_clave: string
+  confianza: 'alta' | 'media' | 'baja'
+  peso_geografico: string
+  url: string
+}
+
+export interface BenchmarkCareerSummary {
+  slug: string
+  nombre: string
+  area: string
+  total_skills: number
+  skills_declining: number
+  skills_growing: number
+  skills_mixed: number
+  skills_sin_datos: number
+}
+
+export type ConvergenceDirection =
+  | 'declining' | 'growing' | 'stable' | 'mixed' | 'sin_datos'
+
+export type AccionCurricular =
+  | 'retirar' | 'redisenar' | 'fortalecer' | 'agregar'
+
+export interface SkillConvergencia {
+  skill_id: string
+  skill_nombre: string
+  skill_tipo: 'tecnica' | 'transversal' | 'digital' | 'social'
+  accion_curricular: AccionCurricular
+  convergencia_por_fuente: Record<string, ConvergenceDirection | null>
+  direccion_global: ConvergenceDirection
+  horizonte_dominante: 'corto' | 'medio' | 'largo' | null
+}
+
+export interface BenchmarkCareerDetail {
+  slug: string
+  nombre: string
+  area: string
+  skills: SkillConvergencia[]
+}
