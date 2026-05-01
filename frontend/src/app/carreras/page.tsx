@@ -54,7 +54,7 @@ export default function CarrerasListPage() {
   const [benchmarkMap, setBenchmarkMap] = useState<Map<string, number>>(new Map())
   const [filterUrgenciaAlta, setFilterUrgenciaAlta] = useState(false)
   const [filterDobleAlerta, setFilterDobleAlerta] = useState(() => searchParams.get('doble') === '1')
-  const [filterD2Alta, setFilterD2Alta] = useState(false)
+  const [filterD2Alta, setFilterD2Alta] = useState(() => searchParams.get('oportunidad') === '1')
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {

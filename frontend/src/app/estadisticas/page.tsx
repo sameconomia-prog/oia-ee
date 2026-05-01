@@ -124,6 +124,17 @@ export default function EstadisticasPage() {
                 href="/carreras?doble=1"
               />
             )}
+            {distribucion && (() => {
+              const count = distribucion.d2.find(b => b.rango.startsWith('Alto'))?.count ?? 0
+              return count > 0 ? (
+                <StatBox
+                  label="Alta oportunidad D2"
+                  value={count}
+                  color="text-emerald-700"
+                  href="/carreras?oportunidad=1"
+                />
+              ) : null
+            })()}
           </div>
 
           {(vacTendencia.length > 1 || notTendencia.length > 1) && (
