@@ -103,9 +103,9 @@ function PertinenciaContent() {
           tendencias del mercado laboral mexicano y exposición a la automatización por IA.
           Sin costo, sin compromisos.
         </p>
-        {totalSolicitudes !== null && totalSolicitudes > 0 && (
+        {totalSolicitudes !== null && totalSolicitudes >= 10 && (
           <p className="mt-3 text-sm text-emerald-700 font-medium">
-            ✓ {totalSolicitudes} institución{totalSolicitudes !== 1 ? 'es' : ''} ya {totalSolicitudes !== 1 ? 'solicitaron' : 'solicitó'} su análisis
+            ✓ {totalSolicitudes} instituciones ya solicitaron su análisis
           </p>
         )}
       </div>
@@ -118,7 +118,7 @@ function PertinenciaContent() {
               <div className="text-4xl mb-4">✓</div>
               <h2 className="text-xl font-bold text-slate-900 mb-2">Solicitud recibida</h2>
               <p className="text-slate-600 text-sm mb-4">
-                Nuestro equipo se pondrá en contacto contigo en las próximas 24 horas hábiles para confirmar los detalles.
+                Sam revisará tu solicitud y te escribirá directamente al correo en las próximas 24 horas hábiles.
               </p>
               <div className="flex flex-col gap-2 items-center">
                 {submittedBenchmark ? (
