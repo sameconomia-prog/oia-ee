@@ -415,7 +415,7 @@ export default function CarreraDetallePage() {
           <p className="text-[11px] text-indigo-600 mt-0.5">Solicita el análisis de pertinencia curricular — diagnóstico personalizado y gratuito en 5 días hábiles.</p>
         </div>
         <Link
-          href="/pertinencia"
+          href={`/pertinencia?carrera=${encodeURIComponent(d.nombre)}`}
           className="shrink-0 text-xs font-semibold text-indigo-700 border border-indigo-300 bg-white px-3 py-1.5 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap"
         >
           Solicitar análisis →
