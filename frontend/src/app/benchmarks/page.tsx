@@ -224,6 +224,7 @@ export default function BenchmarksPage() {
   const [filterArea, setFilterArea] = useState<string>(() => searchParams.get('area') ?? 'all')
   const [sortMode, setSortMode] = useState<SortMode>(() => (searchParams.get('sort') as SortMode) ?? 'default')
   const [filterQ, setFilterQ] = useState<string>(() => searchParams.get('q') ?? '')
+  const [filterUrgencia, setFilterUrgencia] = useState<boolean>(() => searchParams.get('urgencia') === '1')
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
 
   useEffect(() => {
@@ -304,6 +305,11 @@ export default function BenchmarksPage() {
   const setArea = (v: string) => { setFilterArea(v); updateParams({ area: v }) }
   const setSort = (v: SortMode) => { setSortMode(v); updateParams({ sort: v }) }
   const setQ = (v: string) => { setFilterQ(v); updateParams({ q: v }) }
+  const toggleUrgencia = () => {
+    const next = !filterUrgencia
+    setFilterUrgencia(next)
+    updateParams({ urgencia: next ? '1' : '' })
+  }
 
   if (loading) return <p className="text-slate-400 text-sm py-8 text-center">Cargando benchmarks...</p>
 
@@ -312,6 +318,7 @@ export default function BenchmarksPage() {
   const base = careers
     .filter(c => filterArea === 'all' || c.area === filterArea)
     .filter(c => !qNorm || c.nombre.toLowerCase().includes(qNorm))
+    .filter(c => !filterUrgencia || c.urgencia_curricular >= 60)
   const filtered = sortCareers(base, sortMode)
 
   const btnBase = 'text-[11px] px-2.5 py-1 rounded-full border transition-colors whitespace-nowrap'
@@ -548,6 +555,24 @@ export default function BenchmarksPage() {
             {AREA_LABELS[a] ?? a} ({careers.filter(c => c.area === a).length})
           </button>
         ))}
+      </div>
+
+      <div className="flex gap-2 mb-3">
+        <button
+          onClick={toggleUrgencia}
+          title="Mostrar solo carreras con urgencia curricular ≥ 60"
+          className={`px-2.5 py-1 text-xs rounded border transition-colors ${filterUrgencia ? 'bg-red-50 border-red-300 text-red-700 font-semibold' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+        >
+          ⚠ Urgencia ≥ 60
+        </button>
+        {(filterUrgencia || filterQ || filterArea !== 'all') && (
+          <button
+            onClick={() => { setFilterUrgencia(false); setQ(''); setArea('all') }}
+            className="px-2.5 py-1 text-xs rounded border border-gray-200 text-gray-400 hover:bg-gray-50"
+          >
+            Limpiar filtros
+          </button>
+        )}
       </div>
 
       <div className="mb-3 flex items-center justify-between gap-3">
