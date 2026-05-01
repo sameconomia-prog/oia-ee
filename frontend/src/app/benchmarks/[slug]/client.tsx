@@ -513,27 +513,43 @@ export default function BenchmarkCareerPage() {
       {(() => {
         const isAlta = (declining / (detail.skills.length || 1)) * 100 >= 30
         return isAlta ? (
-          <div className="mt-2 rounded-xl bg-indigo-50 border border-indigo-200 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-indigo-900 mb-1">
-                ¿Tienes {detail.nombre} en tu institución?
-              </p>
-              <p className="text-xs text-indigo-700">
-                Solicita el análisis personalizado: diagnóstico D1–D6, benchmarks y recomendaciones curriculares. Sin costo.
-              </p>
-              {solicitudesTotal !== null && solicitudesTotal > 0 && (
-                <p className="text-[11px] text-indigo-500 mt-1">
-                  {solicitudesTotal} institución{solicitudesTotal !== 1 ? 'es' : ''} ya solicitaron análisis
+          <>
+            {urgencia >= 60 && (
+              <div className="mt-2 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 flex items-start gap-3">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold shrink-0 mt-0.5">Lectura</span>
+                <div className="min-w-0">
+                  <Link
+                    href="/investigaciones/2026-05-costo-real-no-actualizar-matricula"
+                    className="text-sm font-medium text-gray-800 hover:text-indigo-700 transition-colors leading-snug"
+                  >
+                    El costo real de no actualizar: cómo se pierde la matrícula antes de que se note
+                  </Link>
+                  <p className="text-xs text-gray-400 mt-0.5">Patrón de declive en 4 fases y cómo interrumpirlo</p>
+                </div>
+              </div>
+            )}
+            <div className="mt-2 rounded-xl bg-indigo-50 border border-indigo-200 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-indigo-900 mb-1">
+                  ¿Tienes {detail.nombre} en tu institución?
                 </p>
-              )}
+                <p className="text-xs text-indigo-700">
+                  Solicita el análisis personalizado: diagnóstico D1–D6, benchmarks y recomendaciones curriculares. Sin costo.
+                </p>
+                {solicitudesTotal !== null && solicitudesTotal > 0 && (
+                  <p className="text-[11px] text-indigo-500 mt-1">
+                    {solicitudesTotal} institución{solicitudesTotal !== 1 ? 'es' : ''} ya solicitaron análisis
+                  </p>
+                )}
+              </div>
+              <Link
+                href={`/pertinencia?carrera=${encodeURIComponent(detail.nombre)}`}
+                className="shrink-0 text-sm font-semibold text-white bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap"
+              >
+                Solicitar análisis →
+              </Link>
             </div>
-            <Link
-              href={`/pertinencia?carrera=${encodeURIComponent(detail.nombre)}`}
-              className="shrink-0 text-sm font-semibold text-white bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap"
-            >
-              Solicitar análisis →
-            </Link>
-          </div>
+          </>
         ) : null
       })()}
     </div>

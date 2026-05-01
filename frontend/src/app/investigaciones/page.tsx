@@ -180,6 +180,7 @@ export default function InvestigacionesPage({
           '2026-05-como-leer-diagnostico-d1-d6-sin-datos',
           '2026-05-error-comun-interpretar-d1',
           '2026-05-semestre-actualizacion-d1-en-6-meses',
+          '2026-05-costo-real-no-actualizar-matricula',
           '2026-05-guia-uso-benchmarks-planificacion-curricular',
           '2026-05-por-que-d1-sube-sin-cambiar-plan-estudios',
           '2026-05-tres-senales-carrera-necesita-actualizacion',
@@ -232,7 +233,7 @@ export default function InvestigacionesPage({
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {investigaciones.filter(i => {
-          const RECTOR_SLUGS = ['2026-05-carta-rectores-urgencia-curricular', '2026-05-como-leer-diagnostico-d1-d6-sin-datos', '2026-05-error-comun-interpretar-d1', '2026-05-semestre-actualizacion-d1-en-6-meses', '2026-05-guia-uso-benchmarks-planificacion-curricular', '2026-05-ies-competencia-ia-diferenciacion', '2026-05-por-que-d1-sube-sin-cambiar-plan-estudios', '2026-05-tres-senales-carrera-necesita-actualizacion']
+          const RECTOR_SLUGS = ['2026-05-carta-rectores-urgencia-curricular', '2026-05-como-leer-diagnostico-d1-d6-sin-datos', '2026-05-error-comun-interpretar-d1', '2026-05-semestre-actualizacion-d1-en-6-meses', '2026-05-costo-real-no-actualizar-matricula', '2026-05-guia-uso-benchmarks-planificacion-curricular', '2026-05-ies-competencia-ia-diferenciacion', '2026-05-por-que-d1-sube-sin-cambiar-plan-estudios', '2026-05-tres-senales-carrera-necesita-actualizacion']
           if (!query && !filtro && !benchmarkFilter && RECTOR_SLUGS.includes(i.slug)) return false
           return true
         }).map(inv => {
