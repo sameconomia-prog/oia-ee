@@ -575,6 +575,15 @@ export default function BenchmarksPage() {
         )}
       </div>
 
+      <details className="mb-3 text-[11px] text-slate-500 border border-slate-100 rounded-lg px-3 py-2 bg-slate-50/50">
+        <summary className="cursor-pointer hover:text-slate-700 select-none font-medium">¿Cómo leer este índice?</summary>
+        <div className="mt-2 space-y-1 leading-relaxed">
+          <p><span className="font-semibold text-slate-700">Urgencia curricular (0–100)</span> — porcentaje de skills en declive × consenso promedio entre fuentes. ≥60 = intervención necesaria.</p>
+          <p><span className="font-semibold text-slate-700">Declining/Growing/Mixed</span> — dirección global según convergencia de WEF, McKinsey, CEPAL, Frey-Osborne y Anthropic.</p>
+          <p><span className="font-semibold text-slate-700">Acción recomendada</span> — retirar (eliminar del plan), rediseñar (actualizar con IA), fortalecer (profundizar) o agregar (nuevo contenido).</p>
+        </div>
+      </details>
+
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-sm font-semibold text-slate-700 shrink-0">
           {filtered.length} carrera{filtered.length !== 1 ? 's' : ''}
