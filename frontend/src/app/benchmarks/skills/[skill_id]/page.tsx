@@ -4,8 +4,12 @@ import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useMemo } from 'react'
-import { getBenchmarkSkillCrossSource, getBenchmarkSkillsIndex, getBenchmarkSkillCareers } from '@/lib/api'
+import { getBenchmarkSkillCrossSource, getBenchmarkSkillsIndex, getBenchmarkSkillCareers, getVacantesTopSkills } from '@/lib/api'
 import type { SkillCrossSource, SkillIndexItem, SkillCareerItem, ConvergenceDirection } from '@/lib/types'
+
+function normS(s: string) {
+  return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import ConvergenceIcon from '@/components/benchmarks/ConvergenceIcon'
@@ -42,6 +46,7 @@ export default function SkillCrossSourcePage() {
   const [indexItem, setIndexItem] = useState<SkillIndexItem | null>(null)
   const [skillCareers, setSkillCareers] = useState<SkillCareerItem[]>([])
   const [allIndex, setAllIndex] = useState<SkillIndexItem[]>([])
+  const [vacanteCount, setVacanteCount] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -51,12 +56,20 @@ export default function SkillCrossSourcePage() {
       getBenchmarkSkillCrossSource(skill_id),
       getBenchmarkSkillsIndex(),
       getBenchmarkSkillCareers(skill_id),
+      getVacantesTopSkills(50).catch(() => []),
     ])
-      .then(([c, idx, sc]) => {
+      .then(([c, idx, sc, vskills]) => {
         setCross(c)
-        setIndexItem(idx.find(s => s.skill_id === skill_id) ?? null)
+        const item = idx.find(s => s.skill_id === skill_id) ?? null
+        setIndexItem(item)
         setSkillCareers(sc)
         setAllIndex(idx)
+        if (item) {
+          const q = normS(item.skill_nombre)
+          const match = vskills.find(vs => normS(vs.nombre) === q) ??
+            vskills.find(vs => normS(vs.nombre).includes(q) || q.includes(normS(vs.nombre)))
+          setVacanteCount(match?.count ?? 0)
+        }
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
@@ -141,6 +154,24 @@ export default function SkillCrossSourcePage() {
               {fuentes > 0 ? `${consenso}%` : '—'}
             </span>
           </div>
+          {vacanteCount !== null && (
+            <div>
+              <span className="text-[11px] text-slate-500 uppercase tracking-widest block mb-0.5">Demanda MX</span>
+              {vacanteCount > 0 ? (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xl font-bold font-mono text-slate-800">{vacanteCount}</span>
+                  <span className="text-[10px] text-slate-400">vacantes</span>
+                  {direccion === 'declining' && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 uppercase tracking-wide ml-1">
+                      brecha
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <span className="text-sm text-slate-400">—</span>
+              )}
+            </div>
+          )}
         </div>
       </Card>
 
