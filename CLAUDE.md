@@ -44,8 +44,8 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 125, 2026-04-30)
-- 458 pytest · 0 errores TypeScript · 62 artículos investigaciones
+## Estado actual (Sprint 126, 2026-04-30)
+- 458 pytest · 0 errores TypeScript · 67 artículos investigaciones
 - P117: benchmark signal badges (↑↓~) en /vacantes/[id] skills
 - P118: urgencia curricular "U" badge en /carreras listing
 - P119: benchmark direction en skill filter pills de /vacantes
@@ -54,6 +54,8 @@ OIA-EE/
 - P122: columna "U" de urgencia global en KpisTable
 - P123: doble alerta (D1≥0.60 + urgencia≥60) en /estadisticas; benchmark_slug en TopRiesgoItemOut
 - P124: skills calientes panel en /benchmarks (growing + demanda MX)
+- P125: 5 artículos análisis sectorial (diseño gráfico, derecho, economía, marketing, turismo)
+- P126: tag cloud en /investigaciones (getTopTags + chips clickables con conteo)
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
