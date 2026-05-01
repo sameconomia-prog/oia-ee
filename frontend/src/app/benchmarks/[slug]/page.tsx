@@ -64,6 +64,8 @@ export default function BenchmarkCareerPage() {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [copiedDiag, setCopiedDiag] = useState(false)
+  const [urgencia, setUrgencia] = useState(0)
 
   useEffect(() => {
     if (!slug) return
@@ -78,6 +80,7 @@ export default function BenchmarkCareerPage() {
         setDetail(d)
         setSources(s)
         setRelated(all.filter(c => c.slug !== slug && c.area === d.area).slice(0, 3))
+        setUrgencia(all.find(c => c.slug === slug)?.urgencia_curricular ?? 0)
         document.title = `${d.nombre} — Benchmark Global · OIA-EE`
         return getCarrerasPublico({ q: d.nombre, limit: 30 })
       })
@@ -115,6 +118,19 @@ export default function BenchmarkCareerPage() {
             <p className="text-sm text-slate-500 mt-1">{detail.area}</p>
           </div>
           <div className="flex items-center gap-2 ml-6 mt-1 shrink-0 flex-wrap justify-end">
+            <button
+              onClick={() => {
+                const urgLabel = urgencia >= 60 ? 'Alta' : urgencia >= 30 ? 'Moderada' : 'Baja'
+                const text = `Benchmark Global — ${detail.nombre}\nUrgencia curricular: ${urgencia}/100 (${urgLabel})\nSkills en declive: ${declining} | Skills crecientes: ${growing} | Mixed: ${mixed}\n${window.location.href}`
+                navigator.clipboard.writeText(text).then(() => {
+                  setCopiedDiag(true)
+                  setTimeout(() => setCopiedDiag(false), 2000)
+                })
+              }}
+              className="text-xs text-slate-500 border border-slate-200 px-3 py-1.5 rounded hover:bg-slate-50 transition-colors font-medium"
+            >
+              {copiedDiag ? '✓ Copiado' : 'Copiar diagnóstico'}
+            </button>
             <button
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href).then(() => {
