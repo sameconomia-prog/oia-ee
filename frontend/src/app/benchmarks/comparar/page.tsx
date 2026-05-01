@@ -189,6 +189,11 @@ export default function BenchmarksCompararPage() {
     return detailB.skills.filter(s => !idsA.has(s.skill_id))
   }, [detailA, detailB])
 
+  const alignmentPct = useMemo(() => {
+    if (!sharedCount) return null
+    return Math.round(((sharedCount - divergencias.length) / sharedCount) * 100)
+  }, [sharedCount, divergencias])
+
   const selectClass = 'w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700'
 
   return (
@@ -261,12 +266,32 @@ export default function BenchmarksCompararPage() {
       {detailA && detailB && (
         <div className="space-y-4">
           <Card className="p-5">
-            <h3 className="text-sm font-semibold text-slate-800 mb-1">
-              Análisis de convergencia cruzada
-            </h3>
-            <p className="text-xs text-slate-400 mb-4">
-              {sharedCount} skills en común · {divergencias.length} con dirección diferente entre ambas carreras
-            </p>
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800 mb-0.5">
+                  Análisis de convergencia cruzada
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {sharedCount} skills en común · {divergencias.length} con dirección diferente entre ambas carreras
+                </p>
+              </div>
+              {alignmentPct !== null && (
+                <div className="shrink-0 text-center ml-4">
+                  <p className={`text-2xl font-bold font-mono ${alignmentPct >= 75 ? 'text-emerald-600' : alignmentPct >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    {alignmentPct}%
+                  </p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest">alineación</p>
+                </div>
+              )}
+            </div>
+            {alignmentPct !== null && (
+              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-4">
+                <div
+                  className={`h-full rounded-full transition-all ${alignmentPct >= 75 ? 'bg-emerald-400' : alignmentPct >= 50 ? 'bg-yellow-400' : 'bg-red-400'}`}
+                  style={{ width: `${alignmentPct}%` }}
+                />
+              </div>
+            )}
             {divergencias.length === 0 ? (
               <p className="text-xs text-emerald-600 font-medium">
                 Ambas carreras comparten la misma dirección en todas sus skills en común.
