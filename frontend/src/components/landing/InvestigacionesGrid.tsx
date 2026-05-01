@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { Investigacion } from '@/lib/investigaciones'
 import { getTipoLabel } from '@/lib/investigaciones'
-import { ARTICLE_TO_BENCHMARK, BENCHMARK_LABELS } from '@/lib/benchmark-articles'
+import { ARTICLE_TO_BENCHMARK, BENCHMARK_LABELS, BENCHMARK_URGENCIA } from '@/lib/benchmark-articles'
 
 interface InvestigacionesGridProps {
   investigaciones: Investigacion[]
@@ -33,6 +33,7 @@ export default function InvestigacionesGrid({ investigaciones }: Investigaciones
           {items.map((inv) => {
             const bmSlug = ARTICLE_TO_BENCHMARK[inv.slug]
             const bmLabel = bmSlug ? BENCHMARK_LABELS[bmSlug] : undefined
+            const urgencia = bmSlug ? (BENCHMARK_URGENCIA[bmSlug] ?? 0) : 0
             return (
             <Link key={inv.slug} href={`/investigaciones/${inv.slug}`}>
               <article className="bg-[#F8FAFC] rounded-xl p-6 border border-gray-100 hover:border-[#3B82F6] hover:shadow-md transition-all h-full">
@@ -43,6 +44,11 @@ export default function InvestigacionesGrid({ investigaciones }: Investigaciones
                   {bmLabel && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
                       {bmLabel}
+                    </span>
+                  )}
+                  {urgencia >= 60 && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-700 font-semibold">
+                      ⚠ urgencia {urgencia}
                     </span>
                   )}
                   <span className="text-xs text-gray-400">{inv.tiempo_lectura} de lectura</span>

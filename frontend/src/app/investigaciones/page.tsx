@@ -1,6 +1,6 @@
 import { getAllInvestigaciones, getTipoLabel, getTopTags } from '@/lib/investigaciones'
 import type { TipoInvestigacion } from '@/lib/investigaciones'
-import { BENCHMARK_ALL_ARTICLES, BENCHMARK_LABELS, ARTICLE_TO_BENCHMARK } from '@/lib/benchmark-articles'
+import { BENCHMARK_ALL_ARTICLES, BENCHMARK_LABELS, ARTICLE_TO_BENCHMARK, BENCHMARK_URGENCIA } from '@/lib/benchmark-articles'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
@@ -185,9 +185,10 @@ export default function InvestigacionesPage({
         {investigaciones.filter(i => i.slug !== '2026-05-carta-rectores-urgencia-curricular' || query || filtro || benchmarkFilter).map(inv => {
           const bmSlug = ARTICLE_TO_BENCHMARK[inv.slug]
           const bmLabel = bmSlug ? BENCHMARK_LABELS[bmSlug] : undefined
+          const urgencia = bmSlug ? (BENCHMARK_URGENCIA[bmSlug] ?? 0) : 0
           return (
             <Link key={inv.slug} href={`/investigaciones/${inv.slug}`}>
-              <article className="bg-white rounded-xl border border-gray-100 p-6 hover:border-[#3B82F6] hover:shadow-md transition-all h-full flex flex-col">
+              <article className={`bg-white rounded-xl border p-6 hover:border-[#3B82F6] hover:shadow-md transition-all h-full flex flex-col ${urgencia >= 60 ? 'border-red-100' : 'border-gray-100'}`}>
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
                   <span className={`text-xs font-semibold px-2 py-1 rounded-full ${TIPO_COLOR[inv.tipo]}`}>
                     {getTipoLabel(inv.tipo)}
@@ -195,6 +196,16 @@ export default function InvestigacionesPage({
                   {bmLabel && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
                       {bmLabel}
+                    </span>
+                  )}
+                  {urgencia >= 60 && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-700 font-semibold">
+                      ⚠ urgencia {urgencia}
+                    </span>
+                  )}
+                  {urgencia >= 30 && urgencia < 60 && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold">
+                      urgencia {urgencia}
                     </span>
                   )}
                   {inv.acceso === 'lead_magnet' && (

@@ -64,6 +64,27 @@ export const BENCHMARK_LABELS: Record<string, string> = {
   'turismo': 'Turismo',
 }
 
+/** Static urgencia_curricular scores (0–100) for each benchmark career */
+export const BENCHMARK_URGENCIA: Record<string, number> = {
+  'administracion-empresas': 20,
+  'arquitectura': 20,
+  'ciencias-politicas': 0,
+  'comunicacion': 0,
+  'contaduria': 71,
+  'derecho': 40,
+  'diseno-grafico': 0,
+  'economia': 0,
+  'educacion': 0,
+  'enfermeria': 40,
+  'ingenieria-civil': 0,
+  'ingenieria-sistemas': 0,
+  'medicina': 0,
+  'mercadotecnia': 80,
+  'nutricion': 0,
+  'psicologia': 0,
+  'turismo': 0,
+}
+
 /** Inverse map: all article slugs (primary + secondary) → benchmark career slug */
 export const ARTICLE_TO_BENCHMARK: Record<string, string> = (() => {
   const map: Record<string, string> = {}
