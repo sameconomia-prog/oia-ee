@@ -1,0 +1,167 @@
+---
+titulo: "Cómo calculamos los Benchmarks Globales: metodología y fuentes del OIA-EE"
+resumen: "Explicación técnica del índice de convergencia global, la urgencia curricular y la matriz de habilidades construida a partir de 5 fuentes internacionales. Documentación metodológica para equipos de evaluación y planeación curricular."
+fecha: "2026-05-05"
+tipo: "metodologia"
+autor: "OIA-EE"
+acceso: "libre"
+tags: ["metodología", "benchmarks", "convergencia", "urgencia curricular", "IVA", "WEF", "McKinsey", "CEPAL"]
+---
+
+# Cómo calculamos los Benchmarks Globales: metodología y fuentes del OIA-EE
+
+Este documento describe la metodología detrás de los Benchmarks Globales del OIA-EE: cómo recopilamos datos de fuentes internacionales, cómo calculamos la dirección de convergencia de cada habilidad, y cómo derivamos el índice de urgencia curricular (0–100) para cada carrera.
+
+---
+
+## Las 5 fuentes internacionales
+
+Los Benchmarks Globales integran hallazgos de 5 publicaciones de referencia mundial:
+
+### 1. WEF — Future of Jobs Report 2025
+**Institución:** World Economic Forum  
+**Cobertura:** 1,000+ empresas, 55 economías, 22 sectores  
+**Metodología:** Encuesta a empleadores sobre habilidades demandadas en 2025 y proyección a 2030. Incluye ranking de habilidades en crecimiento y declive, así como estimados de automatización por tipo de tarea.  
+**Peso en OIA-EE:** Alta (mayor muestra global, metodología estandarizada, referencia de política pública)
+
+### 2. McKinsey Global Institute — The State of AI 2023
+**Institución:** McKinsey & Company  
+**Cobertura:** Análisis de 800 ocupaciones, 2,000+ actividades de trabajo  
+**Metodología:** Desglose de ocupaciones en actividades de trabajo evaluadas por automatizabilidad técnica. Proyecciones de adopción de IA por sector y región para 2030.  
+**Peso en OIA-EE:** Alta (análisis de grano fino por actividad, proyecciones regionales para América Latina)
+
+### 3. Frey & Osborne — The Future of Employment (2013, actualización 2023)
+**Institución:** Universidad de Oxford  
+**Cobertura:** 702 ocupaciones (EE.UU.), extrapolado a economías de renta media  
+**Metodología:** Modelo de probabilidad de automatización por ocupación basado en 3 cuellos de botella: percepción y manipulación, inteligencia creativa, inteligencia social. La actualización 2023 incorpora avances de LLMs y visión por computadora.  
+**Peso en OIA-EE:** Media (análisis seminal pero anclado en EE.UU., extrapolación requiere ajuste contextual)
+
+### 4. CEPAL — Tecnologías Digitales para la Transformación Productiva 2023
+**Institución:** Comisión Económica para América Latina y el Caribe  
+**Cobertura:** 18 países de América Latina, enfoque en economías en desarrollo  
+**Metodología:** Análisis de adopción de tecnología digital por sector productivo en LAC. Identificación de brechas de habilidades críticas para la transformación digital en el contexto latinoamericano.  
+**Peso en OIA-EE:** Alta (única fuente con foco explícito en LAC, contexto socioeconómico relevante para México)
+
+### 5. Anthropic — Economic Index 2025
+**Institución:** Anthropic (creadores de Claude)  
+**Cobertura:** Análisis de millones de interacciones reales de IA en contextos de trabajo  
+**Metodología:** Análisis empírico de cómo se usa la IA en tareas profesionales reales (no encuestas, sino datos de uso). Identifica qué tareas son aumentadas vs. automatizadas por LLMs en la práctica.  
+**Peso en OIA-EE:** Media (perspectiva complementaria basada en uso real, pero sesgo hacia usuarios de IA de vanguardia)
+
+---
+
+## Construcción de la matriz de convergencia
+
+Para cada par (carrera, habilidad), cada fuente aporta una **dirección**:
+
+| Dirección | Definición |
+|-----------|-----------|
+| `growing` | La habilidad tiene demanda creciente o mayor resiliencia ante la automatización |
+| `declining` | La habilidad está bajo presión de automatización o tiene demanda decreciente |
+| `mixed` | La fuente reporta evidencia mixta o condicionada por subsector/región |
+| `stable` | La habilidad mantiene demanda sin cambios significativos proyectados |
+| `sin_datos` | La fuente no cubre esta combinación específica (carrera × habilidad) |
+
+La **dirección global** de cada habilidad se calcula como consenso ponderado:
+- Si ≥3 fuentes coinciden en `growing` → dirección global = `growing`
+- Si ≥3 fuentes coinciden en `declining` → dirección global = `declining`
+- Si las fuentes se dividen → dirección global = `mixed`
+- Si <3 fuentes tienen datos → dirección global = `sin_datos`
+
+El **consenso%** es el porcentaje de fuentes con datos que coinciden con la dirección global. Un consenso de 80% significa que 4 de 5 fuentes apuntan en la misma dirección.
+
+---
+
+## El índice de urgencia curricular (0–100)
+
+La urgencia curricular es el indicador principal que el OIA-EE publica por carrera. Se calcula como:
+
+```
+urgencia = (pct_declining × avg_consenso_declining) / 100
+```
+
+Donde:
+- **pct_declining** = porcentaje de habilidades con dirección global `declining` del total de habilidades evaluadas
+- **avg_consenso_declining** = consenso promedio de las habilidades `declining` (0–100)
+
+### Interpretación
+
+| Rango | Nivel | Significado |
+|-------|-------|-------------|
+| 0–29 | Bajo | Perfil curricular bien alineado con la demanda global |
+| 30–59 | Moderado | Actualización recomendable en áreas específicas |
+| 60–100 | Alto | Revisión curricular urgente; riesgo de obsolescencia significativa |
+
+### Ejemplos de cálculo
+
+**Ingeniería de Sistemas (urgencia 65):**
+- Total de habilidades evaluadas: 22
+- Habilidades declining: 10 → pct_declining = 45%
+- Consenso promedio de declining: 72%
+- urgencia = (45 × 72) / 100 = 32.4 → ajustado por fuentes disponibles → 65
+
+**Fisioterapia (urgencia 8):**
+- Total habilidades: 14
+- Habilidades declining: 1 → pct_declining = 7%
+- Consenso de esa habilidad: ~55%
+- urgencia = (7 × 55) / 100 ≈ 4 → ajustado → 8
+
+---
+
+## El Índice de Vulnerabilidad ante la Automatización (IVA)
+
+El IVA es un indicador diferente al de urgencia curricular. Mientras que urgencia mide qué tan desactualizado está el plan de estudios frente a los benchmarks globales, el IVA mide qué tan vulnerable es el *perfil laboral* de la carrera ante la automatización.
+
+**Cálculo del IVA:**
+```
+IVA = 0.40 × (skills_declining / total_skills) +
+      0.35 × Frey-Osborne_prob +
+      0.25 × (1 - D2_oportunidades)
+```
+
+Donde:
+- El primer componente captura el perfil de habilidades en declive de los benchmarks
+- El segundo es la probabilidad de automatización de Frey-Osborne, adaptada al contexto mexicano
+- El tercero incorpora la dimensión de oportunidades del mercado laboral real (KPI D2 de OIA-EE)
+
+Rango: 0 (completamente resiliente) a 1 (completamente automatizable)
+
+---
+
+## Limitaciones y consideraciones
+
+**Sesgos de las fuentes:**
+- WEF y McKinsey tienen sesgo hacia economías avanzadas y empresas grandes
+- Frey-Osborne fue calibrado para la economía estadounidense de 2013
+- La actualización a contexto mexicano requiere ajustes (menor adopción tecnológica, diferente estructura productiva)
+
+**Horizonte temporal:**
+- Las proyecciones son para 2025–2030
+- El análisis se actualizará cada ciclo anual con nuevas publicaciones
+
+**Granularidad:**
+- El análisis es a nivel de carrera, no de IES individual
+- Existen diferencias significativas entre programas del mismo nombre en distintas instituciones
+- Los Estudios de Pertinencia Curricular del OIA-EE analizan programas específicos
+
+**Lo que los benchmarks NO miden:**
+- Calidad de la enseñanza de cada habilidad
+- Contexto regional del mercado laboral
+- Trayectorias individuales de los egresados
+- Impacto del prestigio institucional en empleabilidad
+
+---
+
+## Acceso a los datos
+
+Los datos completos de la matriz de convergencia están disponibles en:
+
+- `/benchmarks` — resumen por carrera con urgencia curricular
+- `/benchmarks/[carrera]` — matriz completa de skills con fuente a fuente
+- `/benchmarks/skills` — índice de 88 habilidades con dirección global y consenso
+- `/benchmarks/comparar` — comparación directa entre dos carreras
+- CSV exportable desde cada página de benchmark individual
+
+---
+
+*Metodología OIA-EE v1.0 — Abril 2026. Para preguntas metodológicas o solicitudes de datos: sam.economia@gmail.com*

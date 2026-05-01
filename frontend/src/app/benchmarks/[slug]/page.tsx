@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getBenchmarkCareerDetail, getBenchmarkSources } from '@/lib/api'
-import type { BenchmarkCareerDetail, BenchmarkSource } from '@/lib/types'
+import { getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers } from '@/lib/api'
+import type { BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary } from '@/lib/types'
 import SkillConvergenceTable from '@/components/benchmarks/SkillConvergenceTable'
 import CurriculumActionSummary from '@/components/benchmarks/CurriculumActionSummary'
 import HorizonteTimeline from '@/components/benchmarks/HorizonteTimeline'
@@ -51,6 +51,7 @@ export default function BenchmarkCareerPage() {
   const { slug } = useParams<{ slug: string }>()
   const [detail, setDetail] = useState<BenchmarkCareerDetail | null>(null)
   const [sources, setSources] = useState<BenchmarkSource[]>([])
+  const [related, setRelated] = useState<BenchmarkCareerSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -59,8 +60,13 @@ export default function BenchmarkCareerPage() {
     Promise.all([
       getBenchmarkCareerDetail(slug),
       getBenchmarkSources(),
+      getBenchmarkCareers(),
     ])
-      .then(([d, s]) => { setDetail(d); setSources(s) })
+      .then(([d, s, all]) => {
+        setDetail(d)
+        setSources(s)
+        setRelated(all.filter(c => c.slug !== slug && c.area === d.area).slice(0, 3))
+      })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
   }, [slug])
