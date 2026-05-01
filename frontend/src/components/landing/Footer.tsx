@@ -23,8 +23,9 @@ export default function Footer() {
           <p className="text-white font-semibold mb-3 text-sm">Observatorio</p>
           <ul className="space-y-2 text-sm">
             <li><Link href="/investigaciones" className="hover:text-white transition-colors">Investigaciones</Link></li>
-            <li><Link href="/plataforma" className="hover:text-white transition-colors">Plataforma</Link></li>
-            <li><Link href="/#como-funciona" className="hover:text-white transition-colors">Metodología</Link></li>
+            <li><Link href="/benchmarks" className="hover:text-white transition-colors">Benchmarks globales</Link></li>
+            <li><Link href="/estadisticas" className="hover:text-white transition-colors">Estadísticas</Link></li>
+            <li><Link href="/metodologia" className="hover:text-white transition-colors">Metodología</Link></li>
             <li><Link href="/#contacto" className="hover:text-white transition-colors">Contacto</Link></li>
           </ul>
         </div>
@@ -33,9 +34,10 @@ export default function Footer() {
         <div>
           <p className="text-white font-semibold mb-3 text-sm">Para Instituciones</p>
           <ul className="space-y-2 text-sm">
-            <li><Link href="/plataforma" className="hover:text-white transition-colors">IES</Link></li>
-            <li><Link href="/#contacto" className="hover:text-white transition-colors">Gobierno</Link></li>
-            <li><Link href="/plataforma" className="hover:text-white transition-colors">Investigadores</Link></li>
+            <li><Link href="/ies" className="hover:text-white transition-colors">Instituciones (IES)</Link></li>
+            <li><Link href="/carreras" className="hover:text-white transition-colors">Carreras</Link></li>
+            <li><Link href="/pertinencia" className="hover:text-white transition-colors">Análisis de pertinencia</Link></li>
+            <li><Link href="/comparar" className="hover:text-white transition-colors">Comparar IES</Link></li>
           </ul>
         </div>
 
