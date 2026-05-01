@@ -78,6 +78,7 @@ export default function BenchmarkCareerPage() {
         setDetail(d)
         setSources(s)
         setRelated(all.filter(c => c.slug !== slug && c.area === d.area).slice(0, 3))
+        document.title = `${d.nombre} — Benchmark Global · OIA-EE`
         return getCarrerasPublico({ q: d.nombre, limit: 30 })
       })
       .then(carreras => {
