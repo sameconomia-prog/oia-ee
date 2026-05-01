@@ -1,5 +1,5 @@
 // frontend/src/app/page.tsx
-import { getResumenPublico, getEstadisticasPublicas, getBenchmarkResumen, getBenchmarkCareers, getBenchmarkSkillsIndex, getVacantesTopSkills } from '@/lib/api'
+import { getResumenPublico, getEstadisticasPublicas, getBenchmarkResumen, getBenchmarkCareers, getBenchmarkSkillsIndex, getVacantesTopSkills, getTopRiesgo, getKpisDistribucion } from '@/lib/api'
 import { getAllInvestigaciones } from '@/lib/investigaciones'
 import Hero from '@/components/landing/Hero'
 import TickerDatos from '@/components/landing/TickerDatos'
@@ -10,6 +10,7 @@ import InvestigacionesGrid from '@/components/landing/InvestigacionesGrid'
 import BenchmarksSection from '@/components/landing/BenchmarksSection'
 import SobreElAnalista from '@/components/landing/SobreElAnalista'
 import FormularioContacto from '@/components/landing/FormularioContacto'
+import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -30,13 +31,15 @@ function normS(s: string) {
 }
 
 export default async function LandingPage() {
-  const [resumen, estadisticas, benchmarksResumen, benchmarkCareers, skillsIndex, vacanteSkills] = await Promise.all([
+  const [resumen, estadisticas, benchmarksResumen, benchmarkCareers, skillsIndex, vacanteSkills, topRiesgo, distribucion] = await Promise.all([
     getResumenPublico().catch(() => null),
     getEstadisticasPublicas().catch(() => null),
     getBenchmarkResumen().catch(() => null),
     getBenchmarkCareers().catch(() => []),
     getBenchmarkSkillsIndex().catch(() => []),
     getVacantesTopSkills(50).catch(() => []),
+    getTopRiesgo(50).catch(() => []),
+    getKpisDistribucion().catch(() => null),
   ])
   const topUrgentCareers = [...benchmarkCareers]
     .sort((a, b) => b.urgencia_curricular - a.urgencia_curricular)
@@ -49,6 +52,9 @@ export default async function LandingPage() {
   }
   const calientesCount = skillsIndex.filter(s => s.direccion_global === 'growing' && matchesVacante(s.skill_nombre)).length
   const brechaCount = skillsIndex.filter(s => s.direccion_global === 'declining' && matchesVacante(s.skill_nombre)).length
+  const uMap = new Map(benchmarkCareers.map(b => [b.slug, b.urgencia_curricular]))
+  const dobleAlertaCount = topRiesgo.filter(c => c.d1_score >= 0.6 && c.benchmark_slug && (uMap.get(c.benchmark_slug) ?? 0) >= 60).length
+  const altaOportunidadCount = distribucion?.d2.find(b => b.rango.startsWith('Alto'))?.count ?? 0
   const investigaciones = getAllInvestigaciones()
 
   const tickerData = {
@@ -79,6 +85,25 @@ export default async function LandingPage() {
       />
       <Hero totalIes={tickerData.total_ies} totalCarreras={tickerData.total_carreras} />
       <TickerDatos data={tickerData} />
+      {(dobleAlertaCount > 0 || altaOportunidadCount > 0 || calientesCount > 0) && (
+        <section className="max-w-5xl mx-auto px-4 py-4 flex flex-wrap gap-2 justify-center">
+          {dobleAlertaCount > 0 && (
+            <Link href="/carreras?doble=1" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 border border-red-200 text-red-800 text-xs font-semibold hover:bg-red-100 transition-colors">
+              ⚠ {dobleAlertaCount} doble alerta
+            </Link>
+          )}
+          {altaOportunidadCount > 0 && (
+            <Link href="/carreras?oportunidad=1" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold hover:bg-emerald-100 transition-colors">
+              ↑ {altaOportunidadCount} alta oportunidad
+            </Link>
+          )}
+          {calientesCount > 0 && (
+            <Link href="/benchmarks/skills?dir=growing" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-semibold hover:bg-indigo-100 transition-colors">
+              ✦ {calientesCount} skills calientes
+            </Link>
+          )}
+        </section>
+      )}
       <CoberturaPrensa enabled={false} />
       <ElProblema />
       <ComoFunciona />
