@@ -145,6 +145,22 @@ export default function BenchmarkCareerPage() {
               {copied ? '✓ Copiado' : 'Copiar enlace'}
             </button>
             <a
+              href={`https://wa.me/?text=${encodeURIComponent(`Benchmark ${detail.nombre} — OIA-EE\n${typeof window !== 'undefined' ? window.location.href : `https://oia-ee.mx/benchmarks/${slug}`}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-green-700 border border-green-200 px-3 py-1.5 rounded hover:bg-green-50 transition-colors font-medium"
+            >
+              WhatsApp
+            </a>
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Benchmark ${detail.nombre} — urgencia curricular ${detail.urgencia_curricular}/100 — OIA-EE`)}&url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : `https://oia-ee.mx/benchmarks/${slug}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-gray-700 border border-gray-200 px-3 py-1.5 rounded hover:bg-gray-50 transition-colors font-medium"
+            >
+              X
+            </a>
+            <a
               href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : `https://frontend-one-psi-80.vercel.app/benchmarks/${slug}`)}`}
               target="_blank"
               rel="noopener noreferrer"
