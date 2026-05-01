@@ -218,11 +218,23 @@ export default function CarreraDetallePage() {
       {/* Breadcrumb + título */}
       <div className="mb-6">
         <Link href="/carreras" className="text-xs text-brand-600 hover:underline">← Carreras</Link>
-        <h1 className="text-2xl font-bold text-slate-900 mt-2">{d.nombre}</h1>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {d.area_conocimiento && <Badge variant="default">{d.area_conocimiento}</Badge>}
-          {d.nivel && <Badge variant="neutro">{d.nivel}</Badge>}
-          {d.duracion_anios && <Badge variant="neutro">{d.duracion_anios} años</Badge>}
+        <div className="flex items-start justify-between gap-3 mt-2">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-bold text-slate-900">{d.nombre}</h1>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {d.area_conocimiento && <Badge variant="default">{d.area_conocimiento}</Badge>}
+              {d.nivel && <Badge variant="neutro">{d.nivel}</Badge>}
+              {d.duracion_anios && <Badge variant="neutro">{d.duracion_anios} años</Badge>}
+            </div>
+          </div>
+          <a
+            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://oia-ee.mx/carreras/${id}`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 mt-1 text-xs text-blue-600 border border-blue-200 px-3 py-1.5 rounded hover:bg-blue-50 transition-colors font-medium whitespace-nowrap"
+          >
+            LinkedIn
+          </a>
         </div>
       </div>
 
