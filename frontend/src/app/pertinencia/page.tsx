@@ -26,6 +26,33 @@ const STEPS = [
   { n: '4', label: 'Entrega', desc: 'Reporte PDF + sesión de presentación' },
 ]
 
+const FAQ = [
+  {
+    q: '¿Cuánto cuesta el estudio?',
+    a: 'Nada. El estudio de pertinencia curricular es completamente gratuito para instituciones de educación superior en México. OIA-EE es un observatorio académico independiente, no una consultora.',
+  },
+  {
+    q: '¿Qué necesito proporcionar?',
+    a: 'Solo el nombre de la carrera que quieres analizar y tu correo institucional. No necesitas subir documentos ni planes de estudio. Trabajamos con datos públicos y benchmarks internacionales.',
+  },
+  {
+    q: '¿Cómo sé que el análisis es riguroso?',
+    a: 'La metodología cruza 5 fuentes internacionales (WEF Future of Jobs, McKinsey, CEPAL, Frey-Osborne y Anthropic). Cada skill se clasifica por consenso porcentual entre fuentes y horizonte de impacto. Puedes explorar la metodología en /benchmarks antes de solicitar.',
+  },
+  {
+    q: '¿El estudio habla solo de IA o es curricular en general?',
+    a: 'Es específico al impacto de la automatización e IA generativa. Diagnóstica qué competencias de tu plan de estudios tienen riesgo de obsolescencia (D1), cuáles representan oportunidades emergentes (D2) y qué habilidades pide hoy el mercado laboral mexicano.',
+  },
+  {
+    q: '¿Con quién voy a hablar?',
+    a: 'Con Samuel Ruiz, economista y fundador de OIA-EE. El análisis no es automatizado: Sam revisa cada solicitud personalmente y te contacta en máximo 24 horas hábiles para confirmar detalles.',
+  },
+  {
+    q: '¿Qué hago con el reporte cuando lo recibo?',
+    a: 'El PDF está diseñado para presentarse a Consejo Académico o Rectoría. Incluye diagnóstico ejecutivo, matriz de skills por acción (retirar/rediseñar/fortalecer/agregar) y comparativo vs. promedio nacional de la carrera.',
+  },
+]
+
 function PertinenciaContent() {
   const searchParams = useSearchParams()
   const carreraParam = searchParams.get('carrera') ?? ''
@@ -40,6 +67,7 @@ function PertinenciaContent() {
   })
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [submittedBenchmark, setSubmittedBenchmark] = useState<BenchmarkCareerSummary | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [benchmarkCareers, setBenchmarkCareers] = useState<BenchmarkCareerSummary[]>([])
@@ -317,6 +345,29 @@ function PertinenciaContent() {
               Leer la carta →
             </Link>
           </Card>
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div className="mt-10">
+        <h2 className="text-base font-semibold text-slate-800 mb-4">Preguntas frecuentes</h2>
+        <div className="divide-y divide-slate-100 border border-slate-100 rounded-xl overflow-hidden">
+          {FAQ.map((item, i) => (
+            <div key={i} className="bg-white">
+              <button
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-50 transition-colors"
+              >
+                <span className="text-sm font-medium text-slate-800">{item.q}</span>
+                <span className="text-slate-400 text-base ml-4 shrink-0">{openFaq === i ? '−' : '+'}</span>
+              </button>
+              {openFaq === i && (
+                <div className="px-5 pb-4">
+                  <p className="text-sm text-slate-600 leading-relaxed">{item.a}</p>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>
