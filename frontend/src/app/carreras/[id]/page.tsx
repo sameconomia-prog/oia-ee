@@ -1,10 +1,14 @@
 // frontend/src/app/carreras/[id]/page.tsx
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers } from '@/lib/api'
-import type { CarreraDetalle, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary } from '@/lib/types'
+import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills } from '@/lib/api'
+import type { CarreraDetalle, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq } from '@/lib/types'
+
+function normSkill(s: string) {
+  return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
 import { BENCHMARK_TO_ARTICLE } from '@/lib/benchmark-articles'
 import FanChart from '@/components/FanChart'
 import SkillTreemap from '@/components/SkillTreemap'
@@ -100,6 +104,22 @@ export default function CarreraDetallePage() {
   const [benchmarkDetail, setBenchmarkDetail] = useState<BenchmarkCareerDetail | null>(null)
   const [benchmarkSources, setBenchmarkSources] = useState<BenchmarkSource[]>([])
   const [benchmarkSummary, setBenchmarkSummary] = useState<BenchmarkCareerSummary | null>(null)
+  const [vacanteSkills, setVacanteSkills] = useState<SkillFreq[]>([])
+
+  const demandaLaboral = useMemo(() => {
+    if (!benchmarkDetail || vacanteSkills.length === 0) return []
+    const vacMap = new Map(vacanteSkills.map(sf => [normSkill(sf.nombre), sf.count]))
+    return benchmarkDetail.skills
+      .map(sk => {
+        const q = normSkill(sk.skill_nombre)
+        const count = vacMap.get(q) ??
+          Array.from(vacMap.entries()).find(([k]) => k.includes(q) || q.includes(k))?.[1] ?? 0
+        return { ...sk, vacanteCount: count }
+      })
+      .filter(sk => sk.vacanteCount > 0)
+      .sort((a, b) => b.vacanteCount - a.vacanteCount)
+      .slice(0, 8)
+  }, [benchmarkDetail, vacanteSkills])
 
   useEffect(() => {
     if (!id) return
@@ -115,6 +135,7 @@ export default function CarreraDetallePage() {
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
+    getVacantesTopSkills(50).then(setVacanteSkills).catch(() => {})
     getKpisHistorico(id, 'd1_score', 30).then(setHistD1).catch(() => {})
     getKpisHistorico(id, 'd2_score', 30).then(setHistD2).catch(() => {})
     fetch(`${BASE}/predicciones/carrera/${id}?kpi=D1`)
@@ -279,6 +300,33 @@ export default function CarreraDetallePage() {
               </Link>
             )}
           </div>
+
+          {demandaLaboral.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-slate-100">
+              <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">
+                {demandaLaboral.length} skills del benchmark detectadas en vacantes mexicanas
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {demandaLaboral.map(sk => {
+                  const dir = sk.direccion_global
+                  const dirIcon = dir === 'growing' ? '↑' : dir === 'declining' ? '↓' : '~'
+                  const dirCls = dir === 'growing' ? 'text-emerald-600' : dir === 'declining' ? 'text-red-500' : 'text-amber-500'
+                  return (
+                    <Link
+                      key={sk.skill_id}
+                      href={`/vacantes?q=${encodeURIComponent(sk.skill_nombre)}`}
+                      title={`${sk.vacanteCount} vacantes demandan esta skill`}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-full text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+                    >
+                      {sk.skill_nombre}
+                      <span className={`font-bold ${dirCls}`}>{dirIcon}</span>
+                      <span className="text-slate-400 text-[10px] ml-0.5">{sk.vacanteCount}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </Card>
       )}
 
