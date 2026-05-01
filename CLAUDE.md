@@ -44,7 +44,7 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 153, 2026-04-30)
+## Estado actual (Sprint 158, 2026-04-30)
 - 458 pytest · 0 errores TypeScript · 76 artículos investigaciones
 - P117-P126: benchmark signals, urgencia badges, brecha/calientes panels, tag cloud
 - P127-P132: URL params persistence (carreras/vacantes/noticias/ies), BenchmarksSection homepage, comparar U column, CarrerasRanking U column, "Situación en México" en benchmarks/[slug]
@@ -68,6 +68,12 @@ OIA-EE/
 - P150: top skills en declive global card in /estadisticas
 - P151: text search input (?q=) en /benchmarks careers listing
 - P152: señales activas chips on homepage (doble alerta, alta oportunidad, skills calientes)
+- P153: urgencia curricular media row en /comparar aggregate comparison table
+- P154: sort chips (D1/D2/nombre) + KPI badges D1/D2 en /ies listing
+- P155: D2≥0.60 filter chip + ?oportunidad=1 URL param en /carreras listing + stat card en /estadisticas
+- P156: lecturas relacionadas card en /carreras/[id] (benchmark articles API)
+- P157: top skills calientes card en /estadisticas + top declining card en /estadisticas (par)
+- P158: split demandaLaboral en calientes/brecha labeled panels en /carreras/[id]
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
