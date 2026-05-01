@@ -38,6 +38,7 @@ export default function IesDetailPage() {
   const [detalle, setDetalle] = useState<IesDetalle | null>(null)
   const [carreras, setCarreras] = useState<CarreraKpi[]>([])
   const [benchmarkList, setBenchmarkList] = useState<BenchmarkCareerSummary[]>([])
+  const [sortByUrgencia, setSortByUrgencia] = useState(false)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -125,10 +126,18 @@ export default function IesDetailPage() {
 
       {/* Carreras */}
       <div className="bg-white rounded-xl border shadow-sm">
-        <div className="px-5 py-4 border-b flex items-center justify-between">
+        <div className="px-5 py-4 border-b flex items-center justify-between gap-2 flex-wrap">
           <h2 className="font-semibold text-gray-800 text-sm">
             Carreras ({carreras.length})
           </h2>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSortByUrgencia(v => !v)}
+              className={`text-xs px-3 py-1 border rounded transition-colors ${sortByUrgencia ? 'bg-violet-50 border-violet-300 text-violet-700' : 'hover:bg-gray-50 text-gray-500'}`}
+              title="Ordenar por urgencia curricular global"
+            >
+              {sortByUrgencia ? '↓ Urgencia' : 'Ordenar por U'}
+            </button>
           {carreras.length > 0 && (
             <button
               onClick={() => {
@@ -159,13 +168,19 @@ export default function IesDetailPage() {
               ↓ CSV
             </button>
           )}
+          </div>
         </div>
 
         {carreras.length === 0 && (
           <p className="text-gray-400 text-sm px-5 py-8 text-center">Sin carreras registradas.</p>
         )}
 
-        {carreras.map(c => {
+        {[...carreras].sort((a, b) => {
+          if (!sortByUrgencia) return 0
+          const uA = a.benchmark_slug ? (benchmarkMap[a.benchmark_slug]?.urgencia_curricular ?? -1) : -1
+          const uB = b.benchmark_slug ? (benchmarkMap[b.benchmark_slug]?.urgencia_curricular ?? -1) : -1
+          return uB - uA
+        }).map(c => {
           const bm = c.benchmark_slug ? benchmarkMap[c.benchmark_slug] : null
           return (
             <div key={c.id} className="px-5 py-4 border-b last:border-0">
