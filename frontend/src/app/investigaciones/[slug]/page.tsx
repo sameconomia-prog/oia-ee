@@ -123,7 +123,7 @@ export default function InvestigacionDetallePage({ params }: Props) {
       </div>
 
       {/* Share row */}
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
         <CopyLinkButton url={`${BASE_URL}/investigaciones/${params.slug}`} />
         <a
           href={`https://wa.me/?text=${encodeURIComponent(`${meta.titulo} — OIA-EE\n${BASE_URL}/investigaciones/${params.slug}`)}`}
@@ -132,6 +132,14 @@ export default function InvestigacionDetallePage({ params }: Props) {
           className="text-xs text-green-700 border border-green-200 px-3 py-1.5 rounded hover:bg-green-50 transition-colors font-medium"
         >
           WhatsApp
+        </a>
+        <a
+          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${meta.titulo} — OIA-EE`)}&url=${encodeURIComponent(`${BASE_URL}/investigaciones/${params.slug}`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-gray-700 border border-gray-200 px-3 py-1.5 rounded hover:bg-gray-50 transition-colors font-medium"
+        >
+          X
         </a>
         <a
           href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${BASE_URL}/investigaciones/${params.slug}`)}`}
