@@ -22,6 +22,7 @@ function IesListContent() {
   const [loading, setLoading] = useState(true)
   const [busqueda, setBusqueda] = useState(() => searchParams.get('q') ?? '')
   const [sortMode, setSortMode] = useState<SortMode>(() => (searchParams.get('sort') as SortMode) ?? 'default')
+  const [soloRiesgo, setSoloRiesgo] = useState(() => searchParams.get('riesgo') === '1')
 
   function handleBusqueda(val: string) {
     setBusqueda(val)
@@ -39,12 +40,26 @@ function IesListContent() {
     router.replace(`/ies${params.size ? `?${params}` : ''}`, { scroll: false })
   }
 
+  function toggleRiesgo() {
+    const next = !soloRiesgo
+    setSoloRiesgo(next)
+    const params = new URLSearchParams(searchParams.toString())
+    if (next) params.set('riesgo', '1')
+    else params.delete('riesgo')
+    router.replace(`/ies${params.size ? `?${params}` : ''}`, { scroll: false })
+  }
+
   useEffect(() => {
     getIesPublico()
       .then(setIesList)
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
+
+  const riesgoAltoCount = useMemo(
+    () => iesList.filter(i => (i.promedio_d1 ?? 0) >= 0.5).length,
+    [iesList]
+  )
 
   const filtradas = useMemo(() => {
     let list = busqueda.trim()
@@ -53,11 +68,12 @@ function IesListContent() {
           (i.nombre_corto ?? '').toLowerCase().includes(busqueda.toLowerCase())
         )
       : [...iesList]
+    if (soloRiesgo) list = list.filter(i => (i.promedio_d1 ?? 0) >= 0.5)
     if (sortMode === 'd1_desc') list.sort((a, b) => (b.promedio_d1 ?? -1) - (a.promedio_d1 ?? -1))
     if (sortMode === 'd2_desc') list.sort((a, b) => (b.promedio_d2 ?? -1) - (a.promedio_d2 ?? -1))
     if (sortMode === 'nombre') list.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
     return list
-  }, [iesList, busqueda, sortMode])
+  }, [iesList, busqueda, sortMode, soloRiesgo])
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -100,6 +116,17 @@ function IesListContent() {
             {label}
           </button>
         ))}
+        {riesgoAltoCount > 0 && (
+          <button
+            onClick={toggleRiesgo}
+            className={`px-2.5 py-1 text-xs rounded border transition-colors ${
+              soloRiesgo ? 'bg-red-50 border-red-300 text-red-700 font-medium' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+            }`}
+            title={`Mostrar solo IES con D1 ≥ 0.50 (${riesgoAltoCount})`}
+          >
+            ⚠ Riesgo D1 alto ({riesgoAltoCount})
+          </button>
+        )}
       </div>
 
       {loading && (
