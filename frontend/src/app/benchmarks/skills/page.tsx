@@ -3,8 +3,12 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getBenchmarkSkillsIndex, getBenchmarkCareers } from '@/lib/api'
-import type { SkillIndexItem, BenchmarkCareerSummary, ConvergenceDirection } from '@/lib/types'
+import { getBenchmarkSkillsIndex, getBenchmarkCareers, getVacantesTopSkills } from '@/lib/api'
+import type { SkillIndexItem, BenchmarkCareerSummary, ConvergenceDirection, SkillFreq } from '@/lib/types'
+
+function normSkill(s: string) {
+  return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
 import ConvergenceIcon from '@/components/benchmarks/ConvergenceIcon'
 import Card from '@/components/ui/Card'
 import SectionHeader from '@/components/ui/SectionHeader'
@@ -80,6 +84,7 @@ export default function SkillsIndexPage() {
 
   const [skills, setSkills] = useState<SkillIndexItem[]>([])
   const [careers, setCareers] = useState<BenchmarkCareerSummary[]>([])
+  const [vacanteSkills, setVacanteSkills] = useState<SkillFreq[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState(() => searchParams.get('q') ?? '')
   const [filterDir, setFilterDir] = useState<ConvergenceDirection | 'all'>(
@@ -90,8 +95,8 @@ export default function SkillsIndexPage() {
   const [sortMode, setSortMode] = useState<SortMode>(() => (searchParams.get('sort') as SortMode) ?? 'default')
 
   useEffect(() => {
-    Promise.all([getBenchmarkSkillsIndex(), getBenchmarkCareers()])
-      .then(([s, c]) => { setSkills(s); setCareers(c) })
+    Promise.all([getBenchmarkSkillsIndex(), getBenchmarkCareers(), getVacantesTopSkills(50).catch(() => [] as SkillFreq[])])
+      .then(([s, c, vs]) => { setSkills(s); setCareers(c); setVacanteSkills(vs) })
       .finally(() => setLoading(false))
   }, [])
 
@@ -111,6 +116,21 @@ export default function SkillsIndexPage() {
   const setSort = (v: SortMode) => { setSortMode(v); updateParams({ sort: v }) }
 
   const careerBySlug = useMemo(() => Object.fromEntries(careers.map(c => [c.slug, c])), [careers])
+
+  const vacanteMap = useMemo(() => {
+    const m = new Map<string, number>()
+    for (const sf of vacanteSkills) {
+      m.set(normSkill(sf.nombre), sf.count)
+    }
+    return m
+  }, [vacanteSkills])
+
+  function getVacanteCount(skillNombre: string): number {
+    const q = normSkill(skillNombre)
+    if (vacanteMap.has(q)) return vacanteMap.get(q)!
+    const entry = Array.from(vacanteMap.entries()).find(([k]) => k.includes(q) || q.includes(k))
+    return entry ? entry[1] : 0
+  }
 
   const filtered = useMemo(() => {
     const base = skills.filter(s => {
@@ -236,10 +256,13 @@ export default function SkillsIndexPage() {
               <th className="text-center px-3 py-3 font-semibold text-gray-600">Dirección</th>
               <th className="text-center px-3 py-3 font-semibold text-gray-600">Consenso</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Carreras</th>
+              <th className="text-center px-3 py-3 font-semibold text-indigo-600" title="Vacantes en México que demandan esta skill">MX</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((skill, i) => (
+            {filtered.map((skill, i) => {
+              const vc = getVacanteCount(skill.skill_nombre)
+              return (
               <tr key={skill.skill_id} className={`border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
                 <td className="px-4 py-3">
                   <Link
@@ -269,11 +292,19 @@ export default function SkillsIndexPage() {
                     )}
                   </div>
                 </td>
+                <td className="text-center px-3 py-3 font-mono text-xs">
+                  {vc > 0 ? (
+                    <Link href={`/vacantes?q=${encodeURIComponent(skill.skill_nombre)}`} className="text-indigo-600 hover:underline font-semibold">{vc}</Link>
+                  ) : (
+                    <span className="text-slate-300">—</span>
+                  )}
+                </td>
               </tr>
-            ))}
+              )
+            })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={4} className="text-center text-slate-400 text-xs py-8">
+                <td colSpan={5} className="text-center text-slate-400 text-xs py-8">
                   No se encontraron habilidades con esos filtros.
                 </td>
               </tr>
