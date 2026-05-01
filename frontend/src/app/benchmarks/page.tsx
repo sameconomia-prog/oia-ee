@@ -1,10 +1,11 @@
 // frontend/src/app/benchmarks/page.tsx
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getBenchmarkCareers, getBenchmarkResumen } from '@/lib/api'
-import type { BenchmarkCareerSummary, BenchmarkResumen } from '@/lib/types'
+import { getBenchmarkCareers, getBenchmarkResumen, getBenchmarkSkillsIndex } from '@/lib/api'
+import type { BenchmarkCareerSummary, BenchmarkResumen, SkillIndexItem } from '@/lib/types'
+import ConvergenceIcon from '@/components/benchmarks/ConvergenceIcon'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import SectionHeader from '@/components/ui/SectionHeader'
@@ -171,15 +172,24 @@ export default function BenchmarksPage() {
 
   const [careers, setCareers] = useState<BenchmarkCareerSummary[]>([])
   const [resumen, setResumen] = useState<BenchmarkResumen | null>(null)
+  const [skillsIndex, setSkillsIndex] = useState<SkillIndexItem[]>([])
   const [loading, setLoading] = useState(true)
   const [filterArea, setFilterArea] = useState<string>(() => searchParams.get('area') ?? 'all')
   const [sortMode, setSortMode] = useState<SortMode>(() => (searchParams.get('sort') as SortMode) ?? 'default')
 
   useEffect(() => {
-    Promise.all([getBenchmarkCareers(), getBenchmarkResumen()])
-      .then(([c, r]) => { setCareers(c); setResumen(r) })
+    Promise.all([getBenchmarkCareers(), getBenchmarkResumen(), getBenchmarkSkillsIndex()])
+      .then(([c, r, s]) => { setCareers(c); setResumen(r); setSkillsIndex(s) })
       .finally(() => setLoading(false))
   }, [])
+
+  const topUrgentes = useMemo(() =>
+    [...skillsIndex]
+      .filter(s => s.direccion_global === 'declining' && s.fuentes_con_datos > 0)
+      .sort((a, b) => b.consenso_pct - a.consenso_pct || b.fuentes_con_datos - a.fuentes_con_datos)
+      .slice(0, 6),
+    [skillsIndex]
+  )
 
   const updateParams = useCallback((updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -264,6 +274,35 @@ export default function BenchmarksPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Top urgentes */}
+      {topUrgentes.length > 0 && (
+        <Card className="mb-6 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">
+              Skills más urgentes <span className="text-red-500">↓</span>
+            </h3>
+            <Link href="/benchmarks/skills?dir=declining&sort=urgencia" className="text-[11px] text-brand-600 hover:underline">
+              Ver todas →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {topUrgentes.map(s => (
+              <Link
+                key={s.skill_id}
+                href={`/benchmarks/skills/${s.skill_id}`}
+                className="flex items-center gap-2 p-2 rounded-lg bg-red-50/60 hover:bg-red-50 border border-red-100 transition-colors"
+              >
+                <ConvergenceIcon direction="declining" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-slate-700 truncate leading-tight">{s.skill_nombre}</p>
+                  <p className="text-[10px] text-slate-400 capitalize">{s.skill_tipo} · {s.consenso_pct}% consenso</p>
+                </div>
+              </Link>
+            ))}
           </div>
         </Card>
       )}
