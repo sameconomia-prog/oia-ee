@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills, getCarrerasPublico } from '@/lib/api'
-import type { CarreraDetalle, CarreraKpi, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq } from '@/lib/types'
+import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills, getCarrerasPublico, getTendenciasNacionales } from '@/lib/api'
+import type { CarreraDetalle, CarreraKpi, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq, TendenciaNacional } from '@/lib/types'
 
 function normSkill(s: string) {
   return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -108,6 +108,7 @@ export default function CarreraDetallePage() {
   const [vacanteSkills, setVacanteSkills] = useState<SkillFreq[]>([])
   const [lecturas, setLecturas] = useState<ArticleCard[]>([])
   const [similares, setSimilares] = useState<CarreraKpi[]>([])
+  const [tendenciaNacional, setTendenciaNacional] = useState<TendenciaNacional | null>(null)
 
   const demandaLaboral = useMemo(() => {
     if (!benchmarkDetail || vacanteSkills.length === 0) return []
@@ -145,6 +146,7 @@ export default function CarreraDetallePage() {
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
     getVacantesTopSkills(50).then(setVacanteSkills).catch(() => {})
+    getTendenciasNacionales(7).then((list: TendenciaNacional[]) => setTendenciaNacional(list[list.length - 1] ?? null)).catch(() => {})
     getKpisHistorico(id, 'd1_score', 30).then(setHistD1).catch(() => {})
     getKpisHistorico(id, 'd2_score', 30).then(setHistD2).catch(() => {})
     fetch(`${BASE}/predicciones/carrera/${id}?kpi=D1`)
@@ -238,6 +240,21 @@ export default function CarreraDetallePage() {
               </div>
               <KpiRadarChart kpi={d.kpi} />
             </div>
+            {tendenciaNacional && (
+              <div className="mt-4 pt-3 border-t border-slate-100 flex gap-4 text-[10px] text-slate-400">
+                <span>vs. promedio nacional:</span>
+                {tendenciaNacional.d1_score != null && (
+                  <span className={d.kpi!.d1_obsolescencia.score > tendenciaNacional.d1_score ? 'text-red-600 font-semibold' : 'text-emerald-600 font-semibold'}>
+                    D1 {d.kpi!.d1_obsolescencia.score > tendenciaNacional.d1_score ? '▲' : '▼'} {Math.abs(d.kpi!.d1_obsolescencia.score - tendenciaNacional.d1_score).toFixed(2)} {d.kpi!.d1_obsolescencia.score > tendenciaNacional.d1_score ? 'sobre' : 'bajo'} media
+                  </span>
+                )}
+                {tendenciaNacional.d2_score != null && (
+                  <span className={d.kpi!.d2_oportunidades.score >= tendenciaNacional.d2_score ? 'text-emerald-600 font-semibold' : 'text-red-600 font-semibold'}>
+                    D2 {d.kpi!.d2_oportunidades.score >= tendenciaNacional.d2_score ? '▲' : '▼'} {Math.abs(d.kpi!.d2_oportunidades.score - tendenciaNacional.d2_score).toFixed(2)} {d.kpi!.d2_oportunidades.score >= tendenciaNacional.d2_score ? 'sobre' : 'bajo'} media
+                  </span>
+                )}
+              </div>
+            )}
           </Card>
         )}
 

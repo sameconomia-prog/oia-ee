@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import LeadMagnetWrapper from '@/components/landing/LeadMagnetWrapper'
 import BenchmarkMiniCard from '@/components/benchmarks/BenchmarkMiniCard'
+import CopyLinkButton from '@/components/CopyLinkButton'
 import { ARTICLE_TO_BENCHMARK } from '@/lib/benchmark-articles'
 
 const BENCHMARK_FROM_ARTICLE = ARTICLE_TO_BENCHMARK
@@ -108,6 +109,19 @@ export default function InvestigacionDetallePage({ params }: Props) {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Share row */}
+      <div className="flex items-center gap-2 mb-6">
+        <CopyLinkButton url={`${BASE_URL}/investigaciones/${params.slug}`} />
+        <a
+          href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${BASE_URL}/investigaciones/${params.slug}`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-blue-600 border border-blue-200 px-3 py-1.5 rounded hover:bg-blue-50 transition-colors font-medium"
+        >
+          LinkedIn
+        </a>
       </div>
 
       {benchmarkSlug && <BenchmarkMiniCard slug={benchmarkSlug} />}
