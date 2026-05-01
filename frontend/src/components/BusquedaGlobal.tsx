@@ -30,12 +30,15 @@ const TIPO_CLASS: Record<Tipo, string> = {
   benchmark: 'bg-orange-50 text-orange-700',
 }
 
+
 const ACCESOS_RAPIDOS: { href: string; label: string }[] = [
   { href: '/kpis', label: 'KPIs del Observatorio' },
   { href: '/carreras', label: 'Explorar Carreras' },
   { href: '/ies', label: 'Instituciones' },
   { href: '/benchmarks', label: 'Benchmarks Globales' },
   { href: '/benchmarks/skills', label: 'Índice de Habilidades' },
+  { href: '/benchmarks/fuentes', label: 'Fuentes de Benchmarks' },
+  { href: '/benchmarks/comparar', label: 'Comparar Carreras' },
   { href: '/estadisticas', label: 'Estadísticas' },
   { href: '/vacantes', label: 'Vacantes IA' },
 ]
@@ -49,6 +52,7 @@ export default function BusquedaGlobal() {
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const skillsRef = useRef<SkillIndexItem[]>([])
+  const careersRef = useRef<BenchmarkCareerSummary[]>([])
 
   // Cmd+K global + custom event from Sidebar
   useEffect(() => {
@@ -76,6 +80,9 @@ export default function BusquedaGlobal() {
       setTimeout(() => inputRef.current?.focus(), 30)
       if (skillsRef.current.length === 0) {
         getBenchmarkSkillsIndex().then(s => { skillsRef.current = s }).catch(() => {})
+      }
+      if (careersRef.current.length === 0) {
+        getBenchmarkCareers().then(c => { careersRef.current = c }).catch(() => {})
       }
     }
   }, [open])
@@ -119,6 +126,15 @@ export default function BusquedaGlobal() {
             tipo: 'skill', id: s.skill_id, titulo: s.skill_nombre,
             subtitulo: `${s.direccion_global} · ${s.fuentes_con_datos}/5 fuentes`,
             href: `/benchmarks/skills/${s.skill_id}`,
+          }))
+        // Client-side benchmark career search
+        careersRef.current
+          .filter(c => c.nombre.toLowerCase().includes(qLow) || c.slug.includes(qLow))
+          .slice(0, 2)
+          .forEach(c => r.push({
+            tipo: 'benchmark', id: c.slug, titulo: c.nombre,
+            subtitulo: `Benchmark · urgencia ${c.urgencia_curricular}/100`,
+            href: `/benchmarks/${c.slug}`,
           }))
         setResultados(r)
         setSel(0)
