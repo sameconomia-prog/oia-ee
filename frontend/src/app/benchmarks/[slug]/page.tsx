@@ -49,15 +49,19 @@ const DIR_COLORS: Record<string, string> = {
 
 export default function BenchmarkCareerPage() {
   const { slug } = useParams<{ slug: string }>()
+  type ArticleCard = { slug: string; titulo: string; tipo: string; fecha: string; tiempo_lectura: string }
+
   const [detail, setDetail] = useState<BenchmarkCareerDetail | null>(null)
   const [sources, setSources] = useState<BenchmarkSource[]>([])
   const [related, setRelated] = useState<BenchmarkCareerSummary[]>([])
   const [mexicoCarreras, setMexicoCarreras] = useState<CarreraKpi[]>([])
+  const [lecturas, setLecturas] = useState<ArticleCard[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
     if (!slug) return
+    fetch(`/api/benchmark-articles/${slug}`).then(r => r.ok ? r.json() : []).then(setLecturas).catch(() => {})
     Promise.all([
       getBenchmarkCareerDetail(slug),
       getBenchmarkSources(),
@@ -254,6 +258,33 @@ export default function BenchmarkCareerPage() {
                 </div>
               )
             })}
+          </div>
+        </Card>
+      )}
+
+      {/* Lecturas relacionadas */}
+      {lecturas.length > 1 && (
+        <Card className="mb-6 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">
+              Lecturas relacionadas
+            </h3>
+            <Link href="/investigaciones" className="text-[11px] text-brand-600 hover:underline">
+              Más investigaciones →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {lecturas.map(a => (
+              <Link
+                key={a.slug}
+                href={`/investigaciones/${a.slug}`}
+                className="border border-slate-100 rounded-lg p-3 hover:border-brand-200 hover:bg-brand-50/20 transition-colors"
+              >
+                <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">{a.tipo}</span>
+                <p className="text-xs font-medium text-slate-800 leading-snug mt-1 line-clamp-2">{a.titulo}</p>
+                <p className="text-[11px] text-slate-400 mt-1.5">{a.tiempo_lectura} · {new Date(a.fecha).toLocaleDateString('es-MX', { month: 'short', year: 'numeric' })}</p>
+              </Link>
+            ))}
           </div>
         </Card>
       )}

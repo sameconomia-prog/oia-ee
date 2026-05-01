@@ -23,3 +23,27 @@ export const BENCHMARK_TO_ARTICLE: Record<string, string> = {
 export const ARTICLE_TO_BENCHMARK: Record<string, string> = Object.fromEntries(
   Object.entries(BENCHMARK_TO_ARTICLE).map(([slug, article]) => [article, slug])
 )
+
+/**
+ * All articles (primary + secondary) related to each benchmark career.
+ * First entry is always the primary article from BENCHMARK_TO_ARTICLE.
+ */
+export const BENCHMARK_ALL_ARTICLES: Record<string, string[]> = {
+  'derecho': ['2026-04-derecho-ia-2030', '2026-05-derecho-ia-mexico-2030'],
+  'medicina': ['2026-04-medicina-ia-mexico'],
+  'arquitectura': ['2026-04-arquitectura-ia-2030'],
+  'enfermeria': ['2026-04-enfermeria-ia-2030'],
+  'mercadotecnia': ['2026-04-mercadotecnia-ia-2030', '2026-05-mercadotecnia-ia-contenido-datos'],
+  'psicologia': ['2026-04-psicologia-ia-2030', '2026-05-psicologia-ia-salud-mental-futuro'],
+  'administracion-empresas': ['2026-04-administracion-ia-2030'],
+  'contaduria': ['2026-04-contaduria-ia-2030', '2026-05-contaduria-sat-digital-automatizacion'],
+  'diseno-grafico': ['2026-04-diseno-grafico-ia-2030', '2026-05-diseno-grafico-ia-oportunidad-amenaza'],
+  'ingenieria-sistemas': ['2026-04-ingenieros-software-ia', '2026-05-ingenieria-ia-panorama'],
+  'comunicacion': ['2026-04-comunicacion-ia-2030', '2026-05-comunicacion-periodismo-ia-contenido'],
+  'economia': ['2026-04-economia-ia-2030', '2026-05-economia-que-aprenden-economistas-ia'],
+  'educacion': ['2026-04-educacion-ia-2030', '2026-05-ia-docentes-guia-practica'],
+  'turismo': ['2026-04-turismo-ia-2030', '2026-05-turismo-hospitalidad-ia-resiliencia'],
+  'ciencias-politicas': ['2026-04-ciencias-politicas-ia-2030'],
+  'nutricion': ['2026-04-nutricion-ia-2030'],
+  'ingenieria-civil': ['2026-04-ingenieria-civil-ia-2030'],
+}
