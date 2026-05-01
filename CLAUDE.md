@@ -45,7 +45,7 @@ OIA-EE/
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
 ## Estado actual (Sprint 120, 2026-04-30)
-- 454 pytest · 0 errores TypeScript · 59 artículos investigaciones
+- 454 pytest · 0 errores TypeScript · 60 artículos investigaciones
 - P105: urgencia_curricular badge en /carreras/[id] (sección Benchmarks Globales)
 - P106: urgencia badge en CareerPanel + score en selector de /benchmarks/comparar
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
