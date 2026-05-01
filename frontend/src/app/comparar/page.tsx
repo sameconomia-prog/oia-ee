@@ -93,6 +93,16 @@ function CompararContent() {
 
       {iesAId && iesBId && iesAId !== iesBId ? (
         <>
+          <div className="flex justify-end mb-3">
+            <a
+              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://oia-ee.mx/comparar?iesA=${iesAId}&iesB=${iesBId}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-600 border border-blue-200 px-3 py-1.5 rounded hover:bg-blue-50 transition-colors font-medium"
+            >
+              LinkedIn
+            </a>
+          </div>
           <ComparacionIES
             iesAId={iesAId}
             iesBId={iesBId}
