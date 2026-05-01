@@ -144,3 +144,47 @@
     @apply font-sans;
   }
 }
+
+/* ============================================
+   LANDING THEME — dark navy, sin interferencia
+   con dashboard variables
+   ============================================ */
+
+.landing-theme {
+  /* Fondos — 5 niveles */
+  --l-bg-0: #08090a;
+  --l-bg-1: #0f1011;
+  --l-bg-2: #141516;
+  --l-bg-3: #191a1b;
+  --l-bg-4: #232326;
+
+  /* Texto — grises azulados */
+  --l-text-primary:   #f7f8f8;
+  --l-text-secondary: #cad5e2;
+  --l-text-tertiary:  #90a1b9;
+  --l-text-muted:     #62748e;
+
+  /* Accent & Status */
+  --l-accent:  #3B82F6;
+  --l-alert:   #F59E0B;
+  --l-danger:  #EF4444;
+  --l-success: #10B981;
+
+  /* Glow doble capa */
+  --l-glow: 0 0 20px #3b82f630, 0 0 60px #3b82f614;
+
+  /* Borders translúcidos — nunca color sólido */
+  --l-border-subtle: rgba(255, 255, 255, 0.06);
+  --l-border-mid:    rgba(255, 255, 255, 0.10);
+  --l-border-strong: rgba(255, 255, 255, 0.12);
+
+  /* Tipografía fluida */
+  --l-text-display: clamp(3rem, 7vw, 5.5rem);
+  --l-text-hero:    clamp(2.5rem, 5vw, 4rem);
+  --l-text-h2:      clamp(1.75rem, 3vw, 2.5rem);
+  --l-text-h3:      clamp(1.25rem, 2vw, 1.75rem);
+
+  /* Grid decorativo */
+  --l-grid-size: 64px;
+  --l-grid-color: rgba(59, 130, 246, 0.03);
+}
