@@ -10,6 +10,16 @@ import { ARTICLE_TO_BENCHMARK } from '@/lib/benchmark-articles'
 
 const BENCHMARK_FROM_ARTICLE = ARTICLE_TO_BENCHMARK
 
+const RECTOR_SERIES = [
+  { slug: '2026-05-tres-senales-carrera-necesita-actualizacion', label: '3 señales de que tu carrera necesita actualización', group: 'Diagnóstico' },
+  { slug: '2026-05-como-leer-diagnostico-d1-d6-sin-datos', label: 'Cómo leer el diagnóstico D1–D6 sin experiencia en datos', group: 'Diagnóstico' },
+  { slug: '2026-05-error-comun-interpretar-d1', label: 'El error más común al interpretar el D1', group: 'Diagnóstico' },
+  { slug: '2026-05-semestre-actualizacion-d1-en-6-meses', label: 'El semestre de actualización: mejorar el D1 en 6 meses', group: 'Acción' },
+  { slug: '2026-05-presentar-d1-consejo-academico', label: 'Cómo presentar el D1 al Consejo Académico', group: 'Acción' },
+  { slug: '2026-05-costo-real-no-actualizar-matricula', label: 'El costo real de no actualizar: cómo se pierde la matrícula', group: 'Acción' },
+  { slug: '2026-05-kpis-medir-actualizacion-curricular', label: 'Los 4 KPIs para saber si la actualización ya funcionó', group: 'Medición' },
+]
+
 interface Props {
   params: { slug: string }
 }
@@ -44,6 +54,7 @@ export default function InvestigacionDetallePage({ params }: Props) {
 
   const { meta, content } = data
   const benchmarkSlug = BENCHMARK_FROM_ARTICLE[params.slug] ?? null
+  const seriesIdx = RECTOR_SERIES.findIndex(s => s.slug === params.slug)
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -150,6 +161,26 @@ export default function InvestigacionDetallePage({ params }: Props) {
           LinkedIn
         </a>
       </div>
+
+      {seriesIdx >= 0 && (
+        <div className="mb-6 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+          <p className="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-3">
+            Serie para rectores · {seriesIdx + 1} de {RECTOR_SERIES.length}
+          </p>
+          <ol className="space-y-1.5">
+            {RECTOR_SERIES.map((s, i) => (
+              <li key={s.slug} className="flex items-start gap-2">
+                <span className={`shrink-0 text-xs font-mono w-5 mt-0.5 ${i === seriesIdx ? 'text-indigo-700 font-bold' : 'text-indigo-300'}`}>{i + 1}.</span>
+                {i === seriesIdx ? (
+                  <span className="text-xs font-semibold text-indigo-900 leading-snug">{s.label}</span>
+                ) : (
+                  <Link href={`/investigaciones/${s.slug}`} className="text-xs text-indigo-600 hover:underline leading-snug">{s.label}</Link>
+                )}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
 
       {benchmarkSlug && <BenchmarkMiniCard slug={benchmarkSlug} />}
 
