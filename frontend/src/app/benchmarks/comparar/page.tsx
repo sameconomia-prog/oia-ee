@@ -11,6 +11,37 @@ import SectionHeader from '@/components/ui/SectionHeader'
 
 const DIR_ORDER: Record<string, number> = { declining: 0, mixed: 1, stable: 1, growing: 2, sin_datos: 3 }
 
+function exportComparacion(
+  detailA: BenchmarkCareerDetail,
+  detailB: BenchmarkCareerDetail,
+  sources: BenchmarkSource[]
+) {
+  const srcCols = sources.map(s => s.nombre ?? s.id)
+  const header = ['Skill', 'Tipo', `Dir_${detailA.slug}`, `Dir_${detailB.slug}`, 'Divergencia', ...srcCols.map(n => `${n}_${detailA.slug}`), ...srcCols.map(n => `${n}_${detailB.slug}`)].join(',')
+  const mapA = Object.fromEntries(detailA.skills.map(s => [s.skill_id, s]))
+  const mapB = Object.fromEntries(detailB.skills.map(s => [s.skill_id, s]))
+  const allIds = Array.from(new Set([...detailA.skills.map(s => s.skill_id), ...detailB.skills.map(s => s.skill_id)]))
+  const rows = allIds.map(id => {
+    const a = mapA[id]
+    const b = mapB[id]
+    const skill = a ?? b
+    const dirA = a?.direccion_global ?? 'solo_B'
+    const dirB = b?.direccion_global ?? 'solo_A'
+    const diverge = a && b && dirA !== dirB ? 'sí' : 'no'
+    const srcA = sources.map(s => a?.convergencia_por_fuente[s.id] ?? '-')
+    const srcB = sources.map(s => b?.convergencia_por_fuente[s.id] ?? '-')
+    return [`"${skill.skill_nombre}"`, skill.skill_tipo ?? '', dirA, dirB, diverge, ...srcA, ...srcB].join(',')
+  })
+  const csv = [header, ...rows].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `comparacion-${detailA.slug}-vs-${detailB.slug}-${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 function SkillMiniRow({ skill, sources }: { skill: SkillConvergencia; sources: BenchmarkSource[] }) {
   return (
     <div className="flex items-center gap-2 py-1 border-b border-slate-50 last:border-0">
@@ -143,11 +174,19 @@ export default function BenchmarksCompararPage() {
     <div className="max-w-5xl mx-auto">
       <div className="mb-6">
         <Link href="/benchmarks" className="text-xs text-brand-600 hover:underline">← Benchmarks Globales</Link>
-        <div className="mt-2">
+        <div className="mt-2 flex items-start justify-between gap-3">
           <SectionHeader
             title="Comparar carreras"
             subtitle="Selecciona dos carreras para comparar sus perfiles de skills ante la IA"
           />
+          {detailA && detailB && sources.length > 0 && (
+            <button
+              onClick={() => exportComparacion(detailA, detailB, sources)}
+              className="shrink-0 text-xs text-slate-600 border border-slate-200 px-3 py-1.5 rounded hover:bg-slate-50 transition-colors font-medium mt-1"
+            >
+              ↓ CSV
+            </button>
+          )}
         </div>
       </div>
 

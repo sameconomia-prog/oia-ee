@@ -1,10 +1,10 @@
 'use client'
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCarrerasPublico, getIesPublico, getVacantesPublico, getBenchmarkSkillsIndex } from '@/lib/api'
-import type { SkillIndexItem } from '@/lib/types'
+import { getCarrerasPublico, getIesPublico, getVacantesPublico, getBenchmarkSkillsIndex, getBenchmarkCareers } from '@/lib/api'
+import type { SkillIndexItem, BenchmarkCareerSummary } from '@/lib/types'
 
-type Tipo = 'carrera' | 'ies' | 'vacante' | 'skill'
+type Tipo = 'carrera' | 'ies' | 'vacante' | 'skill' | 'benchmark'
 
 interface Resultado {
   tipo: Tipo
@@ -19,6 +19,7 @@ const TIPO_LABEL: Record<Tipo, string> = {
   ies: 'Institución',
   vacante: 'Vacante',
   skill: 'Habilidad',
+  benchmark: 'Benchmark',
 }
 
 const TIPO_CLASS: Record<Tipo, string> = {
@@ -26,6 +27,7 @@ const TIPO_CLASS: Record<Tipo, string> = {
   ies: 'bg-emerald-50 text-emerald-700',
   vacante: 'bg-blue-50 text-blue-700',
   skill: 'bg-violet-50 text-violet-700',
+  benchmark: 'bg-orange-50 text-orange-700',
 }
 
 const ACCESOS_RAPIDOS: { href: string; label: string }[] = [
