@@ -44,7 +44,7 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 168, 2026-05-01)
+## Estado actual (Sprint 180, 2026-05-01)
 - 458 pytest · 0 errores TypeScript · 76 artículos investigaciones
 - P117-P126: benchmark signals, urgencia badges, brecha/calientes panels, tag cloud
 - P127-P132: URL params persistence (carreras/vacantes/noticias/ies), BenchmarksSection homepage, comparar U column, CarrerasRanking U column, "Situación en México" en benchmarks/[slug]
@@ -84,6 +84,18 @@ OIA-EE/
 - P166: rector CTA al final de artículos con tag 'rectores' en /investigaciones/[slug]
 - P167: rector CTA en /benchmarks/[slug] cuando ≥30% skills en declive + LinkedIn share button
 - P168: pre-fill carrera_nombre desde ?carrera= y ies_nombre desde ?ies= en /pertinencia (con Suspense wrapper)
+- P169: vs-promedio-nacional footer row en KPI card /carreras/[id] + share button /investigaciones/[slug]
+- P170: LinkedIn share button en /ies/[id]
+- P171: perfil de riesgo narrative text card en /ies/[id] para rectores
+- P172: LinkedIn share button en /carreras/[id]
+- P173: narrativa impacto IA card en /carreras/[id] (rojo/ambar/verde según D1+D2+urgencia+promedio nacional)
+- P174: carrera prioritaria callout en /ies/[id] con CTA pre-fill → /pertinencia
+- P175: botón "Copiar diagnóstico" en /carreras/[id] (D1/D2/urgencia/URL a clipboard)
+- P176: botón "Copiar diagnóstico" en /ies/[id] (D1/D2/riesgo alto/urgencia/URL a clipboard)
+- P177: distribución D1 mini bar chart (bajo/medio/alto) en /ies/[id]
+- P178: explainer colapsable ¿Qué significan estos indicadores? en /carreras/[id] KPI card
+- P179: top 8 skills nacionales en demanda card en /carreras/[id] con pills clickables
+- P180: distribución urgencia benchmark (alta/media/baja) counter cards en /ies/[id]
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
