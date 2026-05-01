@@ -40,6 +40,7 @@ function PertinenciaContent() {
   })
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+  const [submittedBenchmark, setSubmittedBenchmark] = useState<BenchmarkCareerSummary | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [benchmarkCareers, setBenchmarkCareers] = useState<BenchmarkCareerSummary[]>([])
 
@@ -75,6 +76,7 @@ function PertinenciaContent() {
         const data = await res.json().catch(() => ({}))
         throw new Error(data.detail ?? `Error ${res.status}`)
       }
+      setSubmittedBenchmark(matchedBenchmark)
       setDone(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo enviar la solicitud.')
@@ -109,9 +111,22 @@ function PertinenciaContent() {
               <p className="text-slate-600 text-sm mb-4">
                 Nuestro equipo se pondrá en contacto contigo en las próximas 24 horas hábiles para confirmar los detalles.
               </p>
-              <Link href="/investigaciones" className="text-brand-600 text-sm hover:underline">
-                Mientras tanto, explora nuestras investigaciones →
-              </Link>
+              <div className="flex flex-col gap-2 items-center">
+                {submittedBenchmark ? (
+                  <>
+                    <Link href={`/benchmarks/${submittedBenchmark.slug}`} className="text-brand-600 text-sm hover:underline font-medium">
+                      Explora el benchmark de {submittedBenchmark.nombre} →
+                    </Link>
+                    <Link href="/investigaciones" className="text-slate-400 text-xs hover:underline">
+                      Ver todas las investigaciones
+                    </Link>
+                  </>
+                ) : (
+                  <Link href="/investigaciones" className="text-brand-600 text-sm hover:underline">
+                    Mientras tanto, explora nuestras investigaciones →
+                  </Link>
+                )}
+              </div>
             </Card>
           ) : (
             <Card className="p-6">
