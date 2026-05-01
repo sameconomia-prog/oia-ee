@@ -2,7 +2,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getCarrerasPublico } from '@/lib/api'
+import { getCarrerasPublico, getBenchmarkCareers } from '@/lib/api'
 import { dotColor, textColor } from '@/lib/kpi-colors'
 import type { CarreraKpi } from '@/lib/types'
 
@@ -39,6 +39,7 @@ function Sub({ value, isD1 }: { value: number; isD1: boolean }) {
 
 export default function KpisTable() {
   const [rows, setRows] = useState<CarreraKpi[]>([])
+  const [benchmarkMap, setBenchmarkMap] = useState<Map<string, number>>(new Map())
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
@@ -49,10 +50,13 @@ export default function KpisTable() {
   useEffect(() => {
     setLoading(true)
     setError(null)
-    getCarrerasPublico({ skip: 0, limit: PAGE_SIZE })
-      .then((data) => {
+    Promise.all([
+      getCarrerasPublico({ skip: 0, limit: PAGE_SIZE }),
+      getBenchmarkCareers().catch(() => []),
+    ]).then(([data, bmarks]) => {
         setRows(data)
         setHasMore(data.length === PAGE_SIZE)
+        setBenchmarkMap(new Map(bmarks.map(b => [b.slug, b.urgencia_curricular])))
       })
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false))
@@ -141,6 +145,9 @@ export default function KpisTable() {
               <th colSpan={2} className="px-2 py-1.5 border-b border-l-4 border-l-purple-300 bg-purple-50 text-purple-800 tracking-wide">
                 D6 — ESTUDIANTIL
               </th>
+              <th className="px-2 py-1.5 border-b border-l-4 border-l-violet-300 bg-violet-50 text-violet-800 tracking-wide">
+                GLOBAL
+              </th>
             </tr>
             <tr className="text-xs text-center text-slate-500 bg-slate-50">
               <th className="px-2 py-1 border-b border-slate-200 border-l-4 border-l-red-300 bg-red-50">●</th>
@@ -157,14 +164,17 @@ export default function KpisTable() {
               <th className="px-2 py-1 border-b border-slate-200 bg-brand-50 cursor-pointer hover:bg-brand-100 select-none" onClick={() => handleSort('d3')}>{`Score${arrow('d3')}`}</th>
               <th className="px-2 py-1 border-b border-slate-200 border-l-4 border-l-purple-300 bg-purple-50">●</th>
               <th className="px-2 py-1 border-b border-slate-200 bg-purple-50 cursor-pointer hover:bg-purple-100 select-none" onClick={() => handleSort('d6')}>{`Score${arrow('d6')}`}</th>
+              <th className="px-2 py-1 border-b border-slate-200 border-l-4 border-l-violet-300 bg-violet-50 text-violet-700" title="Urgencia curricular (benchmarks internacionales)">U</th>
             </tr>
           </thead>
           <tbody>
-            {sorted.map(({ id, nombre, kpi }) => {
+            {sorted.map(({ id, nombre, kpi, benchmark_slug }) => {
               const d1 = kpi!.d1_obsolescencia
               const d2 = kpi!.d2_oportunidades
               const d3 = kpi!.d3_mercado
               const d6 = kpi!.d6_estudiantil
+              const urgencia = benchmark_slug ? benchmarkMap.get(benchmark_slug) : undefined
+              const uColor = urgencia == null ? '' : urgencia >= 60 ? 'text-red-600' : urgencia >= 30 ? 'text-amber-600' : 'text-emerald-600'
               return (
                 <tr key={id} className="border-b border-slate-100 hover:bg-slate-50 text-center">
                   <td className="px-3 py-2 text-left text-xs font-semibold text-slate-800">
@@ -184,6 +194,15 @@ export default function KpisTable() {
                   <td className="px-2 py-2 bg-brand-50/50"><Bar value={d3.score} isD1={false} /></td>
                   <td className="px-2 py-2 border-l-4 border-l-purple-200 bg-purple-50/50"><Dot value={d6.score} isD1={false} /></td>
                   <td className="px-2 py-2 bg-purple-50/50"><Bar value={d6.score} isD1={false} /></td>
+                  <td className="px-2 py-2 border-l-4 border-l-violet-200 bg-violet-50/50">
+                    {urgencia != null ? (
+                      <Link href={`/benchmarks/${benchmark_slug}`} className={`text-xs font-mono font-bold hover:underline ${uColor}`} title="Urgencia curricular global">
+                        {urgencia}
+                      </Link>
+                    ) : (
+                      <span className="text-slate-300 text-xs">—</span>
+                    )}
+                  </td>
                 </tr>
               )
             })}
