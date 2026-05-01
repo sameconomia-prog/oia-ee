@@ -1,5 +1,6 @@
 import { getAllInvestigaciones, getTipoLabel, getTopTags } from '@/lib/investigaciones'
 import type { TipoInvestigacion } from '@/lib/investigaciones'
+import { BENCHMARK_ALL_ARTICLES } from '@/lib/benchmark-articles'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
@@ -18,18 +19,43 @@ const TIPO_COLOR: Record<string, string> = {
 
 const TIPOS: TipoInvestigacion[] = ['reporte', 'analisis', 'carta', 'nota', 'metodologia']
 
+const BENCHMARK_LABELS: Record<string, string> = {
+  'administracion-empresas': 'Administración',
+  'arquitectura': 'Arquitectura',
+  'ciencias-politicas': 'Ciencias Políticas',
+  'comunicacion': 'Comunicación',
+  'contaduria': 'Contaduría',
+  'derecho': 'Derecho',
+  'diseno-grafico': 'Diseño Gráfico',
+  'economia': 'Economía',
+  'educacion': 'Educación',
+  'enfermeria': 'Enfermería',
+  'ingenieria-civil': 'Ing. Civil',
+  'ingenieria-sistemas': 'Ing. Sistemas',
+  'medicina': 'Medicina',
+  'mercadotecnia': 'Mercadotecnia',
+  'nutricion': 'Nutrición',
+  'psicologia': 'Psicología',
+  'turismo': 'Turismo',
+}
+
 export default function InvestigacionesPage({
   searchParams,
 }: {
-  searchParams: { tipo?: string; q?: string }
+  searchParams: { tipo?: string; q?: string; benchmark?: string }
 }) {
   const todas = getAllInvestigaciones()
   const topTags = getTopTags(18)
   const filtro = searchParams.tipo as TipoInvestigacion | undefined
   const query = searchParams.q?.toLowerCase().trim() ?? ''
+  const benchmarkFilter = searchParams.benchmark ?? ''
 
   const investigaciones = todas.filter(i => {
     if (filtro && i.tipo !== filtro) return false
+    if (benchmarkFilter) {
+      const slugsForBenchmark = BENCHMARK_ALL_ARTICLES[benchmarkFilter] ?? []
+      if (!slugsForBenchmark.includes(i.slug)) return false
+    }
     if (query) {
       return (
         i.titulo.toLowerCase().includes(query) ||
@@ -44,6 +70,7 @@ export default function InvestigacionesPage({
     const p = new URLSearchParams()
     if (params.tipo) p.set('tipo', params.tipo)
     if (params.q) p.set('q', params.q)
+    if (params.benchmark) p.set('benchmark', params.benchmark)
     const qs = p.toString()
     return `/investigaciones${qs ? `?${qs}` : ''}`
   }
@@ -57,10 +84,11 @@ export default function InvestigacionesPage({
         </p>
       </div>
 
-      {/* Búsqueda y filtros */}
+      {/* Búsqueda */}
       <div className="flex flex-col sm:flex-row gap-4 mb-8">
         <form method="get" action="/investigaciones" className="flex-1">
           {filtro && <input type="hidden" name="tipo" value={filtro} />}
+          {benchmarkFilter && <input type="hidden" name="benchmark" value={benchmarkFilter} />}
           <div className="relative">
             <input
               type="text"
@@ -79,9 +107,9 @@ export default function InvestigacionesPage({
       </div>
 
       {/* Filtros por tipo */}
-      <div className="flex flex-wrap gap-2 mb-10">
+      <div className="flex flex-wrap gap-2 mb-6">
         <Link
-          href={buildUrl({ q: searchParams.q })}
+          href={buildUrl({ q: searchParams.q, benchmark: benchmarkFilter || undefined })}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${!filtro ? 'bg-[#1D4ED8] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
         >
           Todos
@@ -89,7 +117,7 @@ export default function InvestigacionesPage({
         {TIPOS.map(tipo => (
           <Link
             key={tipo}
-            href={buildUrl({ tipo, q: searchParams.q })}
+            href={buildUrl({ tipo, q: searchParams.q, benchmark: benchmarkFilter || undefined })}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${filtro === tipo ? 'bg-[#1D4ED8] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
           >
             {getTipoLabel(tipo)}
@@ -97,8 +125,28 @@ export default function InvestigacionesPage({
         ))}
       </div>
 
-      {/* Tag cloud — only when no active search/filter */}
-      {!query && !filtro && topTags.length > 0 && (
+      {/* Filtro por carrera benchmark */}
+      <div className="mb-8">
+        <p className="text-xs text-gray-400 uppercase tracking-widest mb-3">Por carrera</p>
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(BENCHMARK_LABELS).map(([slug, label]) => (
+            <Link
+              key={slug}
+              href={buildUrl({ tipo: filtro, q: searchParams.q, benchmark: benchmarkFilter === slug ? undefined : slug })}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                benchmarkFilter === slug
+                  ? 'bg-[#1D4ED8] border-[#1D4ED8] text-white'
+                  : 'border-gray-200 text-gray-600 hover:border-[#3B82F6] hover:text-[#1D4ED8] hover:bg-blue-50'
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Tag cloud — solo cuando no hay búsqueda activa */}
+      {!query && !filtro && !benchmarkFilter && topTags.length > 0 && (
         <div className="mb-8">
           <p className="text-xs text-gray-400 uppercase tracking-widest mb-3">Temas frecuentes</p>
           <div className="flex flex-wrap gap-2">
@@ -116,12 +164,14 @@ export default function InvestigacionesPage({
         </div>
       )}
 
-      {query && (
+      {(query || benchmarkFilter) && (
         <p className="text-sm text-gray-500 mb-6">
-          {investigaciones.length} resultado{investigaciones.length !== 1 ? 's' : ''} para{' '}
-          <strong className="text-gray-700">"{searchParams.q}"</strong>{' '}
+          {investigaciones.length} resultado{investigaciones.length !== 1 ? 's' : ''}
+          {query && <> para <strong className="text-gray-700">"{searchParams.q}"</strong></>}
+          {benchmarkFilter && <> · carrera: <strong className="text-gray-700">{BENCHMARK_LABELS[benchmarkFilter] ?? benchmarkFilter}</strong></>}
+          {' '}
           <Link href={buildUrl({ tipo: searchParams.tipo })} className="text-[#1D4ED8] hover:underline ml-1">
-            Limpiar búsqueda
+            Limpiar filtros
           </Link>
         </p>
       )}
@@ -152,8 +202,8 @@ export default function InvestigacionesPage({
 
       {investigaciones.length === 0 && (
         <div className="text-center py-16">
-          <p className="text-gray-400 mb-2">No hay investigaciones{query ? ` sobre "${searchParams.q}"` : ' en esta categoría'} aún.</p>
-          {(query || filtro) && (
+          <p className="text-gray-400 mb-2">No hay investigaciones{query ? ` sobre "${searchParams.q}"` : benchmarkFilter ? ` para esta carrera` : ' en esta categoría'} aún.</p>
+          {(query || filtro || benchmarkFilter) && (
             <Link href="/investigaciones" className="text-[#1D4ED8] text-sm hover:underline">
               Ver todas las investigaciones
             </Link>
