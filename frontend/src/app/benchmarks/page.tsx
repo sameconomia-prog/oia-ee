@@ -226,6 +226,21 @@ export default function BenchmarksPage() {
     [skillsIndex]
   )
 
+  const tipoBreakdown = useMemo(() => {
+    const TIPOS = ['tecnica', 'digital', 'transversal', 'social'] as const
+    const counts: Record<string, { declining: number; growing: number; mixed: number; total: number }> = {}
+    for (const t of TIPOS) counts[t] = { declining: 0, growing: 0, mixed: 0, total: 0 }
+    for (const s of skillsIndex) {
+      if (!(s.skill_tipo in counts)) continue
+      const row = counts[s.skill_tipo]
+      row.total++
+      if (s.direccion_global === 'declining') row.declining++
+      else if (s.direccion_global === 'growing') row.growing++
+      else if (s.direccion_global === 'mixed' || s.direccion_global === 'stable') row.mixed++
+    }
+    return TIPOS.map(t => ({ tipo: t, ...counts[t] })).filter(r => r.total > 0)
+  }, [skillsIndex])
+
   const updateParams = useCallback((updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString())
     Object.entries(updates).forEach(([k, v]) => {
@@ -309,6 +324,41 @@ export default function BenchmarksPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Tipo × direction breakdown */}
+      {tipoBreakdown.length > 0 && (
+        <Card className="mb-6 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">
+              Exposición por categoría de habilidad
+            </h3>
+            <Link href="/benchmarks/skills" className="text-[11px] text-brand-600 hover:underline">
+              Ver índice →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {tipoBreakdown.map(({ tipo, declining, growing, mixed, total }) => {
+              const TIPO_LABEL: Record<string, string> = { tecnica: 'Técnicas', digital: 'Digitales', transversal: 'Transversales', social: 'Sociales' }
+              const pctD = total > 0 ? Math.round((declining / total) * 100) : 0
+              const pctG = total > 0 ? Math.round((growing / total) * 100) : 0
+              return (
+                <div key={tipo} className="border border-slate-100 rounded-lg p-3">
+                  <p className="text-[11px] font-semibold text-slate-600 mb-2">{TIPO_LABEL[tipo] ?? tipo}</p>
+                  <div className="flex h-2 rounded-full overflow-hidden mb-2 gap-px">
+                    <div className="bg-red-400" style={{ width: `${pctD}%` }} title={`Declining: ${declining}`} />
+                    <div className="bg-emerald-400" style={{ width: `${pctG}%` }} title={`Growing: ${growing}`} />
+                    <div className="bg-yellow-300 flex-1" title={`Mixed: ${mixed}`} />
+                  </div>
+                  <div className="text-[10px] text-slate-500 space-y-0.5">
+                    <div className="flex justify-between"><span className="text-red-600">↓ {declining}</span><span className="text-emerald-600">↑ {growing}</span><span className="text-yellow-600">~ {mixed}</span></div>
+                    <p className="text-slate-400">{total} skills · {pctD}% en riesgo</p>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </Card>
       )}
