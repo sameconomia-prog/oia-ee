@@ -180,6 +180,66 @@ hallazgos:
     divergencia_oia: false
     nota_divergencia: null
 
+  - id: wef2025-ingenieria-industrial
+    ocupacion_original: "Industrial and Production Engineers"
+    ocupacion_codigo_oficial: "ISCO-08: 2141"
+    skills_afectadas:
+      - optimizacion-procesos
+      - automatizacion-industrial
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: corto
+    hallazgo: "La optimización rutinaria de procesos es altamente automatizable con IA; la industria 4.0 crea nueva demanda de ingenieros que integren robótica y sistemas inteligentes"
+    dato_clave: "85M empleos en manufactura serán transformados para 2030; ingeniería industrial entre los perfiles con mayor reconversión"
+    cita_textual: "Industrial engineers face dual pressures — AI automates routine process optimization while Industry 4.0 creates demand for automation design and integration skills [p. 35]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: wef2025-actuaria
+    ocupacion_original: "Actuaries, Statisticians"
+    ocupacion_codigo_oficial: "ISCO-08: 2120"
+    skills_afectadas:
+      - calculo-actuarial-basico
+      - ciencia-datos-actuarial
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "Los actuarios que integran ciencia de datos y modelos de ML multiplican su productividad; el cálculo actuarial rutinario se automatiza mientras crece la demanda de modelado de riesgos complejo"
+    dato_clave: "Actuarios con habilidades en ML entre los 10 roles de mayor crecimiento en servicios financieros para 2030"
+    cita_textual: "Actuarial science shows strong augmentation — AI automates routine premium calculations while data-science-enabled actuaries see growing demand for complex risk modeling [p. 41]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: wef2025-ingenieria-electronica
+    ocupacion_original: "Electronics Engineers, Mechatronics"
+    ocupacion_codigo_oficial: "ISCO-08: 2153"
+    skills_afectadas:
+      - electronica-analogica-basica
+      - robotica-y-automatizacion
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: corto
+    hallazgo: "El diseño de circuitos analógicos básicos es progresivamente automatizado por EDA con IA; la robótica y automatización inteligente son las habilidades de más rápido crecimiento en manufactura"
+    dato_clave: "Ingenieros en robótica y automatización: +40% demanda para 2030; habilidades analógicas básicas con alta automatizabilidad"
+    cita_textual: "Electronics engineers face divergent outcomes — basic circuit design faces automation while robotics and intelligent automation skills see explosive demand growth [p. 29]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: wef2025-biologia-datos
+    ocupacion_original: "Biological Scientists, Bioinformaticians"
+    ocupacion_codigo_oficial: "ISCO-08: 2131"
+    skills_afectadas:
+      - taxonomia-campo
+      - bioinformatica
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "La taxonomía y clasificación de campo son automatizables con IA (visión computacional); la bioinformática y el análisis genómico con IA son habilidades de alta demanda"
+    dato_clave: "Bioinformáticos entre los perfiles STEM con mayor crecimiento de demanda; visión computacional automatiza 60% de tareas de clasificación taxonómica"
+    cita_textual: "Biological sciences show strong augmentation in data-intensive roles — bioinformatics and genomic AI analysis grow while traditional field classification faces automation [p. 43]"
+    divergencia_oia: false
+    nota_divergencia: null
+
   - id: wef2025-turismo-hospitalidad
     ocupacion_original: "Hotel and Restaurant Managers"
     ocupacion_codigo_oficial: "ISCO-08: 1412"

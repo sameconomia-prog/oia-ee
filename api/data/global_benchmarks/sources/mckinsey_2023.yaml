@@ -149,6 +149,66 @@ hallazgos:
     divergencia_oia: false
     nota_divergencia: null
 
+  - id: mck2023-trabajo-social
+    ocupacion_original: "Social Workers and Counsellors"
+    ocupacion_codigo_oficial: "SOC: 21-1022"
+    skills_afectadas:
+      - documentacion-casos-sociales
+      - intervencion-psicosocial
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "La documentación de casos sociales tiene alta automatizabilidad técnica; la intervención psicosocial y el acompañamiento humano permanecen resilientes con demanda creciente"
+    dato_clave: "60% del tiempo de trabajadores sociales en tareas documentales técnicamente automatizables; demanda de intervención directa crece 15% anual"
+    cita_textual: "Social workers face mixed automation outcomes — documentation and case management tasks face automation while direct psychosocial intervention shows resilience and growing demand [p. 43]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: mck2023-gastronomia
+    ocupacion_original: "Cooks and Restaurant Managers"
+    ocupacion_codigo_oficial: "SOC: 35-1011"
+    skills_afectadas:
+      - costos-operacion-restaurante
+      - cocina-creativa-innovacion
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: corto
+    hallazgo: "El control de costos y operaciones de restaurante es altamente automatizable; la cocina creativa y el desarrollo de experiencias gastronómicas únicas crecen como diferenciadores no replicables"
+    dato_clave: "75% de tareas de gestión de costos y back-office gastronómico son técnicamente automatizables"
+    cita_textual: "Food service management shows high automation potential in operational tasks while creative culinary roles show resilience — AI automates logistics but cannot replicate culinary creativity [p. 38]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: mck2023-quimica-procesos
+    ocupacion_original: "Chemical Technicians and Process Engineers"
+    ocupacion_codigo_oficial: "SOC: 19-4031"
+    skills_afectadas:
+      - analisis-quimico-rutinario
+      - diseno-procesos-quimicos
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "El análisis químico rutinario de laboratorio es altamente automatizable; el diseño de procesos químicos con simulación IA amplía la productividad de ingenieros especializados"
+    dato_clave: "80% de tareas de análisis químico rutinario son técnicamente automatizables con sistemas analíticos automatizados"
+    cita_textual: "Chemical laboratory analysis shows high automation potential while process design and optimization show strong augmentation from AI simulation tools [p. 32]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: mck2023-veterinaria
+    ocupacion_original: "Veterinarians"
+    ocupacion_codigo_oficial: "SOC: 29-1131"
+    skills_afectadas:
+      - registros-veterinarios
+      - diagnostico-veterinario
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "Los registros veterinarios electrónicos son técnicamente automatizables; el diagnóstico clínico veterinario se amplía con IA de imagen pero el juicio clínico y la presencia física permanecen"
+    dato_clave: "70% del tiempo veterinario en tareas documentales y administrativas es técnicamente automatizable"
+    cita_textual: "Veterinary medicine shows augmentation patterns — AI imaging assists diagnosis while clinical judgment, surgery, and physical examination remain human-dependent [p. 41]"
+    divergencia_oia: false
+    nota_divergencia: null
+
   - id: mck2023-nutricion-basica
     ocupacion_original: "Dietitians and Nutritionists"
     ocupacion_codigo_oficial: "SOC: 29-1031"

@@ -161,6 +161,52 @@ hallazgos:
     divergencia_oia: false
     nota_divergencia: null
 
+  - id: anthropic2025-actuaria-datos
+    ocupacion_original: "Actuaries, Risk Analysts"
+    ocupacion_codigo_oficial: "O*NET: 15-2011.00"
+    skills_afectadas:
+      - calculo-actuarial-basico
+      - modelado-riesgos-actuarial
+      - ciencia-datos-actuarial
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "Los actuarios usan LLMs y modelos ML para modelado de riesgos de alta complejidad; el cálculo actuarial rutinario se automatiza mientras la ciencia de datos actuarial es el perfil de mayor demanda"
+    dato_clave: "Actuarios con ciencia de datos entre categorías con mayor ampliación en uso observado de Claude en industria aseguradora"
+    cita_textual: "Actuarial data science shows strong augmentation — AI handles routine premium calculation while human actuaries use ML for complex risk modeling and scenario analysis [p. 13]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: anthropic2025-ingenieria-electronica
+    ocupacion_original: "Electronics Engineers, Robotics Engineers"
+    ocupacion_codigo_oficial: "O*NET: 17-2072.00"
+    skills_afectadas:
+      - programacion-embebida
+      - robotica-y-automatizacion
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: corto
+    hallazgo: "La programación embebida y de robótica es uno de los usos de mayor ampliación observada de LLMs en ingeniería; los ingenieros electrónicos con IA diseñan sistemas más complejos en menos tiempo"
+    dato_clave: "Robótica e IoT entre las categorías con mayor tasa de ampliación en uso observado de Claude en manufactura"
+    cita_textual: "Embedded systems and robotics programming shows high augmentation rates — AI assists code generation and system optimization while engineers handle design judgment and integration [p. 12]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: anthropic2025-biologia-datos
+    ocupacion_original: "Bioinformaticians, Computational Biologists"
+    ocupacion_codigo_oficial: "O*NET: 15-1221.00"
+    skills_afectadas:
+      - bioinformatica
+      - analisis-datos-biologicos
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: corto
+    hallazgo: "La bioinformática y el análisis de datos genómicos son de los casos de mayor ampliación observada — los investigadores usan LLMs para interpretar resultados y diseñar pipelines de análisis"
+    dato_clave: "Bioinformática y análisis genómico entre las categorías STEM con mayor tasa de ampliación en uso de Claude"
+    cita_textual: "Bioinformatics and computational biology show very high augmentation — AI dramatically speeds genomic analysis and biological data interpretation while research hypothesis generation remains human [p. 14]"
+    divergencia_oia: false
+    nota_divergencia: null
+
   - id: anthropic2025-diseno-instruccional
     ocupacion_original: "Instructional Designers, Curriculum Developers"
     ocupacion_codigo_oficial: "O*NET: 25-9031.00"

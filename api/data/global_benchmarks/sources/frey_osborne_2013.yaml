@@ -162,6 +162,65 @@ hallazgos:
     divergencia_oia: false
     nota_divergencia: null
 
+  - id: fo2013-ingenieria-industrial
+    ocupacion_original: "Industrial Engineers"
+    ocupacion_codigo_oficial: "O*NET: 17-2112.00"
+    skills_afectadas:
+      - optimizacion-procesos
+      - lean-manufacturing
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: largo
+    hallazgo: "Los ingenieros industriales tienen probabilidad moderada-alta de automatización (0.79) — la optimización de procesos rutinaria y el control de calidad estándar son altamente automatizables"
+    dato_clave: "Probabilidad de automatización: 0.79 para Industrial Engineers (Frey-Osborne)"
+    cita_textual: "Industrial Engineers: 0.79 probability of computerisation — routine process optimization and quality control tasks face high automation risk [Appendix, p. 61]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: fo2013-quimica-laboratorio
+    ocupacion_original: "Chemical Technicians"
+    ocupacion_codigo_oficial: "O*NET: 19-4031.00"
+    skills_afectadas:
+      - analisis-quimico-rutinario
+      - control-calidad-quimico
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: largo
+    hallazgo: "Los técnicos de laboratorio químico tienen alta probabilidad de automatización (0.81) — el análisis rutinario y el control de calidad estandarizado son altamente automatizables"
+    dato_clave: "Probabilidad de automatización: 0.81 para Chemical Technicians"
+    cita_textual: "Chemical Technicians: 0.81 probability of computerisation — routine laboratory analysis and quality control testing face high displacement risk [Appendix, p. 58]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: fo2013-veterinaria-registros
+    ocupacion_original: "Veterinary Technologists and Technicians"
+    ocupacion_codigo_oficial: "O*NET: 29-2056.00"
+    skills_afectadas:
+      - registros-veterinarios
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: largo
+    hallazgo: "Los técnicos veterinarios tienen probabilidad moderada-alta de automatización (0.71); los registros clínicos y las tareas de apoyo administrativo son más automatizables que la práctica clínica"
+    dato_clave: "Probabilidad de automatización: 0.71 para Veterinary Technicians; veterinarios especializados tienen 0.21"
+    cita_textual: "Veterinary technicians: 0.71 probability of computerisation; veterinarians themselves show resilience (0.21) due to physical manipulation and diagnostic judgment bottlenecks [Appendix, p. 73]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: fo2013-biologia-campo
+    ocupacion_original: "Zoologists, Wildlife Biologists"
+    ocupacion_codigo_oficial: "O*NET: 19-1023.00"
+    skills_afectadas:
+      - taxonomia-campo
+      - trabajo-laboratorio-basico
+    direccion: declining
+    taxonomia_oia: automated
+    horizonte_impacto: largo
+    hallazgo: "Los biólogos de campo y laboratorio tienen probabilidad moderada de automatización (0.57) — la clasificación taxonómica y el análisis de laboratorio básico son progresivamente automatizables"
+    dato_clave: "Probabilidad de automatización: 0.57 para Zoologists and Wildlife Biologists"
+    cita_textual: "Biological scientists face moderate automation risk — laboratory techniques and field classification are automatable; research design and scientific judgment constitute bottlenecks [Appendix, p. 58]"
+    divergencia_oia: false
+    nota_divergencia: null
+
   - id: fo2013-hotel-managers
     ocupacion_original: "Lodging Managers"
     ocupacion_codigo_oficial: "O*NET: 11-9081.00"

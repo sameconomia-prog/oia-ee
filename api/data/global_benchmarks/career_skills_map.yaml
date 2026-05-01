@@ -435,3 +435,208 @@ carreras:
         nombre: "Topografía y levantamiento territorial"
         tipo: tecnica
         accion_curricular: redisenar
+
+  - slug: ingenieria-industrial
+    nombre: "Ingeniería Industrial"
+    area: ingenieria_y_tecnologia
+    skills:
+      - id: optimizacion-procesos
+        nombre: "Optimización de procesos productivos"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: lean-manufacturing
+        nombre: "Lean manufacturing y mejora continua"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: gestion-calidad
+        nombre: "Gestión de calidad y control estadístico"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: analisis-cadena-suministro
+        nombre: "Análisis y diseño de cadena de suministro"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: automatizacion-industrial
+        nombre: "Automatización, robótica e industria 4.0"
+        tipo: digital
+        accion_curricular: agregar
+      - id: gestion-proyectos-ind
+        nombre: "Gestión de proyectos industriales"
+        tipo: tecnica
+        accion_curricular: fortalecer
+
+  - slug: trabajo-social
+    nombre: "Trabajo Social"
+    area: ciencias_sociales
+    skills:
+      - id: documentacion-casos-sociales
+        nombre: "Documentación y registro de casos sociales"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: gestion-casos-sociales
+        nombre: "Gestión y seguimiento de casos"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: diagnostico-social
+        nombre: "Diagnóstico social e investigación comunitaria"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: intervencion-psicosocial
+        nombre: "Intervención psicosocial y acompañamiento"
+        tipo: social
+        accion_curricular: fortalecer
+      - id: trabajo-comunitario
+        nombre: "Trabajo comunitario y organización social"
+        tipo: social
+        accion_curricular: fortalecer
+
+  - slug: actuaria
+    nombre: "Actuaría / Ciencias Actuariales"
+    area: ciencias_economico_administrativas
+    skills:
+      - id: calculo-actuarial-basico
+        nombre: "Cálculo actuarial y tablas de mortalidad"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: modelado-riesgos-actuarial
+        nombre: "Modelado de riesgos y reservas"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: estadistica-avanzada-act
+        nombre: "Estadística avanzada y probabilidad"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: ciencia-datos-actuarial
+        nombre: "Ciencia de datos aplicada a seguros"
+        tipo: digital
+        accion_curricular: agregar
+      - id: analisis-seguros
+        nombre: "Análisis de productos de seguros y siniestros"
+        tipo: tecnica
+        accion_curricular: redisenar
+
+  - slug: veterinaria
+    nombre: "Medicina Veterinaria y Zootecnia"
+    area: ciencias_de_la_salud
+    skills:
+      - id: registros-veterinarios
+        nombre: "Registros clínicos y documentación veterinaria"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: diagnostico-veterinario
+        nombre: "Diagnóstico clínico veterinario"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: cirugia-veterinaria
+        nombre: "Cirugía y procedimientos veterinarios"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: medicina-preventiva-animal
+        nombre: "Medicina preventiva y salud pública animal"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: gestion-ganaderia
+        nombre: "Gestión ganadera y zootecnia"
+        tipo: transversal
+        accion_curricular: redisenar
+
+  - slug: gastronomia
+    nombre: "Gastronomía"
+    area: ciencias_sociales
+    skills:
+      - id: costos-operacion-restaurante
+        nombre: "Costos y control de operación de restaurante"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: tecnicas-culinarias-basicas
+        nombre: "Técnicas culinarias y producción básica"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: gestion-restaurante-hosp
+        nombre: "Gestión de restaurante y hospitalidad gastronómica"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: cocina-creativa-innovacion
+        nombre: "Cocina creativa, innovación y desarrollo de menú"
+        tipo: transversal
+        accion_curricular: fortalecer
+      - id: nutricion-gastronomica
+        nombre: "Nutrición aplicada y gastronomía saludable"
+        tipo: transversal
+        accion_curricular: fortalecer
+
+  - slug: ingenieria-electronica
+    nombre: "Ingeniería Electrónica / Mecatrónica"
+    area: ingenieria_y_tecnologia
+    skills:
+      - id: electronica-analogica-basica
+        nombre: "Electrónica analógica básica"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: diseno-circuitos-digitales
+        nombre: "Diseño de circuitos digitales"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: programacion-embebida
+        nombre: "Programación de sistemas embebidos e IoT"
+        tipo: digital
+        accion_curricular: fortalecer
+      - id: robotica-y-automatizacion
+        nombre: "Robótica, automatización y control inteligente"
+        tipo: digital
+        accion_curricular: agregar
+      - id: sistemas-control-automatico
+        nombre: "Sistemas de control y automatización industrial"
+        tipo: tecnica
+        accion_curricular: fortalecer
+
+  - slug: biologia
+    nombre: "Biología / Ciencias Biológicas"
+    area: ciencias_exactas_y_naturales
+    skills:
+      - id: taxonomia-campo
+        nombre: "Taxonomía y trabajo de campo biológico"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: trabajo-laboratorio-basico
+        nombre: "Técnicas de laboratorio básico"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: investigacion-biologica
+        nombre: "Investigación y metodología científica"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: bioinformatica
+        nombre: "Bioinformática y análisis genómico"
+        tipo: digital
+        accion_curricular: agregar
+      - id: analisis-datos-biologicos
+        nombre: "Análisis de datos biológicos y estadística"
+        tipo: digital
+        accion_curricular: fortalecer
+
+  - slug: quimica
+    nombre: "Química / Ingeniería Química"
+    area: ingenieria_y_tecnologia
+    skills:
+      - id: analisis-quimico-rutinario
+        nombre: "Análisis químico rutinario y caracterización"
+        tipo: tecnica
+        accion_curricular: retirar
+      - id: control-calidad-quimico
+        nombre: "Control de calidad y pruebas de laboratorio"
+        tipo: tecnica
+        accion_curricular: redisenar
+      - id: sintesis-quimica
+        nombre: "Síntesis química y formulación"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: diseno-procesos-quimicos
+        nombre: "Diseño y optimización de procesos químicos"
+        tipo: tecnica
+        accion_curricular: fortalecer
+      - id: seguridad-laboratorio-quim
+        nombre: "Seguridad, normativa y gestión ambiental"
+        tipo: transversal
+        accion_curricular: fortalecer
+        accion_curricular: redisenar

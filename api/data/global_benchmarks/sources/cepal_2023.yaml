@@ -165,6 +165,51 @@ hallazgos:
     divergencia_oia: false
     nota_divergencia: null
 
+  - id: cepal2023-ingenieria-industrial
+    ocupacion_original: "Ingenieros industriales y de producción en ALC"
+    ocupacion_codigo_oficial: "CIUO-08: 2141"
+    skills_afectadas:
+      - analisis-cadena-suministro
+      - automatizacion-industrial
+    direccion: growing
+    taxonomia_oia: augmented
+    horizonte_impacto: medio
+    hallazgo: "La manufactura en ALC adopta gradualmente industria 4.0; los ingenieros industriales con habilidades en automatización y cadena de suministro digital tienen demanda creciente en México y Brasil"
+    dato_clave: "México 4° destino mundial de nearshoring; demanda de ingenieros industriales con perfil 4.0 crece 38% anual en norte del país"
+    cita_textual: "Industrial engineers in ALC benefit from nearshoring trends — automation and supply chain digital skills show growing demand, particularly in Mexico's manufacturing corridor [p. 43]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: cepal2023-gastronomia-latam
+    ocupacion_original: "Cocineros y trabajadores gastronómicos en ALC"
+    ocupacion_codigo_oficial: "CIUO-08: 5120"
+    skills_afectadas:
+      - tecnicas-culinarias-basicas
+      - nutricion-gastronomica
+    direccion: mixed
+    taxonomia_oia: augmented
+    horizonte_impacto: largo
+    hallazgo: "La gastronomía en ALC muestra resiliencia por identidad cultural y turismo gastronómico; las técnicas culinarias básicas de producción masiva son automatizables pero la cocina de autor permanece"
+    dato_clave: "México 6° destino mundial de turismo gastronómico; sector con alta demanda de chefs especializados y conocimiento de nutrición aplicada"
+    cita_textual: "Gastronomy in ALC shows resilience in creative and cultural dimensions — mass food production faces automation while artisan and experience-driven gastronomy grows with tourism [p. 71]"
+    divergencia_oia: false
+    nota_divergencia: null
+
+  - id: cepal2023-trabajo-social-latam
+    ocupacion_original: "Trabajadores sociales y comunitarios en ALC"
+    ocupacion_codigo_oficial: "CIUO-08: 2635"
+    skills_afectadas:
+      - gestion-casos-sociales
+      - trabajo-comunitario
+    direccion: growing
+    taxonomia_oia: resilient
+    horizonte_impacto: largo
+    hallazgo: "El trabajo social en ALC muestra alta resiliencia por la creciente demanda de atención a poblaciones vulnerables; el trabajo comunitario y la intervención directa no son automatizables"
+    dato_clave: "México: 30% de la población en condición de pobreza; demanda de trabajadores sociales 20% superior a la oferta universitaria"
+    cita_textual: "Social workers in ALC demonstrate strong resilience — rising inequality and social vulnerability create growing demand while community intervention and psychosocial support remain human [p. 58]"
+    divergencia_oia: false
+    nota_divergencia: null
+
   - id: cepal2023-ingenieria-civil-bim
     ocupacion_original: "Ingenieros civiles y de construcción en ALC"
     ocupacion_codigo_oficial: "CIUO-08: 2142"
