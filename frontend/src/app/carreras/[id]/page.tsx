@@ -20,6 +20,7 @@ import SectionHeader from '@/components/ui/SectionHeader'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
+type ArticleCard = { slug: string; titulo: string; tipo: string; fecha: string; tiempo_lectura: string }
 type ScoreKey = 'd1_obsolescencia' | 'd2_oportunidades' | 'd3_mercado' | 'd6_estudiantil'
 
 interface PredData {
@@ -105,6 +106,7 @@ export default function CarreraDetallePage() {
   const [benchmarkSources, setBenchmarkSources] = useState<BenchmarkSource[]>([])
   const [benchmarkSummary, setBenchmarkSummary] = useState<BenchmarkCareerSummary | null>(null)
   const [vacanteSkills, setVacanteSkills] = useState<SkillFreq[]>([])
+  const [lecturas, setLecturas] = useState<ArticleCard[]>([])
 
   const demandaLaboral = useMemo(() => {
     if (!benchmarkDetail || vacanteSkills.length === 0) return []
@@ -131,6 +133,7 @@ export default function CarreraDetallePage() {
           getBenchmarkCareerDetail(slug).then(setBenchmarkDetail).catch(() => {})
           getBenchmarkSources().then(setBenchmarkSources).catch(() => {})
           getBenchmarkCareers().then(list => setBenchmarkSummary(list.find(c => c.slug === slug) ?? null)).catch(() => {})
+          fetch(`/api/benchmark-articles/${slug}`).then(r => r.ok ? r.json() : []).then(setLecturas).catch(() => {})
         }
       })
       .catch(() => setNotFound(true))
@@ -338,6 +341,33 @@ export default function CarreraDetallePage() {
               </div>
             </div>
           )}
+        </Card>
+      )}
+
+      {/* Lecturas relacionadas */}
+      {lecturas.length > 0 && (
+        <Card className="mb-6 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">Lecturas relacionadas</h3>
+            {d.benchmark_slug && (
+              <Link href={`/investigaciones?benchmark=${d.benchmark_slug}`} className="text-[11px] text-brand-600 hover:underline">
+                Más investigaciones →
+              </Link>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {lecturas.map(a => (
+              <Link
+                key={a.slug}
+                href={`/investigaciones/${a.slug}`}
+                className="border border-slate-100 rounded-lg p-3 hover:border-brand-200 hover:bg-brand-50/20 transition-colors"
+              >
+                <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">{a.tipo}</span>
+                <p className="text-xs font-medium text-slate-800 leading-snug mt-1 line-clamp-2">{a.titulo}</p>
+                <p className="text-[11px] text-slate-400 mt-1.5">{a.tiempo_lectura} · {new Date(a.fecha).toLocaleDateString('es-MX', { month: 'short', year: 'numeric' })}</p>
+              </Link>
+            ))}
+          </div>
         </Card>
       )}
 
