@@ -177,6 +177,41 @@ export default function BenchmarkCareerPage() {
         <HorizonteTimeline skills={detail.skills} />
       </Card>
 
+      {/* Related careers in same area */}
+      {related.length > 0 && (
+        <Card className="mb-6 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">
+              Otras carreras en el mismo área
+            </h3>
+            <Link href="/benchmarks/comparar" className="text-[11px] text-brand-600 hover:underline">
+              Comparar todas →
+            </Link>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {related.map(c => {
+              const urgColor = c.urgencia_curricular >= 60 ? 'text-red-600' : c.urgencia_curricular >= 30 ? 'text-amber-600' : 'text-emerald-600'
+              return (
+                <div key={c.slug} className="border border-slate-100 rounded-lg p-3 bg-slate-50">
+                  <Link href={`/benchmarks/${c.slug}`} className="text-xs font-medium text-slate-800 hover:text-brand-700 hover:underline block mb-1 leading-tight">
+                    {c.nombre}
+                  </Link>
+                  <p className={`text-[11px] font-mono font-semibold ${urgColor} mb-2`}>
+                    Urgencia {c.urgencia_curricular}
+                  </p>
+                  <Link
+                    href={`/benchmarks/comparar?a=${slug}&b=${c.slug}`}
+                    className="text-[11px] text-brand-600 hover:underline font-medium"
+                  >
+                    Comparar →
+                  </Link>
+                </div>
+              )
+            })}
+          </div>
+        </Card>
+      )}
+
       {/* Sources legend */}
       <Card className="p-4">
         <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest mb-3">Fuentes</h3>
