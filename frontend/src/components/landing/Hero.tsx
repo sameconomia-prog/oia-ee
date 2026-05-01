@@ -27,6 +27,23 @@ export default function Hero({ totalIes, totalCarreras }: HeroProps) {
             OIA-EE monitorea instituciones, carreras y vacantes para anticipar
             qué programas necesitan adaptarse ante la IA — y cuáles ya perdieron la carrera.
           </p>
+          <form action="/ies" method="get" className="mb-6 max-w-sm">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                name="q"
+                placeholder="Busca tu institución…"
+                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3B82F6] bg-white"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2.5 bg-[#1D4ED8] text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+              >
+                Buscar
+              </button>
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5">Busca por nombre de universidad o siglas</p>
+          </form>
           <div className="flex flex-col sm:flex-row gap-4">
             <button
               onClick={() => setOpen(true)}
