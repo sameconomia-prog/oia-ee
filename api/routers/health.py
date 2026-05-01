@@ -49,7 +49,8 @@ def health_check(db: Session = Depends(get_db)):
     if heartbeat is None:
         scheduler_alive = False
     else:
-        hours_since_hb = (now - heartbeat.ran_at).total_seconds() / 3600
+        ran_at_utc = heartbeat.ran_at.replace(tzinfo=timezone.utc) if heartbeat.ran_at.tzinfo is None else heartbeat.ran_at
+        hours_since_hb = (now - ran_at_utc).total_seconds() / 3600
         scheduler_alive = hours_since_hb <= HEARTBEAT_THRESHOLD_HOURS
 
     # Evaluar frescura de cada job
@@ -65,7 +66,8 @@ def health_check(db: Session = Depends(get_db)):
         if last is None:
             jobs[job_id] = {"last_run": None, "status": "n/a", "threshold_hours": threshold_hours}
         else:
-            hours_since = (now - last.ran_at).total_seconds() / 3600
+            last_ran_at_utc = last.ran_at.replace(tzinfo=timezone.utc) if last.ran_at.tzinfo is None else last.ran_at
+            hours_since = (now - last_ran_at_utc).total_seconds() / 3600
             stale = hours_since > threshold_hours
             if stale or last.status == "error":
                 degraded = True
