@@ -108,14 +108,22 @@ export default function BenchmarkCareerPage() {
             <h1 className="text-2xl font-bold text-slate-900">{detail.nombre}</h1>
             <p className="text-sm text-slate-500 mt-1">{detail.area}</p>
           </div>
-          {article && (
+          <div className="flex items-center gap-3 ml-6 mt-1 shrink-0">
             <Link
-              href={`/investigaciones/${article}`}
-              className="shrink-0 text-xs text-brand-600 hover:underline font-medium ml-6 mt-1"
+              href={`/benchmarks/comparar?a=${slug}`}
+              className="text-xs text-brand-600 border border-brand-200 px-3 py-1.5 rounded hover:bg-brand-50 transition-colors font-medium"
             >
-              Leer análisis completo →
+              Comparar →
             </Link>
-          )}
+            {article && (
+              <Link
+                href={`/investigaciones/${article}`}
+                className="text-xs text-brand-600 hover:underline font-medium"
+              >
+                Análisis completo →
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 

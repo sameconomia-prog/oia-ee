@@ -125,6 +125,18 @@ export default function BenchmarksCompararPage() {
     return detailB.skills.filter(s => idsA.has(s.skill_id)).length
   }, [detailA, detailB])
 
+  const uniqueA = useMemo(() => {
+    if (!detailA || !detailB) return []
+    const idsB = new Set(detailB.skills.map(s => s.skill_id))
+    return detailA.skills.filter(s => !idsB.has(s.skill_id))
+  }, [detailA, detailB])
+
+  const uniqueB = useMemo(() => {
+    if (!detailA || !detailB) return []
+    const idsA = new Set(detailA.skills.map(s => s.skill_id))
+    return detailB.skills.filter(s => !idsA.has(s.skill_id))
+  }, [detailA, detailB])
+
   const selectClass = 'w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700'
 
   return (
@@ -187,36 +199,79 @@ export default function BenchmarksCompararPage() {
 
       {/* Divergencias */}
       {detailA && detailB && (
-        <Card className="p-5">
-          <h3 className="text-sm font-semibold text-slate-800 mb-1">
-            Análisis de convergencia cruzada
-          </h3>
-          <p className="text-xs text-slate-400 mb-4">
-            {sharedCount} skills en común · {divergencias.length} con dirección diferente entre ambas carreras
-          </p>
-          {divergencias.length === 0 ? (
-            <p className="text-xs text-emerald-600 font-medium">
-              Ambas carreras comparten la misma dirección en todas sus skills en común.
+        <div className="space-y-4">
+          <Card className="p-5">
+            <h3 className="text-sm font-semibold text-slate-800 mb-1">
+              Análisis de convergencia cruzada
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">
+              {sharedCount} skills en común · {divergencias.length} con dirección diferente entre ambas carreras
             </p>
-          ) : (
-            <div className="space-y-2">
-              {divergencias.map(({ id, skillA, skillB }) => (
-                <div key={id} className="flex items-center gap-3 p-2 rounded-lg bg-amber-50 border border-amber-100">
-                  <span className="text-xs font-medium text-slate-700 flex-1">{skillA.skill_nombre}</span>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-slate-500">{detailA.nombre.split('/')[0].trim()}:</span>
-                    <ConvergenceIcon direction={skillA.direccion_global as ConvergenceDirection} />
+            {divergencias.length === 0 ? (
+              <p className="text-xs text-emerald-600 font-medium">
+                Ambas carreras comparten la misma dirección en todas sus skills en común.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {divergencias.map(({ id, skillA, skillB }) => (
+                  <div key={id} className="flex items-center gap-3 p-2 rounded-lg bg-amber-50 border border-amber-100">
+                    <Link href={`/benchmarks/skills/${id}`}
+                      className="text-xs font-medium text-slate-700 flex-1 hover:underline text-brand-700">
+                      {skillA.skill_nombre}
+                    </Link>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] text-slate-500">{detailA.nombre.split('/')[0].trim()}:</span>
+                      <ConvergenceIcon direction={skillA.direccion_global as ConvergenceDirection} />
+                    </div>
+                    <span className="text-slate-300">vs</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] text-slate-500">{detailB.nombre.split('/')[0].trim()}:</span>
+                      <ConvergenceIcon direction={skillB.direccion_global as ConvergenceDirection} />
+                    </div>
                   </div>
-                  <span className="text-slate-300">vs</span>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-slate-500">{detailB.nombre.split('/')[0].trim()}:</span>
-                    <ConvergenceIcon direction={skillB.direccion_global as ConvergenceDirection} />
+                ))}
+              </div>
+            )}
+          </Card>
+
+          {(uniqueA.length > 0 || uniqueB.length > 0) && (
+            <Card className="p-5">
+              <h3 className="text-sm font-semibold text-slate-800 mb-3">Skills exclusivas por carrera</h3>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p className="text-xs font-semibold text-slate-600 mb-2">
+                    Solo en {detailA.nombre.split('/')[0].trim()} <span className="font-normal text-slate-400">({uniqueA.length})</span>
+                  </p>
+                  <div className="space-y-1">
+                    {uniqueA.slice(0, 8).map(s => (
+                      <div key={s.skill_id} className="flex items-center gap-2">
+                        <ConvergenceIcon direction={s.direccion_global as ConvergenceDirection} />
+                        <Link href={`/benchmarks/skills/${s.skill_id}`}
+                          className="text-xs text-slate-600 hover:text-brand-700 hover:underline truncate">{s.skill_nombre}</Link>
+                      </div>
+                    ))}
+                    {uniqueA.length > 8 && <p className="text-[11px] text-slate-400">+{uniqueA.length - 8} más</p>}
                   </div>
                 </div>
-              ))}
-            </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-600 mb-2">
+                    Solo en {detailB.nombre.split('/')[0].trim()} <span className="font-normal text-slate-400">({uniqueB.length})</span>
+                  </p>
+                  <div className="space-y-1">
+                    {uniqueB.slice(0, 8).map(s => (
+                      <div key={s.skill_id} className="flex items-center gap-2">
+                        <ConvergenceIcon direction={s.direccion_global as ConvergenceDirection} />
+                        <Link href={`/benchmarks/skills/${s.skill_id}`}
+                          className="text-xs text-slate-600 hover:text-brand-700 hover:underline truncate">{s.skill_nombre}</Link>
+                      </div>
+                    ))}
+                    {uniqueB.length > 8 && <p className="text-[11px] text-slate-400">+{uniqueB.length - 8} más</p>}
+                  </div>
+                </div>
+              </div>
+            </Card>
           )}
-        </Card>
+        </div>
       )}
 
       {!detailA && !detailB && !loadingA && !loadingB && (
