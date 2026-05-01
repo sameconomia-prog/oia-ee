@@ -223,6 +223,7 @@ export default function BenchmarksPage() {
   const [loading, setLoading] = useState(true)
   const [filterArea, setFilterArea] = useState<string>(() => searchParams.get('area') ?? 'all')
   const [sortMode, setSortMode] = useState<SortMode>(() => (searchParams.get('sort') as SortMode) ?? 'default')
+  const [filterQ, setFilterQ] = useState<string>(() => searchParams.get('q') ?? '')
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
 
   useEffect(() => {
@@ -302,11 +303,15 @@ export default function BenchmarksPage() {
 
   const setArea = (v: string) => { setFilterArea(v); updateParams({ area: v }) }
   const setSort = (v: SortMode) => { setSortMode(v); updateParams({ sort: v }) }
+  const setQ = (v: string) => { setFilterQ(v); updateParams({ q: v }) }
 
   if (loading) return <p className="text-slate-400 text-sm py-8 text-center">Cargando benchmarks...</p>
 
   const areas = Array.from(new Set(careers.map(c => c.area))).sort()
-  const base = filterArea === 'all' ? careers : careers.filter(c => c.area === filterArea)
+  const qNorm = filterQ.toLowerCase().trim()
+  const base = careers
+    .filter(c => filterArea === 'all' || c.area === filterArea)
+    .filter(c => !qNorm || c.nombre.toLowerCase().includes(qNorm))
   const filtered = sortCareers(base, sortMode)
 
   const btnBase = 'text-[11px] px-2.5 py-1 rounded-full border transition-colors whitespace-nowrap'
@@ -516,6 +521,22 @@ export default function BenchmarksPage() {
           </div>
         </Card>
       )}
+
+      {/* Search */}
+      <div className="mb-3 flex gap-2">
+        <input
+          type="text"
+          value={filterQ}
+          onChange={e => setQ(e.target.value)}
+          placeholder="Buscar carrera..."
+          className="flex-1 border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-brand-400 bg-white"
+        />
+        {filterQ && (
+          <button onClick={() => setQ('')} className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-slate-500 hover:bg-slate-50">
+            ✕
+          </button>
+        )}
+      </div>
 
       {/* Area filter */}
       <div className="flex flex-wrap gap-1.5 mb-4">
