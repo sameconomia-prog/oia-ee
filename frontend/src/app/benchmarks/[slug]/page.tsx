@@ -232,6 +232,12 @@ export default function BenchmarkCareerPage() {
                       </Link>
                       <span className="text-[10px] font-mono text-red-500 bg-red-100 px-1.5 rounded">{sk.consenso_pct}% consenso</span>
                       {sk.skill_tipo && <span className="text-[10px] text-slate-400">{sk.skill_tipo}</span>}
+                      {sk.horizonte_dominante && (
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${sk.horizonte_dominante === 'corto' ? 'bg-red-100 text-red-700' : sk.horizonte_dominante === 'medio' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}
+                          title="Horizonte de impacto estimado">
+                          {sk.horizonte_dominante === 'corto' ? '≤2 años' : sk.horizonte_dominante === 'medio' ? '3–5 años' : '5+ años'}
+                        </span>
+                      )}
                     </div>
                     <p className="text-[11px] text-red-700 mt-0.5">→ {accionLabel(sk.accion_curricular)}</p>
                   </div>
