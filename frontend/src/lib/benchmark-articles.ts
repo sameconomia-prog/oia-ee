@@ -31,8 +31,8 @@ export const ARTICLE_TO_BENCHMARK: Record<string, string> = Object.fromEntries(
 export const BENCHMARK_ALL_ARTICLES: Record<string, string[]> = {
   'derecho': ['2026-04-derecho-ia-2030', '2026-05-derecho-ia-mexico-2030'],
   'medicina': ['2026-04-medicina-ia-mexico'],
-  'arquitectura': ['2026-04-arquitectura-ia-2030'],
-  'enfermeria': ['2026-04-enfermeria-ia-2030'],
+  'arquitectura': ['2026-04-arquitectura-ia-2030', '2026-05-arquitectura-ia-diseno-computacional'],
+  'enfermeria': ['2026-04-enfermeria-ia-2030', '2026-05-enfermeria-ia-cuidado-humano'],
   'mercadotecnia': ['2026-04-mercadotecnia-ia-2030', '2026-05-mercadotecnia-ia-contenido-datos'],
   'psicologia': ['2026-04-psicologia-ia-2030', '2026-05-psicologia-ia-salud-mental-futuro'],
   'administracion-empresas': ['2026-04-administracion-ia-2030', '2026-05-administracion-negocios-ia-liderazgo'],
@@ -43,7 +43,7 @@ export const BENCHMARK_ALL_ARTICLES: Record<string, string[]> = {
   'economia': ['2026-04-economia-ia-2030', '2026-05-economia-que-aprenden-economistas-ia'],
   'educacion': ['2026-04-educacion-ia-2030', '2026-05-ia-docentes-guia-practica'],
   'turismo': ['2026-04-turismo-ia-2030', '2026-05-turismo-hospitalidad-ia-resiliencia'],
-  'ciencias-politicas': ['2026-04-ciencias-politicas-ia-2030'],
+  'ciencias-politicas': ['2026-04-ciencias-politicas-ia-2030', '2026-05-ciencias-politicas-ia-poder-datos'],
   'nutricion': ['2026-04-nutricion-ia-2030', '2026-05-nutricion-alimentos-ia-personalizacion'],
-  'ingenieria-civil': ['2026-04-ingenieria-civil-ia-2030'],
+  'ingenieria-civil': ['2026-04-ingenieria-civil-ia-2030', '2026-05-ingenieria-civil-ia-infraestructura'],
 }
