@@ -315,32 +315,45 @@ export default function CarreraDetallePage() {
             )}
           </div>
 
-          {demandaLaboral.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-slate-100">
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">
-                {demandaLaboral.length} skills del benchmark detectadas en vacantes mexicanas
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {demandaLaboral.map(sk => {
-                  const dir = sk.direccion_global
-                  const dirIcon = dir === 'growing' ? '↑' : dir === 'declining' ? '↓' : '~'
-                  const dirCls = dir === 'growing' ? 'text-emerald-600' : dir === 'declining' ? 'text-red-500' : 'text-amber-500'
-                  return (
-                    <Link
-                      key={sk.skill_id}
-                      href={`/vacantes?q=${encodeURIComponent(sk.skill_nombre)}`}
-                      title={`${sk.vacanteCount} vacantes demandan esta skill`}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-full text-xs text-slate-700 hover:bg-slate-100 transition-colors"
-                    >
-                      {sk.skill_nombre}
-                      <span className={`font-bold ${dirCls}`}>{dirIcon}</span>
-                      <span className="text-slate-400 text-[10px] ml-0.5">{sk.vacanteCount}</span>
-                    </Link>
-                  )
-                })}
+          {demandaLaboral.length > 0 && (() => {
+            const calientesD = demandaLaboral.filter(sk => sk.direccion_global === 'growing')
+            const brechaD = demandaLaboral.filter(sk => sk.direccion_global === 'declining')
+            const skillPill = (sk: typeof demandaLaboral[0], cls: string) => (
+              <Link
+                key={sk.skill_id}
+                href={`/vacantes?q=${encodeURIComponent(sk.skill_nombre)}`}
+                title={`${sk.vacanteCount} vacantes demandan esta skill`}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${cls}`}
+              >
+                {sk.skill_nombre}
+                <span className="text-[10px] ml-0.5 opacity-70">{sk.vacanteCount}</span>
+              </Link>
+            )
+            return (
+              <div className="mt-4 pt-4 border-t border-slate-100 space-y-3">
+                {calientesD.length > 0 && (
+                  <div>
+                    <p className="text-[10px] text-emerald-600 uppercase tracking-widest font-semibold mb-1.5">
+                      ↑ {calientesD.length} skills calientes — crecimiento global + demanda MX
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {calientesD.map(sk => skillPill(sk, 'bg-emerald-50 border border-emerald-200 text-emerald-800 hover:bg-emerald-100'))}
+                    </div>
+                  </div>
+                )}
+                {brechaD.length > 0 && (
+                  <div>
+                    <p className="text-[10px] text-amber-600 uppercase tracking-widest font-semibold mb-1.5">
+                      ↓ {brechaD.length} skills brecha — declive global pero aún demandadas en MX
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {brechaD.map(sk => skillPill(sk, 'bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100'))}
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            )
+          })()}
         </Card>
       )}
 
