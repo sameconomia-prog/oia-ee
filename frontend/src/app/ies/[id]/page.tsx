@@ -71,6 +71,11 @@ export default function IesDetailPage() {
     return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
   }, [carreras, benchmarkMap])
 
+  const nationalAvgUrgencia = useMemo(() => {
+    if (benchmarkList.length === 0) return null
+    return Math.round(benchmarkList.reduce((a, b) => a + b.urgencia_curricular, 0) / benchmarkList.length)
+  }, [benchmarkList])
+
   if (loading) {
     return <p className="text-gray-400 text-sm py-8 text-center">Cargando...</p>
   }
@@ -131,13 +136,21 @@ export default function IesDetailPage() {
           <p className="text-[10px] text-gray-400">D1 ≥ 0.6</p>
         </div>
         {portfolioUrgencia !== null && (
-          <div className={`bg-white border rounded-xl p-4 text-center shadow-sm ${portfolioUrgencia >= 60 ? 'border-red-200 bg-red-50/40' : portfolioUrgencia >= 30 ? 'border-amber-200 bg-amber-50/40' : 'border-green-200 bg-green-50/40'}`}>
+          <Link
+            href="/benchmarks"
+            className={`bg-white border rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-shadow ${portfolioUrgencia >= 60 ? 'border-red-200 bg-red-50/40' : portfolioUrgencia >= 30 ? 'border-amber-200 bg-amber-50/40' : 'border-green-200 bg-green-50/40'}`}
+          >
             <p className="text-xs text-gray-500 mb-1">Urgencia media</p>
             <p className={`text-2xl font-bold font-mono ${portfolioUrgencia >= 60 ? 'text-red-700' : portfolioUrgencia >= 30 ? 'text-amber-700' : 'text-green-700'}`}>
               {portfolioUrgencia}
             </p>
             <p className="text-[10px] text-gray-400">Portfolio global</p>
-          </div>
+            {nationalAvgUrgencia !== null && (
+              <p className={`text-[10px] mt-0.5 font-medium ${portfolioUrgencia > nationalAvgUrgencia ? 'text-red-500' : 'text-green-600'}`}>
+                vs. {nationalAvgUrgencia} nac.
+              </p>
+            )}
+          </Link>
         )}
       </div>
 
