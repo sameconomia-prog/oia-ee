@@ -71,9 +71,11 @@ export default function EstadisticasPage() {
   const [topDeclining, setTopDeclining] = useState<SkillIndexItem[]>([])
   const [topIesRiesgo, setTopIesRiesgo] = useState<IesInfo[]>([])
   const [topIesOportunidad, setTopIesOportunidad] = useState<IesInfo[]>([])
+  const [totalArticulos, setTotalArticulos] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    fetch('/api/investigaciones/count').then(r => r.json()).then(d => setTotalArticulos(d.total)).catch(() => {})
     getEstadisticasPublicas()
       .then(setData)
       .catch((e: Error) => setError(e.message))
@@ -133,6 +135,9 @@ export default function EstadisticasPage() {
             <StatBox label="Carreras" value={data.total_carreras} color="text-indigo-600" href="/carreras" />
             <StatBox label="Vacantes IA" value={data.total_vacantes} color="text-blue-600" href="/vacantes" />
             <StatBox label="Noticias analizadas" value={data.total_noticias} color="text-gray-800" href="/noticias" />
+            {totalArticulos != null && (
+              <StatBox label="Investigaciones" value={totalArticulos} color="text-purple-600" href="/investigaciones" />
+            )}
             <StatBox
               label="Alertas activas"
               value={data.alertas_activas}
