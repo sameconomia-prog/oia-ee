@@ -58,10 +58,13 @@ const PATHS = [
 ]
 
 const GUIDES = [
-  { href: '/investigaciones/2026-05-como-leer-diagnostico-d1-d6-sin-datos', label: 'Cómo leer el diagnóstico D1–D6 sin experiencia en datos' },
-  { href: '/investigaciones/2026-05-error-comun-interpretar-d1', label: 'El error más común al interpretar el D1' },
-  { href: '/investigaciones/2026-05-tres-senales-carrera-necesita-actualizacion', label: '3 señales de que tu carrera necesita actualización' },
-  { href: '/investigaciones/2026-05-semestre-actualizacion-d1-en-6-meses', label: 'El semestre de actualización: cómo mejorar el D1 en 6 meses' },
+  { href: '/investigaciones/2026-05-tres-senales-carrera-necesita-actualizacion', label: '3 señales de que tu carrera necesita actualización — ahora', group: 'Diagnóstico' },
+  { href: '/investigaciones/2026-05-como-leer-diagnostico-d1-d6-sin-datos', label: 'Cómo leer el diagnóstico D1–D6 sin experiencia en datos', group: 'Diagnóstico' },
+  { href: '/investigaciones/2026-05-error-comun-interpretar-d1', label: 'El error más común al interpretar el D1', group: 'Diagnóstico' },
+  { href: '/investigaciones/2026-05-semestre-actualizacion-d1-en-6-meses', label: 'El semestre de actualización: cómo mejorar el D1 en 6 meses', group: 'Acción' },
+  { href: '/investigaciones/2026-05-presentar-d1-consejo-academico', label: 'Cómo presentar el D1 al Consejo Académico', group: 'Acción' },
+  { href: '/investigaciones/2026-05-costo-real-no-actualizar-matricula', label: 'El costo real de no actualizar: cómo se pierde la matrícula', group: 'Acción' },
+  { href: '/investigaciones/2026-05-kpis-medir-actualizacion-curricular', label: 'Los 4 KPIs para saber si la actualización curricular ya funcionó', group: 'Medición' },
 ]
 
 export default function GuiaPage() {
@@ -118,17 +121,22 @@ export default function GuiaPage() {
 
       <section>
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-5">Lecturas recomendadas para rectores</h2>
-        <div className="flex flex-col gap-3">
-          {GUIDES.map(g => (
-            <Link key={g.href} href={g.href} className="group flex items-center gap-2">
-              <span className="text-xs text-gray-400 group-hover:text-indigo-500 transition-colors">→</span>
-              <span className="text-sm text-gray-700 group-hover:text-indigo-700 transition-colors">{g.label}</span>
-            </Link>
-          ))}
-          <Link href="/investigaciones?q=rectores" className="text-xs text-indigo-600 hover:underline mt-1">
-            Ver todas las investigaciones para rectores →
-          </Link>
-        </div>
+        {(['Diagnóstico', 'Acción', 'Medición'] as const).map(grp => (
+          <div key={grp} className="mb-5">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{grp}</p>
+            <div className="flex flex-col gap-2">
+              {GUIDES.filter(g => g.group === grp).map(g => (
+                <Link key={g.href} href={g.href} className="group flex items-center gap-2">
+                  <span className="text-xs text-gray-400 group-hover:text-indigo-500 transition-colors">→</span>
+                  <span className="text-sm text-gray-700 group-hover:text-indigo-700 transition-colors">{g.label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        ))}
+        <Link href="/investigaciones?q=rectores" className="text-xs text-indigo-600 hover:underline mt-1">
+          Ver todas las investigaciones para rectores →
+        </Link>
       </section>
     </main>
   )
