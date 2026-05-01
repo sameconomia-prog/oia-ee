@@ -544,6 +544,14 @@ export interface SkillIndexItem {
   carreras: string[]
 }
 
+export interface SkillCareerItem {
+  career_slug: string
+  career_nombre: string
+  area: string
+  direccion: ConvergenceDirection
+  urgencia_curricular: number
+}
+
 export interface SourceHallazgo {
   career_slug: string
   career_nombre: string

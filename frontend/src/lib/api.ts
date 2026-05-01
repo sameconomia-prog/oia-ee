@@ -458,6 +458,12 @@ export async function getBenchmarkSkillCrossSource(skillId: string): Promise<imp
   return res.json()
 }
 
+export async function getBenchmarkSkillCareers(skillId: string): Promise<import('./types').SkillCareerItem[]> {
+  const res = await fetch(`${BASE}/publico/benchmarks/skills/${skillId}/carreras`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
 export async function getBenchmarkSkillsIndex(): Promise<import('./types').SkillIndexItem[]> {
   const res = await fetch(`${BASE}/publico/benchmarks/skills`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)

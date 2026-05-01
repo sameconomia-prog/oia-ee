@@ -453,3 +453,37 @@ def test_source_detail_filter_by_dir_declining(bench_client):
     hallazgos = resp.json()["hallazgos"]
     for h in hallazgos:
         assert h["direccion"] in {"declining", "growing", "mixed", "stable", "sin_datos"}
+
+
+# ── skill carreras endpoint ──────────────────────────────────────────────────
+
+def test_skill_carreras_returns_list(bench_client):
+    resp = bench_client.get("/publico/benchmarks/skills/skill-a/carreras")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data, list)
+    assert len(data) >= 1
+
+
+def test_skill_carreras_has_direction_and_urgencia(bench_client):
+    resp = bench_client.get("/publico/benchmarks/skills/skill-a/carreras")
+    assert resp.status_code == 200
+    item = resp.json()[0]
+    assert item["career_slug"] == "carrera-test"
+    assert item["career_nombre"] == "Carrera Test"
+    assert "direccion" in item
+    assert "urgencia_curricular" in item
+    assert isinstance(item["urgencia_curricular"], int)
+
+
+def test_skill_carreras_not_found_returns_404(bench_client):
+    resp = bench_client.get("/publico/benchmarks/skills/no-existe/carreras")
+    assert resp.status_code == 404
+
+
+def test_skill_carreras_only_includes_careers_with_skill(bench_client):
+    """skill-b only appears in one career in mock data."""
+    resp = bench_client.get("/publico/benchmarks/skills/skill-b/carreras")
+    assert resp.status_code == 200
+    slugs = [item["career_slug"] for item in resp.json()]
+    assert "carrera-test" in slugs

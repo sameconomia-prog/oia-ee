@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { getBenchmarkSkillCrossSource, getBenchmarkSkillsIndex, getBenchmarkCareers } from '@/lib/api'
-import type { SkillCrossSource, SkillIndexItem, BenchmarkCareerSummary, ConvergenceDirection } from '@/lib/types'
+import { getBenchmarkSkillCrossSource, getBenchmarkSkillsIndex, getBenchmarkSkillCareers } from '@/lib/api'
+import type { SkillCrossSource, SkillIndexItem, SkillCareerItem, ConvergenceDirection } from '@/lib/types'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import ConvergenceIcon from '@/components/benchmarks/ConvergenceIcon'
@@ -39,7 +39,7 @@ export default function SkillCrossSourcePage() {
 
   const [cross, setCross] = useState<SkillCrossSource | null>(null)
   const [indexItem, setIndexItem] = useState<SkillIndexItem | null>(null)
-  const [careerMap, setCareerMap] = useState<Record<string, BenchmarkCareerSummary>>({})
+  const [skillCareers, setSkillCareers] = useState<SkillCareerItem[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -48,12 +48,12 @@ export default function SkillCrossSourcePage() {
     Promise.all([
       getBenchmarkSkillCrossSource(skill_id),
       getBenchmarkSkillsIndex(),
-      getBenchmarkCareers(),
+      getBenchmarkSkillCareers(skill_id),
     ])
-      .then(([c, idx, careers]) => {
+      .then(([c, idx, sc]) => {
         setCross(c)
         setIndexItem(idx.find(s => s.skill_id === skill_id) ?? null)
-        setCareerMap(Object.fromEntries(careers.map(ca => [ca.slug, ca])))
+        setSkillCareers(sc)
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
@@ -75,7 +75,7 @@ export default function SkillCrossSourcePage() {
   const direccion = (indexItem?.direccion_global ?? 'sin_datos') as ConvergenceDirection
   const fuentes = indexItem?.fuentes_con_datos ?? 0
   const consenso = indexItem?.consenso_pct ?? 0
-  const carreras = indexItem?.carreras ?? []
+  const backCareerName = skillCareers.find(c => c.career_slug === backSlug)?.career_nombre ?? backSlug
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -86,7 +86,7 @@ export default function SkillCrossSourcePage() {
         {backSlug ? (
           <>
             <Link href={`/benchmarks/${backSlug}`} className="text-brand-600 hover:underline">
-              {careerMap[backSlug]?.nombre ?? backSlug}
+              {backCareerName}
             </Link>
             <span>/</span>
           </>
@@ -181,24 +181,31 @@ export default function SkillCrossSourcePage() {
       )}
 
       {/* Carreras */}
-      {carreras.length > 0 && (
-        <div className="mt-6">
+      {skillCareers.length > 0 && (
+        <Card className="mt-6 p-5">
           <h2 className="text-sm font-semibold text-slate-700 mb-3">
             Carreras que incluyen esta habilidad
-            <span className="ml-2 text-[11px] font-normal text-slate-400">({carreras.length})</span>
+            <span className="ml-2 text-[11px] font-normal text-slate-400">({skillCareers.length})</span>
           </h2>
-          <div className="flex flex-wrap gap-2">
-            {carreras.map(slug => (
-              <Link
-                key={slug}
-                href={`/benchmarks/${slug}`}
-                className="text-xs bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 px-3 py-1.5 rounded-full transition-colors border border-slate-200 hover:border-brand-200"
-              >
-                {careerMap[slug]?.nombre ?? slug}
-              </Link>
+          <div className="divide-y divide-slate-50">
+            {skillCareers.map(c => (
+              <div key={c.career_slug} className="flex items-center gap-3 py-2 first:pt-0 last:pb-0">
+                <ConvergenceIcon direction={c.direccion as ConvergenceDirection} />
+                <Link
+                  href={`/benchmarks/${c.career_slug}${backSlug ? '' : `?from=${skill_id}`}`}
+                  className="flex-1 text-sm text-slate-700 hover:text-brand-700 hover:underline"
+                >
+                  {c.career_nombre}
+                </Link>
+                <span className="text-[11px] text-slate-400 hidden sm:block">{c.area}</span>
+                <span className={`text-[11px] font-mono font-semibold ${c.urgencia_curricular >= 50 ? 'text-red-500' : c.urgencia_curricular >= 25 ? 'text-yellow-600' : 'text-emerald-600'}`}>
+                  {c.urgencia_curricular}
+                </span>
+              </div>
             ))}
           </div>
-        </div>
+          <p className="text-[10px] text-slate-300 mt-3">Número = urgencia curricular de la carrera (0–100)</p>
+        </Card>
       )}
     </div>
   )

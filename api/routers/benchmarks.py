@@ -80,6 +80,14 @@ class SkillIndexItemOut(BaseModel):
     carreras: list[str]
 
 
+class SkillCareerOut(BaseModel):
+    career_slug: str
+    career_nombre: str
+    area: str
+    direccion: str
+    urgencia_curricular: int
+
+
 class SourceHallazgoOut(BaseModel):
     career_slug: str
     career_nombre: str
@@ -327,6 +335,31 @@ def get_skills_index():
             carreras=skill_careers.get(sid, []),
         ))
     return sorted(result, key=lambda s: (s.direccion_global, s.skill_nombre))
+
+
+@router.get("/skills/{skill_id}/carreras", response_model=list[SkillCareerOut],
+            summary="Carreras que incluyen esta skill con su dirección específica")
+def get_skill_careers(skill_id: str):
+    sources, career_map, skill_index = load_benchmarks()
+    all_skill_ids = {s["id"] for c in career_map["carreras"] for s in c["skills"]}
+    if skill_id not in all_skill_ids:
+        raise HTTPException(status_code=404, detail=f"Skill '{skill_id}' no encontrada")
+    result = []
+    for carrera in career_map["carreras"]:
+        skill = next((s for s in carrera["skills"] if s["id"] == skill_id), None)
+        if skill is None:
+            continue
+        by_fuente = skill_index.get(skill_id, {})
+        direccion = compute_direction(by_fuente)
+        result.append(SkillCareerOut(
+            career_slug=carrera["slug"],
+            career_nombre=carrera["nombre"],
+            area=carrera["area"],
+            direccion=direccion,
+            urgencia_curricular=_compute_urgencia(carrera, skill_index),
+        ))
+    result.sort(key=lambda x: (x.direccion, x.career_nombre))
+    return result
 
 
 @router.get("/skills/{skill_id}", response_model=SkillCrossSourceOut,
