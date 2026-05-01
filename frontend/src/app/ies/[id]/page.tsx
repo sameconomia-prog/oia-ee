@@ -103,12 +103,22 @@ export default function IesDetailPage() {
               <p className="text-sm text-gray-500">{detalle.nombre_corto}</p>
             )}
           </div>
-          <Link
-            href={`/comparar?iesA=${id}`}
-            className="shrink-0 mt-1 px-4 py-2 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-700 transition-colors"
-          >
-            ⚖️ Comparar
-          </Link>
+          <div className="flex items-center gap-2 mt-1 shrink-0">
+            <a
+              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://oia-ee.mx/ies/${id}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-600 border border-blue-200 px-3 py-1.5 rounded hover:bg-blue-50 transition-colors font-medium"
+            >
+              LinkedIn
+            </a>
+            <Link
+              href={`/comparar?iesA=${id}`}
+              className="px-4 py-1.5 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              ⚖️ Comparar
+            </Link>
+          </div>
         </div>
       </div>
 
