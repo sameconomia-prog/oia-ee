@@ -104,6 +104,23 @@ export default function IesDetailPage() {
             )}
           </div>
           <div className="flex items-center gap-2 mt-1 shrink-0">
+            <button
+              onClick={() => {
+                const lines = [
+                  `📊 Diagnóstico IA — ${detalle.nombre}`,
+                  `Promedio D1 Obsolescencia: ${detalle.promedio_d1.toFixed(2)} | D2 Oportunidades: ${detalle.promedio_d2.toFixed(2)}`,
+                  detalle.carreras_riesgo_alto > 0 ? `Carreras en riesgo alto (D1 ≥ 0.60): ${detalle.carreras_riesgo_alto}` : '',
+                  portfolioUrgencia != null ? `Urgencia curricular portfolio: ${portfolioUrgencia}/100` : '',
+                  `Ver análisis completo: https://oia-ee.mx/ies/${id}`,
+                  'Fuente: OIA-EE — Observatorio de Impacto IA en Educación y Empleo',
+                ].filter(Boolean).join('\n')
+                navigator.clipboard.writeText(lines).catch(() => {})
+              }}
+              className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded hover:bg-gray-50 transition-colors font-medium"
+              title="Copiar resumen diagnóstico"
+            >
+              Copiar
+            </button>
             <a
               href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://oia-ee.mx/ies/${id}`)}`}
               target="_blank"
