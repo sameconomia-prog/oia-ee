@@ -1,9 +1,9 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getIesDetalle, getCarrerasDeIes } from '@/lib/api'
-import type { IesDetalle, CarreraKpi } from '@/lib/types'
+import { getIesDetalle, getCarrerasDeIes, getBenchmarkCareers } from '@/lib/api'
+import type { IesDetalle, CarreraKpi, BenchmarkCareerSummary } from '@/lib/types'
 
 function ScoreBadge({ label, score, invert }: { label: string; score: number; invert?: boolean }) {
   const bad = invert ? score >= 0.6 : score < 0.4
@@ -16,10 +16,28 @@ function ScoreBadge({ label, score, invert }: { label: string; score: number; in
   )
 }
 
+function UrgenciaMini({ score, slug }: { score: number; slug: string }) {
+  const { label, color } =
+    score >= 60 ? { label: `Urgencia alta (${score})`, color: 'bg-red-50 text-red-700 border-red-200' } :
+    score >= 30 ? { label: `Urgencia media (${score})`, color: 'bg-amber-50 text-amber-700 border-amber-200' } :
+    { label: `Urgencia baja (${score})`, color: 'bg-green-50 text-green-700 border-green-200' }
+  return (
+    <Link
+      href={`/benchmarks/${slug}`}
+      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10px] font-semibold whitespace-nowrap ${color}`}
+      title={`Urgencia curricular benchmark global: ${score}/100`}
+    >
+      <span>Benchmark</span>
+      <span className="font-mono">{score}</span>
+    </Link>
+  )
+}
+
 export default function IesDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [detalle, setDetalle] = useState<IesDetalle | null>(null)
   const [carreras, setCarreras] = useState<CarreraKpi[]>([])
+  const [benchmarkList, setBenchmarkList] = useState<BenchmarkCareerSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -28,14 +46,21 @@ export default function IesDetailPage() {
     Promise.all([
       getIesDetalle(id),
       getCarrerasDeIes(id),
+      getBenchmarkCareers().catch(() => []),
     ])
-      .then(([det, cs]) => {
+      .then(([det, cs, bms]) => {
         setDetalle(det)
         setCarreras(cs)
+        setBenchmarkList(bms)
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
   }, [id])
+
+  const benchmarkMap = useMemo(
+    () => Object.fromEntries(benchmarkList.map(b => [b.slug, b])),
+    [benchmarkList]
+  )
 
   if (loading) {
     return <p className="text-gray-400 text-sm py-8 text-center">Cargando...</p>
@@ -110,28 +135,34 @@ export default function IesDetailPage() {
           <p className="text-gray-400 text-sm px-5 py-8 text-center">Sin carreras registradas.</p>
         )}
 
-        {carreras.map(c => (
-          <div key={c.id} className="px-5 py-4 border-b last:border-0">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <Link href={`/carreras/${c.id}`} className="text-sm font-medium text-gray-800 hover:text-indigo-700 hover:underline">
-                  {c.nombre}
-                </Link>
-                {c.matricula != null && (
-                  <p className="text-xs text-gray-400">Matrícula: {c.matricula.toLocaleString()}</p>
+        {carreras.map(c => {
+          const bm = c.benchmark_slug ? benchmarkMap[c.benchmark_slug] : null
+          return (
+            <div key={c.id} className="px-5 py-4 border-b last:border-0">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Link href={`/carreras/${c.id}`} className="text-sm font-medium text-gray-800 hover:text-indigo-700 hover:underline">
+                      {c.nombre}
+                    </Link>
+                    {bm && <UrgenciaMini score={bm.urgencia_curricular} slug={bm.slug} />}
+                  </div>
+                  {c.matricula != null && (
+                    <p className="text-xs text-gray-400 mt-0.5">Matrícula: {c.matricula.toLocaleString()}</p>
+                  )}
+                </div>
+                {c.kpi && (
+                  <div className="flex gap-1.5 flex-wrap justify-end">
+                    <ScoreBadge label="D1" score={c.kpi.d1_obsolescencia.score} invert />
+                    <ScoreBadge label="D2" score={c.kpi.d2_oportunidades.score} />
+                    <ScoreBadge label="D3" score={c.kpi.d3_mercado.score} />
+                    <ScoreBadge label="D6" score={c.kpi.d6_estudiantil.score} />
+                  </div>
                 )}
               </div>
-              {c.kpi && (
-                <div className="flex gap-1.5 flex-wrap justify-end">
-                  <ScoreBadge label="D1" score={c.kpi.d1_obsolescencia.score} invert />
-                  <ScoreBadge label="D2" score={c.kpi.d2_oportunidades.score} />
-                  <ScoreBadge label="D3" score={c.kpi.d3_mercado.score} />
-                  <ScoreBadge label="D6" score={c.kpi.d6_estudiantil.score} />
-                </div>
-              )}
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
