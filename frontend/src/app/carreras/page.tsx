@@ -52,6 +52,7 @@ export default function CarrerasListPage() {
   const [sortKey, setSortKey] = useState<SortKey>('none')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [benchmarkMap, setBenchmarkMap] = useState<Map<string, number>>(new Map())
+  const [filterUrgenciaAlta, setFilterUrgenciaAlta] = useState(false)
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -63,8 +64,12 @@ export default function CarrerasListPage() {
   }
 
   const sorted = useMemo(() => {
-    if (sortKey === 'none') return carreras
-    return [...carreras].sort((a, b) => {
+    let base = carreras
+    if (filterUrgenciaAlta) {
+      base = base.filter(c => c.benchmark_slug && (benchmarkMap.get(c.benchmark_slug) ?? 0) >= 60)
+    }
+    if (sortKey === 'none') return base
+    return [...base].sort((a, b) => {
       let av = 0, bv = 0
       if (sortKey === 'nombre') {
         const cmp = a.nombre.localeCompare(b.nombre, 'es')
@@ -75,7 +80,7 @@ export default function CarrerasListPage() {
       if (sortKey === 'matricula') { av = a.matricula ?? -1; bv = b.matricula ?? -1 }
       return sortDir === 'asc' ? av - bv : bv - av
     })
-  }, [carreras, sortKey, sortDir])
+  }, [carreras, sortKey, sortDir, filterUrgenciaAlta, benchmarkMap])
 
   useEffect(() => {
     getAreasCarreras().then(setAreas).catch(() => {})
@@ -183,6 +188,14 @@ export default function CarrerasListPage() {
               Limpiar
             </button>
           )}
+          <span className="ml-2 text-xs text-gray-300">|</span>
+          <button
+            onClick={() => setFilterUrgenciaAlta(v => !v)}
+            title="Mostrar solo carreras con urgencia curricular ≥ 60"
+            className={`px-2.5 py-1 text-xs rounded border transition-colors ${filterUrgenciaAlta ? 'bg-red-50 border-red-300 text-red-700 font-semibold' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+          >
+            U ≥ 60
+          </button>
         </div>
       )}
 
