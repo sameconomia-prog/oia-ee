@@ -281,14 +281,34 @@ export default function CarreraDetallePage() {
               {d.duracion_anios && <Badge variant="neutro">{d.duracion_anios} años</Badge>}
             </div>
           </div>
-          <a
-            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://oia-ee.mx/carreras/${id}`)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shrink-0 mt-1 text-xs text-blue-600 border border-blue-200 px-3 py-1.5 rounded hover:bg-blue-50 transition-colors font-medium whitespace-nowrap"
-          >
-            LinkedIn
-          </a>
+          <div className="flex gap-2 shrink-0 mt-1">
+            <button
+              onClick={() => {
+                const kpi = d.kpi
+                const urgencia = benchmarkSummary?.urgencia_curricular
+                const lines = [
+                  `📊 Diagnóstico IA — ${d.nombre}`,
+                  kpi ? `D1 Obsolescencia: ${kpi.d1_obsolescencia.score.toFixed(2)} | D2 Oportunidades: ${kpi.d2_oportunidades.score.toFixed(2)}` : '',
+                  urgencia != null ? `Urgencia curricular global: ${urgencia}/100` : '',
+                  `Ver análisis completo: https://oia-ee.mx/carreras/${id}`,
+                  'Fuente: OIA-EE — Observatorio de Impacto IA en Educación y Empleo',
+                ].filter(Boolean).join('\n')
+                navigator.clipboard.writeText(lines).catch(() => {})
+              }}
+              className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded hover:bg-gray-50 transition-colors font-medium whitespace-nowrap"
+              title="Copiar resumen diagnóstico"
+            >
+              Copiar
+            </button>
+            <a
+              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://oia-ee.mx/carreras/${id}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-600 border border-blue-200 px-3 py-1.5 rounded hover:bg-blue-50 transition-colors font-medium whitespace-nowrap"
+            >
+              LinkedIn
+            </a>
+          </div>
         </div>
       </div>
 
