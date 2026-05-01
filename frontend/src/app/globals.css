@@ -187,6 +187,10 @@
   /* Grid decorativo */
   --l-grid-size: 64px;
   --l-grid-color: rgba(59, 130, 246, 0.03);
+
+  /* Navbar scroll backgrounds */
+  --l-nav-bg-scrolled: rgba(8, 9, 10, 0.85);
+  --l-nav-bg-drawer: rgba(8, 9, 10, 0.95);
 }
 
 /* Prevent FOUC for landing pages on cold-start */

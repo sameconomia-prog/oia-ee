@@ -29,7 +29,7 @@ export default function Navbar() {
           : 'border-b border-transparent'
       }`}
       style={scrolled ? {
-        background: 'rgba(8, 9, 10, 0.85)',
+        background: 'var(--l-nav-bg-scrolled)',
         borderColor: 'var(--l-border-subtle)',
       } : undefined}
     >
@@ -88,7 +88,7 @@ export default function Navbar() {
           className="md:hidden border-t px-6 py-4 space-y-4 backdrop-blur-md"
           style={{
             borderColor: 'var(--l-border-subtle)',
-            background: 'rgba(8, 9, 10, 0.95)',
+            background: 'var(--l-nav-bg-drawer)',
           }}
         >
           {links.map(l => (
