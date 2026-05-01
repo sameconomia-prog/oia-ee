@@ -44,6 +44,7 @@ export default function SkillConvergenceTable({
   const [filterDir, setFilterDir] = useState<ConvergenceDirection | 'all'>('all')
   const [filterAccion, setFilterAccion] = useState<string>('all')
   const [groupByTipo, setGroupByTipo] = useState(false)
+  const [search, setSearch] = useState('')
 
   const TIPO_ORDER: Record<string, number> = { tecnica: 0, digital: 1, transversal: 2, social: 3 }
   const TIPO_LABEL: Record<string, string> = {
@@ -51,12 +52,14 @@ export default function SkillConvergenceTable({
   }
 
   const sorted = useMemo(() => {
+    const q = search.trim().toLowerCase()
     let list = filterDir === 'all'
       ? [...skills]
       : skills.filter(s => s.direccion_global === filterDir ||
           (filterDir === 'mixed' && s.direccion_global === 'stable'))
 
     if (filterAccion !== 'all') list = list.filter(s => s.accion_curricular === filterAccion)
+    if (q) list = list.filter(s => s.skill_nombre.toLowerCase().includes(q))
 
     if (sort === 'declining') list.sort((a, b) => DIR_ORDER[a.direccion_global] - DIR_ORDER[b.direccion_global])
     else if (sort === 'growing') list.sort((a, b) => DIR_ORDER[b.direccion_global] - DIR_ORDER[a.direccion_global])
@@ -74,6 +77,17 @@ export default function SkillConvergenceTable({
 
   return (
     <div>
+      {/* Search */}
+      <div className="mb-2">
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Buscar habilidad…"
+          className="w-full sm:w-64 text-xs border border-slate-200 rounded px-3 py-1.5 bg-white text-slate-700 placeholder:text-slate-400 outline-none focus:border-brand-400"
+        />
+      </div>
+
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-2 mb-3">
         <span className="text-[10px] text-slate-500 uppercase tracking-widest">Ordenar:</span>
