@@ -192,6 +192,47 @@ export default function BenchmarkCareerPage() {
         <HorizonteTimeline skills={detail.skills} careerSlug={slug} />
       </Card>
 
+      {/* Skills calientes — growing y demandadas en MX */}
+      {vacanteSkills.length > 0 && (() => {
+        const vacMap = new Map(vacanteSkills.map(sf => [normS(sf.nombre), sf.count]))
+        const calientesSkills = detail.skills
+          .filter(sk => sk.direccion_global === 'growing')
+          .map(sk => {
+            const q = normS(sk.skill_nombre)
+            const count = vacMap.get(q) ??
+              Array.from(vacMap.entries()).find(([k]) => k.includes(q) || q.includes(k))?.[1] ?? 0
+            return { ...sk, vacanteCount: count }
+          })
+          .filter(sk => sk.vacanteCount > 0)
+          .sort((a, b) => b.vacanteCount - a.vacanteCount)
+        if (calientesSkills.length === 0) return null
+        return (
+          <Card className="mb-6 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">
+                Skills calientes · {calientesSkills.length} {calientesSkills.length === 1 ? 'skill' : 'skills'}
+              </h3>
+              <span className="text-[11px] text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-medium">
+                Creciendo globalmente y demandadas en MX
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {calientesSkills.map(sk => (
+                <Link
+                  key={sk.skill_id}
+                  href={`/vacantes?q=${encodeURIComponent(sk.skill_nombre)}`}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded-full text-xs text-emerald-800 hover:bg-emerald-100 transition-colors"
+                >
+                  <span className="font-medium">{sk.skill_nombre}</span>
+                  <span className="font-mono text-emerald-600 text-[10px]">{sk.vacanteCount} vac.</span>
+                </Link>
+              ))}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-2">↑ growing globalmente · alta demanda en vacantes mexicanas · fortalecer en currículo</p>
+          </Card>
+        )
+      })()}
+
       {/* Brecha de skills — declining pero demandadas en MX */}
       {vacanteSkills.length > 0 && (() => {
         const vacMap = new Map(vacanteSkills.map(sf => [normS(sf.nombre), sf.count]))
