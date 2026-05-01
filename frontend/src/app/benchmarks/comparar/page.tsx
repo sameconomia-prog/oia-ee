@@ -59,10 +59,12 @@ function SkillMiniRow({ skill, sources }: { skill: SkillConvergencia; sources: B
 function CareerPanel({
   detail,
   sources,
+  summary,
   onClear,
 }: {
   detail: BenchmarkCareerDetail
   sources: BenchmarkSource[]
+  summary?: BenchmarkCareerSummary | null
   onClear: () => void
 }) {
   const declining = detail.skills.filter(s => s.direccion_global === 'declining')
@@ -76,7 +78,21 @@ function CareerPanel({
           <h3 className="text-sm font-bold text-slate-900">{detail.nombre}</h3>
           <p className="text-[11px] text-slate-400 mt-0.5">{detail.area}</p>
         </div>
-        <button onClick={onClear} className="text-[11px] text-slate-400 hover:text-slate-600 ml-3">×</button>
+        <div className="flex items-center gap-2 ml-3">
+          {summary && (() => {
+            const s = summary.urgencia_curricular
+            const cls = s >= 60 ? 'bg-red-50 text-red-700 border-red-200'
+              : s >= 30 ? 'bg-amber-50 text-amber-700 border-amber-200'
+              : 'bg-green-50 text-green-700 border-green-200'
+            return (
+              <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[10px] font-semibold ${cls}`}
+                title="Urgencia curricular (0–100)">
+                U<span className="font-mono">{s}</span>
+              </span>
+            )
+          })()}
+          <button onClick={onClear} className="text-[11px] text-slate-400 hover:text-slate-600">×</button>
+        </div>
       </div>
 
       <div className="flex gap-3 mb-4 text-xs">
@@ -140,6 +156,11 @@ export default function BenchmarksCompararPage() {
     getBenchmarkCareerDetail(slugB).then(setDetailB).catch(() => setDetailB(null)).finally(() => setLoadingB(false))
   }, [slugB])
 
+  const careersMap = useMemo(
+    () => Object.fromEntries(careers.map(c => [c.slug, c])),
+    [careers]
+  )
+
   const divergencias = useMemo(() => {
     if (!detailA || !detailB) return []
     const mapA = Object.fromEntries(detailA.skills.map(s => [s.skill_id, s]))
@@ -198,7 +219,7 @@ export default function BenchmarksCompararPage() {
             <select value={slugA} onChange={e => setSlugA(e.target.value)} className={selectClass}>
               <option value="">Selecciona una carrera…</option>
               {careers.filter(c => c.slug !== slugB).map(c => (
-                <option key={c.slug} value={c.slug}>{c.nombre}</option>
+                <option key={c.slug} value={c.slug}>{c.nombre} (U{c.urgencia_curricular})</option>
               ))}
             </select>
           </div>
@@ -207,7 +228,7 @@ export default function BenchmarksCompararPage() {
             <select value={slugB} onChange={e => setSlugB(e.target.value)} className={selectClass}>
               <option value="">Selecciona una carrera…</option>
               {careers.filter(c => c.slug !== slugA).map(c => (
-                <option key={c.slug} value={c.slug}>{c.nombre}</option>
+                <option key={c.slug} value={c.slug}>{c.nombre} (U{c.urgencia_curricular})</option>
               ))}
             </select>
           </div>
@@ -221,7 +242,7 @@ export default function BenchmarksCompararPage() {
             {loadingA
               ? <p className="text-xs text-slate-400 text-center py-4">Cargando...</p>
               : detailA
-              ? <CareerPanel detail={detailA} sources={sources} onClear={() => setSlugA('')} />
+              ? <CareerPanel detail={detailA} sources={sources} summary={careersMap[slugA]} onClear={() => setSlugA('')} />
               : <p className="text-xs text-slate-400 text-center py-4">Selecciona la Carrera A</p>
             }
           </Card>
@@ -229,7 +250,7 @@ export default function BenchmarksCompararPage() {
             {loadingB
               ? <p className="text-xs text-slate-400 text-center py-4">Cargando...</p>
               : detailB
-              ? <CareerPanel detail={detailB} sources={sources} onClear={() => setSlugB('')} />
+              ? <CareerPanel detail={detailB} sources={sources} summary={careersMap[slugB]} onClear={() => setSlugB('')} />
               : <p className="text-xs text-slate-400 text-center py-4">Selecciona la Carrera B</p>
             }
           </Card>
