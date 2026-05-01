@@ -13,9 +13,13 @@ const SOURCES = [
 export default function BenchmarksSection({
   resumen,
   topCareers = [],
+  calientesCount = 0,
+  brechaCount = 0,
 }: {
   resumen?: BenchmarkResumen | null
   topCareers?: BenchmarkCareerSummary[]
+  calientesCount?: number
+  brechaCount?: number
 }) {
   const totalCareers = resumen?.total_carreras ?? 17
   const totalSources = resumen?.total_fuentes ?? 5
@@ -57,6 +61,26 @@ export default function BenchmarksSection({
             <p className="text-sm text-slate-400 mt-1">Skills evaluadas</p>
           </div>
         </div>
+
+        {/* Intelligence highlights */}
+        {(calientesCount > 0 || brechaCount > 0) && (
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            {calientesCount > 0 && (
+              <a href="/benchmarks?panel=calientes" className="group bg-emerald-900/30 border border-emerald-700/40 rounded-xl p-4 text-center hover:bg-emerald-900/50 transition-colors">
+                <p className="text-3xl font-bold font-mono text-emerald-400 group-hover:scale-105 transition-transform inline-block">{calientesCount}</p>
+                <p className="text-sm text-emerald-300 mt-1">Skills calientes ↑</p>
+                <p className="text-[11px] text-emerald-500 mt-0.5">Creciendo globalmente y en demanda en México</p>
+              </a>
+            )}
+            {brechaCount > 0 && (
+              <a href="/benchmarks?panel=brecha" className="group bg-amber-900/30 border border-amber-700/40 rounded-xl p-4 text-center hover:bg-amber-900/50 transition-colors">
+                <p className="text-3xl font-bold font-mono text-amber-400 group-hover:scale-105 transition-transform inline-block">{brechaCount}</p>
+                <p className="text-sm text-amber-300 mt-1">Skills en brecha ↓</p>
+                <p className="text-[11px] text-amber-500 mt-0.5">En declive global pero aún pedidas por empleadores</p>
+              </a>
+            )}
+          </div>
+        )}
 
         {/* Direction distribution bar */}
         {resumen && total > 0 && (

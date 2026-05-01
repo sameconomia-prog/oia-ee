@@ -1,5 +1,5 @@
 // frontend/src/app/page.tsx
-import { getResumenPublico, getEstadisticasPublicas, getBenchmarkResumen, getBenchmarkCareers } from '@/lib/api'
+import { getResumenPublico, getEstadisticasPublicas, getBenchmarkResumen, getBenchmarkCareers, getBenchmarkSkillsIndex, getVacantesTopSkills } from '@/lib/api'
 import { getAllInvestigaciones } from '@/lib/investigaciones'
 import Hero from '@/components/landing/Hero'
 import TickerDatos from '@/components/landing/TickerDatos'
@@ -25,16 +25,30 @@ export const metadata: Metadata = {
 
 export const revalidate = 300
 
+function normS(s: string) {
+  return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
 export default async function LandingPage() {
-  const [resumen, estadisticas, benchmarksResumen, benchmarkCareers] = await Promise.all([
+  const [resumen, estadisticas, benchmarksResumen, benchmarkCareers, skillsIndex, vacanteSkills] = await Promise.all([
     getResumenPublico().catch(() => null),
     getEstadisticasPublicas().catch(() => null),
     getBenchmarkResumen().catch(() => null),
     getBenchmarkCareers().catch(() => []),
+    getBenchmarkSkillsIndex().catch(() => []),
+    getVacantesTopSkills(50).catch(() => []),
   ])
   const topUrgentCareers = [...benchmarkCareers]
     .sort((a, b) => b.urgencia_curricular - a.urgencia_curricular)
     .slice(0, 3)
+
+  const vacNorms = new Set(vacanteSkills.map(sf => normS(sf.nombre)))
+  const matchesVacante = (skillNombre: string) => {
+    const q = normS(skillNombre)
+    return vacNorms.has(q) || Array.from(vacNorms).some(k => k.includes(q) || q.includes(k))
+  }
+  const calientesCount = skillsIndex.filter(s => s.direccion_global === 'growing' && matchesVacante(s.skill_nombre)).length
+  const brechaCount = skillsIndex.filter(s => s.direccion_global === 'declining' && matchesVacante(s.skill_nombre)).length
   const investigaciones = getAllInvestigaciones()
 
   const tickerData = {
@@ -69,7 +83,7 @@ export default async function LandingPage() {
       <ElProblema />
       <ComoFunciona />
       <InvestigacionesGrid investigaciones={investigaciones} />
-      <BenchmarksSection resumen={benchmarksResumen} topCareers={topUrgentCareers} />
+      <BenchmarksSection resumen={benchmarksResumen} topCareers={topUrgentCareers} calientesCount={calientesCount} brechaCount={brechaCount} />
       <SobreElAnalista />
       <FormularioContacto />
     </main>
