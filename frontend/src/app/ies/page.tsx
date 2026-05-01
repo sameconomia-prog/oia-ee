@@ -21,13 +21,21 @@ function IesListContent() {
   const [iesList, setIesList] = useState<IesInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [busqueda, setBusqueda] = useState(() => searchParams.get('q') ?? '')
-  const [sortMode, setSortMode] = useState<SortMode>('default')
+  const [sortMode, setSortMode] = useState<SortMode>(() => (searchParams.get('sort') as SortMode) ?? 'default')
 
   function handleBusqueda(val: string) {
     setBusqueda(val)
     const params = new URLSearchParams(searchParams.toString())
     if (val) params.set('q', val)
     else params.delete('q')
+    router.replace(`/ies${params.size ? `?${params}` : ''}`, { scroll: false })
+  }
+
+  function handleSort(val: SortMode) {
+    setSortMode(val)
+    const params = new URLSearchParams(searchParams.toString())
+    if (val === 'default') params.delete('sort')
+    else params.set('sort', val)
     router.replace(`/ies${params.size ? `?${params}` : ''}`, { scroll: false })
   }
 
@@ -84,7 +92,7 @@ function IesListContent() {
         ] as { key: SortMode; label: string }[]).map(({ key, label }) => (
           <button
             key={key}
-            onClick={() => setSortMode(key)}
+            onClick={() => handleSort(key)}
             className={`px-2.5 py-1 text-xs rounded border transition-colors ${
               sortMode === key ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-medium' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
             }`}
