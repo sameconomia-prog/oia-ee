@@ -70,6 +70,7 @@ export default function EstadisticasPage() {
   const [topCalientes, setTopCalientes] = useState<SkillIndexItem[]>([])
   const [topDeclining, setTopDeclining] = useState<SkillIndexItem[]>([])
   const [topIesRiesgo, setTopIesRiesgo] = useState<IesInfo[]>([])
+  const [topIesOportunidad, setTopIesOportunidad] = useState<IesInfo[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -83,9 +84,14 @@ export default function EstadisticasPage() {
     getNoticiasTendencia(12).then(setNotTendencia).catch(() => {})
     getBenchmarkResumen().then(setBenchResumen).catch(() => {})
     getIesPublico()
-      .then(list => setTopIesRiesgo(
-        [...list].filter(i => i.promedio_d1 != null).sort((a, b) => (b.promedio_d1 ?? 0) - (a.promedio_d1 ?? 0)).slice(0, 5)
-      )).catch(() => {})
+      .then(list => {
+        setTopIesRiesgo(
+          [...list].filter(i => i.promedio_d1 != null).sort((a, b) => (b.promedio_d1 ?? 0) - (a.promedio_d1 ?? 0)).slice(0, 5)
+        )
+        setTopIesOportunidad(
+          [...list].filter(i => i.promedio_d2 != null).sort((a, b) => (b.promedio_d2 ?? 0) - (a.promedio_d2 ?? 0)).slice(0, 5)
+        )
+      }).catch(() => {})
     getBenchmarkSkillsIndex()
       .then(skills => {
         setTopCalientes(
@@ -356,6 +362,34 @@ export default function EstadisticasPage() {
                         />
                       </div>
                       <span className="text-[11px] font-mono text-gray-500 w-8 text-right">{ies.promedio_d1?.toFixed(2)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {topIesOportunidad.length > 0 && (
+            <div className="bg-white rounded-xl border shadow-sm p-5 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-semibold text-gray-800 text-sm">Top IES por oportunidad D2</h2>
+                <Link href="/ies?sort=d2_desc" className="text-xs text-indigo-600 hover:underline">Ver todas →</Link>
+              </div>
+              <div className="space-y-2">
+                {topIesOportunidad.map((ies, i) => (
+                  <div key={ies.id} className="flex items-center gap-3">
+                    <span className="text-[11px] text-gray-400 font-mono w-4">{i + 1}</span>
+                    <Link href={`/ies/${ies.id}`} className="flex-1 text-xs text-slate-700 hover:text-indigo-700 hover:underline truncate font-medium">
+                      {ies.nombre_corto ?? ies.nombre}
+                    </Link>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${(ies.promedio_d2 ?? 0) >= 0.6 ? 'bg-emerald-400' : (ies.promedio_d2 ?? 0) >= 0.4 ? 'bg-yellow-400' : 'bg-red-400'}`}
+                          style={{ width: `${(ies.promedio_d2 ?? 0) * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-[11px] font-mono text-gray-500 w-8 text-right">{ies.promedio_d2?.toFixed(2)}</span>
                     </div>
                   </div>
                 ))}
