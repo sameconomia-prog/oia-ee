@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { getPublicoIes, getCarrerasDeIes } from '@/lib/api'
+import { getPublicoIes, getCarrerasDeIes, getBenchmarkCareers } from '@/lib/api'
 import ComparacionIES from '@/components/ComparacionIES'
 import ComparacionResumenChart from '@/components/ComparacionResumenChart'
 import type { CarreraKpi } from '@/lib/types'
@@ -24,9 +24,11 @@ function CompararContent() {
   const [iesBId, setIesBId] = useState(searchParams.get('iesB') ?? '')
   const [carrerasA, setCarrerasA] = useState<CarreraKpi[]>([])
   const [carrerasB, setCarrerasB] = useState<CarreraKpi[]>([])
+  const [benchmarkMap, setBenchmarkMap] = useState<Map<string, number>>(new Map())
 
   useEffect(() => {
     getPublicoIes().then(setIes).catch(() => setIes([]))
+    getBenchmarkCareers().then(list => setBenchmarkMap(new Map(list.map(b => [b.slug, b.urgencia_curricular])))).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -131,38 +133,51 @@ function CompararContent() {
                 </button>
               </div>
               <div className="border rounded-lg overflow-hidden text-sm">
-                <div className="grid grid-cols-5 bg-gray-800 text-white text-xs font-semibold px-4 py-2">
+                <div className="grid grid-cols-6 bg-gray-800 text-white text-xs font-semibold px-4 py-2">
                   <div className="col-span-2">Carrera</div>
                   <div className="text-center">D1 A / B</div>
                   <div className="text-center">D2 A / B</div>
                   <div className="text-center">D3 A / B</div>
+                  <div className="text-center text-violet-300" title="Urgencia curricular global (benchmarks internacionales)">U</div>
                 </div>
-                {carrerasComunes.map(({ cA, cB }) => (
-                  <div key={cA.id} className="grid grid-cols-5 border-t px-4 py-2 hover:bg-gray-50">
-                    <div className="col-span-2 text-xs truncate" title={cA.nombre}>
-                      <Link href={`/carreras/${cA.id}`} className="text-gray-700 hover:text-indigo-700 hover:underline">{cA.nombre}</Link>
+                {carrerasComunes.map(({ cA, cB }) => {
+                  const slug = cA.benchmark_slug ?? cB.benchmark_slug
+                  const urgencia = slug ? benchmarkMap.get(slug) : undefined
+                  const uCls = urgencia == null ? '' : urgencia >= 60 ? 'text-red-600' : urgencia >= 30 ? 'text-amber-600' : 'text-emerald-600'
+                  return (
+                    <div key={cA.id} className="grid grid-cols-6 border-t px-4 py-2 hover:bg-gray-50">
+                      <div className="col-span-2 text-xs truncate" title={cA.nombre}>
+                        <Link href={`/carreras/${cA.id}`} className="text-gray-700 hover:text-indigo-700 hover:underline">{cA.nombre}</Link>
+                      </div>
+                      <div className="text-center font-mono text-xs">
+                        <span className={cA.kpi && cA.kpi.d1_obsolescencia.score >= 0.6 ? 'text-red-600' : 'text-green-600'}>
+                          {cA.kpi?.d1_obsolescencia.score.toFixed(2) ?? '—'}
+                        </span>
+                        {' / '}
+                        <span className={cB.kpi && cB.kpi.d1_obsolescencia.score >= 0.6 ? 'text-red-600' : 'text-green-600'}>
+                          {cB.kpi?.d1_obsolescencia.score.toFixed(2) ?? '—'}
+                        </span>
+                      </div>
+                      <div className="text-center font-mono text-xs">
+                        {cA.kpi?.d2_oportunidades.score.toFixed(2) ?? '—'}
+                        {' / '}
+                        {cB.kpi?.d2_oportunidades.score.toFixed(2) ?? '—'}
+                      </div>
+                      <div className="text-center font-mono text-xs">
+                        {cA.kpi?.d3_mercado.score.toFixed(2) ?? '—'}
+                        {' / '}
+                        {cB.kpi?.d3_mercado.score.toFixed(2) ?? '—'}
+                      </div>
+                      <div className="text-center font-mono text-xs">
+                        {urgencia != null ? (
+                          <Link href={`/benchmarks/${slug}`} className={`font-bold hover:underline ${uCls}`}>{urgencia}</Link>
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-center font-mono text-xs">
-                      <span className={cA.kpi && cA.kpi.d1_obsolescencia.score >= 0.6 ? 'text-red-600' : 'text-green-600'}>
-                        {cA.kpi?.d1_obsolescencia.score.toFixed(2) ?? '—'}
-                      </span>
-                      {' / '}
-                      <span className={cB.kpi && cB.kpi.d1_obsolescencia.score >= 0.6 ? 'text-red-600' : 'text-green-600'}>
-                        {cB.kpi?.d1_obsolescencia.score.toFixed(2) ?? '—'}
-                      </span>
-                    </div>
-                    <div className="text-center font-mono text-xs">
-                      {cA.kpi?.d2_oportunidades.score.toFixed(2) ?? '—'}
-                      {' / '}
-                      {cB.kpi?.d2_oportunidades.score.toFixed(2) ?? '—'}
-                    </div>
-                    <div className="text-center font-mono text-xs">
-                      {cA.kpi?.d3_mercado.score.toFixed(2) ?? '—'}
-                      {' / '}
-                      {cB.kpi?.d3_mercado.score.toFixed(2) ?? '—'}
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
               <p className="text-xs text-gray-400 mt-1">D1: menor=mejor · D2/D3: mayor=mejor</p>
             </div>
