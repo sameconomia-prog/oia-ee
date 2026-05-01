@@ -357,7 +357,7 @@ export default function BenchmarkCareerPage() {
             <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">
               Lecturas relacionadas
             </h3>
-            <Link href="/investigaciones" className="text-[11px] text-brand-600 hover:underline">
+            <Link href={`/investigaciones?benchmark=${slug}`} className="text-[11px] text-brand-600 hover:underline">
               Más investigaciones →
             </Link>
           </div>
