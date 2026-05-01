@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { getVacantesPublico, getVacantesTopSkills, getSectoresVacantes, getVacantesTendencia, getBenchmarkSkillsIndex } from '@/lib/api'
 import type { VacantePublico, SkillFreq, VacanteTendencia, SkillIndexItem } from '@/lib/types'
 
@@ -61,12 +62,13 @@ function exportarCSV(vacantes: VacantePublico[]) {
 }
 
 export default function VacantesPage() {
+  const searchParams = useSearchParams()
   const [vacantes, setVacantes] = useState<VacantePublico[]>([])
   const [skills, setSkills] = useState<SkillFreq[]>([])
   const [sectores, setSectores] = useState<string[]>([])
   const [tendencia, setTendencia] = useState<VacanteTendencia[]>([])
   const [sectorFiltro, setSectorFiltro] = useState<string>('')
-  const [busqueda, setBusqueda] = useState('')
+  const [busqueda, setBusqueda] = useState(() => searchParams.get('q') ?? '')
   const [loading, setLoading] = useState(true)
   const [skip, setSkip] = useState(0)
   const [hasMore, setHasMore] = useState(true)

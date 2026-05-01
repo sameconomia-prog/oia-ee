@@ -449,17 +449,16 @@ export default function BenchmarksPage() {
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {brechaSkills.map(s => (
-              <Link
-                key={s.skill_id}
-                href={`/benchmarks/skills/${s.skill_id}`}
-                className="flex items-center gap-2 p-2 rounded-lg bg-white border border-amber-200 hover:border-amber-400 transition-colors"
-              >
+              <div key={s.skill_id} className="flex items-center gap-2 p-2 rounded-lg bg-white border border-amber-200 hover:border-amber-300 transition-colors">
                 <span className="text-red-500 font-bold text-sm shrink-0">↓</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-slate-700 truncate leading-tight">{s.skill_nombre}</p>
-                  <p className="text-[10px] text-slate-400">{s.consenso_pct}% consenso · {s.vacanteCount} vacantes</p>
+                  <Link href={`/benchmarks/skills/${s.skill_id}`} className="text-xs font-medium text-slate-700 truncate leading-tight hover:underline block">{s.skill_nombre}</Link>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[10px] text-slate-400">{s.consenso_pct}% consenso</span>
+                    <Link href={`/vacantes?q=${encodeURIComponent(s.skill_nombre)}`} className="text-[10px] text-amber-700 hover:underline font-medium">{s.vacanteCount} vacantes →</Link>
+                  </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </Card>
@@ -481,17 +480,16 @@ export default function BenchmarksPage() {
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {calientesSkills.map(s => (
-              <Link
-                key={s.skill_id}
-                href={`/benchmarks/skills/${s.skill_id}`}
-                className="flex items-center gap-2 p-2 rounded-lg bg-white border border-emerald-200 hover:border-emerald-400 transition-colors"
-              >
+              <div key={s.skill_id} className="flex items-center gap-2 p-2 rounded-lg bg-white border border-emerald-200 hover:border-emerald-300 transition-colors">
                 <span className="text-emerald-500 font-bold text-sm shrink-0">↑</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-slate-700 truncate leading-tight">{s.skill_nombre}</p>
-                  <p className="text-[10px] text-slate-400">{s.consenso_pct}% consenso · {s.vacanteCount} vacantes</p>
+                  <Link href={`/benchmarks/skills/${s.skill_id}`} className="text-xs font-medium text-slate-700 truncate leading-tight hover:underline block">{s.skill_nombre}</Link>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[10px] text-slate-400">{s.consenso_pct}% consenso</span>
+                    <Link href={`/vacantes?q=${encodeURIComponent(s.skill_nombre)}`} className="text-[10px] text-emerald-700 hover:underline font-medium">{s.vacanteCount} vacantes →</Link>
+                  </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </Card>
