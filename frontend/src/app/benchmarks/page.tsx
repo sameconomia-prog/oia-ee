@@ -7,7 +7,6 @@ import { getBenchmarkCareers, getBenchmarkResumen, getBenchmarkSkillsIndex } fro
 import type { BenchmarkCareerSummary, BenchmarkResumen, SkillIndexItem } from '@/lib/types'
 import ConvergenceIcon from '@/components/benchmarks/ConvergenceIcon'
 import Card from '@/components/ui/Card'
-import Badge from '@/components/ui/Badge'
 import SectionHeader from '@/components/ui/SectionHeader'
 
 const ARTICLE_MAP: Record<string, string> = {
@@ -150,6 +149,58 @@ function sortCareers(list: BenchmarkCareerSummary[], mode: SortMode): BenchmarkC
   return copy
 }
 
+function UrgenciaBar({ value }: { value: number }) {
+  const color = value >= 60 ? 'bg-red-400' : value >= 30 ? 'bg-amber-400' : 'bg-emerald-400'
+  return (
+    <div className="flex items-center gap-2 w-full">
+      <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${value}%` }} />
+      </div>
+      <span className="text-[11px] font-mono text-slate-600 w-7 text-right">{value}</span>
+    </div>
+  )
+}
+
+function CareerTable({ careers }: { careers: BenchmarkCareerSummary[] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-xs">
+        <thead>
+          <tr className="text-[10px] uppercase tracking-widest text-slate-400 border-b border-slate-100">
+            <th className="text-left py-2 pr-4 font-semibold">#</th>
+            <th className="text-left py-2 pr-4 font-semibold">Carrera</th>
+            <th className="text-left py-2 pr-4 font-semibold w-48">Urgencia curricular</th>
+            <th className="text-right py-2 pr-3 font-semibold text-red-500">↓</th>
+            <th className="text-right py-2 pr-3 font-semibold text-emerald-500">↑</th>
+            <th className="text-right py-2 pr-3 font-semibold text-yellow-500">~</th>
+            <th className="text-right py-2 font-semibold">Total</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-50">
+          {careers.map((c, i) => (
+            <tr key={c.slug} className="hover:bg-slate-50 transition-colors">
+              <td className="py-2.5 pr-4 text-slate-400 font-mono">{i + 1}</td>
+              <td className="py-2.5 pr-4">
+                <Link href={`/benchmarks/${c.slug}`} className="font-medium text-slate-800 hover:text-brand-700 hover:underline">
+                  {c.nombre}
+                </Link>
+                <span className="text-slate-400 ml-2 text-[10px]">{c.area.split('_').join(' ')}</span>
+              </td>
+              <td className="py-2.5 pr-4 w-48">
+                <UrgenciaBar value={c.urgencia_curricular} />
+              </td>
+              <td className="py-2.5 pr-3 text-right font-mono text-red-600">{c.skills_declining}</td>
+              <td className="py-2.5 pr-3 text-right font-mono text-emerald-600">{c.skills_growing}</td>
+              <td className="py-2.5 pr-3 text-right font-mono text-yellow-600">{c.skills_mixed}</td>
+              <td className="py-2.5 text-right font-mono text-slate-500">{c.total_skills}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 function exportCSV(careers: BenchmarkCareerSummary[]) {
   const header = 'Slug,Carrera,Area,Urgencia,Declining,Growing,Mixed,Sin datos,Total'
   const rows = careers.map(c =>
@@ -176,6 +227,7 @@ export default function BenchmarksPage() {
   const [loading, setLoading] = useState(true)
   const [filterArea, setFilterArea] = useState<string>(() => searchParams.get('area') ?? 'all')
   const [sortMode, setSortMode] = useState<SortMode>(() => (searchParams.get('sort') as SortMode) ?? 'default')
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
 
   useEffect(() => {
     Promise.all([getBenchmarkCareers(), getBenchmarkResumen(), getBenchmarkSkillsIndex()])
@@ -337,17 +389,34 @@ export default function BenchmarksPage() {
             <option value="opportunity">Mayor oportunidad</option>
             <option value="name">Nombre A–Z</option>
           </select>
-          <div className="flex gap-2 text-[11px] text-slate-400 ml-2">
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block"></span>Declining</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>Growing</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-400 inline-block"></span>Mixed</span>
+          <div className="flex border border-slate-200 rounded overflow-hidden ml-1">
+            <button
+              onClick={() => setViewMode('grid')}
+              title="Vista tarjetas"
+              className={`px-2.5 py-1 text-[11px] transition-colors ${viewMode === 'grid' ? 'bg-brand-600 text-white' : 'text-slate-500 hover:bg-slate-50'}`}
+            >
+              ▦
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              title="Vista tabla"
+              className={`px-2.5 py-1 text-[11px] transition-colors ${viewMode === 'table' ? 'bg-brand-600 text-white' : 'text-slate-500 hover:bg-slate-50'}`}
+            >
+              ☰
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-        {filtered.map(c => <CareerCard key={c.slug} career={c} />)}
-      </div>
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+          {filtered.map(c => <CareerCard key={c.slug} career={c} />)}
+        </div>
+      ) : (
+        <Card className="p-4">
+          <CareerTable careers={filtered} />
+        </Card>
+      )}
 
       <p className="text-xs text-slate-400 mt-6 text-center">
         Fuentes: WEF Future of Jobs 2025 · McKinsey 2023 · Frey-Osborne 2013 · CEPAL 2023 · Anthropic Economic Index 2025
