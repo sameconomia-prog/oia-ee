@@ -174,7 +174,7 @@ export default function BenchmarkCareerPage() {
 
       {/* Horizonte timeline */}
       <Card className="mb-6 p-5">
-        <HorizonteTimeline skills={detail.skills} />
+        <HorizonteTimeline skills={detail.skills} careerSlug={slug} />
       </Card>
 
       {/* Related careers in same area */}
