@@ -452,12 +452,12 @@ export default function IesDetailPage() {
             tipo: 'Nota',
           },
           detalle.promedio_d1 >= 0.45 ? {
+            slug: '2026-05-semestre-actualizacion-d1-en-6-meses',
+            titulo: 'El semestre de actualización: cómo mejorar el D1 en 6 meses',
+            tipo: 'Nota',
+          } : {
             slug: '2026-05-tres-senales-carrera-necesita-actualizacion',
             titulo: '3 señales de que tu carrera necesita actualización — ahora',
-            tipo: 'Análisis',
-          } : {
-            slug: '2026-05-stem-vs-humanidades-ia-riesgo-comparativo',
-            titulo: 'STEM vs. Humanidades: lo que los datos revelan',
             tipo: 'Análisis',
           },
         ] as { slug: string; titulo: string; tipo: string }[]
