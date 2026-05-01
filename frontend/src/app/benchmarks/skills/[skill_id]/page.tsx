@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useMemo } from 'react'
 import { getBenchmarkSkillCrossSource, getBenchmarkSkillsIndex, getBenchmarkSkillCareers } from '@/lib/api'
 import type { SkillCrossSource, SkillIndexItem, SkillCareerItem, ConvergenceDirection } from '@/lib/types'
 import Card from '@/components/ui/Card'
@@ -40,6 +41,7 @@ export default function SkillCrossSourcePage() {
   const [cross, setCross] = useState<SkillCrossSource | null>(null)
   const [indexItem, setIndexItem] = useState<SkillIndexItem | null>(null)
   const [skillCareers, setSkillCareers] = useState<SkillCareerItem[]>([])
+  const [allIndex, setAllIndex] = useState<SkillIndexItem[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -54,10 +56,22 @@ export default function SkillCrossSourcePage() {
         setCross(c)
         setIndexItem(idx.find(s => s.skill_id === skill_id) ?? null)
         setSkillCareers(sc)
+        setAllIndex(idx)
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
   }, [skill_id])
+
+  const relatedSkills = useMemo(() => {
+    if (!indexItem || allIndex.length === 0) return []
+    const myCarrerasSet = new Set(indexItem.carreras)
+    return allIndex
+      .filter(s => s.skill_id !== skill_id)
+      .map(s => ({ ...s, sharedCount: s.carreras.filter(c => myCarrerasSet.has(c)).length }))
+      .filter(s => s.sharedCount > 0)
+      .sort((a, b) => b.sharedCount - a.sharedCount || b.consenso_pct - a.consenso_pct)
+      .slice(0, 8)
+  }, [indexItem, allIndex, skill_id])
 
   if (loading) return <p className="text-slate-400 text-sm py-8 text-center">Cargando...</p>
 
@@ -205,6 +219,31 @@ export default function SkillCrossSourcePage() {
             ))}
           </div>
           <p className="text-[10px] text-slate-300 mt-3">Número = urgencia curricular de la carrera (0–100)</p>
+        </Card>
+      )}
+
+      {/* Related skills */}
+      {relatedSkills.length > 0 && (
+        <Card className="mt-6 p-5">
+          <h2 className="text-sm font-semibold text-slate-700 mb-3">
+            Habilidades relacionadas
+            <span className="ml-2 text-[11px] font-normal text-slate-400">(comparten carreras)</span>
+          </h2>
+          <div className="grid grid-cols-2 gap-2">
+            {relatedSkills.map(s => (
+              <Link
+                key={s.skill_id}
+                href={`/benchmarks/skills/${s.skill_id}`}
+                className="flex items-center gap-2 p-2 rounded-lg border border-slate-100 hover:border-brand-200 hover:bg-brand-50/30 transition-colors"
+              >
+                <ConvergenceIcon direction={s.direccion_global as ConvergenceDirection} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-slate-700 truncate leading-tight">{s.skill_nombre}</p>
+                  <p className="text-[10px] text-slate-400">{s.sharedCount} carrera{s.sharedCount !== 1 ? 's' : ''} en común</p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </Card>
       )}
     </div>
