@@ -7,7 +7,8 @@ import WhiteLabelApplier from '@/components/WhiteLabelApplier'
 import BusquedaGlobal from '@/components/BusquedaGlobal'
 import Navbar from '@/components/landing/Navbar'
 import Footer from '@/components/landing/Footer'
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   title: {
@@ -42,7 +43,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   if (isEmbed) {
     return (
       <html lang="es" className={cn("font-sans", GeistSans.variable)}>
-        <body className="bg-white">{children}</body>
+        <body className="bg-white">{children}<Analytics /></body>
       </html>
     )
   }
@@ -54,6 +55,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Navbar />
           {children}
           <Footer />
+          <Analytics />
         </body>
       </html>
     )
@@ -66,6 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <BusquedaGlobal />
         <Sidebar />
         <main className="flex-1 p-6 overflow-auto">{children}</main>
+        <Analytics />
       </body>
     </html>
   )
