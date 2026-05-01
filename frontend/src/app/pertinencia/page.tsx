@@ -1,9 +1,11 @@
 // frontend/src/app/pertinencia/page.tsx
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
+import { getBenchmarkCareers } from '@/lib/api'
+import type { BenchmarkCareerSummary } from '@/lib/types'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -34,6 +36,21 @@ export default function PertinenciaPage() {
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [benchmarkCareers, setBenchmarkCareers] = useState<BenchmarkCareerSummary[]>([])
+
+  useEffect(() => {
+    getBenchmarkCareers().then(setBenchmarkCareers).catch(() => {})
+  }, [])
+
+  const matchedBenchmark = useMemo<BenchmarkCareerSummary | null>(() => {
+    const q = form.carrera_nombre.toLowerCase().trim()
+    if (q.length < 4) return null
+    const words = q.split(/\s+/).filter(w => w.length > 3)
+    return benchmarkCareers.find(c => {
+      const n = c.nombre.toLowerCase()
+      return words.some(w => n.includes(w)) || n.includes(q)
+    }) ?? null
+  }, [form.carrera_nombre, benchmarkCareers])
 
   function set(k: keyof typeof form, v: string) {
     setForm(f => ({ ...f, [k]: v }))
@@ -142,6 +159,25 @@ export default function PertinenciaPage() {
                     placeholder="Ej: Licenciatura en Derecho, Ingeniería Industrial…"
                     className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
+                  {matchedBenchmark && (
+                    <div className="mt-2 p-3 rounded-lg border border-brand-200 bg-brand-50 flex items-center justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-brand-700 mb-0.5">
+                          Benchmark disponible: {matchedBenchmark.nombre}
+                        </p>
+                        <div className="flex gap-3 text-[11px] text-slate-600">
+                          <span className="text-red-600">{matchedBenchmark.skills_declining} declining</span>
+                          <span className="text-emerald-600">{matchedBenchmark.skills_growing} growing</span>
+                          <span className={`font-semibold ${matchedBenchmark.urgencia_curricular >= 60 ? 'text-red-600' : matchedBenchmark.urgencia_curricular >= 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                            urgencia {matchedBenchmark.urgencia_curricular}/100
+                          </span>
+                        </div>
+                      </div>
+                      <Link href={`/benchmarks/${matchedBenchmark.slug}`} className="text-[11px] text-brand-600 hover:underline shrink-0 font-medium">
+                        Ver benchmark →
+                      </Link>
+                    </div>
+                  )}
                 </div>
 
                 <div>
