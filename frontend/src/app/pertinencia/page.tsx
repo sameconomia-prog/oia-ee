@@ -329,6 +329,23 @@ function PertinenciaContent() {
             </Card>
           )}
 
+          {/* Muestra del reporte */}
+          <Card className="p-4 border-slate-200">
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">¿Cómo es el reporte?</p>
+            <h3 className="text-xs font-semibold text-slate-800 mb-1 leading-snug">
+              Ver una muestra real antes de solicitar
+            </h3>
+            <p className="text-[11px] text-slate-500 mb-2">
+              Diagnóstico D1–D6, skills con acción recomendada y comparativo vs. promedio nacional.
+            </p>
+            <Link
+              href="/pertinencia/muestra"
+              className="text-[11px] text-brand-600 hover:underline font-medium"
+            >
+              Ver muestra del reporte →
+            </Link>
+          </Card>
+
           {/* Carta a rectores */}
           <Card className="p-4 border-indigo-100 bg-indigo-50/50">
             <p className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest mb-1">Lectura recomendada</p>
