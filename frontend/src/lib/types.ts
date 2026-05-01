@@ -230,6 +230,7 @@ export interface TopRiesgoItem {
   d1_score: number
   d2_score: number
   matricula: number | null
+  benchmark_slug?: string | null
 }
 
 export interface IesDetalle {
@@ -401,6 +402,7 @@ export interface TopRiesgoItemOut {
   d2_score: number
   matricula: number | null
   area_conocimiento: string | null
+  benchmark_slug?: string | null
 }
 
 export interface PertinenciaSolicitud {

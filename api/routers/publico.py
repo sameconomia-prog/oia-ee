@@ -304,6 +304,7 @@ def top_carreras_riesgo(n: int = 5, db: Session = Depends(get_db)):
                 d2_score=result.d2_oportunidades.score,
                 matricula=cie.matricula if cie else None,
                 area_conocimiento=carrera.area_conocimiento if carrera else None,
+                benchmark_slug=_match_benchmark_slug(carrera.nombre_norm) if carrera else None,
             ))
 
     items.sort(key=lambda x: x.d1_score, reverse=True)
@@ -328,6 +329,7 @@ def top_carreras_oportunidades(n: int = 5, db: Session = Depends(get_db)):
                 d2_score=result.d2_oportunidades.score,
                 matricula=cie.matricula if cie else None,
                 area_conocimiento=carrera.area_conocimiento if carrera else None,
+                benchmark_slug=_match_benchmark_slug(carrera.nombre_norm) if carrera else None,
             ))
 
     items.sort(key=lambda x: x.d2_score, reverse=True)
@@ -363,6 +365,7 @@ def ranking_carreras(
                 d2_score=result.d2_oportunidades.score,
                 matricula=cie.matricula if cie else None,
                 area_conocimiento=carrera.area_conocimiento,
+                benchmark_slug=_match_benchmark_slug(carrera.nombre_norm),
             ))
 
     reverse = orden != "d2"

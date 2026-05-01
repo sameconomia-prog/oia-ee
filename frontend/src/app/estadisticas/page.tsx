@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getEstadisticasPublicas, getKpisDistribucion, getVacantesTendencia, getNoticiasTendencia, getBenchmarkResumen, getBenchmarkCareers } from '@/lib/api'
-import type { EstadisticasPublicas, KpisDistribucion, VacanteTendencia, BenchmarkResumen, BenchmarkCareerSummary } from '@/lib/types'
+import { getEstadisticasPublicas, getKpisDistribucion, getVacantesTendencia, getNoticiasTendencia, getBenchmarkResumen, getBenchmarkCareers, getTopRiesgo } from '@/lib/api'
+import type { EstadisticasPublicas, KpisDistribucion, VacanteTendencia, BenchmarkResumen, BenchmarkCareerSummary, TopRiesgoItem } from '@/lib/types'
 
 function StatBox({ label, value, color, href }: { label: string; value: number | string; color: string; href?: string }) {
   const inner = (
@@ -66,6 +66,7 @@ export default function EstadisticasPage() {
   const [notTendencia, setNotTendencia] = useState<VacanteTendencia[]>([])
   const [benchResumen, setBenchResumen] = useState<BenchmarkResumen | null>(null)
   const [topCareers, setTopCareers] = useState<BenchmarkCareerSummary[]>([])
+  const [dobleAlerta, setDobleAlerta] = useState<(TopRiesgoItem & { urgencia: number })[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -78,9 +79,18 @@ export default function EstadisticasPage() {
     getVacantesTendencia(12).then(setVacTendencia).catch(() => {})
     getNoticiasTendencia(12).then(setNotTendencia).catch(() => {})
     getBenchmarkResumen().then(setBenchResumen).catch(() => {})
-    getBenchmarkCareers()
-      .then(list => setTopCareers([...list].sort((a, b) => b.urgencia_curricular - a.urgencia_curricular).slice(0, 3)))
-      .catch(() => {})
+    Promise.all([
+      getBenchmarkCareers().catch(() => [] as BenchmarkCareerSummary[]),
+      getTopRiesgo(20).catch(() => [] as TopRiesgoItem[]),
+    ]).then(([bmarks, topRiesgo]) => {
+      setTopCareers([...bmarks].sort((a, b) => b.urgencia_curricular - a.urgencia_curricular).slice(0, 3))
+      const uMap = new Map(bmarks.map(b => [b.slug, b.urgencia_curricular]))
+      const alerts = topRiesgo
+        .filter(c => c.d1_score >= 0.6 && c.benchmark_slug && (uMap.get(c.benchmark_slug!) ?? 0) >= 60)
+        .map(c => ({ ...c, urgencia: uMap.get(c.benchmark_slug!)! }))
+        .sort((a, b) => (b.d1_score + b.urgencia / 100) - (a.d1_score + a.urgencia / 100))
+      setDobleAlerta(alerts)
+    }).catch(() => {})
   }, [])
 
   return (
@@ -245,6 +255,26 @@ export default function EstadisticasPage() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {dobleAlerta.length > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-5 mb-3">
+              <h2 className="text-sm font-bold text-red-800 mb-1">⚠ Doble alerta — riesgo local + urgencia global</h2>
+              <p className="text-xs text-red-600 mb-3">Carreras con D1 ≥ 0.60 Y urgencia curricular ≥ 60 — intervención prioritaria</p>
+              <div className="space-y-2">
+                {dobleAlerta.map(c => (
+                  <div key={c.carrera_id} className="flex items-center gap-3 bg-white rounded-lg border border-red-100 px-3 py-2">
+                    <Link href={`/carreras/${c.carrera_id}`} className="flex-1 text-xs font-semibold text-slate-800 hover:text-red-700 hover:underline truncate">
+                      {c.nombre}
+                    </Link>
+                    <span className="text-[11px] font-mono text-red-700 shrink-0">D1 {c.d1_score.toFixed(2)}</span>
+                    <Link href={`/benchmarks/${c.benchmark_slug}`} className="text-[11px] font-mono text-violet-700 hover:underline shrink-0">
+                      U {c.urgencia}
+                    </Link>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
