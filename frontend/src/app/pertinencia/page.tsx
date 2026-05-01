@@ -245,6 +245,23 @@ export default function PertinenciaPage() {
               ))}
             </div>
           </Card>
+
+          {/* Carta a rectores */}
+          <Card className="p-4 border-indigo-100 bg-indigo-50/50">
+            <p className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest mb-1">Lectura recomendada</p>
+            <h3 className="text-xs font-semibold text-slate-800 mb-1 leading-snug">
+              Carta a rectores: qué hacer cuando el benchmark dice &ldquo;urgencia alta&rdquo;
+            </h3>
+            <p className="text-[11px] text-slate-500 mb-2">
+              Qué significa un score alto, qué no significa, y los primeros pasos accionables.
+            </p>
+            <Link
+              href="/investigaciones/2026-05-carta-rectores-urgencia-curricular"
+              className="text-[11px] text-indigo-600 hover:underline font-medium"
+            >
+              Leer la carta →
+            </Link>
+          </Card>
         </div>
       </div>
     </div>

@@ -154,6 +154,22 @@ export default function IesDetailPage() {
         )}
       </div>
 
+      {/* Carta a rectores — contextual link when urgencia alta */}
+      {portfolioUrgencia !== null && portfolioUrgencia >= 60 && (
+        <div className="mb-4 rounded-xl bg-indigo-50 border border-indigo-200 px-4 py-3 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-indigo-800">Tu institución tiene urgencia curricular alta</p>
+            <p className="text-[11px] text-indigo-600 mt-0.5">Lee la guía de primeros pasos accionables para rectores</p>
+          </div>
+          <Link
+            href="/investigaciones/2026-05-carta-rectores-urgencia-curricular"
+            className="shrink-0 text-xs font-semibold text-indigo-700 border border-indigo-300 bg-white px-3 py-1.5 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap"
+          >
+            Leer carta →
+          </Link>
+        </div>
+      )}
+
       {/* Carreras */}
       <div className="bg-white rounded-xl border shadow-sm">
         <div className="px-5 py-4 border-b flex items-center justify-between gap-2 flex-wrap">
