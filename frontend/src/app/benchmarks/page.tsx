@@ -350,6 +350,20 @@ export default function BenchmarksPage() {
         </div>
       </div>
 
+      {/* CTA rector */}
+      <div className="mb-6 rounded-xl bg-indigo-50 border border-indigo-200 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold text-indigo-800">¿Eres rector o coordinador académico?</p>
+          <p className="text-xs text-indigo-600 mt-0.5">Solicita el análisis de pertinencia curricular de tu institución — diagnóstico personalizado, gratuito.</p>
+        </div>
+        <Link
+          href="/pertinencia"
+          className="shrink-0 text-xs font-semibold text-indigo-700 border border-indigo-300 bg-white px-3 py-1.5 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap"
+        >
+          Solicitar análisis gratuito →
+        </Link>
+      </div>
+
       {resumen && (
         <Card className="mb-6 p-5">
           <div className="grid grid-cols-4 gap-6 divide-x divide-slate-100">
