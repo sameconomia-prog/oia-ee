@@ -142,6 +142,16 @@ def test_patch_solicitud_sin_cambio_no_notifica(client, db_session):
     mock_notify.assert_not_called()
 
 
+def test_contador_solicitudes_publico(client):
+    with patch("api.routers.pertinencia._send_confirmation"):
+        client.post("/pertinencia/solicitud", json=PAYLOAD)
+    resp = client.get("/pertinencia/contador")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "total" in data
+    assert data["total"] >= 1
+
+
 def test_notify_estado_change_sin_resend_key_no_llama_httpx(monkeypatch):
     from api.routers.pertinencia import _notify_estado_change
     from pipeline.db.models import SolicitudPertinencia

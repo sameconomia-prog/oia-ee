@@ -86,6 +86,12 @@ def crear_solicitud(body: SolicitudIn, db: Session = Depends(get_db)):
     return {"id": sol.id, "estado": sol.estado}
 
 
+@router.get("/pertinencia/contador")
+def contador_solicitudes(db: Session = Depends(get_db)):
+    total = db.query(SolicitudPertinencia).count()
+    return {"total": total}
+
+
 @router.get("/pertinencia/solicitudes", dependencies=[Depends(get_superadmin_user)])
 def listar_solicitudes(
     estado: str | None = None,

@@ -43,9 +43,11 @@ function PertinenciaContent() {
   const [submittedBenchmark, setSubmittedBenchmark] = useState<BenchmarkCareerSummary | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [benchmarkCareers, setBenchmarkCareers] = useState<BenchmarkCareerSummary[]>([])
+  const [totalSolicitudes, setTotalSolicitudes] = useState<number | null>(null)
 
   useEffect(() => {
     getBenchmarkCareers().then(setBenchmarkCareers).catch(() => {})
+    fetch(`${BASE}/pertinencia/contador`).then(r => r.json()).then(d => setTotalSolicitudes(d.total)).catch(() => {})
   }, [])
 
   const matchedBenchmark = useMemo<BenchmarkCareerSummary | null>(() => {
@@ -99,6 +101,11 @@ function PertinenciaContent() {
           tendencias del mercado laboral mexicano y exposición a la automatización por IA.
           Sin costo, sin compromisos.
         </p>
+        {totalSolicitudes !== null && totalSolicitudes > 0 && (
+          <p className="mt-3 text-sm text-emerald-700 font-medium">
+            ✓ {totalSolicitudes} institución{totalSolicitudes !== 1 ? 'es' : ''} ya {totalSolicitudes !== 1 ? 'solicitaron' : 'solicitó'} su análisis
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-6">
