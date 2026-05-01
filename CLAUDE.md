@@ -46,8 +46,14 @@ OIA-EE/
 
 ## Estado actual (Sprint 120, 2026-04-30)
 - 454 pytest · 0 errores TypeScript · 62 artículos investigaciones
-- P105: urgencia_curricular badge en /carreras/[id] (sección Benchmarks Globales)
-- P106: urgencia badge en CareerPanel + score en selector de /benchmarks/comparar
+- P105: urgencia_curricular badge en /carreras/[id] + skills→careers direction endpoint
+- P106: urgencia badge en comparar + table/ranking toggle en /benchmarks index
+- P107: shared lib/benchmark-articles.ts + benchmark section en /estadisticas
+- P108: inline skill name search en SkillConvergenceTable
+- P109: related careers section en /benchmarks/[slug]
+- P110: global skill-tipo exposure breakdown en benchmarks index
+- P111: skill links + expand toggle en CurriculumActionSummary
+- P112: HorizonteTimeline mejorado + accesos rápidos extendidos
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
