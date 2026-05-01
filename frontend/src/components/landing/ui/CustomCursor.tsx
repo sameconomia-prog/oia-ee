@@ -4,11 +4,11 @@ import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 
 const TRAIL_COUNT = 5
+const HOVERABLE = 'a, button, [data-cursor-hover]'
 
 export default function CustomCursor() {
   const cursorRef = useRef<HTMLDivElement>(null)
   const trailRefs = useRef<HTMLDivElement[]>([])
-  const mouse = useRef({ x: 0, y: 0 })
   const isVisible = useRef(false)
 
   useEffect(() => {
@@ -18,9 +18,9 @@ export default function CustomCursor() {
     const cursor = cursorRef.current
     if (!cursor) return
 
-    const onMove = (e: MouseEvent) => {
-      mouse.current = { x: e.clientX, y: e.clientY }
+    document.body.style.cursor = 'none'
 
+    const onMove = (e: MouseEvent) => {
       if (!isVisible.current) {
         isVisible.current = true
         gsap.to(cursor, { opacity: 1, duration: 0.3 })
@@ -45,26 +45,27 @@ export default function CustomCursor() {
       })
     }
 
-    const onEnterHoverable = () => {
-      gsap.to(cursor, { width: 40, height: 40, x: '-=14', y: '-=14', duration: 0.25, ease: 'power2.out' })
+    const onOver = (e: MouseEvent) => {
+      if ((e.target as Element).closest(HOVERABLE)) {
+        gsap.to(cursor, { width: 40, height: 40, x: '-=14', y: '-=14', duration: 0.25, ease: 'power2.out' })
+      }
     }
 
-    const onLeaveHoverable = () => {
-      gsap.to(cursor, { width: 12, height: 12, x: '+=14', y: '+=14', duration: 0.25, ease: 'power2.out' })
-    }
-
-    const attachHoverListeners = () => {
-      document.querySelectorAll('a, button, [data-cursor-hover]').forEach(el => {
-        el.addEventListener('mouseenter', onEnterHoverable)
-        el.addEventListener('mouseleave', onLeaveHoverable)
-      })
+    const onOut = (e: MouseEvent) => {
+      if ((e.target as Element).closest(HOVERABLE)) {
+        gsap.to(cursor, { width: 12, height: 12, x: '+=14', y: '+=14', duration: 0.25, ease: 'power2.out' })
+      }
     }
 
     document.addEventListener('mousemove', onMove)
-    attachHoverListeners()
+    document.addEventListener('mouseover', onOver)
+    document.addEventListener('mouseout', onOut)
 
     return () => {
       document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseover', onOver)
+      document.removeEventListener('mouseout', onOut)
+      document.body.style.cursor = ''
     }
   }, [])
 

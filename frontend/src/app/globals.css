@@ -188,3 +188,8 @@
   --l-grid-size: 64px;
   --l-grid-color: rgba(59, 130, 246, 0.03);
 }
+
+/* Prevent FOUC for landing pages on cold-start */
+body:has(.landing-theme) {
+  background: #08090a;
+}

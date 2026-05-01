@@ -2,6 +2,7 @@ export default function GridDecorative() {
   return (
     <div
       aria-hidden="true"
+      className="hidden lg:block"
       style={{
         position: 'absolute',
         inset: 0,
@@ -11,9 +12,7 @@ export default function GridDecorative() {
         `,
         backgroundSize: '64px 64px',
         pointerEvents: 'none',
-        display: 'none',
       }}
-      className="lg:block"
     />
   )
 }
