@@ -5,6 +5,7 @@ interface TickerData {
   total_vacantes: number
   total_noticias: number
   iva_promedio?: number
+  urgencia_curricular?: number
 }
 
 interface TickerDatosProps {
@@ -16,7 +17,9 @@ const items = (data: TickerData) => [
   { label: 'Carreras analizadas', value: data.total_carreras.toLocaleString('es-MX') },
   { label: 'Vacantes monitoreadas', value: data.total_vacantes.toLocaleString('es-MX') },
   { label: 'Noticias procesadas', value: data.total_noticias.toLocaleString('es-MX') },
-  ...(data.iva_promedio !== undefined
+  ...(data.urgencia_curricular !== undefined
+    ? [{ label: 'Urgencia curricular global', value: `${data.urgencia_curricular}/100` }]
+    : data.iva_promedio !== undefined
     ? [{ label: 'IVA promedio nacional', value: data.iva_promedio.toFixed(2) }]
     : []),
 ]

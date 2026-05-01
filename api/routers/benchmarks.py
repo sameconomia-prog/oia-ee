@@ -277,6 +277,8 @@ def get_resumen():
             d = compute_direction(skill_index.get(skill["id"], {}))
             direction_counts[d] += 1
             accion_counts[skill.get("accion_curricular", "sin_datos")] += 1
+    urgencias = [_compute_urgencia(c, skill_index) for c in carreras]
+    urgencia_promedio = round(sum(urgencias) / len(urgencias)) if urgencias else 0
     return {
         "total_carreras": len(carreras),
         "total_fuentes": len(sources),
@@ -286,6 +288,7 @@ def get_resumen():
         "skills_mixed_stable": direction_counts["mixed"] + direction_counts["stable"],
         "skills_sin_datos": direction_counts["sin_datos"],
         "acciones": dict(accion_counts),
+        "urgencia_promedio": urgencia_promedio,
     }
 
 

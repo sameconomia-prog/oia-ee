@@ -516,6 +516,7 @@ export interface BenchmarkResumen {
   skills_mixed_stable: number
   skills_sin_datos: number
   acciones: Record<string, number>
+  urgencia_promedio?: number
 }
 
 export interface SkillHallazgo {

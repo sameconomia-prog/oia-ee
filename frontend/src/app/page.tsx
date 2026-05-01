@@ -1,5 +1,5 @@
 // frontend/src/app/page.tsx
-import { getResumenPublico, getEstadisticasPublicas } from '@/lib/api'
+import { getResumenPublico, getEstadisticasPublicas, getBenchmarkResumen } from '@/lib/api'
 import { getAllInvestigaciones } from '@/lib/investigaciones'
 import Hero from '@/components/landing/Hero'
 import TickerDatos from '@/components/landing/TickerDatos'
@@ -26,9 +26,10 @@ export const metadata: Metadata = {
 export const revalidate = 300
 
 export default async function LandingPage() {
-  const [resumen, estadisticas] = await Promise.all([
+  const [resumen, estadisticas, benchmarksResumen] = await Promise.all([
     getResumenPublico().catch(() => null),
     getEstadisticasPublicas().catch(() => null),
+    getBenchmarkResumen().catch(() => null),
   ])
   const investigaciones = getAllInvestigaciones()
 
@@ -38,6 +39,7 @@ export default async function LandingPage() {
     total_vacantes: resumen?.total_vacantes ?? estadisticas?.total_vacantes ?? 3247,
     total_noticias: resumen?.total_noticias ?? estadisticas?.total_noticias ?? 1840,
     iva_promedio: 0.42,
+    urgencia_curricular: benchmarksResumen?.urgencia_promedio,
   }
 
   const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://oia-ee.mx'
