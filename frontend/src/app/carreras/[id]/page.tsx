@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills } from '@/lib/api'
-import type { CarreraDetalle, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq } from '@/lib/types'
+import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills, getCarrerasPublico } from '@/lib/api'
+import type { CarreraDetalle, CarreraKpi, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq } from '@/lib/types'
 
 function normSkill(s: string) {
   return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -107,6 +107,7 @@ export default function CarreraDetallePage() {
   const [benchmarkSummary, setBenchmarkSummary] = useState<BenchmarkCareerSummary | null>(null)
   const [vacanteSkills, setVacanteSkills] = useState<SkillFreq[]>([])
   const [lecturas, setLecturas] = useState<ArticleCard[]>([])
+  const [similares, setSimilares] = useState<CarreraKpi[]>([])
 
   const demandaLaboral = useMemo(() => {
     if (!benchmarkDetail || vacanteSkills.length === 0) return []
@@ -134,6 +135,11 @@ export default function CarreraDetallePage() {
           getBenchmarkSources().then(setBenchmarkSources).catch(() => {})
           getBenchmarkCareers().then(list => setBenchmarkSummary(list.find(c => c.slug === slug) ?? null)).catch(() => {})
           fetch(`/api/benchmark-articles/${slug}`).then(r => r.ok ? r.json() : []).then(setLecturas).catch(() => {})
+        }
+        if (d.area_conocimiento) {
+          getCarrerasPublico({ area: d.area_conocimiento, limit: 8 })
+            .then(list => setSimilares(list.filter(c => c.id !== id).slice(0, 5)))
+            .catch(() => {})
         }
       })
       .catch(() => setNotFound(true))
@@ -405,6 +411,41 @@ export default function CarreraDetallePage() {
               )}
             </div>
           ))}
+        </Card>
+      )}
+
+      {/* Carreras similares */}
+      {similares.length > 0 && (
+        <Card className="mb-6 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">
+              Otras carreras en {d.area_conocimiento}
+            </h3>
+            <Link href={`/carreras?area=${encodeURIComponent(d.area_conocimiento ?? '')}`} className="text-[11px] text-brand-600 hover:underline">
+              Ver todas →
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {similares.map(c => (
+              <div key={c.id} className="flex items-center gap-3">
+                <Link href={`/carreras/${c.id}`} className="flex-1 text-xs text-slate-700 hover:text-brand-700 hover:underline font-medium truncate">
+                  {c.nombre}
+                </Link>
+                <div className="flex gap-1.5 shrink-0">
+                  {c.kpi && (
+                    <>
+                      <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded ${c.kpi.d1_obsolescencia.score >= 0.6 ? 'bg-red-50 text-red-700' : c.kpi.d1_obsolescencia.score >= 0.4 ? 'bg-yellow-50 text-yellow-700' : 'bg-green-50 text-green-700'}`}>
+                        D1 {c.kpi.d1_obsolescencia.score.toFixed(2)}
+                      </span>
+                      <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded ${c.kpi.d2_oportunidades.score >= 0.6 ? 'bg-green-50 text-green-700' : c.kpi.d2_oportunidades.score >= 0.4 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
+                        D2 {c.kpi.d2_oportunidades.score.toFixed(2)}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </Card>
       )}
 
