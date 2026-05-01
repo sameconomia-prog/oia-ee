@@ -3,8 +3,12 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getBenchmarkCareers, getBenchmarkResumen, getBenchmarkSkillsIndex } from '@/lib/api'
-import type { BenchmarkCareerSummary, BenchmarkResumen, SkillIndexItem } from '@/lib/types'
+import { getBenchmarkCareers, getBenchmarkResumen, getBenchmarkSkillsIndex, getVacantesTopSkills } from '@/lib/api'
+import type { BenchmarkCareerSummary, BenchmarkResumen, SkillIndexItem, SkillFreq } from '@/lib/types'
+
+function normSkill(s: string) {
+  return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
 import ConvergenceIcon from '@/components/benchmarks/ConvergenceIcon'
 import Card from '@/components/ui/Card'
 import SectionHeader from '@/components/ui/SectionHeader'
@@ -207,14 +211,19 @@ export default function BenchmarksPage() {
   const [careers, setCareers] = useState<BenchmarkCareerSummary[]>([])
   const [resumen, setResumen] = useState<BenchmarkResumen | null>(null)
   const [skillsIndex, setSkillsIndex] = useState<SkillIndexItem[]>([])
+  const [vacanteSkills, setVacanteSkills] = useState<SkillFreq[]>([])
   const [loading, setLoading] = useState(true)
   const [filterArea, setFilterArea] = useState<string>(() => searchParams.get('area') ?? 'all')
   const [sortMode, setSortMode] = useState<SortMode>(() => (searchParams.get('sort') as SortMode) ?? 'default')
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
 
   useEffect(() => {
-    Promise.all([getBenchmarkCareers(), getBenchmarkResumen(), getBenchmarkSkillsIndex()])
-      .then(([c, r, s]) => { setCareers(c); setResumen(r); setSkillsIndex(s) })
+    Promise.all([
+      getBenchmarkCareers(),
+      getBenchmarkResumen(),
+      getBenchmarkSkillsIndex(),
+      getVacantesTopSkills(50).catch(() => [] as SkillFreq[]),
+    ]).then(([c, r, s, vs]) => { setCareers(c); setResumen(r); setSkillsIndex(s); setVacanteSkills(vs) })
       .finally(() => setLoading(false))
   }, [])
 
@@ -240,6 +249,22 @@ export default function BenchmarksPage() {
     }
     return TIPOS.map(t => ({ tipo: t, ...counts[t] })).filter(r => r.total > 0)
   }, [skillsIndex])
+
+  const brechaSkills = useMemo(() => {
+    if (vacanteSkills.length === 0 || skillsIndex.length === 0) return []
+    const vacNorms = new Map(vacanteSkills.map(sf => [normSkill(sf.nombre), sf.count]))
+    return skillsIndex
+      .filter(item => item.direccion_global === 'declining')
+      .map(item => {
+        const q = normSkill(item.skill_nombre)
+        const count = vacNorms.get(q) ??
+          Array.from(vacNorms.entries()).find(([k]) => k.includes(q) || q.includes(k))?.[1] ?? 0
+        return { ...item, vacanteCount: count }
+      })
+      .filter(item => item.vacanteCount > 0)
+      .sort((a, b) => b.vacanteCount - a.vacanteCount || b.consenso_pct - a.consenso_pct)
+      .slice(0, 6)
+  }, [skillsIndex, vacanteSkills])
 
   const updateParams = useCallback((updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -385,6 +410,38 @@ export default function BenchmarksPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-slate-700 truncate leading-tight">{s.skill_nombre}</p>
                   <p className="text-[10px] text-slate-400 capitalize">{s.skill_tipo} · {s.consenso_pct}% consenso</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Brecha curricular */}
+      {brechaSkills.length > 0 && (
+        <Card className="mb-6 p-4 border-amber-200 bg-amber-50/30">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="text-xs font-semibold text-amber-800 uppercase tracking-widest">
+                ⚠ Brecha curricular
+              </h3>
+              <p className="text-[10px] text-amber-600 mt-0.5">Skills en declive global que empleadores siguen demandando en México</p>
+            </div>
+            <Link href="/vacantes" className="text-[11px] text-amber-700 hover:underline font-medium">
+              Ver vacantes →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {brechaSkills.map(s => (
+              <Link
+                key={s.skill_id}
+                href={`/benchmarks/skills/${s.skill_id}`}
+                className="flex items-center gap-2 p-2 rounded-lg bg-white border border-amber-200 hover:border-amber-400 transition-colors"
+              >
+                <span className="text-red-500 font-bold text-sm shrink-0">↓</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-slate-700 truncate leading-tight">{s.skill_nombre}</p>
+                  <p className="text-[10px] text-slate-400">{s.consenso_pct}% consenso · {s.vacanteCount} vacantes</p>
                 </div>
               </Link>
             ))}
