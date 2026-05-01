@@ -116,6 +116,14 @@ export default function EstadisticasPage() {
               value={data.alertas_activas}
               color={data.alertas_activas > 0 ? 'text-red-500' : 'text-gray-400'}
             />
+            {dobleAlerta.length > 0 && (
+              <StatBox
+                label="Doble alerta"
+                value={dobleAlerta.length}
+                color="text-red-700"
+                href="/carreras?doble=1"
+              />
+            )}
           </div>
 
           {(vacTendencia.length > 1 || notTendencia.length > 1) && (
