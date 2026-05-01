@@ -1,8 +1,19 @@
 'use client'
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
-import { getVacantesPublico, getVacantesTopSkills, getSectoresVacantes, getVacantesTendencia } from '@/lib/api'
-import type { VacantePublico, SkillFreq, VacanteTendencia } from '@/lib/types'
+import { getVacantesPublico, getVacantesTopSkills, getSectoresVacantes, getVacantesTendencia, getBenchmarkSkillsIndex } from '@/lib/api'
+import type { VacantePublico, SkillFreq, VacanteTendencia, SkillIndexItem } from '@/lib/types'
+
+function normStr(s: string) {
+  return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+const DIR_ICON: Record<string, { icon: string; cls: string }> = {
+  growing:  { icon: '↑', cls: 'text-emerald-500' },
+  declining:{ icon: '↓', cls: 'text-red-400' },
+  mixed:    { icon: '~', cls: 'text-amber-500' },
+  stable:   { icon: '→', cls: 'text-slate-400' },
+}
 
 function TendenciaChart({ data }: { data: VacanteTendencia[] }) {
   if (data.length < 2) return null
@@ -59,6 +70,7 @@ export default function VacantesPage() {
   const [loading, setLoading] = useState(true)
   const [skip, setSkip] = useState(0)
   const [hasMore, setHasMore] = useState(true)
+  const [skillsIndex, setSkillsIndex] = useState<SkillIndexItem[]>([])
   const PAGE_SIZE = 25
 
   const vacantesFiltradas = useMemo(() => {
@@ -75,7 +87,20 @@ export default function VacantesPage() {
     getVacantesTopSkills(10).then(setSkills).catch(() => {})
     getSectoresVacantes().then(setSectores).catch(() => {})
     getVacantesTendencia(12).then(setTendencia).catch(() => {})
+    getBenchmarkSkillsIndex().then(setSkillsIndex).catch(() => {})
   }, [])
+
+  const skillSignalMap = useMemo(() => {
+    if (skillsIndex.length === 0) return new Map<string, SkillIndexItem>()
+    const map = new Map<string, SkillIndexItem>()
+    for (const sf of skills) {
+      const q = normStr(sf.nombre)
+      const match = skillsIndex.find(item => normStr(item.skill_nombre) === q) ??
+        skillsIndex.find(item => normStr(item.skill_nombre).includes(q) || q.includes(normStr(item.skill_nombre)))
+      if (match) map.set(sf.nombre, match)
+    }
+    return map
+  }, [skills, skillsIndex])
 
   const cargar = (newSkip: number, append: boolean) => {
     setLoading(true)
@@ -115,16 +140,25 @@ export default function VacantesPage() {
       {/* Skills demandadas */}
       {skills.length > 0 && (
         <div className="mb-5 flex flex-wrap gap-2">
-          {skills.map(s => (
-            <button
-              key={s.nombre}
-              onClick={() => setBusqueda(prev => prev === s.nombre ? '' : s.nombre)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${busqueda === s.nombre ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'}`}
-            >
-              {s.nombre}
-              <span className="bg-indigo-200 text-indigo-800 rounded-full px-1.5 py-0.5 text-[10px] font-bold">{s.count}</span>
-            </button>
-          ))}
+          {skills.map(s => {
+            const signal = skillSignalMap.get(s.nombre)
+            const dir = signal ? DIR_ICON[signal.direccion_global] : null
+            const active = busqueda === s.nombre
+            return (
+              <button
+                key={s.nombre}
+                onClick={() => setBusqueda(prev => prev === s.nombre ? '' : s.nombre)}
+                title={signal ? `${signal.skill_nombre} — ${signal.direccion_global} (${signal.consenso_pct}% consenso)` : undefined}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${active ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'}`}
+              >
+                {s.nombre}
+                {dir && (
+                  <span className={`font-bold text-[11px] ${active ? 'text-white/90' : dir.cls}`}>{dir.icon}</span>
+                )}
+                <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${active ? 'bg-white/20 text-white' : 'bg-indigo-200 text-indigo-800'}`}>{s.count}</span>
+              </button>
+            )
+          })}
         </div>
       )}
 
