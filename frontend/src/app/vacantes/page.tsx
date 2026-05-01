@@ -67,7 +67,7 @@ export default function VacantesPage() {
   const [skills, setSkills] = useState<SkillFreq[]>([])
   const [sectores, setSectores] = useState<string[]>([])
   const [tendencia, setTendencia] = useState<VacanteTendencia[]>([])
-  const [sectorFiltro, setSectorFiltro] = useState<string>('')
+  const [sectorFiltro, setSectorFiltro] = useState<string>(() => searchParams.get('sector') ?? '')
   const [busqueda, setBusqueda] = useState(() => searchParams.get('q') ?? '')
   const [loading, setLoading] = useState(true)
   const [skip, setSkip] = useState(0)

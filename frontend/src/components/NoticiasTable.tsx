@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { getNoticias, buscarNoticias, getSectoresNoticias } from '@/lib/api'
 import type { Noticia } from '@/lib/types'
 
@@ -48,9 +49,10 @@ function formatDate(dateStr: string | null): string {
 }
 
 export default function NoticiasTable() {
+  const searchParams = useSearchParams()
   const [noticias, setNoticias] = useState<Noticia[]>([])
-  const [sector, setSector] = useState('')
-  const [impacto, setImpacto] = useState('')
+  const [sector, setSector] = useState(() => searchParams.get('sector') ?? '')
+  const [impacto, setImpacto] = useState(() => searchParams.get('impacto') ?? '')
   const [sectoresDisponibles, setSectoresDisponibles] = useState<string[]>([])
   const [query, setQuery] = useState('')
   const [queryActiva, setQueryActiva] = useState('')
