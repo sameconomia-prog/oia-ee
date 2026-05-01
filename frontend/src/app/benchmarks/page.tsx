@@ -12,9 +12,9 @@ function normSkill(s: string) {
 import ConvergenceIcon from '@/components/benchmarks/ConvergenceIcon'
 import Card from '@/components/ui/Card'
 import SectionHeader from '@/components/ui/SectionHeader'
-import { BENCHMARK_TO_ARTICLE } from '@/lib/benchmark-articles'
+import { BENCHMARK_ALL_ARTICLES } from '@/lib/benchmark-articles'
 
-const ARTICLE_MAP = BENCHMARK_TO_ARTICLE
+const ARTICLE_MAP = BENCHMARK_ALL_ARTICLES
 
 const DIR_LABEL: Record<string, { label: string; variant: 'risk' | 'oportunidad' | 'neutro' }> = {
   declining: { label: 'Declining', variant: 'risk' },
@@ -49,7 +49,7 @@ function UrgenciaBadge({ score }: { score: number }) {
 }
 
 function CareerCard({ career }: { career: BenchmarkCareerSummary }) {
-  const article = ARTICLE_MAP[career.slug]
+  const articles = ARTICLE_MAP[career.slug] ?? []
   const total = career.total_skills
 
   return (
@@ -93,12 +93,12 @@ function CareerCard({ career }: { career: BenchmarkCareerSummary }) {
         >
           Ver matriz →
         </Link>
-        {article && (
+        {articles.length > 0 && (
           <Link
-            href={`/investigaciones/${article}`}
+            href={`/investigaciones?benchmark=${career.slug}`}
             className="text-xs text-slate-400 hover:underline"
           >
-            Análisis
+            {articles.length} artículo{articles.length !== 1 ? 's' : ''}
           </Link>
         )}
       </div>
@@ -160,7 +160,8 @@ function CareerTable({ careers }: { careers: BenchmarkCareerSummary[] }) {
             <th className="text-right py-2 pr-3 font-semibold text-red-500">↓</th>
             <th className="text-right py-2 pr-3 font-semibold text-emerald-500">↑</th>
             <th className="text-right py-2 pr-3 font-semibold text-yellow-500">~</th>
-            <th className="text-right py-2 font-semibold">Total</th>
+            <th className="text-right py-2 pr-3 font-semibold">Total</th>
+            <th className="text-right py-2 font-semibold">Art.</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-50">
@@ -179,7 +180,14 @@ function CareerTable({ careers }: { careers: BenchmarkCareerSummary[] }) {
               <td className="py-2.5 pr-3 text-right font-mono text-red-600">{c.skills_declining}</td>
               <td className="py-2.5 pr-3 text-right font-mono text-emerald-600">{c.skills_growing}</td>
               <td className="py-2.5 pr-3 text-right font-mono text-yellow-600">{c.skills_mixed}</td>
-              <td className="py-2.5 text-right font-mono text-slate-500">{c.total_skills}</td>
+              <td className="py-2.5 pr-3 text-right font-mono text-slate-500">{c.total_skills}</td>
+              <td className="py-2.5 text-right">
+                {(ARTICLE_MAP[c.slug]?.length ?? 0) > 0 && (
+                  <Link href={`/investigaciones?benchmark=${c.slug}`} className="text-[10px] text-brand-600 hover:underline font-medium">
+                    {ARTICLE_MAP[c.slug].length}
+                  </Link>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
