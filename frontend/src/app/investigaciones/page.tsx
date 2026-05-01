@@ -62,6 +62,9 @@ export default function InvestigacionesPage({
     return `/investigaciones${qs ? `?${qs}` : ''}`
   }
 
+  const carrerasCubiertas = new Set(todas.map(i => ARTICLE_TO_BENCHMARK[i.slug]).filter(Boolean)).size
+  const totalTipos = new Set(todas.map(i => i.tipo)).size
+
   return (
     <main className="max-w-7xl mx-auto px-4 py-16">
       <div className="mb-12">
@@ -69,6 +72,13 @@ export default function InvestigacionesPage({
         <p className="text-gray-500 text-lg max-w-2xl">
           Análisis, reportes y perspectivas sobre la IA, el empleo y la educación superior en México.
         </p>
+        <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-400">
+          <span><strong className="text-gray-700">{todas.length}</strong> publicaciones</span>
+          <span>·</span>
+          <span><strong className="text-gray-700">{totalTipos}</strong> tipos de contenido</span>
+          <span>·</span>
+          <span><strong className="text-gray-700">{carrerasCubiertas}</strong> carreras cubiertas</span>
+        </div>
       </div>
 
       {/* Búsqueda */}
