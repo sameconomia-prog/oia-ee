@@ -1,6 +1,7 @@
 // frontend/src/app/pertinencia/page.tsx
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -25,12 +26,16 @@ const STEPS = [
   { n: '4', label: 'Entrega', desc: 'Reporte PDF + sesión de presentación' },
 ]
 
-export default function PertinenciaPage() {
+function PertinenciaContent() {
+  const searchParams = useSearchParams()
+  const carreraParam = searchParams.get('carrera') ?? ''
+  const iesParam = searchParams.get('ies') ?? ''
+
   const [form, setForm] = useState({
     nombre_contacto: '',
     email_contacto: '',
-    ies_nombre: '',
-    carrera_nombre: '',
+    ies_nombre: iesParam,
+    carrera_nombre: carreraParam,
     mensaje: '',
   })
   const [loading, setLoading] = useState(false)
@@ -265,5 +270,13 @@ export default function PertinenciaPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function PertinenciaPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-slate-400">Cargando…</div>}>
+      <PertinenciaContent />
+    </Suspense>
   )
 }
