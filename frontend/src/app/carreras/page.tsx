@@ -54,6 +54,7 @@ export default function CarrerasListPage() {
   const [benchmarkMap, setBenchmarkMap] = useState<Map<string, number>>(new Map())
   const [filterUrgenciaAlta, setFilterUrgenciaAlta] = useState(false)
   const [filterDobleAlerta, setFilterDobleAlerta] = useState(() => searchParams.get('doble') === '1')
+  const [filterD2Alta, setFilterD2Alta] = useState(false)
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -73,6 +74,8 @@ export default function CarrerasListPage() {
       )
     } else if (filterUrgenciaAlta) {
       base = base.filter(c => c.benchmark_slug && (benchmarkMap.get(c.benchmark_slug) ?? 0) >= 60)
+    } else if (filterD2Alta) {
+      base = base.filter(c => (c.kpi?.d2_oportunidades.score ?? 0) >= 0.6)
     }
     if (sortKey === 'none') return base
     return [...base].sort((a, b) => {
@@ -86,7 +89,7 @@ export default function CarrerasListPage() {
       if (sortKey === 'matricula') { av = a.matricula ?? -1; bv = b.matricula ?? -1 }
       return sortDir === 'asc' ? av - bv : bv - av
     })
-  }, [carreras, sortKey, sortDir, filterUrgenciaAlta, filterDobleAlerta, benchmarkMap])
+  }, [carreras, sortKey, sortDir, filterUrgenciaAlta, filterDobleAlerta, filterD2Alta, benchmarkMap])
 
   useEffect(() => {
     getAreasCarreras().then(setAreas).catch(() => {})
@@ -203,11 +206,18 @@ export default function CarrerasListPage() {
             U ≥ 60
           </button>
           <button
-            onClick={() => { setFilterDobleAlerta(v => !v); setFilterUrgenciaAlta(false) }}
+            onClick={() => { setFilterDobleAlerta(v => !v); setFilterUrgenciaAlta(false); setFilterD2Alta(false) }}
             title="Mostrar solo carreras con D1 ≥ 0.60 Y urgencia ≥ 60 (doble alerta)"
             className={`px-2.5 py-1 text-xs rounded border transition-colors ${filterDobleAlerta ? 'bg-red-100 border-red-400 text-red-800 font-semibold' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
           >
             ⚠ Doble alerta
+          </button>
+          <button
+            onClick={() => { setFilterD2Alta(v => !v); setFilterUrgenciaAlta(false); setFilterDobleAlerta(false) }}
+            title="Mostrar solo carreras con D2 ≥ 0.60 (alta oportunidad)"
+            className={`px-2.5 py-1 text-xs rounded border transition-colors ${filterD2Alta ? 'bg-emerald-50 border-emerald-300 text-emerald-700 font-semibold' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+          >
+            D2 ≥ 0.60
           </button>
         </div>
       )}
