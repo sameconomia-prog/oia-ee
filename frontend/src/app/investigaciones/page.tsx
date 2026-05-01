@@ -1,4 +1,4 @@
-import { getAllInvestigaciones, getTipoLabel } from '@/lib/investigaciones'
+import { getAllInvestigaciones, getTipoLabel, getTopTags } from '@/lib/investigaciones'
 import type { TipoInvestigacion } from '@/lib/investigaciones'
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -24,6 +24,7 @@ export default function InvestigacionesPage({
   searchParams: { tipo?: string; q?: string }
 }) {
   const todas = getAllInvestigaciones()
+  const topTags = getTopTags(18)
   const filtro = searchParams.tipo as TipoInvestigacion | undefined
   const query = searchParams.q?.toLowerCase().trim() ?? ''
 
@@ -95,6 +96,25 @@ export default function InvestigacionesPage({
           </Link>
         ))}
       </div>
+
+      {/* Tag cloud — only when no active search/filter */}
+      {!query && !filtro && topTags.length > 0 && (
+        <div className="mb-8">
+          <p className="text-xs text-gray-400 uppercase tracking-widest mb-3">Temas frecuentes</p>
+          <div className="flex flex-wrap gap-2">
+            {topTags.map(({ tag, count }) => (
+              <Link
+                key={tag}
+                href={buildUrl({ q: tag })}
+                className="text-xs px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 hover:border-[#3B82F6] hover:text-[#1D4ED8] hover:bg-blue-50 transition-colors"
+              >
+                {tag}
+                <span className="ml-1.5 text-gray-400 text-[10px]">{count}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {query && (
         <p className="text-sm text-gray-500 mb-6">

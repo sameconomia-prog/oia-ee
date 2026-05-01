@@ -78,3 +78,17 @@ export function getTipoLabel(tipo: TipoInvestigacion): string {
 export function getAccesoLabel(acceso: AccesoInvestigacion): string {
   return acceso === 'abierto' ? 'Lectura libre' : 'PDF descargable'
 }
+
+export function getTopTags(limit = 20): Array<{ tag: string; count: number }> {
+  const todas = getAllInvestigaciones()
+  const freq: Record<string, number> = {}
+  for (const inv of todas) {
+    for (const tag of inv.tags ?? []) {
+      freq[tag] = (freq[tag] ?? 0) + 1
+    }
+  }
+  return Object.entries(freq)
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+}
