@@ -68,6 +68,7 @@ export default function EstadisticasPage() {
   const [topCareers, setTopCareers] = useState<BenchmarkCareerSummary[]>([])
   const [dobleAlerta, setDobleAlerta] = useState<(TopRiesgoItem & { urgencia: number })[]>([])
   const [topCalientes, setTopCalientes] = useState<SkillIndexItem[]>([])
+  const [topDeclining, setTopDeclining] = useState<SkillIndexItem[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -81,9 +82,14 @@ export default function EstadisticasPage() {
     getNoticiasTendencia(12).then(setNotTendencia).catch(() => {})
     getBenchmarkResumen().then(setBenchResumen).catch(() => {})
     getBenchmarkSkillsIndex()
-      .then(skills => setTopCalientes(
-        skills.filter(s => s.direccion_global === 'growing').sort((a, b) => b.consenso_pct - a.consenso_pct).slice(0, 8)
-      )).catch(() => {})
+      .then(skills => {
+        setTopCalientes(
+          skills.filter(s => s.direccion_global === 'growing').sort((a, b) => b.consenso_pct - a.consenso_pct).slice(0, 8)
+        )
+        setTopDeclining(
+          skills.filter(s => s.direccion_global === 'declining').sort((a, b) => b.consenso_pct - a.consenso_pct).slice(0, 8)
+        )
+      }).catch(() => {})
     Promise.all([
       getBenchmarkCareers().catch(() => [] as BenchmarkCareerSummary[]),
       getTopRiesgo(20).catch(() => [] as TopRiesgoItem[]),
@@ -184,6 +190,27 @@ export default function EstadisticasPage() {
                   >
                     {s.skill_nombre}
                     <span className="text-emerald-500 text-[10px] font-mono">{s.consenso_pct}%</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {topDeclining.length > 0 && (
+            <div className="bg-white rounded-xl border shadow-sm p-5 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-semibold text-gray-800 text-sm">Skills en declive global</h2>
+                <Link href="/benchmarks/skills?dir=declining" className="text-xs text-indigo-600 hover:underline">Ver todas →</Link>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {topDeclining.map(s => (
+                  <Link
+                    key={s.skill_id}
+                    href={`/benchmarks/skills/${s.skill_id}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 border border-red-200 text-red-800 text-xs font-medium hover:bg-red-100 transition-colors"
+                  >
+                    {s.skill_nombre}
+                    <span className="text-red-400 text-[10px] font-mono">{s.consenso_pct}%</span>
                   </Link>
                 ))}
               </div>
