@@ -43,6 +43,27 @@ export const BENCHMARK_ALL_ARTICLES: Record<string, string[]> = {
   'ingenieria-civil': ['2026-04-ingenieria-civil-ia-2030', '2026-05-ingenieria-civil-ia-infraestructura'],
 }
 
+/** Human-readable label for each benchmark career slug */
+export const BENCHMARK_LABELS: Record<string, string> = {
+  'administracion-empresas': 'Administración',
+  'arquitectura': 'Arquitectura',
+  'ciencias-politicas': 'Ciencias Políticas',
+  'comunicacion': 'Comunicación',
+  'contaduria': 'Contaduría',
+  'derecho': 'Derecho',
+  'diseno-grafico': 'Diseño Gráfico',
+  'economia': 'Economía',
+  'educacion': 'Educación',
+  'enfermeria': 'Enfermería',
+  'ingenieria-civil': 'Ing. Civil',
+  'ingenieria-sistemas': 'Ing. Sistemas',
+  'medicina': 'Medicina',
+  'mercadotecnia': 'Mercadotecnia',
+  'nutricion': 'Nutrición',
+  'psicologia': 'Psicología',
+  'turismo': 'Turismo',
+}
+
 /** Inverse map: all article slugs (primary + secondary) → benchmark career slug */
 export const ARTICLE_TO_BENCHMARK: Record<string, string> = (() => {
   const map: Record<string, string> = {}

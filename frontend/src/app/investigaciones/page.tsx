@@ -1,6 +1,6 @@
 import { getAllInvestigaciones, getTipoLabel, getTopTags } from '@/lib/investigaciones'
 import type { TipoInvestigacion } from '@/lib/investigaciones'
-import { BENCHMARK_ALL_ARTICLES } from '@/lib/benchmark-articles'
+import { BENCHMARK_ALL_ARTICLES, BENCHMARK_LABELS, ARTICLE_TO_BENCHMARK } from '@/lib/benchmark-articles'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
@@ -19,25 +19,6 @@ const TIPO_COLOR: Record<string, string> = {
 
 const TIPOS: TipoInvestigacion[] = ['reporte', 'analisis', 'carta', 'nota', 'metodologia']
 
-const BENCHMARK_LABELS: Record<string, string> = {
-  'administracion-empresas': 'Administración',
-  'arquitectura': 'Arquitectura',
-  'ciencias-politicas': 'Ciencias Políticas',
-  'comunicacion': 'Comunicación',
-  'contaduria': 'Contaduría',
-  'derecho': 'Derecho',
-  'diseno-grafico': 'Diseño Gráfico',
-  'economia': 'Economía',
-  'educacion': 'Educación',
-  'enfermeria': 'Enfermería',
-  'ingenieria-civil': 'Ing. Civil',
-  'ingenieria-sistemas': 'Ing. Sistemas',
-  'medicina': 'Medicina',
-  'mercadotecnia': 'Mercadotecnia',
-  'nutricion': 'Nutrición',
-  'psicologia': 'Psicología',
-  'turismo': 'Turismo',
-}
 
 export default function InvestigacionesPage({
   searchParams,
@@ -178,26 +159,35 @@ export default function InvestigacionesPage({
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {investigaciones.map(inv => (
-          <Link key={inv.slug} href={`/investigaciones/${inv.slug}`}>
-            <article className="bg-white rounded-xl border border-gray-100 p-6 hover:border-[#3B82F6] hover:shadow-md transition-all h-full flex flex-col">
-              <div className="flex items-center gap-2 mb-3">
-                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${TIPO_COLOR[inv.tipo]}`}>
-                  {getTipoLabel(inv.tipo)}
-                </span>
-                {inv.acceso === 'lead_magnet' && (
-                  <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">PDF</span>
-                )}
-              </div>
-              <h2 className="font-bold text-gray-900 text-lg leading-snug mb-2 flex-grow">{inv.titulo}</h2>
-              <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 mb-4">{inv.resumen}</p>
-              <div className="flex items-center justify-between text-xs text-gray-400 mt-auto">
-                <span>{new Date(inv.fecha).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}</span>
-                <span>{inv.tiempo_lectura} de lectura</span>
-              </div>
-            </article>
-          </Link>
-        ))}
+        {investigaciones.map(inv => {
+          const bmSlug = ARTICLE_TO_BENCHMARK[inv.slug]
+          const bmLabel = bmSlug ? BENCHMARK_LABELS[bmSlug] : undefined
+          return (
+            <Link key={inv.slug} href={`/investigaciones/${inv.slug}`}>
+              <article className="bg-white rounded-xl border border-gray-100 p-6 hover:border-[#3B82F6] hover:shadow-md transition-all h-full flex flex-col">
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${TIPO_COLOR[inv.tipo]}`}>
+                    {getTipoLabel(inv.tipo)}
+                  </span>
+                  {bmLabel && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
+                      {bmLabel}
+                    </span>
+                  )}
+                  {inv.acceso === 'lead_magnet' && (
+                    <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">PDF</span>
+                  )}
+                </div>
+                <h2 className="font-bold text-gray-900 text-lg leading-snug mb-2 flex-grow">{inv.titulo}</h2>
+                <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 mb-4">{inv.resumen}</p>
+                <div className="flex items-center justify-between text-xs text-gray-400 mt-auto">
+                  <span>{new Date(inv.fecha).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}</span>
+                  <span>{inv.tiempo_lectura} de lectura</span>
+                </div>
+              </article>
+            </Link>
+          )
+        })}
       </div>
 
       {investigaciones.length === 0 && (
