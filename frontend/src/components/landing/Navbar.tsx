@@ -6,6 +6,7 @@ const links = [
   { href: '/#como-funciona', label: 'Observatorio' },
   { href: '/plataforma', label: 'Para Instituciones' },
   { href: '/investigaciones', label: 'Investigaciones' },
+  { href: '/guia', label: 'Guía' },
   { href: '/#sobre', label: 'Sobre' },
 ]
 
