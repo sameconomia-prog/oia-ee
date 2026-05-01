@@ -23,72 +23,136 @@ scheduler = BlockingScheduler(timezone="America/Mexico_City")
 
 
 def run_news_scraper():
-    from pipeline.jobs.news_ingest_job import run_news_ingest
-    from pipeline.db import get_session
-    with get_session() as session:
-        result = run_news_ingest(session)
-        session.commit()
-    logger.info("news_ingest OK: %s", result)
+    error = None
+    traceback_str = None
+    try:
+        from pipeline.jobs.news_ingest_job import run_news_ingest
+        from pipeline.db import get_session
+        with get_session() as session:
+            result = run_news_ingest(session)
+            session.commit()
+        logger.info("news_ingest OK: %s", result)
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+        logger.error("news_ingest FAILED: %s", e)
+    finally:
+        notify_job_result("news_scraper", error=error, traceback_str=traceback_str)
 
 
 def run_stps_loader():
-    from pipeline.jobs.stps_ingest_job import run_stps_ingest
-    from pipeline.db import get_session
-    with get_session() as session:
-        result = run_stps_ingest(session)
-        session.commit()
-    logger.info("stps_ingest OK: %s", result)
+    error = None
+    traceback_str = None
+    try:
+        from pipeline.jobs.stps_ingest_job import run_stps_ingest
+        from pipeline.db import get_session
+        with get_session() as session:
+            result = run_stps_ingest(session)
+            session.commit()
+        logger.info("stps_ingest OK: %s", result)
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+        logger.error("stps_ingest FAILED: %s", e)
+    finally:
+        notify_job_result("stps_loader", error=error, traceback_str=traceback_str)
 
 
 def run_kpi_snapshot_job():
-    from pipeline.jobs.kpi_snapshot_job import run_kpi_snapshot
-    from pipeline.db import get_session
-    with get_session() as session:
-        result = run_kpi_snapshot(session)
-        session.commit()
-    logger.info("kpi_snapshot OK: %s", result)
+    error = None
+    traceback_str = None
+    try:
+        from pipeline.jobs.kpi_snapshot_job import run_kpi_snapshot
+        from pipeline.db import get_session
+        with get_session() as session:
+            result = run_kpi_snapshot(session)
+            session.commit()
+        logger.info("kpi_snapshot OK: %s", result)
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+        logger.error("kpi_snapshot FAILED: %s", e)
+    finally:
+        notify_job_result("kpi_snapshot", error=error, traceback_str=traceback_str)
 
 
 def run_anuies_loader():
-    path_env = os.getenv("ANUIES_CSV_PATH")
-    if not path_env:
-        logger.warning("ANUIES_CSV_PATH no configurado — job omitido")
-        return
-    from pathlib import Path
-    from pipeline.loaders.anuies_loader import AnuiesLoader
-    from pipeline.jobs.anuies_ingest_job import ingest_anuies
-    from pipeline.db import get_session
-    records = AnuiesLoader().load_csv(Path(path_env))
-    with get_session() as session:
-        result = ingest_anuies(records, session)
-        session.commit()
-    logger.info("anuies_ingest OK: %s", result)
+    error = None
+    traceback_str = None
+    try:
+        path_env = os.getenv("ANUIES_CSV_PATH")
+        if not path_env:
+            logger.warning("ANUIES_CSV_PATH no configurado — job omitido")
+            return  # No registrar en pipeline_runs si no está configurado
+        from pathlib import Path
+        from pipeline.loaders.anuies_loader import AnuiesLoader
+        from pipeline.jobs.anuies_ingest_job import ingest_anuies
+        from pipeline.db import get_session
+        records = AnuiesLoader().load_csv(Path(path_env))
+        with get_session() as session:
+            result = ingest_anuies(records, session)
+            session.commit()
+        logger.info("anuies_ingest OK: %s", result)
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+        logger.error("anuies_ingest FAILED: %s", e)
+    finally:
+        if os.getenv("ANUIES_CSV_PATH"):
+            notify_job_result("anuies_loader", error=error, traceback_str=traceback_str)
 
 
 def run_imss_loader():
-    from pipeline.jobs.imss_ingest_job import run_imss_ingest
-    from pipeline.db import get_session
-    with get_session() as session:
-        result = run_imss_ingest(session)
-        session.commit()
-    logger.info("imss_ingest OK: %s", result)
+    error = None
+    traceback_str = None
+    try:
+        from pipeline.jobs.imss_ingest_job import run_imss_ingest
+        from pipeline.db import get_session
+        with get_session() as session:
+            result = run_imss_ingest(session)
+            session.commit()
+        logger.info("imss_ingest OK: %s", result)
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+        logger.error("imss_ingest FAILED: %s", e)
+    finally:
+        notify_job_result("imss_loader", error=error, traceback_str=traceback_str)
 
 
 def run_enoe_loader():
-    from pipeline.jobs.enoe_ingest_job import run_enoe_ingest
-    from pipeline.db import get_session
-    with get_session() as session:
-        result = run_enoe_ingest(session)
-        session.commit()
-    logger.info("enoe_ingest OK: %s", result)
+    error = None
+    traceback_str = None
+    try:
+        from pipeline.jobs.enoe_ingest_job import run_enoe_ingest
+        from pipeline.db import get_session
+        with get_session() as session:
+            result = run_enoe_ingest(session)
+            session.commit()
+        logger.info("enoe_ingest OK: %s", result)
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+        logger.error("enoe_ingest FAILED: %s", e)
+    finally:
+        notify_job_result("enoe_loader", error=error, traceback_str=traceback_str)
 
 
 def run_resumen_semanal():
-    from pipeline.services.resumen_semanal import send_resumen_semanal
-    from pipeline.db import get_session
-    with get_session() as session:
-        result = send_resumen_semanal(session)
-    logger.info("resumen_semanal OK: %s", result)
+    error = None
+    traceback_str = None
+    try:
+        from pipeline.services.resumen_semanal import send_resumen_semanal
+        from pipeline.db import get_session
+        with get_session() as session:
+            result = send_resumen_semanal(session)
+        logger.info("resumen_semanal OK: %s", result)
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+        logger.error("resumen_semanal FAILED: %s", e)
+    finally:
+        notify_job_result("resumen_semanal", error=error, traceback_str=traceback_str)
 
 
 def write_heartbeat():
