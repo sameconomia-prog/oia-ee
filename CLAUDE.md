@@ -44,8 +44,8 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 180, 2026-05-01)
-- 458 pytest · 0 errores TypeScript · 76 artículos investigaciones
+## Estado actual (Sprint 186, 2026-05-01)
+- 459 pytest · 0 errores TypeScript · 78 artículos investigaciones
 - P117-P126: benchmark signals, urgencia badges, brecha/calientes panels, tag cloud
 - P127-P132: URL params persistence (carreras/vacantes/noticias/ies), BenchmarksSection homepage, comparar U column, CarrerasRanking U column, "Situación en México" en benchmarks/[slug]
 - P133: URL params persistence (?q=) en /ies listing con botón clear
@@ -96,6 +96,12 @@ OIA-EE/
 - P178: explainer colapsable ¿Qué significan estos indicadores? en /carreras/[id] KPI card
 - P179: top 8 skills nacionales en demanda card en /carreras/[id] con pills clickables
 - P180: distribución urgencia benchmark (alta/media/baja) counter cards en /ies/[id]
+- P181: artículo MDX "Guía práctica: uso de benchmarks para planificación curricular" (analisis, tags rectores)
+- P182: artículo MDX "Cómo la IA redefine la competencia entre IES en México" (analisis, tags rectores)
+- P183: bloque 'Para rectores y directivos' en /investigaciones (3 artículos: principal + 2 secundarios en grid)
+- P184: GET /pertinencia/contador público + social proof "X instituciones ya solicitaron" en /pertinencia hero
+- P185: banner rector CTA en homepage entre BenchmarksSection y SobreElAnalista (gradiente indigo, mensaje dinámico con dobleAlertaCount)
+- P186: botón 'Copiar diagnóstico' en /benchmarks/[slug] (urgencia + declining/growing/mixed + URL)
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
