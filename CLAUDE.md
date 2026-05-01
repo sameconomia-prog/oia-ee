@@ -44,7 +44,7 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 186, 2026-05-01)
+## Estado actual (Sprint 192, 2026-05-01)
 - 459 pytest · 0 errores TypeScript · 78 artículos investigaciones
 - P117-P126: benchmark signals, urgencia badges, brecha/calientes panels, tag cloud
 - P127-P132: URL params persistence (carreras/vacantes/noticias/ies), BenchmarksSection homepage, comparar U column, CarrerasRanking U column, "Situación en México" en benchmarks/[slug]
@@ -102,6 +102,12 @@ OIA-EE/
 - P184: GET /pertinencia/contador público + social proof "X instituciones ya solicitaron" en /pertinencia hero
 - P185: banner rector CTA en homepage entre BenchmarksSection y SobreElAnalista (gradiente indigo, mensaje dinámico con dobleAlertaCount)
 - P186: botón 'Copiar diagnóstico' en /benchmarks/[slug] (urgencia + declining/growing/mixed + URL)
+- P187: top urgentes skills críticas card en /benchmarks/[slug] (declining+consenso≥60%, con acción recomendada)
+- P188: social proof contador solicitudes near rector CTA en /benchmarks/[slug]
+- P189: top 5 benchmarks por urgencia curricular card standalone en /estadisticas
+- P190: explainer colapsable ¿Cómo leer este índice? en /benchmarks listing
+- P191: horizonte_dominante badge (≤2/3–5/5+ años) en top urgentes card /benchmarks/[slug]
+- P192: contexto nacional D1/D2 card en sidebar /pertinencia (getTendenciasNacionales)
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
