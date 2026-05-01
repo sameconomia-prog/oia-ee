@@ -44,27 +44,18 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 135, 2026-04-30)
-- 458 pytest · 0 errores TypeScript · 67 artículos investigaciones
-- P117: benchmark signal badges (↑↓~) en /vacantes/[id] skills
-- P118: urgencia curricular "U" badge en /carreras listing
-- P119: benchmark direction en skill filter pills de /vacantes
-- P120: brecha curricular panel en /benchmarks (declining + demanda MX)
-- P121: demanda laboral MX stat en /benchmarks/skills/[id]
-- P122: columna "U" de urgencia global en KpisTable
-- P123: doble alerta (D1≥0.60 + urgencia≥60) en /estadisticas; benchmark_slug en TopRiesgoItemOut
-- P124: skills calientes panel en /benchmarks (growing + demanda MX)
-- P125: 5 artículos análisis sectorial (diseño gráfico, derecho, economía, marketing, turismo)
-- P126: tag cloud en /investigaciones (getTopTags + chips clickables con conteo)
-- P127: URL params persistence en /carreras (?q=, ?area=)
-- P128: URL params persistence en /vacantes (?q=, ?sector=) y NoticiasTable
-- P129: calientesCount + brechaCount en homepage BenchmarksSection (server-side)
-- P130: columna "U" urgencia en tabla carreras comunes de /comparar
-- P131: columna "U" urgencia en CarrerasRanking table
-- P132: panel "Situación en México" en /benchmarks/[slug] con D1/D2/D3
+## Estado actual (Sprint 140, 2026-04-30)
+- 458 pytest · 0 errores TypeScript · 73 artículos investigaciones
+- P117-P126: benchmark signals, urgencia badges, brecha/calientes panels, tag cloud
+- P127-P132: URL params persistence (carreras/vacantes/noticias/ies), BenchmarksSection homepage, comparar U column, CarrerasRanking U column, "Situación en México" en benchmarks/[slug]
 - P133: URL params persistence (?q=) en /ies listing con botón clear
 - P134: botón CSV export en /ies/[id] carreras list (D1–D6 + benchmark urgencia)
 - P135: columna "MX" vacantes demanda en /benchmarks/skills index table
+- P136: portfolioUrgencia stat card (5ª) en /ies/[id] con semáforo + sort por urgencia
+- P137: doble alerta banner en /carreras/[id] (D1≥0.60 + urgencia≥60) + portfolioUrgencia /ies/[id]
+- P138: D1/D2 aggregate comparison panel en /comparar (+ getIesDetalle para ambas IES)
+- P139: U≥60 quick filter chip en /carreras listing
+- P140: ⚠ Doble alerta quick filter chip en /carreras listing (D1≥0.60 + U≥60)
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
