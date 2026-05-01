@@ -157,32 +157,59 @@ export default function InvestigacionesPage({
         </p>
       )}
 
-      {/* Featured: carta a rectores (solo cuando no hay filtros activos) */}
+      {/* Featured: bloque rector (solo cuando no hay filtros activos) */}
       {!query && !filtro && !benchmarkFilter && (() => {
-        const carta = investigaciones.find(i => i.slug === '2026-05-carta-rectores-urgencia-curricular')
-        if (!carta) return null
+        const RECTOR_SLUGS = [
+          '2026-05-carta-rectores-urgencia-curricular',
+          '2026-05-guia-uso-benchmarks-planificacion-curricular',
+          '2026-05-ies-competencia-ia-diferenciacion',
+        ]
+        const rectores = RECTOR_SLUGS.map(s => investigaciones.find(i => i.slug === s)).filter(Boolean) as typeof investigaciones
+        if (rectores.length === 0) return null
+        const [principal, ...secundarios] = rectores
         return (
-          <Link href={`/investigaciones/${carta.slug}`} className="block mb-8">
-            <article className="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-6 hover:border-indigo-400 hover:shadow-md transition-all">
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="text-xs font-bold px-2 py-1 rounded-full bg-indigo-200 text-indigo-900 uppercase tracking-wide">
-                  Destacado · Rectores
-                </span>
-                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${TIPO_COLOR[carta.tipo]}`}>
-                  {getTipoLabel(carta.tipo)}
-                </span>
+          <div className="mb-10">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-800 uppercase tracking-wide">Para rectores y directivos</span>
+              <div className="flex-1 h-px bg-indigo-100" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link href={`/investigaciones/${principal.slug}`} className="md:col-span-1">
+                <article className="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-5 hover:border-indigo-400 hover:shadow-md transition-all h-full flex flex-col">
+                  <span className={`text-xs font-semibold px-2 py-1 rounded-full self-start mb-3 ${TIPO_COLOR[principal.tipo]}`}>
+                    {getTipoLabel(principal.tipo)}
+                  </span>
+                  <h2 className="font-bold text-indigo-900 text-base leading-snug mb-2 flex-1">{principal.titulo}</h2>
+                  <p className="text-indigo-700 text-xs leading-relaxed mb-3 line-clamp-3">{principal.resumen}</p>
+                  <span className="text-xs text-indigo-500">{principal.tiempo_lectura} →</span>
+                </article>
+              </Link>
+              <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {secundarios.map(art => (
+                  <Link key={art.slug} href={`/investigaciones/${art.slug}`}>
+                    <article className="bg-white border border-indigo-100 rounded-xl p-4 hover:border-indigo-300 hover:shadow-sm transition-all h-full flex flex-col">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full self-start mb-2 ${TIPO_COLOR[art.tipo]}`}>
+                        {getTipoLabel(art.tipo)}
+                      </span>
+                      <h3 className="font-semibold text-gray-800 text-sm leading-snug mb-1.5 flex-1">{art.titulo}</h3>
+                      <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 mb-2">{art.resumen}</p>
+                      <span className="text-xs text-indigo-500">{art.tiempo_lectura} →</span>
+                    </article>
+                  </Link>
+                ))}
               </div>
-              <h2 className="font-bold text-indigo-900 text-xl leading-snug mb-2">{carta.titulo}</h2>
-              <p className="text-indigo-700 text-sm leading-relaxed mb-3">{carta.resumen}</p>
-              <span className="text-xs text-indigo-500">{carta.tiempo_lectura} de lectura →</span>
-            </article>
-          </Link>
+            </div>
+          </div>
         )
       })()}
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {investigaciones.filter(i => i.slug !== '2026-05-carta-rectores-urgencia-curricular' || query || filtro || benchmarkFilter).map(inv => {
+        {investigaciones.filter(i => {
+          const RECTOR_SLUGS = ['2026-05-carta-rectores-urgencia-curricular', '2026-05-guia-uso-benchmarks-planificacion-curricular', '2026-05-ies-competencia-ia-diferenciacion']
+          if (!query && !filtro && !benchmarkFilter && RECTOR_SLUGS.includes(i.slug)) return false
+          return true
+        }).map(inv => {
           const bmSlug = ARTICLE_TO_BENCHMARK[inv.slug]
           const bmLabel = bmSlug ? BENCHMARK_LABELS[bmSlug] : undefined
           const urgencia = bmSlug ? (BENCHMARK_URGENCIA[bmSlug] ?? 0) : 0
