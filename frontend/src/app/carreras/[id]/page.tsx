@@ -163,6 +163,17 @@ export default function CarreraDetallePage() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* Doble alerta banner */}
+      {d.kpi && d.kpi.d1_obsolescencia.score >= 0.6 && benchmarkSummary && benchmarkSummary.urgencia_curricular >= 60 && (
+        <div className="mb-5 p-4 rounded-xl bg-red-50 border border-red-200">
+          <p className="text-sm font-bold text-red-800 mb-1">⚠ Doble alerta — riesgo local + urgencia global</p>
+          <p className="text-xs text-red-700">
+            D1 local <span className="font-mono font-semibold">{d.kpi.d1_obsolescencia.score.toFixed(2)}</span> ≥ 0.60
+            {' '}y urgencia benchmark <span className="font-mono font-semibold">{benchmarkSummary.urgencia_curricular}</span>/100 — intervención curricular prioritaria.
+            {' '}<Link href={`/benchmarks/${benchmarkSummary.slug}`} className="underline hover:text-red-900">Ver benchmark →</Link>
+          </p>
+        </div>
+      )}
       {/* Breadcrumb + título */}
       <div className="mb-6">
         <Link href="/carreras" className="text-xs text-brand-600 hover:underline">← Carreras</Link>
