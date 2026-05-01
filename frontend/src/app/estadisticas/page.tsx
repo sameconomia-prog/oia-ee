@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getEstadisticasPublicas, getKpisDistribucion, getVacantesTendencia, getNoticiasTendencia, getBenchmarkResumen } from '@/lib/api'
-import type { EstadisticasPublicas, KpisDistribucion, VacanteTendencia, BenchmarkResumen } from '@/lib/types'
+import { getEstadisticasPublicas, getKpisDistribucion, getVacantesTendencia, getNoticiasTendencia, getBenchmarkResumen, getBenchmarkCareers } from '@/lib/api'
+import type { EstadisticasPublicas, KpisDistribucion, VacanteTendencia, BenchmarkResumen, BenchmarkCareerSummary } from '@/lib/types'
 
 function StatBox({ label, value, color, href }: { label: string; value: number | string; color: string; href?: string }) {
   const inner = (
@@ -65,6 +65,7 @@ export default function EstadisticasPage() {
   const [vacTendencia, setVacTendencia] = useState<VacanteTendencia[]>([])
   const [notTendencia, setNotTendencia] = useState<VacanteTendencia[]>([])
   const [benchResumen, setBenchResumen] = useState<BenchmarkResumen | null>(null)
+  const [topCareers, setTopCareers] = useState<BenchmarkCareerSummary[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -77,6 +78,9 @@ export default function EstadisticasPage() {
     getVacantesTendencia(12).then(setVacTendencia).catch(() => {})
     getNoticiasTendencia(12).then(setNotTendencia).catch(() => {})
     getBenchmarkResumen().then(setBenchResumen).catch(() => {})
+    getBenchmarkCareers()
+      .then(list => setTopCareers([...list].sort((a, b) => b.urgencia_curricular - a.urgencia_curricular).slice(0, 3)))
+      .catch(() => {})
   }, [])
 
   return (
@@ -156,37 +160,91 @@ export default function EstadisticasPage() {
           {benchResumen && (
             <div className="bg-white rounded-xl border shadow-sm p-5 mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-800 text-sm">Benchmarks Globales</h2>
+                <h2 className="font-semibold text-gray-800 text-sm">Benchmarks Globales de Habilidades</h2>
                 <Link href="/benchmarks" className="text-xs text-indigo-600 hover:underline">Ver detalle →</Link>
               </div>
-              <div className="grid grid-cols-3 gap-4 mb-4">
+
+              {/* Stats row */}
+              <div className="grid grid-cols-4 gap-4 mb-4">
                 <div className="text-center">
                   <p className="text-2xl font-bold font-mono text-slate-900">{benchResumen.total_carreras}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">Carreras analizadas</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Carreras</p>
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-bold font-mono text-slate-900">{benchResumen.total_fuentes}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">Fuentes internacionales</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Fuentes</p>
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-bold font-mono text-slate-900">{benchResumen.total_skills}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">Skills evaluadas</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Skills totales</p>
                 </div>
+                {benchResumen.urgencia_promedio != null && (
+                  <div className="text-center">
+                    <p className={`text-2xl font-bold font-mono ${benchResumen.urgencia_promedio >= 60 ? 'text-red-600' : benchResumen.urgencia_promedio >= 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                      {benchResumen.urgencia_promedio}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">Urgencia prom.</p>
+                  </div>
+                )}
               </div>
-              <div className="flex gap-4 text-xs">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-red-400"></span>
-                  <span className="text-slate-600">{benchResumen.skills_declining} declining</span>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  <span className="text-slate-600">{benchResumen.skills_growing} growing</span>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
-                  <span className="text-slate-600">{benchResumen.skills_mixed_stable} mixed</span>
-                </span>
-              </div>
+
+              {/* Stacked proportion bar */}
+              {(() => {
+                const total = benchResumen.skills_declining + benchResumen.skills_growing + benchResumen.skills_mixed_stable + benchResumen.skills_sin_datos
+                if (total === 0) return null
+                const pctD = (benchResumen.skills_declining / total) * 100
+                const pctG = (benchResumen.skills_growing / total) * 100
+                const pctM = (benchResumen.skills_mixed_stable / total) * 100
+                return (
+                  <div className="mb-4">
+                    <div className="flex h-3 rounded-full overflow-hidden gap-0.5 mb-1.5">
+                      <div className="bg-red-400 rounded-l-full" style={{ width: `${pctD}%` }} title={`Declining: ${benchResumen.skills_declining}`} />
+                      <div className="bg-emerald-400" style={{ width: `${pctG}%` }} title={`Growing: ${benchResumen.skills_growing}`} />
+                      <div className="bg-yellow-400 rounded-r-full" style={{ width: `${pctM}%` }} title={`Mixed/Stable: ${benchResumen.skills_mixed_stable}`} />
+                    </div>
+                    <div className="flex gap-4 text-xs">
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-red-400 shrink-0"></span>
+                        <span className="text-slate-600">{benchResumen.skills_declining} declining ({Math.round(pctD)}%)</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+                        <span className="text-slate-600">{benchResumen.skills_growing} growing ({Math.round(pctG)}%)</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-yellow-400 shrink-0"></span>
+                        <span className="text-slate-600">{benchResumen.skills_mixed_stable} mixed ({Math.round(pctM)}%)</span>
+                      </span>
+                    </div>
+                  </div>
+                )
+              })()}
+
+              {/* Top 3 urgent careers */}
+              {topCareers.length > 0 && (
+                <div className="border-t border-slate-100 pt-3">
+                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Carreras más urgentes</p>
+                  <div className="space-y-2">
+                    {topCareers.map((c, i) => (
+                      <div key={c.slug} className="flex items-center gap-3">
+                        <span className="text-[11px] text-slate-400 font-mono w-4">{i + 1}</span>
+                        <Link href={`/benchmarks/${c.slug}`} className="flex-1 text-xs text-slate-700 hover:text-indigo-700 hover:underline truncate">
+                          {c.nombre}
+                        </Link>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${c.urgencia_curricular >= 60 ? 'bg-red-400' : c.urgencia_curricular >= 30 ? 'bg-amber-400' : 'bg-emerald-400'}`}
+                              style={{ width: `${c.urgencia_curricular}%` }}
+                            />
+                          </div>
+                          <span className="text-[11px] font-mono text-slate-500 w-5 text-right">{c.urgencia_curricular}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
