@@ -341,6 +341,17 @@ export default function CarreraDetallePage() {
                 )}
               </div>
             )}
+            <details className="mt-3 pt-3 border-t border-slate-100">
+              <summary className="text-[10px] text-slate-400 cursor-pointer hover:text-slate-600 select-none">
+                ¿Qué significan estos indicadores?
+              </summary>
+              <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] text-slate-500 leading-snug">
+                <p><span className="font-semibold text-slate-700">D1 Obsolescencia</span> — Fracción del contenido curricular expuesto a automatización. Menor es mejor; ≥ 0.60 requiere intervención.</p>
+                <p><span className="font-semibold text-slate-700">D2 Oportunidades</span> — Capacidad del plan de estudios de aprovechar tecnologías emergentes. Mayor es mejor; ≥ 0.60 indica perfil digital sólido.</p>
+                <p><span className="font-semibold text-slate-700">D3 Mercado Laboral</span> — Demanda de vacantes activas alineadas con las habilidades de la carrera. Mayor es mejor.</p>
+                <p><span className="font-semibold text-slate-700">D6 Perfil Estudiantil</span> — Índice de empleabilidad estimada de los egresados frente al mercado IA. Mayor es mejor.</p>
+              </div>
+            </details>
           </Card>
         )}
 
