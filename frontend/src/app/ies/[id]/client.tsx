@@ -438,6 +438,40 @@ export default function IesDetailPage() {
         })}
       </div>
 
+      {/* Lecturas recomendadas */}
+      {(() => {
+        const READS = [
+          detalle.promedio_d1 >= 0.45 && {
+            slug: '2026-05-por-que-d1-sube-sin-cambiar-plan-estudios',
+            titulo: 'Por qué el D1 puede subir aunque no cambies nada',
+            tipo: 'Análisis',
+          },
+          {
+            slug: '2026-05-tres-senales-carrera-necesita-actualizacion',
+            titulo: '3 señales de que tu carrera necesita actualización — ahora',
+            tipo: 'Análisis',
+          },
+          {
+            slug: '2026-05-stem-vs-humanidades-ia-riesgo-comparativo',
+            titulo: 'STEM vs. Humanidades: lo que los datos del observatorio revelan',
+            tipo: 'Análisis',
+          },
+        ].filter(Boolean) as { slug: string; titulo: string; tipo: string }[]
+        return (
+          <div className="mt-6 mb-4 rounded-xl border border-gray-100 bg-gray-50 px-4 py-4">
+            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest mb-3">Lecturas recomendadas para rectores</p>
+            <div className="flex flex-col gap-2">
+              {READS.slice(0, 3).map(r => (
+                <Link key={r.slug} href={`/investigaciones/${r.slug}`} className="group flex items-start gap-2">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 font-semibold shrink-0 mt-0.5">{r.tipo}</span>
+                  <span className="text-xs text-gray-700 group-hover:text-indigo-700 transition-colors leading-snug">{r.titulo}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Pertinencia CTA */}
       <div className="mt-6 rounded-xl bg-indigo-50 border border-indigo-200 px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex-1 min-w-0">
