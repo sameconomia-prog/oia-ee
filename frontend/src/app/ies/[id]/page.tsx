@@ -164,6 +164,47 @@ export default function IesDetailPage() {
         )}
       </div>
 
+      {/* Perfil de riesgo — narrative interpretation for non-technical rectors */}
+      {(() => {
+        const d1Level = detalle.promedio_d1 >= 0.6 ? 'alto' : detalle.promedio_d1 >= 0.4 ? 'moderado' : 'bajo'
+        const d1Color = detalle.promedio_d1 >= 0.6 ? 'text-red-700' : detalle.promedio_d1 >= 0.4 ? 'text-yellow-700' : 'text-green-700'
+        const d2Level = detalle.promedio_d2 >= 0.6 ? 'alta' : detalle.promedio_d2 >= 0.4 ? 'moderada' : 'baja'
+        const urgDelta = portfolioUrgencia !== null && nationalAvgUrgencia !== null
+          ? portfolioUrgencia - nationalAvgUrgencia
+          : null
+        return (
+          <div className="mb-4 rounded-xl bg-gray-50 border border-gray-200 px-4 py-3">
+            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Perfil de riesgo</p>
+            <p className="text-sm text-gray-700 leading-relaxed">
+              {'Riesgo de obsolescencia '}
+              <span className={`font-semibold ${d1Color}`}>{d1Level}</span>
+              {` (D1 ${detalle.promedio_d1.toFixed(2)})`}
+              {detalle.carreras_riesgo_alto > 0 && (
+                <> — <span className="font-semibold text-red-700">{detalle.carreras_riesgo_alto} carrera{detalle.carreras_riesgo_alto !== 1 ? 's' : ''}</span> requieren atención inmediata</>
+              )}
+              {'. '}
+              {`Oportunidades curriculares `}
+              <span className={`font-semibold ${detalle.promedio_d2 >= 0.6 ? 'text-green-700' : detalle.promedio_d2 >= 0.4 ? 'text-yellow-700' : 'text-red-700'}`}>{d2Level}s</span>
+              {` (D2 ${detalle.promedio_d2.toFixed(2)})`}
+              {portfolioUrgencia !== null && (
+                <>
+                  {'. Urgencia curricular global del portfolio: '}
+                  <span className={`font-semibold ${portfolioUrgencia >= 60 ? 'text-red-700' : portfolioUrgencia >= 30 ? 'text-amber-700' : 'text-green-700'}`}>
+                    {portfolioUrgencia}/100
+                  </span>
+                  {urgDelta !== null && (
+                    <span className={`text-xs ml-1 ${urgDelta > 0 ? 'text-red-500' : 'text-green-600'}`}>
+                      ({urgDelta > 0 ? `+${urgDelta}` : urgDelta} vs. promedio nacional)
+                    </span>
+                  )}
+                </>
+              )}
+              .
+            </p>
+          </div>
+        )
+      })()}
+
       {/* Carta a rectores — contextual link when urgencia alta */}
       {portfolioUrgencia !== null && portfolioUrgencia >= 60 && (
         <div className="mb-4 rounded-xl bg-indigo-50 border border-indigo-200 px-4 py-3 flex items-center justify-between gap-3">
