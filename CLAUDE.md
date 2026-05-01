@@ -44,8 +44,8 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 142, 2026-04-30)
-- 458 pytest · 0 errores TypeScript · 73 artículos investigaciones
+## Estado actual (Sprint 143, 2026-04-30)
+- 458 pytest · 0 errores TypeScript · 76 artículos investigaciones
 - P117-P126: benchmark signals, urgencia badges, brecha/calientes panels, tag cloud
 - P127-P132: URL params persistence (carreras/vacantes/noticias/ies), BenchmarksSection homepage, comparar U column, CarrerasRanking U column, "Situación en México" en benchmarks/[slug]
 - P133: URL params persistence (?q=) en /ies listing con botón clear
@@ -53,11 +53,12 @@ OIA-EE/
 - P135: columna "MX" vacantes demanda en /benchmarks/skills index table
 - P136: portfolioUrgencia stat card (5ª) en /ies/[id] con semáforo + sort por urgencia
 - P137: doble alerta banner en /carreras/[id] (D1≥0.60 + urgencia≥60) + portfolioUrgencia /ies/[id]
-- P138: D1/D2 aggregate comparison panel en /comparar (+ getIesDetalle para ambas IES)
+- P138: D1/D2 aggregate comparison panel en /comparar (+ artículos enfermería/ciencias políticas/ing. civil)
 - P139: U≥60 quick filter chip en /carreras listing
 - P140: ⚠ Doble alerta quick filter chip en /carreras listing (D1≥0.60 + U≥60)
-- P141: brecha de skills panel en /benchmarks/[slug] (declining + demanda MX, con links a vacantes)
-- P142: skills calientes panel en /benchmarks/[slug] (growing + demanda MX, con links a vacantes)
+- P141: brecha de skills panel en /benchmarks/[slug] + filtro por carrera en /investigaciones (?benchmark=)
+- P142: skills calientes panel en /benchmarks/[slug] + conteo artículos en tarjetas /benchmarks (grid y tabla)
+- P143: badge de carrera benchmark (indigo) en tarjetas de artículos (/investigaciones + homepage) + BENCHMARK_LABELS en lib
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
