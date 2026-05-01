@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { getCarrerasPublico, getAreasCarreras, getBenchmarkCareers } from '@/lib/api'
 import type { CarreraKpi } from '@/lib/types'
 
@@ -39,10 +40,11 @@ function ScoreBadge({ label, score, invert }: { label: string; score: number; in
 const PAGE_SIZE = 25
 
 export default function CarrerasListPage() {
+  const searchParams = useSearchParams()
   const [carreras, setCarreras] = useState<CarreraKpi[]>([])
-  const [busqueda, setBusqueda] = useState('')
-  const [query, setQuery] = useState('')
-  const [areaFiltro, setAreaFiltro] = useState('')
+  const [busqueda, setBusqueda] = useState(() => searchParams.get('q') ?? '')
+  const [query, setQuery] = useState(() => searchParams.get('q') ?? '')
+  const [areaFiltro, setAreaFiltro] = useState(() => searchParams.get('area') ?? '')
   const [areas, setAreas] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [skip, setSkip] = useState(0)
