@@ -1,5 +1,5 @@
 // frontend/src/app/page.tsx
-import { getResumenPublico, getEstadisticasPublicas, getBenchmarkResumen } from '@/lib/api'
+import { getResumenPublico, getEstadisticasPublicas, getBenchmarkResumen, getBenchmarkCareers } from '@/lib/api'
 import { getAllInvestigaciones } from '@/lib/investigaciones'
 import Hero from '@/components/landing/Hero'
 import TickerDatos from '@/components/landing/TickerDatos'
@@ -26,11 +26,15 @@ export const metadata: Metadata = {
 export const revalidate = 300
 
 export default async function LandingPage() {
-  const [resumen, estadisticas, benchmarksResumen] = await Promise.all([
+  const [resumen, estadisticas, benchmarksResumen, benchmarkCareers] = await Promise.all([
     getResumenPublico().catch(() => null),
     getEstadisticasPublicas().catch(() => null),
     getBenchmarkResumen().catch(() => null),
+    getBenchmarkCareers().catch(() => []),
   ])
+  const topUrgentCareers = [...benchmarkCareers]
+    .sort((a, b) => b.urgencia_curricular - a.urgencia_curricular)
+    .slice(0, 3)
   const investigaciones = getAllInvestigaciones()
 
   const tickerData = {
@@ -65,7 +69,7 @@ export default async function LandingPage() {
       <ElProblema />
       <ComoFunciona />
       <InvestigacionesGrid investigaciones={investigaciones} />
-      <BenchmarksSection />
+      <BenchmarksSection resumen={benchmarksResumen} topCareers={topUrgentCareers} />
       <SobreElAnalista />
       <FormularioContacto />
     </main>
