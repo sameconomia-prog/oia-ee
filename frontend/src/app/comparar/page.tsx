@@ -2,10 +2,10 @@
 import { useState, useEffect, useMemo, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { getPublicoIes, getCarrerasDeIes, getBenchmarkCareers } from '@/lib/api'
+import { getPublicoIes, getCarrerasDeIes, getBenchmarkCareers, getIesDetalle } from '@/lib/api'
 import ComparacionIES from '@/components/ComparacionIES'
 import ComparacionResumenChart from '@/components/ComparacionResumenChart'
-import type { CarreraKpi } from '@/lib/types'
+import type { CarreraKpi, IesDetalle } from '@/lib/types'
 
 type IesOpcion = { id: string; nombre: string; nombre_corto?: string }
 
@@ -25,6 +25,8 @@ function CompararContent() {
   const [carrerasA, setCarrerasA] = useState<CarreraKpi[]>([])
   const [carrerasB, setCarrerasB] = useState<CarreraKpi[]>([])
   const [benchmarkMap, setBenchmarkMap] = useState<Map<string, number>>(new Map())
+  const [detalleA, setDetalleA] = useState<IesDetalle | null>(null)
+  const [detalleB, setDetalleB] = useState<IesDetalle | null>(null)
 
   useEffect(() => {
     getPublicoIes().then(setIes).catch(() => setIes([]))
@@ -32,13 +34,17 @@ function CompararContent() {
   }, [])
 
   useEffect(() => {
-    if (iesAId) getCarrerasDeIes(iesAId).then(setCarrerasA).catch(() => setCarrerasA([]))
-    else setCarrerasA([])
+    if (iesAId) {
+      getCarrerasDeIes(iesAId).then(setCarrerasA).catch(() => setCarrerasA([]))
+      getIesDetalle(iesAId).then(setDetalleA).catch(() => setDetalleA(null))
+    } else { setCarrerasA([]); setDetalleA(null) }
   }, [iesAId])
 
   useEffect(() => {
-    if (iesBId) getCarrerasDeIes(iesBId).then(setCarrerasB).catch(() => setCarrerasB([]))
-    else setCarrerasB([])
+    if (iesBId) {
+      getCarrerasDeIes(iesBId).then(setCarrerasB).catch(() => setCarrerasB([]))
+      getIesDetalle(iesBId).then(setDetalleB).catch(() => setDetalleB(null))
+    } else { setCarrerasB([]); setDetalleB(null) }
   }, [iesBId])
 
   const carrerasComunes = useMemo(() => {
@@ -85,6 +91,49 @@ function CompararContent() {
             iesANombre={ies.find(i => i.id === iesAId)?.nombre ?? iesAId}
             iesBNombre={ies.find(i => i.id === iesBId)?.nombre ?? iesBId}
           />
+
+          {/* D1/D2 aggregate comparison */}
+          {detalleA && detalleB && (
+            <div className="mt-6 border rounded-lg overflow-hidden text-sm">
+              {(() => {
+                const nombreA = ies.find(i => i.id === iesAId)?.nombre_corto ?? ies.find(i => i.id === iesAId)?.nombre ?? iesAId
+                const nombreB = ies.find(i => i.id === iesBId)?.nombre_corto ?? ies.find(i => i.id === iesBId)?.nombre ?? iesBId
+                const rows = [
+                  { label: 'Promedio D1 (Riesgo)', vA: detalleA.promedio_d1, vB: detalleB.promedio_d1, invert: true },
+                  { label: 'Promedio D2 (Oportunidades)', vA: detalleA.promedio_d2, vB: detalleB.promedio_d2, invert: false },
+                  { label: 'Carreras con D1 ≥ 0.6', vA: detalleA.carreras_riesgo_alto, vB: detalleB.carreras_riesgo_alto, invert: true, isCount: true },
+                ] as { label: string; vA: number; vB: number; invert: boolean; isCount?: boolean }[]
+                return (
+                  <>
+                    <div className="grid grid-cols-3 bg-gray-800 text-white text-xs font-semibold">
+                      <div className="px-4 py-2">Indicador</div>
+                      <div className="px-4 py-2 text-center border-l border-gray-700 truncate">{nombreA}</div>
+                      <div className="px-4 py-2 text-center border-l border-gray-700 truncate">{nombreB}</div>
+                    </div>
+                    {rows.map(({ label, vA, vB, invert, isCount }) => {
+                      const diff = Math.abs(vA - vB)
+                      const ganA = diff >= 0.005 && (invert ? vA < vB : vA > vB)
+                      const ganB = diff >= 0.005 && (invert ? vB < vA : vB > vA)
+                      return (
+                        <div key={label} className="grid grid-cols-3 border-t text-xs">
+                          <div className="px-4 py-2 text-gray-500">{label}</div>
+                          <div className={`px-4 py-2 text-center border-l font-mono ${ganA ? 'bg-green-50 font-bold text-green-800' : 'text-gray-700'}`}>
+                            {isCount ? vA : vA.toFixed(2)}{ganA && ' ✓'}
+                          </div>
+                          <div className={`px-4 py-2 text-center border-l font-mono ${ganB ? 'bg-green-50 font-bold text-green-800' : 'text-gray-700'}`}>
+                            {isCount ? vB : vB.toFixed(2)}{ganB && ' ✓'}
+                          </div>
+                        </div>
+                      )
+                    })}
+                    <div className="px-4 py-2 bg-gray-50 border-t text-[11px] text-gray-400">
+                      KPIs nacionales agregados · D1: menor=mejor · D2: mayor=mejor · ✓ indica mejor valor
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
+          )}
 
           {/* Gráfica comparativa de promedios */}
           {carrerasComunes.length > 0 && (
