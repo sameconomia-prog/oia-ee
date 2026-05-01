@@ -1,7 +1,8 @@
 // frontend/src/app/benchmarks/comparar/page.tsx
 'use client'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { getBenchmarkCareers, getBenchmarkCareerDetail, getBenchmarkSources } from '@/lib/api'
 import type { BenchmarkCareerSummary, BenchmarkCareerDetail, BenchmarkSource, SkillConvergencia, ConvergenceDirection } from '@/lib/types'
 import ConvergenceIcon from '@/components/benchmarks/ConvergenceIcon'
@@ -68,14 +69,28 @@ function CareerPanel({
 }
 
 export default function BenchmarksCompararPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
   const [careers, setCareers] = useState<BenchmarkCareerSummary[]>([])
   const [sources, setSources] = useState<BenchmarkSource[]>([])
-  const [slugA, setSlugA] = useState<string>('')
-  const [slugB, setSlugB] = useState<string>('')
+  const [slugA, setSlugAState] = useState<string>(() => searchParams.get('a') ?? '')
+  const [slugB, setSlugBState] = useState<string>(() => searchParams.get('b') ?? '')
   const [detailA, setDetailA] = useState<BenchmarkCareerDetail | null>(null)
   const [detailB, setDetailB] = useState<BenchmarkCareerDetail | null>(null)
   const [loadingA, setLoadingA] = useState(false)
   const [loadingB, setLoadingB] = useState(false)
+
+  const updateParams = useCallback((a: string, b: string) => {
+    const params = new URLSearchParams()
+    if (a) params.set('a', a)
+    if (b) params.set('b', b)
+    const qs = params.toString()
+    router.replace(qs ? `?${qs}` : '?', { scroll: false })
+  }, [router])
+
+  const setSlugA = (v: string) => { setSlugAState(v); updateParams(v, slugB) }
+  const setSlugB = (v: string) => { setSlugBState(v); updateParams(slugA, v) }
 
   useEffect(() => {
     Promise.all([getBenchmarkCareers(), getBenchmarkSources()])
@@ -85,13 +100,13 @@ export default function BenchmarksCompararPage() {
   useEffect(() => {
     if (!slugA) { setDetailA(null); return }
     setLoadingA(true)
-    getBenchmarkCareerDetail(slugA).then(setDetailA).finally(() => setLoadingA(false))
+    getBenchmarkCareerDetail(slugA).then(setDetailA).catch(() => setDetailA(null)).finally(() => setLoadingA(false))
   }, [slugA])
 
   useEffect(() => {
     if (!slugB) { setDetailB(null); return }
     setLoadingB(true)
-    getBenchmarkCareerDetail(slugB).then(setDetailB).finally(() => setLoadingB(false))
+    getBenchmarkCareerDetail(slugB).then(setDetailB).catch(() => setDetailB(null)).finally(() => setLoadingB(false))
   }, [slugB])
 
   const divergencias = useMemo(() => {
