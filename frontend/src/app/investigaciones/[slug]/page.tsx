@@ -120,6 +120,31 @@ export default function InvestigacionDetallePage({ params }: Props) {
         <MDXRemote source={content} />
       </article>
 
+      {/* CTA para artículos dirigidos a rectores */}
+      {meta.tags?.includes('rectores') && (
+        <div className="mt-10 rounded-xl bg-indigo-50 border border-indigo-200 p-6">
+          <p className="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-2">Próximo paso</p>
+          <h3 className="text-base font-bold text-indigo-900 mb-2">¿Cómo está la urgencia curricular de tu institución?</h3>
+          <p className="text-sm text-indigo-700 mb-4">
+            Busca tu IES en el observatorio y revisa el portfolio de urgencia curricular de tus carreras con datos actualizados.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/ies"
+              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              Buscar mi institución →
+            </Link>
+            <Link
+              href="/pertinencia"
+              className="inline-flex items-center px-4 py-2 border border-indigo-300 text-indigo-700 text-sm font-semibold rounded-lg hover:bg-indigo-100 transition-colors"
+            >
+              Solicitar análisis gratuito
+            </Link>
+          </div>
+        </div>
+      )}
+
       {related.length > 0 && (
         <aside className="mt-16 border-t border-gray-100 pt-10">
           <h2 className="text-lg font-bold text-gray-800 mb-6">También te puede interesar</h2>
