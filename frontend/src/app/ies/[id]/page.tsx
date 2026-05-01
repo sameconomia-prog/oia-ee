@@ -53,6 +53,7 @@ export default function IesDetailPage() {
         setDetalle(det)
         setCarreras(cs)
         setBenchmarkList(bms)
+        document.title = `${det.nombre_corto ?? det.nombre} — OIA-EE`
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
@@ -75,6 +76,15 @@ export default function IesDetailPage() {
     if (benchmarkList.length === 0) return null
     return Math.round(benchmarkList.reduce((a, b) => a + b.urgencia_curricular, 0) / benchmarkList.length)
   }, [benchmarkList])
+
+  const distribucionUrgencia = useMemo(() => {
+    const bm = carreras.filter(c => c.benchmark_slug && benchmarkMap[c.benchmark_slug])
+    if (bm.length === 0) return null
+    const alta = bm.filter(c => benchmarkMap[c.benchmark_slug!].urgencia_curricular >= 60).length
+    const media = bm.filter(c => { const u = benchmarkMap[c.benchmark_slug!].urgencia_curricular; return u >= 30 && u < 60 }).length
+    const baja = bm.filter(c => benchmarkMap[c.benchmark_slug!].urgencia_curricular < 30).length
+    return { alta, media, baja, total: bm.length }
+  }, [carreras, benchmarkMap])
 
   const distribucionD1 = useMemo(() => {
     const withKpi = carreras.filter(c => c.kpi != null)
@@ -209,6 +219,27 @@ export default function IesDetailPage() {
                   />
                 </div>
                 <span className="text-[10px] font-mono text-gray-600 w-6 text-right">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Distribución urgencia benchmark */}
+      {distribucionUrgencia && distribucionUrgencia.total > 1 && (
+        <div className="mb-4 bg-white rounded-xl border shadow-sm px-4 py-3">
+          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
+            Urgencia curricular global — {distribucionUrgencia.total} carrera{distribucionUrgencia.total !== 1 ? 's' : ''} con benchmark
+          </p>
+          <div className="flex gap-3 flex-wrap">
+            {[
+              { label: 'Alta (≥60)', count: distribucionUrgencia.alta, cls: 'bg-red-50 border-red-200 text-red-700' },
+              { label: 'Media (30–59)', count: distribucionUrgencia.media, cls: 'bg-amber-50 border-amber-200 text-amber-700' },
+              { label: 'Baja (<30)', count: distribucionUrgencia.baja, cls: 'bg-green-50 border-green-200 text-green-700' },
+            ].map(({ label, count, cls }) => (
+              <div key={label} className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${cls}`}>
+                <span className="text-lg font-bold font-mono">{count}</span>
+                <span className="text-[10px] font-medium leading-tight">{label}</span>
               </div>
             ))}
           </div>

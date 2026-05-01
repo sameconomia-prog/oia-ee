@@ -184,6 +184,7 @@ export default function CarreraDetallePage() {
     getCarreraDetalle(id)
       .then(d => {
         setDetalle(d)
+        document.title = `${d.nombre} — OIA-EE`
         if (d.benchmark_slug) {
           const slug = d.benchmark_slug
           getBenchmarkCareerDetail(slug).then(setBenchmarkDetail).catch(() => {})
