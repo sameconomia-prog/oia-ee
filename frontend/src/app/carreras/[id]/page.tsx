@@ -183,6 +183,36 @@ export default function CarreraDetallePage() {
           </p>
         </div>
       )}
+      {/* Diagnóstico rápido — solo cuando no hay doble alerta */}
+      {d.kpi && !(d.kpi.d1_obsolescencia.score >= 0.6 && benchmarkSummary && benchmarkSummary.urgencia_curricular >= 60) && (() => {
+        const d1 = d.kpi.d1_obsolescencia.score
+        const d2 = d.kpi.d2_oportunidades.score
+        if (d1 < 0.4 && d2 >= 0.6) {
+          return (
+            <div className="mb-5 p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center gap-2">
+              <span className="text-emerald-600 font-bold">✓</span>
+              <p className="text-xs text-emerald-800 font-medium">Perfil favorable — baja obsolescencia y alta oportunidad curricular.</p>
+            </div>
+          )
+        }
+        if (d2 >= 0.6) {
+          return (
+            <div className="mb-5 p-3 rounded-xl bg-green-50 border border-green-200 flex items-center gap-2">
+              <span className="text-green-600 font-bold">↑</span>
+              <p className="text-xs text-green-800 font-medium">Alta oportunidad digital — D2 <span className="font-mono">{d2.toFixed(2)}</span>. Fortalecer habilidades emergentes.</p>
+            </div>
+          )
+        }
+        if (d1 >= 0.4 && d1 < 0.6) {
+          return (
+            <div className="mb-5 p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-2">
+              <span className="text-amber-600 font-bold">~</span>
+              <p className="text-xs text-amber-800 font-medium">Riesgo moderado — D1 <span className="font-mono">{d1.toFixed(2)}</span>. Revisar contenidos con más exposición a automatización.</p>
+            </div>
+          )
+        }
+        return null
+      })()}
       {/* Breadcrumb + título */}
       <div className="mb-6">
         <Link href="/carreras" className="text-xs text-brand-600 hover:underline">← Carreras</Link>
