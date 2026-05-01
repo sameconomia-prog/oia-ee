@@ -258,6 +258,7 @@ git commit -m "feat(landing): GSAPProvider con ScrollTrigger, SplitText, CustomE
 import { useEffect } from 'react'
 import Lenis from 'lenis'
 import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 export default function LenisProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -265,6 +266,7 @@ export default function LenisProvider({ children }: { children: React.ReactNode 
     if (!isDesktop) return
 
     const lenis = new Lenis({ lerp: 0.08, syncTouch: false })
+    lenis.on('scroll', ScrollTrigger.update)
 
     const ticker = (time: number) => lenis.raf(time * 1000)
     gsap.ticker.add(ticker)
@@ -290,7 +292,7 @@ cd ~/Documents/OIA-EE/frontend && npx tsc --noEmit 2>&1 | head -30
 
 ```bash
 git add src/components/landing/providers/LenisProvider.tsx
-git commit -m "feat(landing): LenisProvider desktop-only, lerp 0.08, GSAP ticker sync"
+git commit -m "feat(landing): LenisProvider desktop-only, lerp 0.08, GSAP ticker + ScrollTrigger sync"
 ```
 
 ---
@@ -512,6 +514,8 @@ git add src/components/landing/ui/CustomCursor.tsx
 git commit -m "feat(landing): CustomCursor desktop-only, 12px→40px hover, 5-dot trail GSAP"
 ```
 
+> **Nota Fase 1:** Cuando se cree el `ParticleHero` (canvas Three.js), agregar `data-no-cursor` al `<canvas>` y en `CustomCursor` detectar `e.target.closest('[data-no-cursor]')` para desactivar el cursor sobre el canvas y evitar conflicto visual con `mix-blend-mode`.
+
 ---
 
 ## Task 7: Crear PageLoader
@@ -717,187 +721,16 @@ git commit -m "feat(landing): HeroGradientFallback mobile LCP — gradiente CSS 
 
 ---
 
-## Task 10: Crear (landing)/layout.tsx
+## Task 10: Simplificar root layout.tsx
 
 **Files:**
-- Create: `frontend/src/app/(landing)/layout.tsx`
+- Modify: `frontend/src/app/layout.tsx`
 
-Este layout monta las fuentes nuevas, aplica `.landing-theme` al `<html>`, y envuelve los providers.
+El root layout actual tiene lógica condicional compleja (`pathname → embed/landing/dashboard`). Con los route groups, ya no necesita esa lógica — solo provee el shell `<html><body>` con todas las fuentes registradas como CSS variables.
 
-- [ ] **Step 1: Crear directorio**
+**IMPORTANTE:** Este task DEBE completarse ANTES de crear los route group layouts (Tasks 11 y 12). Si los route group layouts existen mientras el root layout aún tiene `<Navbar />` y `<Footer />` condicionales, las páginas landing mostrarán doble navbar y doble footer.
 
-```bash
-mkdir -p ~/Documents/OIA-EE/frontend/src/app/\(landing\)
-```
-
-- [ ] **Step 2: Crear (landing)/layout.tsx**
-
-```tsx
-import type { Metadata } from 'next'
-import { Instrument_Serif, Syne, Outfit, JetBrains_Mono } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
-import GSAPProvider from '@/components/landing/providers/GSAPProvider'
-import LenisProvider from '@/components/landing/providers/LenisProvider'
-import NoiseOverlay from '@/components/landing/ui/NoiseOverlay'
-import CustomCursor from '@/components/landing/ui/CustomCursor'
-import PageLoader from '@/components/landing/ui/PageLoader'
-
-const instrumentSerif = Instrument_Serif({
-  weight: ['400'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-instrument-serif',
-})
-
-const syne = Syne({
-  weight: ['700'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-syne',
-})
-
-const outfit = Outfit({
-  weight: ['400', '500'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-outfit',
-})
-
-const jetbrainsMono = JetBrains_Mono({
-  weight: ['500'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-jetbrains-mono',
-})
-
-export const metadata: Metadata = {
-  title: {
-    default: 'OIA-EE — Observatorio IA · Empleo · Educación',
-    template: '%s | OIA-EE',
-  },
-  description: 'Monitoreo en tiempo real del impacto de la IA en educación y empleo en México. Rankings D1–D7, comparación IES, alertas y tendencias.',
-  openGraph: {
-    title: 'OIA-EE — Observatorio IA · Empleo · Educación',
-    description: 'Rankings D1–D7 de carreras por riesgo de automatización. Datos abiertos sobre IES en México.',
-    type: 'website',
-    locale: 'es_MX',
-    siteName: 'OIA-EE',
-    url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://oia-ee.mx',
-  },
-}
-
-export default function LandingLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html
-      lang="es"
-      className={`landing-theme ${instrumentSerif.variable} ${syne.variable} ${outfit.variable} ${jetbrainsMono.variable}`}
-    >
-      <body style={{ background: 'var(--l-bg-0)', color: 'var(--l-text-primary)', margin: 0 }}>
-        <GSAPProvider>
-          <LenisProvider>
-            <PageLoader />
-            <NoiseOverlay />
-            <CustomCursor />
-            {children}
-            <Analytics />
-          </LenisProvider>
-        </GSAPProvider>
-      </body>
-    </html>
-  )
-}
-```
-
-- [ ] **Step 3: TypeScript check**
-
-```bash
-cd ~/Documents/OIA-EE/frontend && npx tsc --noEmit 2>&1 | head -30
-```
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add src/app/\(landing\)/layout.tsx
-git commit -m "feat(landing): layout con fuentes, .landing-theme, GSAPProvider, LenisProvider, infra components"
-```
-
----
-
-## Task 11: Crear (dashboard)/layout.tsx
-
-**Files:**
-- Create: `frontend/src/app/(dashboard)/layout.tsx`
-
-Extrae la lógica del dashboard del root layout actual.
-
-- [ ] **Step 1: Crear directorio**
-
-```bash
-mkdir -p ~/Documents/OIA-EE/frontend/src/app/\(dashboard\)
-```
-
-- [ ] **Step 2: Crear (dashboard)/layout.tsx**
-
-```tsx
-import type { Metadata } from 'next'
-import { GeistSans } from 'geist/font/sans'
-import { Analytics } from '@vercel/analytics/next'
-import Sidebar from '@/components/Sidebar'
-import WhiteLabelApplier from '@/components/WhiteLabelApplier'
-import BusquedaGlobal from '@/components/BusquedaGlobal'
-import { cn } from '@/lib/utils'
-
-export const metadata: Metadata = {
-  title: {
-    default: 'OIA-EE — Plataforma',
-    template: '%s | OIA-EE',
-  },
-}
-
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="es" className={cn('font-sans', GeistSans.variable)}>
-      <body className="flex min-h-screen bg-slate-50 font-sans">
-        <WhiteLabelApplier />
-        <BusquedaGlobal />
-        <Sidebar />
-        <main className="flex-1 p-6 overflow-auto">{children}</main>
-        <Analytics />
-      </body>
-    </html>
-  )
-}
-```
-
-- [ ] **Step 3: TypeScript check**
-
-```bash
-cd ~/Documents/OIA-EE/frontend && npx tsc --noEmit 2>&1 | head -30
-```
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add src/app/\(dashboard\)/layout.tsx
-git commit -m "feat(dashboard): layout route group — extrae lógica Sidebar/WhiteLabel del root"
-```
-
----
-
-## Task 12: Simplificar root layout.tsx
-
-El root layout ahora solo maneja rutas que no están en ningún route group (api, embed, robots, sitemap). Como Next.js requiere exactamente UN layout raíz que envuelva todo, este layout debe ser mínimo — solo el shell HTML. Los metadatos globales se mueven al `(landing)/layout.tsx` y `(dashboard)/layout.tsx`.
-
-**IMPORTANTE:** En Next.js App Router, los route groups NO eliminan la necesidad del root layout. El root layout se aplica a TODAS las rutas. Pero si tenemos `<html>` en el root layout Y en los route group layouts → conflicto. La solución correcta: el root layout NO renderiza `<html>/<body>` — eso lo hace cada route group layout.
-
-Sin embargo, Next.js 14 requiere que el root `layout.tsx` exporte `<html>` y `<body>`. La solución real es **no duplicar** `<html>/<body>` en los route group layouts — solo el root los provee.
-
-**Arquitectura correcta:**
-- `app/layout.tsx` → `<html><body>` con todo lo mínimo necesario
-- `app/(landing)/layout.tsx` → solo un `<div>` wrapper + providers (SIN `<html><body>`)
-- `app/(dashboard)/layout.tsx` → solo `<>` wrapper (SIN `<html><body>`)
-
-- [ ] **Step 1: Reescribir root layout.tsx — minimal con soporte dual-font**
+- [ ] **Step 1: Reescribir root layout.tsx — minimal con todas las fuentes**
 
 ```tsx
 import type { Metadata } from 'next'
@@ -976,38 +809,63 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-- [ ] **Step 2: Actualizar (landing)/layout.tsx — SIN html/body (los provee el root)**
+- [ ] **Step 2: TypeScript check**
 
-Reescribir `frontend/src/app/(landing)/layout.tsx`:
+```bash
+cd ~/Documents/OIA-EE/frontend && npx tsc --noEmit 2>&1 | head -40
+```
+
+Esperado: 0 errores.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/app/layout.tsx
+git commit -m "refactor: root layout minimal — html shell + todas las fuentes como CSS variables"
+```
+
+---
+
+## Task 11: Crear (landing)/layout.tsx
+
+**Files:**
+- Create: `frontend/src/app/(landing)/layout.tsx`
+
+Aplica `.landing-theme` al wrapper, monta los providers de animación, y conserva `<Navbar />` + `<Footer />` para que las páginas landing tengan navegación funcional durante Fase 0. En Fase 1 se reemplazará la Navbar por el nuevo diseño premium.
+
+**PREREQUISITO:** Task 10 completado (root layout ya no tiene Navbar/Footer condicionales).
+
+- [ ] **Step 1: Crear directorio**
+
+```bash
+mkdir -p ~/Documents/OIA-EE/frontend/src/app/\(landing\)
+```
+
+- [ ] **Step 2: Crear (landing)/layout.tsx**
 
 ```tsx
-import type { Metadata } from 'next'
+import Navbar from '@/components/landing/Navbar'
+import Footer from '@/components/landing/Footer'
 import GSAPProvider from '@/components/landing/providers/GSAPProvider'
 import LenisProvider from '@/components/landing/providers/LenisProvider'
 import NoiseOverlay from '@/components/landing/ui/NoiseOverlay'
 import CustomCursor from '@/components/landing/ui/CustomCursor'
 import PageLoader from '@/components/landing/ui/PageLoader'
 
-export const metadata: Metadata = {
-  openGraph: {
-    title: 'OIA-EE — Observatorio IA · Empleo · Educación',
-    description: 'Rankings D1–D7 de carreras por riesgo de automatización.',
-    type: 'website',
-    locale: 'es_MX',
-    siteName: 'OIA-EE',
-    url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://oia-ee.mx',
-  },
-}
-
 export default function LandingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="landing-theme" style={{ background: 'var(--l-bg-0)', color: 'var(--l-text-primary)', minHeight: '100vh' }}>
+    <div
+      className="landing-theme"
+      style={{ background: 'var(--l-bg-0)', color: 'var(--l-text-primary)', minHeight: '100vh' }}
+    >
       <GSAPProvider>
         <LenisProvider>
           <PageLoader />
           <NoiseOverlay />
           <CustomCursor />
+          <Navbar />
           {children}
+          <Footer />
         </LenisProvider>
       </GSAPProvider>
     </div>
@@ -1015,9 +873,37 @@ export default function LandingLayout({ children }: { children: React.ReactNode 
 }
 ```
 
-- [ ] **Step 3: Actualizar (dashboard)/layout.tsx — SIN html/body**
+- [ ] **Step 3: TypeScript check**
 
-Reescribir `frontend/src/app/(dashboard)/layout.tsx`:
+```bash
+cd ~/Documents/OIA-EE/frontend && npx tsc --noEmit 2>&1 | head -30
+```
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add src/app/\(landing\)/layout.tsx
+git commit -m "feat(landing): layout con .landing-theme, providers infra, Navbar y Footer"
+```
+
+---
+
+## Task 12: Crear (dashboard)/layout.tsx
+
+**Files:**
+- Create: `frontend/src/app/(dashboard)/layout.tsx`
+
+Extrae la lógica del dashboard del root layout. La clase `font-sans` y `bg-slate-50` se mantienen idénticas al original.
+
+**PREREQUISITO:** Task 10 completado (root layout ya no tiene Sidebar/WhiteLabelApplier/BusquedaGlobal).
+
+- [ ] **Step 1: Crear directorio**
+
+```bash
+mkdir -p ~/Documents/OIA-EE/frontend/src/app/\(dashboard\)
+```
+
+- [ ] **Step 2: Crear (dashboard)/layout.tsx**
 
 ```tsx
 import Sidebar from '@/components/Sidebar'
@@ -1036,19 +922,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 }
 ```
 
-- [ ] **Step 4: TypeScript check**
+- [ ] **Step 3: TypeScript check**
 
 ```bash
-cd ~/Documents/OIA-EE/frontend && npx tsc --noEmit 2>&1 | head -40
+cd ~/Documents/OIA-EE/frontend && npx tsc --noEmit 2>&1 | head -30
 ```
 
-Esperado: 0 errores.
-
-- [ ] **Step 5: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add src/app/layout.tsx src/app/\(landing\)/layout.tsx src/app/\(dashboard\)/layout.tsx
-git commit -m "refactor: root layout minimal, route group layouts sin html/body duplicado"
+git add src/app/\(dashboard\)/layout.tsx
+git commit -m "feat(dashboard): layout route group — Sidebar, WhiteLabelApplier, BusquedaGlobal"
 ```
 
 ---
