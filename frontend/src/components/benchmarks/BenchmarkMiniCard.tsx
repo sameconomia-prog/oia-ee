@@ -30,7 +30,7 @@ export default function BenchmarkMiniCard({ slug }: { slug: string }) {
         <div className="flex items-center gap-2 mb-2">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Benchmark Global</span>
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${urgColor}`}>
-            {urgLabel}
+            {urgLabel} · {urgencia}
           </span>
         </div>
         <p className="text-sm text-slate-700 font-medium mb-2">{data.nombre} · {total} habilidades analizadas</p>
