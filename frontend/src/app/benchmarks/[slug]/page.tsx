@@ -53,7 +53,7 @@ const DIR_COLORS: Record<string, string> = {
 
 export default function BenchmarkCareerPage() {
   const { slug } = useParams<{ slug: string }>()
-  type ArticleCard = { slug: string; titulo: string; tipo: string; fecha: string; tiempo_lectura: string }
+  type ArticleCard = { slug: string; titulo: string; tipo: string; fecha: string; tiempo_lectura: string; resumen?: string }
 
   const [detail, setDetail] = useState<BenchmarkCareerDetail | null>(null)
   const [sources, setSources] = useState<BenchmarkSource[]>([])
@@ -366,10 +366,13 @@ export default function BenchmarkCareerPage() {
               <Link
                 key={a.slug}
                 href={`/investigaciones/${a.slug}`}
-                className="border border-slate-100 rounded-lg p-3 hover:border-brand-200 hover:bg-brand-50/20 transition-colors"
+                className="border border-slate-100 rounded-lg p-3 hover:border-brand-200 hover:bg-brand-50/20 transition-colors flex flex-col"
               >
                 <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">{a.tipo}</span>
                 <p className="text-xs font-medium text-slate-800 leading-snug mt-1 line-clamp-2">{a.titulo}</p>
+                {a.resumen && (
+                  <p className="text-[11px] text-slate-500 mt-1.5 line-clamp-2 leading-snug">{a.resumen}</p>
+                )}
                 <p className="text-[11px] text-slate-400 mt-1.5">{a.tiempo_lectura} · {new Date(a.fecha).toLocaleDateString('es-MX', { month: 'short', year: 'numeric' })}</p>
               </Link>
             ))}
