@@ -19,6 +19,12 @@ const TIPO_COLOR: Record<string, string> = {
 
 const TIPOS: TipoInvestigacion[] = ['reporte', 'analisis', 'carta', 'nota', 'metodologia']
 
+const NEW_DAYS = 14
+const now = Date.now()
+function isNew(fecha: string) {
+  return (now - new Date(fecha).getTime()) / 86400000 <= NEW_DAYS
+}
+
 
 export default function InvestigacionesPage({
   searchParams,
@@ -234,6 +240,9 @@ export default function InvestigacionesPage({
                     <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold">
                       urgencia {urgencia}
                     </span>
+                  )}
+                  {isNew(inv.fecha) && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">Nuevo</span>
                   )}
                   {inv.acceso === 'lead_magnet' && (
                     <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">PDF</span>
