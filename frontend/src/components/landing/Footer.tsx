@@ -34,6 +34,7 @@ export default function Footer() {
         <div>
           <p className="text-white font-semibold mb-3 text-sm">Para Instituciones</p>
           <ul className="space-y-2 text-sm">
+            <li><Link href="/guia" className="hover:text-white transition-colors">Guía de uso</Link></li>
             <li><Link href="/ies" className="hover:text-white transition-colors">Instituciones (IES)</Link></li>
             <li><Link href="/carreras" className="hover:text-white transition-colors">Carreras</Link></li>
             <li><Link href="/pertinencia" className="hover:text-white transition-colors">Análisis de pertinencia</Link></li>
