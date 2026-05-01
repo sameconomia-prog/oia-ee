@@ -3,8 +3,12 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getCarrerasPublico } from '@/lib/api'
-import type { BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, CarreraKpi } from '@/lib/types'
+import { getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getCarrerasPublico, getVacantesTopSkills } from '@/lib/api'
+import type { BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, CarreraKpi, SkillFreq } from '@/lib/types'
+
+function normS(s: string) {
+  return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
 import SkillConvergenceTable from '@/components/benchmarks/SkillConvergenceTable'
 import CurriculumActionSummary from '@/components/benchmarks/CurriculumActionSummary'
 import HorizonteTimeline from '@/components/benchmarks/HorizonteTimeline'
@@ -55,6 +59,7 @@ export default function BenchmarkCareerPage() {
   const [sources, setSources] = useState<BenchmarkSource[]>([])
   const [related, setRelated] = useState<BenchmarkCareerSummary[]>([])
   const [mexicoCarreras, setMexicoCarreras] = useState<CarreraKpi[]>([])
+  const [vacanteSkills, setVacanteSkills] = useState<SkillFreq[]>([])
   const [lecturas, setLecturas] = useState<ArticleCard[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -62,6 +67,7 @@ export default function BenchmarkCareerPage() {
   useEffect(() => {
     if (!slug) return
     fetch(`/api/benchmark-articles/${slug}`).then(r => r.ok ? r.json() : []).then(setLecturas).catch(() => {})
+    getVacantesTopSkills(50).then(setVacanteSkills).catch(() => {})
     Promise.all([
       getBenchmarkCareerDetail(slug),
       getBenchmarkSources(),
@@ -185,6 +191,47 @@ export default function BenchmarkCareerPage() {
       <Card className="mb-6 p-5">
         <HorizonteTimeline skills={detail.skills} careerSlug={slug} />
       </Card>
+
+      {/* Brecha de skills — declining pero demandadas en MX */}
+      {vacanteSkills.length > 0 && (() => {
+        const vacMap = new Map(vacanteSkills.map(sf => [normS(sf.nombre), sf.count]))
+        const brechaSkills = detail.skills
+          .filter(sk => sk.direccion_global === 'declining')
+          .map(sk => {
+            const q = normS(sk.skill_nombre)
+            const count = vacMap.get(q) ??
+              Array.from(vacMap.entries()).find(([k]) => k.includes(q) || q.includes(k))?.[1] ?? 0
+            return { ...sk, vacanteCount: count }
+          })
+          .filter(sk => sk.vacanteCount > 0)
+          .sort((a, b) => b.vacanteCount - a.vacanteCount)
+        if (brechaSkills.length === 0) return null
+        return (
+          <Card className="mb-6 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">
+                Brecha curricular · {brechaSkills.length} {brechaSkills.length === 1 ? 'skill' : 'skills'}
+              </h3>
+              <span className="text-[11px] text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded font-medium">
+                En declive global pero demandadas en MX
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {brechaSkills.map(sk => (
+                <Link
+                  key={sk.skill_id}
+                  href={`/vacantes?q=${encodeURIComponent(sk.skill_nombre)}`}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-full text-xs text-amber-800 hover:bg-amber-100 transition-colors"
+                >
+                  <span className="font-medium">{sk.skill_nombre}</span>
+                  <span className="font-mono text-amber-600 text-[10px]">{sk.vacanteCount} vac.</span>
+                </Link>
+              ))}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-2">↓ declining globalmente · demanda activa en vacantes mexicanas · oportunidad curricular en transición</p>
+          </Card>
+        )
+      })()}
 
       {/* Situación en México */}
       {mexicoCarreras.length > 0 && (
