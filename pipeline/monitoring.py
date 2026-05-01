@@ -1,7 +1,6 @@
 """Helpers para registrar ejecuciones del scheduler y enviar alertas por email."""
 from __future__ import annotations
 import os
-import traceback as tb
 from datetime import datetime, timezone
 
 import resend
@@ -28,7 +27,6 @@ def _write_pipeline_run(job_id: str, status: str, message: str = "") -> None:
             message=message[:2000] if message else "",
         )
         session.add(run)
-        session.commit()
 
 
 def _get_previous_status(job_id: str) -> str | None:
