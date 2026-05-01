@@ -163,25 +163,40 @@ export default function InvestigacionDetallePage({ params }: Props) {
         </a>
       </div>
 
-      {seriesIdx >= 0 && (
-        <div className="mb-6 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
-          <p className="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-3">
-            Serie para rectores · {seriesIdx + 1} de {RECTOR_SERIES.length}
-          </p>
-          <ol className="space-y-1.5">
-            {RECTOR_SERIES.map((s, i) => (
-              <li key={s.slug} className="flex items-start gap-2">
-                <span className={`shrink-0 text-xs font-mono w-5 mt-0.5 ${i === seriesIdx ? 'text-indigo-700 font-bold' : 'text-indigo-300'}`}>{i + 1}.</span>
-                {i === seriesIdx ? (
-                  <span className="text-xs font-semibold text-indigo-900 leading-snug">{s.label}</span>
-                ) : (
-                  <Link href={`/investigaciones/${s.slug}`} className="text-xs text-indigo-600 hover:underline leading-snug">{s.label}</Link>
-                )}
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
+      {seriesIdx >= 0 && (() => {
+        const groups = ['Fundamentos', 'Diagnóstico', 'Acción', 'Medición'] as const
+        return (
+          <div className="mb-6 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-indigo-600 uppercase tracking-widest">
+                Serie para rectores · {seriesIdx + 1} de {RECTOR_SERIES.length}
+              </p>
+              <Link href="/guia" className="text-xs text-indigo-400 hover:text-indigo-600 transition-colors">Guía completa →</Link>
+            </div>
+            {groups.map(grp => {
+              const items = RECTOR_SERIES.map((s, i) => ({ ...s, idx: i })).filter(s => s.group === grp)
+              if (items.length === 0) return null
+              return (
+                <div key={grp} className="mb-3 last:mb-0">
+                  <p className="text-xs font-semibold text-indigo-400 uppercase tracking-wider mb-1.5">{grp}</p>
+                  <ol className="space-y-1">
+                    {items.map(s => (
+                      <li key={s.slug} className="flex items-start gap-2">
+                        <span className={`shrink-0 text-xs font-mono w-5 mt-0.5 ${s.idx === seriesIdx ? 'text-indigo-700 font-bold' : 'text-indigo-300'}`}>{s.idx + 1}.</span>
+                        {s.idx === seriesIdx ? (
+                          <span className="text-xs font-semibold text-indigo-900 leading-snug">{s.label}</span>
+                        ) : (
+                          <Link href={`/investigaciones/${s.slug}`} className="text-xs text-indigo-600 hover:underline leading-snug">{s.label}</Link>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )
+            })}
+          </div>
+        )
+      })()}
 
       {benchmarkSlug && <BenchmarkMiniCard slug={benchmarkSlug} />}
 
