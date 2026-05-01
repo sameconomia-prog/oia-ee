@@ -5,8 +5,8 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
-import { getBenchmarkCareers } from '@/lib/api'
-import type { BenchmarkCareerSummary } from '@/lib/types'
+import { getBenchmarkCareers, getTendenciasNacionales } from '@/lib/api'
+import type { BenchmarkCareerSummary, TendenciaNacional } from '@/lib/types'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -44,10 +44,12 @@ function PertinenciaContent() {
   const [error, setError] = useState<string | null>(null)
   const [benchmarkCareers, setBenchmarkCareers] = useState<BenchmarkCareerSummary[]>([])
   const [totalSolicitudes, setTotalSolicitudes] = useState<number | null>(null)
+  const [tendenciaNac, setTendenciaNac] = useState<TendenciaNacional | null>(null)
 
   useEffect(() => {
     getBenchmarkCareers().then(setBenchmarkCareers).catch(() => {})
     fetch(`${BASE}/pertinencia/contador`).then(r => r.json()).then(d => setTotalSolicitudes(d.total)).catch(() => {})
+    getTendenciasNacionales(30).then(list => setTendenciaNac(list[list.length - 1] ?? null)).catch(() => {})
   }, [])
 
   const matchedBenchmark = useMemo<BenchmarkCareerSummary | null>(() => {
@@ -272,6 +274,32 @@ function PertinenciaContent() {
               ))}
             </div>
           </Card>
+
+          {/* Contexto nacional */}
+          {tendenciaNac && (tendenciaNac.d1_score != null || tendenciaNac.d2_score != null) && (
+            <Card className="p-4">
+              <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest mb-3">Contexto nacional</h3>
+              <div className="space-y-2">
+                {tendenciaNac.d1_score != null && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-slate-500">Promedio D1 nacional</span>
+                    <span className={`text-sm font-bold font-mono ${tendenciaNac.d1_score >= 0.6 ? 'text-red-600' : tendenciaNac.d1_score >= 0.4 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                      {tendenciaNac.d1_score.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                {tendenciaNac.d2_score != null && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-slate-500">Promedio D2 nacional</span>
+                    <span className={`text-sm font-bold font-mono ${tendenciaNac.d2_score >= 0.6 ? 'text-emerald-600' : tendenciaNac.d2_score >= 0.4 ? 'text-amber-600' : 'text-red-600'}`}>
+                      {tendenciaNac.d2_score.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                <p className="text-[10px] text-slate-400 pt-1">Promedio de todas las carreras monitoreadas en OIA-EE</p>
+              </div>
+            </Card>
+          )}
 
           {/* Carta a rectores */}
           <Card className="p-4 border-indigo-100 bg-indigo-50/50">
