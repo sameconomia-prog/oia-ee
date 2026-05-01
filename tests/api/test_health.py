@@ -50,7 +50,7 @@ def _add_run(job_id: str, status: str, hours_ago: float = 0):
     db = TestSession()
     run = PipelineRun(
         job_id=job_id,
-        ran_at=datetime.utcnow() - timedelta(hours=hours_ago),
+        ran_at=datetime.now(timezone.utc) - timedelta(hours=hours_ago),
         status=status,
         message="",
     )
