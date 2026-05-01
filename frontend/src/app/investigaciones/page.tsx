@@ -179,6 +179,8 @@ export default function InvestigacionesPage({
           '2026-05-carta-rectores-urgencia-curricular',
           '2026-05-guia-uso-benchmarks-planificacion-curricular',
           '2026-05-ies-competencia-ia-diferenciacion',
+          '2026-05-por-que-d1-sube-sin-cambiar-plan-estudios',
+          '2026-05-tres-senales-carrera-necesita-actualizacion',
         ]
         const rectores = RECTOR_SLUGS.map(s => investigaciones.find(i => i.slug === s)).filter(Boolean) as typeof investigaciones
         if (rectores.length === 0) return null
@@ -201,7 +203,7 @@ export default function InvestigacionesPage({
                 </article>
               </Link>
               <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {secundarios.map(art => (
+                {secundarios.slice(0, 4).map(art => (
                   <Link key={art.slug} href={`/investigaciones/${art.slug}`}>
                     <article className="bg-white border border-indigo-100 rounded-xl p-4 hover:border-indigo-300 hover:shadow-sm transition-all h-full flex flex-col">
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full self-start mb-2 ${TIPO_COLOR[art.tipo]}`}>
@@ -222,7 +224,7 @@ export default function InvestigacionesPage({
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {investigaciones.filter(i => {
-          const RECTOR_SLUGS = ['2026-05-carta-rectores-urgencia-curricular', '2026-05-guia-uso-benchmarks-planificacion-curricular', '2026-05-ies-competencia-ia-diferenciacion']
+          const RECTOR_SLUGS = ['2026-05-carta-rectores-urgencia-curricular', '2026-05-guia-uso-benchmarks-planificacion-curricular', '2026-05-ies-competencia-ia-diferenciacion', '2026-05-por-que-d1-sube-sin-cambiar-plan-estudios', '2026-05-tres-senales-carrera-necesita-actualizacion']
           if (!query && !filtro && !benchmarkFilter && RECTOR_SLUGS.includes(i.slug)) return false
           return true
         }).map(inv => {
