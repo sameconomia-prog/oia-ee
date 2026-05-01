@@ -125,6 +125,14 @@ export default function BenchmarkCareerPage() {
             >
               {copied ? '✓ Copiado' : 'Copiar enlace'}
             </button>
+            <a
+              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : `https://frontend-one-psi-80.vercel.app/benchmarks/${slug}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-600 border border-blue-200 px-3 py-1.5 rounded hover:bg-blue-50 transition-colors font-medium"
+            >
+              LinkedIn
+            </a>
             <Link
               href={`/benchmarks/comparar?a=${slug}`}
               className="text-xs text-brand-600 border border-brand-200 px-3 py-1.5 rounded hover:bg-brand-50 transition-colors font-medium"
