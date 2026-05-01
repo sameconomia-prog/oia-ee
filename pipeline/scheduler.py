@@ -9,9 +9,11 @@ Variables de entorno:
 """
 import logging
 import os
+import traceback
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 from dotenv import load_dotenv
+from pipeline.monitoring import notify_job_result
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -89,6 +91,10 @@ def run_resumen_semanal():
     logger.info("resumen_semanal OK: %s", result)
 
 
+def write_heartbeat():
+    notify_job_result("_heartbeat", error=None)
+
+
 scheduler.add_job(
     run_news_scraper,
     trigger=CronTrigger(hour="*/6"),
@@ -142,6 +148,14 @@ scheduler.add_job(
     trigger=CronTrigger(day_of_week="mon", hour=8, minute=0),
     id="resumen_semanal",
     name="Resumen semanal email a admin_ies",
+    replace_existing=True,
+)
+
+scheduler.add_job(
+    write_heartbeat,
+    trigger=CronTrigger(minute="*/30"),
+    id="_heartbeat",
+    name="Heartbeat monitor (cada 30 min)",
     replace_existing=True,
 )
 
