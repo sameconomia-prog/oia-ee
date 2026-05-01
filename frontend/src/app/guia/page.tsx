@@ -58,6 +58,7 @@ const PATHS = [
 ]
 
 const GUIDES = [
+  { href: '/investigaciones/2026-05-que-mide-el-d1-explicacion-directa', label: 'Qué mide exactamente el D1 y por qué es más útil que un consultor', group: 'Fundamentos' },
   { href: '/investigaciones/2026-05-tres-senales-carrera-necesita-actualizacion', label: '3 señales de que tu carrera necesita actualización — ahora', group: 'Diagnóstico' },
   { href: '/investigaciones/2026-05-como-leer-diagnostico-d1-d6-sin-datos', label: 'Cómo leer el diagnóstico D1–D6 sin experiencia en datos', group: 'Diagnóstico' },
   { href: '/investigaciones/2026-05-error-comun-interpretar-d1', label: 'El error más común al interpretar el D1', group: 'Diagnóstico' },
@@ -121,7 +122,7 @@ export default function GuiaPage() {
 
       <section>
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-5">Lecturas recomendadas para rectores</h2>
-        {(['Diagnóstico', 'Acción', 'Medición'] as const).map(grp => (
+        {(['Fundamentos', 'Diagnóstico', 'Acción', 'Medición'] as const).map(grp => (
           <div key={grp} className="mb-5">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{grp}</p>
             <div className="flex flex-col gap-2">

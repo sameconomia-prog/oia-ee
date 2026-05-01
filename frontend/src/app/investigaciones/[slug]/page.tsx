@@ -11,6 +11,7 @@ import { ARTICLE_TO_BENCHMARK } from '@/lib/benchmark-articles'
 const BENCHMARK_FROM_ARTICLE = ARTICLE_TO_BENCHMARK
 
 const RECTOR_SERIES = [
+  { slug: '2026-05-que-mide-el-d1-explicacion-directa', label: 'Qué mide exactamente el D1 y por qué es más útil que un consultor', group: 'Fundamentos' },
   { slug: '2026-05-tres-senales-carrera-necesita-actualizacion', label: '3 señales de que tu carrera necesita actualización', group: 'Diagnóstico' },
   { slug: '2026-05-como-leer-diagnostico-d1-d6-sin-datos', label: 'Cómo leer el diagnóstico D1–D6 sin experiencia en datos', group: 'Diagnóstico' },
   { slug: '2026-05-error-comun-interpretar-d1', label: 'El error más común al interpretar el D1', group: 'Diagnóstico' },
