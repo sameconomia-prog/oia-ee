@@ -66,11 +66,13 @@ export default function BenchmarkCareerPage() {
   const [copied, setCopied] = useState(false)
   const [copiedDiag, setCopiedDiag] = useState(false)
   const [urgencia, setUrgencia] = useState(0)
+  const [solicitudesTotal, setSolicitudesTotal] = useState<number | null>(null)
 
   useEffect(() => {
     if (!slug) return
     fetch(`/api/benchmark-articles/${slug}`).then(r => r.ok ? r.json() : []).then(setLecturas).catch(() => {})
     getVacantesTopSkills(50).then(setVacanteSkills).catch(() => {})
+    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'}/pertinencia/contador`).then(r => r.json()).then(d => setSolicitudesTotal(d.total ?? null)).catch(() => {})
     Promise.all([
       getBenchmarkCareerDetail(slug),
       getBenchmarkSources(),
@@ -497,6 +499,11 @@ export default function BenchmarkCareerPage() {
               <p className="text-xs text-indigo-700">
                 Solicita el análisis personalizado: diagnóstico D1–D6, benchmarks y recomendaciones curriculares. Sin costo.
               </p>
+              {solicitudesTotal !== null && solicitudesTotal > 0 && (
+                <p className="text-[11px] text-indigo-500 mt-1">
+                  {solicitudesTotal} institución{solicitudesTotal !== 1 ? 'es' : ''} ya solicitaron análisis
+                </p>
+              )}
             </div>
             <Link
               href={`/pertinencia?carrera=${encodeURIComponent(detail.nombre)}`}
