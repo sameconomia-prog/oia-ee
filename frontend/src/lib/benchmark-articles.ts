@@ -1,4 +1,4 @@
-/** Maps benchmark career slug → investigaciones article slug */
+/** Maps benchmark career slug → primary investigaciones article slug */
 export const BENCHMARK_TO_ARTICLE: Record<string, string> = {
   'derecho': '2026-04-derecho-ia-2030',
   'medicina': '2026-04-medicina-ia-mexico',
@@ -18,11 +18,6 @@ export const BENCHMARK_TO_ARTICLE: Record<string, string> = {
   'nutricion': '2026-04-nutricion-ia-2030',
   'ingenieria-civil': '2026-04-ingenieria-civil-ia-2030',
 }
-
-/** Inverse map: investigaciones article slug → benchmark career slug */
-export const ARTICLE_TO_BENCHMARK: Record<string, string> = Object.fromEntries(
-  Object.entries(BENCHMARK_TO_ARTICLE).map(([slug, article]) => [article, slug])
-)
 
 /**
  * All articles (primary + secondary) related to each benchmark career.
@@ -47,3 +42,14 @@ export const BENCHMARK_ALL_ARTICLES: Record<string, string[]> = {
   'nutricion': ['2026-04-nutricion-ia-2030', '2026-05-nutricion-alimentos-ia-personalizacion'],
   'ingenieria-civil': ['2026-04-ingenieria-civil-ia-2030', '2026-05-ingenieria-civil-ia-infraestructura'],
 }
+
+/** Inverse map: all article slugs (primary + secondary) → benchmark career slug */
+export const ARTICLE_TO_BENCHMARK: Record<string, string> = (() => {
+  const map: Record<string, string> = {}
+  for (const [benchmarkSlug, articles] of Object.entries(BENCHMARK_ALL_ARTICLES)) {
+    for (const article of articles) {
+      map[article] = benchmarkSlug
+    }
+  }
+  return map
+})()
