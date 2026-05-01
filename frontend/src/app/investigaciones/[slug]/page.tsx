@@ -71,6 +71,12 @@ export default function InvestigacionDetallePage({ params }: Props) {
     .sort((a, b) => b.score - a.score || new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
     .slice(0, 3)
 
+  const relatedSlugs = new Set([params.slug, ...related.map(i => i.slug)])
+  const recientes = todos
+    .filter(i => !relatedSlugs.has(i.slug))
+    .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+    .slice(0, 3)
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-16">
       <script
@@ -172,6 +178,25 @@ export default function InvestigacionDetallePage({ params }: Props) {
                   <h3 className="text-sm font-semibold text-gray-800 leading-snug mb-1 flex-grow">{inv.titulo}</h3>
                   <p className="text-xs text-gray-400 mt-auto">{inv.tiempo_lectura} de lectura</p>
                 </article>
+              </Link>
+            ))}
+          </div>
+        </aside>
+      )}
+
+      {recientes.length > 0 && (
+        <aside className="mt-10 border-t border-gray-100 pt-8">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-4">Publicaciones recientes</h2>
+          <div className="flex flex-col gap-3">
+            {recientes.map(inv => (
+              <Link key={inv.slug} href={`/investigaciones/${inv.slug}`} className="group flex items-start gap-3">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full w-fit shrink-0 mt-0.5 ${TIPO_COLOR[inv.tipo] ?? 'bg-gray-100 text-gray-600'}`}>
+                  {getTipoLabel(inv.tipo)}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-800 group-hover:text-[#1D4ED8] transition-colors leading-snug">{inv.titulo}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{new Date(inv.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                </div>
               </Link>
             ))}
           </div>
