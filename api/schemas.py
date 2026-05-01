@@ -276,6 +276,7 @@ class TopRiesgoItemOut(BaseModel):
     d2_score: float
     matricula: Optional[int] = None
     area_conocimiento: Optional[str] = None
+    benchmark_slug: Optional[str] = None
 
 
 class EstadisticasPublicasOut(BaseModel):
