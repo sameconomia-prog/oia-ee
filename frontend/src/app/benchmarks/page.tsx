@@ -266,6 +266,22 @@ export default function BenchmarksPage() {
       .slice(0, 6)
   }, [skillsIndex, vacanteSkills])
 
+  const calientesSkills = useMemo(() => {
+    if (vacanteSkills.length === 0 || skillsIndex.length === 0) return []
+    const vacNorms = new Map(vacanteSkills.map(sf => [normSkill(sf.nombre), sf.count]))
+    return skillsIndex
+      .filter(item => item.direccion_global === 'growing')
+      .map(item => {
+        const q = normSkill(item.skill_nombre)
+        const count = vacNorms.get(q) ??
+          Array.from(vacNorms.entries()).find(([k]) => k.includes(q) || q.includes(k))?.[1] ?? 0
+        return { ...item, vacanteCount: count }
+      })
+      .filter(item => item.vacanteCount > 0)
+      .sort((a, b) => b.vacanteCount - a.vacanteCount || b.consenso_pct - a.consenso_pct)
+      .slice(0, 6)
+  }, [skillsIndex, vacanteSkills])
+
   const updateParams = useCallback((updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString())
     Object.entries(updates).forEach(([k, v]) => {
@@ -439,6 +455,38 @@ export default function BenchmarksPage() {
                 className="flex items-center gap-2 p-2 rounded-lg bg-white border border-amber-200 hover:border-amber-400 transition-colors"
               >
                 <span className="text-red-500 font-bold text-sm shrink-0">↓</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-slate-700 truncate leading-tight">{s.skill_nombre}</p>
+                  <p className="text-[10px] text-slate-400">{s.consenso_pct}% consenso · {s.vacanteCount} vacantes</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Skills calientes */}
+      {calientesSkills.length > 0 && (
+        <Card className="mb-6 p-4 border-emerald-200 bg-emerald-50/30">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="text-xs font-semibold text-emerald-800 uppercase tracking-widest">
+                ✦ Skills calientes
+              </h3>
+              <p className="text-[10px] text-emerald-600 mt-0.5">Creciendo globalmente y en demanda laboral en México</p>
+            </div>
+            <Link href="/benchmarks/skills?dir=growing" className="text-[11px] text-emerald-700 hover:underline font-medium">
+              Ver todas →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {calientesSkills.map(s => (
+              <Link
+                key={s.skill_id}
+                href={`/benchmarks/skills/${s.skill_id}`}
+                className="flex items-center gap-2 p-2 rounded-lg bg-white border border-emerald-200 hover:border-emerald-400 transition-colors"
+              >
+                <span className="text-emerald-500 font-bold text-sm shrink-0">↑</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-slate-700 truncate leading-tight">{s.skill_nombre}</p>
                   <p className="text-[10px] text-slate-400">{s.consenso_pct}% consenso · {s.vacanteCount} vacantes</p>
