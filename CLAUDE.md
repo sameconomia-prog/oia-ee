@@ -44,7 +44,7 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 192, 2026-05-01)
+## Estado actual (Sprint 203, 2026-05-01)
 - 459 pytest · 0 errores TypeScript · 78 artículos investigaciones
 - P117-P126: benchmark signals, urgencia badges, brecha/calientes panels, tag cloud
 - P127-P132: URL params persistence (carreras/vacantes/noticias/ies), BenchmarksSection homepage, comparar U column, CarrerasRanking U column, "Situación en México" en benchmarks/[slug]
@@ -108,6 +108,17 @@ OIA-EE/
 - P190: explainer colapsable ¿Cómo leer este índice? en /benchmarks listing
 - P191: horizonte_dominante badge (≤2/3–5/5+ años) en top urgentes card /benchmarks/[slug]
 - P192: contexto nacional D1/D2 card en sidebar /pertinencia (getTendenciasNacionales)
+- P193: artículo MDX "3 señales de que tu carrera necesita actualización curricular — ahora" (analisis, tags rectores)
+- P194: (vacío, skip)
+- P195: artículo MDX "3 señales de que tu carrera necesita actualización curricular" — ver P193
+- P196: sección "Publicaciones recientes" al pie de /investigaciones/[slug] (3 más recientes excl. current+related)
+- P197: WhatsApp share button en /investigaciones/[slug] share row
+- P198: navegación anterior/siguiente (por fecha) al pie de /investigaciones/[slug]
+- P199: badge "Nuevo" en artículos publicados ≤14 días en /investigaciones listing e InvestigacionesGrid
+- P200: artículo MDX "Por qué el D1 sube aunque no cambies nada" (analisis, tags rectores — explicación metodológica)
+- P201: rediseño editorial InvestigacionesGrid homepage — 1 principal (3/5) + 3 secundarios (2/5)
+- P202: stats de cobertura en header de /investigaciones (total · tipos · carreras cubiertas)
+- P203: bloque rector en /investigaciones amplía a 5 artículos (1 principal + 4 secundarios 2×2)
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
