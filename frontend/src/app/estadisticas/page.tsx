@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getEstadisticasPublicas, getKpisDistribucion, getVacantesTendencia, getNoticiasTendencia, getBenchmarkResumen, getBenchmarkCareers, getTopRiesgo } from '@/lib/api'
-import type { EstadisticasPublicas, KpisDistribucion, VacanteTendencia, BenchmarkResumen, BenchmarkCareerSummary, TopRiesgoItem } from '@/lib/types'
+import { getEstadisticasPublicas, getKpisDistribucion, getVacantesTendencia, getNoticiasTendencia, getBenchmarkResumen, getBenchmarkCareers, getTopRiesgo, getBenchmarkSkillsIndex } from '@/lib/api'
+import type { EstadisticasPublicas, KpisDistribucion, VacanteTendencia, BenchmarkResumen, BenchmarkCareerSummary, TopRiesgoItem, SkillIndexItem } from '@/lib/types'
 
 function StatBox({ label, value, color, href }: { label: string; value: number | string; color: string; href?: string }) {
   const inner = (
@@ -67,6 +67,7 @@ export default function EstadisticasPage() {
   const [benchResumen, setBenchResumen] = useState<BenchmarkResumen | null>(null)
   const [topCareers, setTopCareers] = useState<BenchmarkCareerSummary[]>([])
   const [dobleAlerta, setDobleAlerta] = useState<(TopRiesgoItem & { urgencia: number })[]>([])
+  const [topCalientes, setTopCalientes] = useState<SkillIndexItem[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -79,6 +80,10 @@ export default function EstadisticasPage() {
     getVacantesTendencia(12).then(setVacTendencia).catch(() => {})
     getNoticiasTendencia(12).then(setNotTendencia).catch(() => {})
     getBenchmarkResumen().then(setBenchResumen).catch(() => {})
+    getBenchmarkSkillsIndex()
+      .then(skills => setTopCalientes(
+        skills.filter(s => s.direccion_global === 'growing').sort((a, b) => b.consenso_pct - a.consenso_pct).slice(0, 8)
+      )).catch(() => {})
     Promise.all([
       getBenchmarkCareers().catch(() => [] as BenchmarkCareerSummary[]),
       getTopRiesgo(20).catch(() => [] as TopRiesgoItem[]),
@@ -159,6 +164,27 @@ export default function EstadisticasPage() {
                   <span key={s} className="px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 text-sm font-medium">
                     {s}
                   </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {topCalientes.length > 0 && (
+            <div className="bg-white rounded-xl border shadow-sm p-5 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-semibold text-gray-800 text-sm">Skills calientes globalmente</h2>
+                <Link href="/benchmarks/skills?dir=growing" className="text-xs text-indigo-600 hover:underline">Ver todas →</Link>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {topCalientes.map(s => (
+                  <Link
+                    key={s.skill_id}
+                    href={`/benchmarks/skills/${s.skill_id}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium hover:bg-emerald-100 transition-colors"
+                  >
+                    {s.skill_nombre}
+                    <span className="text-emerald-500 text-[10px] font-mono">{s.consenso_pct}%</span>
+                  </Link>
                 ))}
               </div>
             </div>
