@@ -105,7 +105,7 @@ export default function EstadisticasPage() {
       getBenchmarkCareers().catch(() => [] as BenchmarkCareerSummary[]),
       getTopRiesgo(20).catch(() => [] as TopRiesgoItem[]),
     ]).then(([bmarks, topRiesgo]) => {
-      setTopCareers([...bmarks].sort((a, b) => b.urgencia_curricular - a.urgencia_curricular).slice(0, 3))
+      setTopCareers([...bmarks].sort((a, b) => b.urgencia_curricular - a.urgencia_curricular).slice(0, 5))
       const uMap = new Map(bmarks.map(b => [b.slug, b.urgencia_curricular]))
       const alerts = topRiesgo
         .filter(c => c.d1_score >= 0.6 && c.benchmark_slug && (uMap.get(c.benchmark_slug!) ?? 0) >= 60)
@@ -390,6 +390,36 @@ export default function EstadisticasPage() {
                         />
                       </div>
                       <span className="text-[11px] font-mono text-gray-500 w-8 text-right">{ies.promedio_d2?.toFixed(2)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {topCareers.length > 0 && (
+            <div className="bg-white rounded-xl border shadow-sm p-5 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-semibold text-gray-800 text-sm">Top benchmarks por urgencia curricular</h2>
+                <Link href="/benchmarks?sort=urgencia" className="text-xs text-indigo-600 hover:underline">Ver todos →</Link>
+              </div>
+              <div className="space-y-2">
+                {topCareers.map((c, i) => (
+                  <div key={c.slug} className="flex items-center gap-3">
+                    <span className="text-[11px] text-gray-400 font-mono w-4">{i + 1}</span>
+                    <Link href={`/benchmarks/${c.slug}`} className="flex-1 text-xs text-slate-700 hover:text-indigo-700 hover:underline truncate font-medium">
+                      {c.nombre}
+                    </Link>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${c.urgencia_curricular >= 60 ? 'bg-red-400' : c.urgencia_curricular >= 30 ? 'bg-amber-400' : 'bg-emerald-400'}`}
+                          style={{ width: `${c.urgencia_curricular}%` }}
+                        />
+                      </div>
+                      <span className={`text-[11px] font-mono w-5 text-right ${c.urgencia_curricular >= 60 ? 'text-red-600' : c.urgencia_curricular >= 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                        {c.urgencia_curricular}
+                      </span>
                     </div>
                   </div>
                 ))}
