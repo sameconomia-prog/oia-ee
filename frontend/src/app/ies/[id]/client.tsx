@@ -441,22 +441,26 @@ export default function IesDetailPage() {
       {/* Lecturas recomendadas */}
       {(() => {
         const READS = [
-          detalle.promedio_d1 >= 0.45 && {
-            slug: '2026-05-por-que-d1-sube-sin-cambiar-plan-estudios',
-            titulo: 'Por qué el D1 puede subir aunque no cambies nada',
-            tipo: 'Análisis',
+          {
+            slug: '2026-05-como-leer-diagnostico-d1-d6-sin-datos',
+            titulo: 'Cómo leer tu diagnóstico D1–D6 sin experiencia en datos',
+            tipo: 'Metodología',
           },
           {
+            slug: '2026-05-error-comun-interpretar-d1',
+            titulo: 'El error más común al interpretar el D1 — y cómo evitarlo',
+            tipo: 'Nota',
+          },
+          detalle.promedio_d1 >= 0.45 ? {
             slug: '2026-05-tres-senales-carrera-necesita-actualizacion',
             titulo: '3 señales de que tu carrera necesita actualización — ahora',
             tipo: 'Análisis',
-          },
-          {
+          } : {
             slug: '2026-05-stem-vs-humanidades-ia-riesgo-comparativo',
-            titulo: 'STEM vs. Humanidades: lo que los datos del observatorio revelan',
+            titulo: 'STEM vs. Humanidades: lo que los datos revelan',
             tipo: 'Análisis',
           },
-        ].filter(Boolean) as { slug: string; titulo: string; tipo: string }[]
+        ] as { slug: string; titulo: string; tipo: string }[]
         return (
           <div className="mt-6 mb-4 rounded-xl border border-gray-100 bg-gray-50 px-4 py-4">
             <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest mb-3">Lecturas recomendadas para rectores</p>
