@@ -41,6 +41,8 @@ const ACCESOS_RAPIDOS: { href: string; label: string }[] = [
   { href: '/benchmarks/comparar', label: 'Comparar Carreras' },
   { href: '/estadisticas', label: 'Estadísticas' },
   { href: '/vacantes', label: 'Vacantes IA' },
+  { href: '/pertinencia', label: 'Estudio de Pertinencia' },
+  { href: '/investigaciones', label: 'Investigaciones' },
 ]
 
 export default function BusquedaGlobal() {
