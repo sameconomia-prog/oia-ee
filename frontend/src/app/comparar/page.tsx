@@ -54,6 +54,14 @@ function CompararContent() {
       .map(cA => ({ cA, cB: nombresB.get(cA.nombre.toLowerCase())! }))
   }, [carrerasA, carrerasB])
 
+  function calcPortfolioUrgencia(carreras: typeof carrerasA) {
+    const scores = carreras
+      .filter(c => c.benchmark_slug && benchmarkMap.has(c.benchmark_slug))
+      .map(c => benchmarkMap.get(c.benchmark_slug!)!)
+    if (scores.length === 0) return null
+    return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+  }
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-800 mb-2">Comparar Instituciones</h1>
@@ -98,10 +106,13 @@ function CompararContent() {
               {(() => {
                 const nombreA = ies.find(i => i.id === iesAId)?.nombre_corto ?? ies.find(i => i.id === iesAId)?.nombre ?? iesAId
                 const nombreB = ies.find(i => i.id === iesBId)?.nombre_corto ?? ies.find(i => i.id === iesBId)?.nombre ?? iesBId
+                const urgA = calcPortfolioUrgencia(carrerasA)
+                const urgB = calcPortfolioUrgencia(carrerasB)
                 const rows = [
                   { label: 'Promedio D1 (Riesgo)', vA: detalleA.promedio_d1, vB: detalleB.promedio_d1, invert: true },
                   { label: 'Promedio D2 (Oportunidades)', vA: detalleA.promedio_d2, vB: detalleB.promedio_d2, invert: false },
                   { label: 'Carreras con D1 ≥ 0.6', vA: detalleA.carreras_riesgo_alto, vB: detalleB.carreras_riesgo_alto, invert: true, isCount: true },
+                  ...(urgA !== null && urgB !== null ? [{ label: 'Urgencia curricular media', vA: urgA, vB: urgB, invert: true, isCount: true }] : []),
                 ] as { label: string; vA: number; vB: number; invert: boolean; isCount?: boolean }[]
                 return (
                   <>
@@ -127,7 +138,7 @@ function CompararContent() {
                       )
                     })}
                     <div className="px-4 py-2 bg-gray-50 border-t text-[11px] text-gray-400">
-                      KPIs nacionales agregados · D1: menor=mejor · D2: mayor=mejor · ✓ indica mejor valor
+                      KPIs nacionales agregados · D1: menor=mejor · D2: mayor=mejor · Urgencia: menor=mejor · ✓ indica mejor valor
                     </div>
                   </>
                 )
