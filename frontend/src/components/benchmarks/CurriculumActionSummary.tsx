@@ -1,3 +1,6 @@
+'use client'
+import { useState } from 'react'
+import Link from 'next/link'
 import type { SkillConvergencia, AccionCurricular } from '@/lib/types'
 
 const ACCIONES: { key: AccionCurricular; label: string; desc: string; icon: string; bg: string; border: string; text: string }[] = [
@@ -39,7 +42,69 @@ const ACCIONES: { key: AccionCurricular; label: string; desc: string; icon: stri
   },
 ]
 
-export default function CurriculumActionSummary({ skills }: { skills: SkillConvergencia[] }) {
+function ActionCard({
+  accion,
+  skills,
+  total,
+  careerSlug,
+}: {
+  accion: typeof ACCIONES[number]
+  skills: SkillConvergencia[]
+  total: number
+  careerSlug?: string
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const count = skills.length
+  const pct = Math.round(count / total * 100)
+  const visible = expanded ? skills : skills.slice(0, 5)
+
+  return (
+    <div className={`rounded-lg border p-3 ${accion.bg} ${accion.border}`}>
+      <div className="flex items-center justify-between mb-2">
+        <span className={`text-xs font-bold uppercase tracking-widest ${accion.text}`}>
+          {accion.icon} {accion.label}
+        </span>
+        <span className={`text-lg font-bold font-mono ${accion.text}`}>{count}</span>
+      </div>
+      <p className="text-[10px] text-slate-500 leading-tight mb-2">{accion.desc}</p>
+      <div className="h-1 bg-white/60 rounded-full overflow-hidden mb-1.5">
+        <div className={`h-full rounded-full ${accion.text.replace('text-', 'bg-').replace('-800', '-400')}`}
+          style={{ width: `${pct}%` }} />
+      </div>
+      <div className="space-y-0.5">
+        {visible.map(s => (
+          careerSlug ? (
+            <Link
+              key={s.skill_id}
+              href={`/benchmarks/skills/${s.skill_id}?from=${careerSlug}&nombre=${encodeURIComponent(s.skill_nombre)}`}
+              className="block text-[10px] text-slate-600 hover:text-brand-700 hover:underline leading-tight"
+            >
+              • {s.skill_nombre}
+            </Link>
+          ) : (
+            <p key={s.skill_id} className="text-[10px] text-slate-600 leading-tight">• {s.skill_nombre}</p>
+          )
+        ))}
+        {skills.length > 5 && (
+          <button
+            onClick={() => setExpanded(v => !v)}
+            className="text-[10px] text-brand-600 hover:underline mt-0.5"
+          >
+            {expanded ? 'Mostrar menos' : `+${skills.length - 5} más`}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default function CurriculumActionSummary({
+  skills,
+  careerSlug,
+}: {
+  skills: SkillConvergencia[]
+  careerSlug?: string
+}) {
   const byAccion = Object.fromEntries(
     ACCIONES.map(a => [a.key, skills.filter(s => s.accion_curricular === a.key)])
   ) as Record<AccionCurricular, SkillConvergencia[]>
@@ -55,31 +120,9 @@ export default function CurriculumActionSummary({ skills }: { skills: SkillConve
       </h3>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {ACCIONES.map(a => {
-          const count = byAccion[a.key].length
-          if (count === 0) return null
-          const pct = Math.round(count / total * 100)
+          if (byAccion[a.key].length === 0) return null
           return (
-            <div key={a.key} className={`rounded-lg border p-3 ${a.bg} ${a.border}`}>
-              <div className="flex items-center justify-between mb-2">
-                <span className={`text-xs font-bold uppercase tracking-widest ${a.text}`}>
-                  {a.icon} {a.label}
-                </span>
-                <span className={`text-lg font-bold font-mono ${a.text}`}>{count}</span>
-              </div>
-              <p className="text-[10px] text-slate-500 leading-tight mb-2">{a.desc}</p>
-              <div className="h-1 bg-white/60 rounded-full overflow-hidden">
-                <div className={`h-full rounded-full ${a.text.replace('text-', 'bg-').replace('-800', '-400')}`}
-                  style={{ width: `${pct}%` }} />
-              </div>
-              <div className="mt-1.5 space-y-0.5">
-                {byAccion[a.key].slice(0, 5).map(s => (
-                  <p key={s.skill_id} className="text-[10px] text-slate-600 leading-tight">• {s.skill_nombre}</p>
-                ))}
-                {byAccion[a.key].length > 5 && (
-                  <p className="text-[10px] text-slate-400">+{byAccion[a.key].length - 5} más</p>
-                )}
-              </div>
-            </div>
+            <ActionCard key={a.key} accion={a} skills={byAccion[a.key]} total={total} careerSlug={careerSlug} />
           )
         })}
       </div>
