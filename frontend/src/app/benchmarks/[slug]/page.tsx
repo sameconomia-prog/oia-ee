@@ -197,6 +197,50 @@ export default function BenchmarkCareerPage() {
         </div>
       </Card>
 
+      {/* Top urgentes — skills críticas */}
+      {(() => {
+        const urgentes = detail.skills
+          .filter(s => s.direccion_global === 'declining' && s.consenso_pct >= 60)
+          .sort((a, b) => b.consenso_pct - a.consenso_pct)
+          .slice(0, 5)
+        if (urgentes.length === 0) return null
+        const accionLabel = (a: string) =>
+          a === 'retirar' ? 'Retirar del plan de estudios' :
+          a === 'rediseñar' ? 'Rediseñar con enfoque digital' :
+          a === 'fortalecer' ? 'Reforzar con enfoque digital' :
+          'Revisar contenidos'
+        return (
+          <Card className="mb-6 p-4 border-red-200 bg-red-50/30">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-red-700 uppercase tracking-widest">
+                Skills críticas — acción inmediata
+              </h3>
+              <span className="text-[10px] bg-red-100 text-red-700 border border-red-200 px-2 py-0.5 rounded font-semibold">
+                Consenso ≥ 60% · declining
+              </span>
+            </div>
+            <div className="space-y-2">
+              {urgentes.map((sk, i) => (
+                <div key={sk.skill_id} className="flex items-start gap-3 py-2 border-b border-red-100 last:border-0">
+                  <span className="text-[10px] font-mono text-red-400 font-bold w-4 shrink-0 mt-0.5">{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Link href={`/benchmarks/skills/${sk.skill_id}`} className="text-xs font-semibold text-red-900 hover:underline">
+                        {sk.skill_nombre}
+                      </Link>
+                      <span className="text-[10px] font-mono text-red-500 bg-red-100 px-1.5 rounded">{sk.consenso_pct}% consenso</span>
+                      {sk.skill_tipo && <span className="text-[10px] text-slate-400">{sk.skill_tipo}</span>}
+                    </div>
+                    <p className="text-[11px] text-red-700 mt-0.5">→ {accionLabel(sk.accion_curricular)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-[10px] text-slate-400 mt-2">Skills con mayor convergencia internacional hacia el declive por impacto de IA.</p>
+          </Card>
+        )
+      })()}
+
       {/* Convergence table */}
       <Card className="mb-6 p-5">
         <div className="flex items-start justify-between mb-4">
