@@ -10,7 +10,11 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-geist-sans)', ...defaultTheme.fontFamily.sans],
+        sans:   ['var(--font-geist-sans)', ...defaultTheme.fontFamily.sans],
+        serif:  ['var(--font-instrument-serif)', ...defaultTheme.fontFamily.serif],
+        syne:   ['var(--font-syne)', ...defaultTheme.fontFamily.sans],
+        outfit: ['var(--font-outfit)', ...defaultTheme.fontFamily.sans],
+        mono:   ['var(--font-jetbrains-mono)', ...defaultTheme.fontFamily.mono],
       },
       colors: {
         brand: {
