@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
-import { getCarrerasPublico } from '@/lib/api'
+import { getCarrerasPublico, getBenchmarkCareers } from '@/lib/api'
 import type { CarreraKpi, KpiResult } from '@/lib/types'
 
 export interface DimConfig {
@@ -91,7 +91,7 @@ function scoreTextClass(s: number, invert: boolean): string {
   return 'text-red-700'
 }
 
-type RowData = { id: string; nombre: string; score: number; subFields: Record<string, number> }
+type RowData = { id: string; nombre: string; score: number; subFields: Record<string, number>; benchmark_slug?: string | null }
 
 interface CarrerasRankingProps {
   config: DimConfig
@@ -100,12 +100,19 @@ interface CarrerasRankingProps {
 
 export default function CarrerasRanking({ config, filterQuery = '' }: CarrerasRankingProps) {
   const [raw, setRaw] = useState<CarreraKpi[]>([])
+  const [benchmarkMap, setBenchmarkMap] = useState<Map<string, number>>(new Map())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    getCarrerasPublico({ limit: 500 })
-      .then(setRaw)
+    Promise.all([
+      getCarrerasPublico({ limit: 500 }),
+      getBenchmarkCareers().catch(() => []),
+    ])
+      .then(([carreras, benchmarks]) => {
+        setRaw(carreras)
+        setBenchmarkMap(new Map(benchmarks.map(b => [b.slug, b.urgencia_curricular])))
+      })
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
@@ -115,7 +122,7 @@ export default function CarrerasRanking({ config, filterQuery = '' }: CarrerasRa
       .filter((c): c is CarreraKpi & { kpi: NonNullable<CarreraKpi['kpi']> } => c.kpi !== null)
       .map(c => {
         const { score, subFields } = config.extract(c.kpi!)
-        return { id: c.id, nombre: c.nombre, score, subFields }
+        return { id: c.id, nombre: c.nombre, score, subFields, benchmark_slug: c.benchmark_slug }
       })
       .sort((a, b) => b.score - a.score)
       .filter(d => !filterQuery || d.nombre.toLowerCase().includes(filterQuery.toLowerCase()))
@@ -230,10 +237,14 @@ export default function CarrerasRanking({ config, filterQuery = '' }: CarrerasRa
               {config.subFieldLabels.map(f => (
                 <th key={f.key} className="px-4 py-2 text-center">{f.label}</th>
               ))}
+              <th className="px-4 py-2 text-center text-violet-500" title="Urgencia curricular global (benchmarks internacionales)">U</th>
             </tr>
           </thead>
           <tbody>
-            {datos.map(({ id, nombre, score, subFields }, i) => (
+            {datos.map(({ id, nombre, score, subFields, benchmark_slug }, i) => {
+              const urgencia = benchmark_slug ? benchmarkMap.get(benchmark_slug) : undefined
+              const uCls = urgencia == null ? '' : urgencia >= 60 ? 'text-red-600' : urgencia >= 30 ? 'text-amber-600' : 'text-emerald-600'
+              return (
               <tr key={id} className="border-t border-slate-100 hover:bg-slate-50">
                 <td className="px-4 py-2 text-slate-400 font-mono text-xs">{i + 1}</td>
                 <td className="px-4 py-2 font-medium text-slate-700">
@@ -251,8 +262,16 @@ export default function CarrerasRanking({ config, filterQuery = '' }: CarrerasRa
                     {subFields[f.key].toFixed(3)}
                   </td>
                 ))}
+                <td className="px-4 py-2 text-center font-mono text-xs">
+                  {urgencia != null ? (
+                    <Link href={`/benchmarks/${benchmark_slug}`} className={`font-bold hover:underline ${uCls}`}>{urgencia}</Link>
+                  ) : (
+                    <span className="text-slate-300">—</span>
+                  )}
+                </td>
               </tr>
-            ))}
+              )
+            })}
           </tbody>
         </table>
         <p className="text-xs text-slate-400 px-4 py-2 bg-slate-50 border-t border-slate-100">
