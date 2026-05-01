@@ -219,6 +219,11 @@ export default function InvestigacionesPage({
                 ))}
               </div>
             </div>
+            <div className="mt-3 text-right">
+              <Link href="/investigaciones?q=rectores" className="text-xs text-indigo-600 hover:underline font-medium">
+                Ver todos los artículos para rectores →
+              </Link>
+            </div>
           </div>
         )
       })()}
