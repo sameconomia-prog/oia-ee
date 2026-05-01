@@ -205,6 +205,47 @@ export default function IesDetailPage() {
         )
       })()}
 
+      {/* Carrera prioritaria — first intervention target */}
+      {(() => {
+        const riesgoAltas = carreras.filter(c => (c.kpi?.d1_obsolescencia.score ?? 0) >= 0.6)
+        if (riesgoAltas.length === 0) return null
+        const top = [...riesgoAltas].sort((a, b) => (b.kpi?.d1_obsolescencia.score ?? 0) - (a.kpi?.d1_obsolescencia.score ?? 0))[0]
+        const bm = top.benchmark_slug ? benchmarkMap[top.benchmark_slug] : null
+        return (
+          <div className="mb-4 rounded-xl border border-red-200 bg-red-50/60 px-4 py-3">
+            <p className="text-[10px] font-semibold text-red-500 uppercase tracking-widest mb-1.5">
+              Intervención prioritaria — {riesgoAltas.length} carrera{riesgoAltas.length !== 1 ? 's' : ''} en riesgo alto
+            </p>
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <Link href={`/carreras/${top.id}`} className="text-sm font-semibold text-red-900 hover:underline">
+                  {top.nombre}
+                </Link>
+                <div className="flex gap-1.5 mt-1 flex-wrap">
+                  {top.kpi && (
+                    <>
+                      <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-red-100 text-red-700">
+                        D1 {top.kpi.d1_obsolescencia.score.toFixed(2)}
+                      </span>
+                      <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded ${top.kpi.d2_oportunidades.score >= 0.4 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                        D2 {top.kpi.d2_oportunidades.score.toFixed(2)}
+                      </span>
+                    </>
+                  )}
+                  {bm && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700">U {bm.urgencia_curricular}/100</span>}
+                </div>
+              </div>
+              <Link
+                href={`/pertinencia?ies=${encodeURIComponent(detalle.nombre)}&carrera=${encodeURIComponent(top.nombre)}`}
+                className="shrink-0 text-xs font-semibold text-red-700 border border-red-300 bg-white px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors whitespace-nowrap"
+              >
+                Solicitar análisis →
+              </Link>
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Carta a rectores — contextual link when urgencia alta */}
       {portfolioUrgencia !== null && portfolioUrgencia >= 60 && (
         <div className="mb-4 rounded-xl bg-indigo-50 border border-indigo-200 px-4 py-3 flex items-center justify-between gap-3">
