@@ -1,13 +1,32 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { getIesPublico } from '@/lib/api'
 import type { IesInfo } from '@/lib/types'
 
 export default function IesListPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-gray-400">Cargando…</div>}>
+      <IesListContent />
+    </Suspense>
+  )
+}
+
+function IesListContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const [iesList, setIesList] = useState<IesInfo[]>([])
   const [loading, setLoading] = useState(true)
-  const [busqueda, setBusqueda] = useState('')
+  const [busqueda, setBusqueda] = useState(() => searchParams.get('q') ?? '')
+
+  function handleBusqueda(val: string) {
+    setBusqueda(val)
+    const params = new URLSearchParams(searchParams.toString())
+    if (val) params.set('q', val)
+    else params.delete('q')
+    router.replace(`/ies${params.size ? `?${params}` : ''}`, { scroll: false })
+  }
 
   useEffect(() => {
     getIesPublico()
@@ -33,14 +52,17 @@ export default function IesListPage() {
         </p>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4 flex items-center gap-2">
         <input
           type="text"
           value={busqueda}
-          onChange={e => setBusqueda(e.target.value)}
+          onChange={e => handleBusqueda(e.target.value)}
           placeholder="Buscar institución..."
-          className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400"
+          className="flex-1 border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400"
         />
+        {busqueda && (
+          <button onClick={() => handleBusqueda('')} className="text-xs text-gray-400 hover:text-gray-700">✕</button>
+        )}
       </div>
 
       {loading && (
