@@ -153,7 +153,7 @@ export default function BenchmarkCareerPage() {
               WhatsApp
             </a>
             <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Benchmark ${detail.nombre} — urgencia curricular ${detail.urgencia_curricular}/100 — OIA-EE`)}&url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : `https://oia-ee.mx/benchmarks/${slug}`)}`}
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Benchmark ${detail.nombre} — urgencia curricular ${urgencia}/100 — OIA-EE`)}&url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : `https://oia-ee.mx/benchmarks/${slug}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs text-gray-700 border border-gray-200 px-3 py-1.5 rounded hover:bg-gray-50 transition-colors font-medium"
