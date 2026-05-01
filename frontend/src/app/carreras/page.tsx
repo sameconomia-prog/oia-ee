@@ -53,7 +53,7 @@ export default function CarrerasListPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [benchmarkMap, setBenchmarkMap] = useState<Map<string, number>>(new Map())
   const [filterUrgenciaAlta, setFilterUrgenciaAlta] = useState(false)
-  const [filterDobleAlerta, setFilterDobleAlerta] = useState(false)
+  const [filterDobleAlerta, setFilterDobleAlerta] = useState(() => searchParams.get('doble') === '1')
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
