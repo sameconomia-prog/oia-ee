@@ -407,6 +407,20 @@ export default function CarreraDetallePage() {
           ))}
         </Card>
       )}
+
+      {/* Pertinencia CTA */}
+      <div className="mt-6 rounded-xl bg-indigo-50 border border-indigo-200 px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold text-indigo-800">¿Tu institución ofrece esta carrera?</p>
+          <p className="text-[11px] text-indigo-600 mt-0.5">Solicita el análisis de pertinencia curricular — diagnóstico personalizado y gratuito en 5 días hábiles.</p>
+        </div>
+        <Link
+          href="/pertinencia"
+          className="shrink-0 text-xs font-semibold text-indigo-700 border border-indigo-300 bg-white px-3 py-1.5 rounded-lg hover:bg-indigo-50 transition-colors whitespace-nowrap"
+        >
+          Solicitar análisis →
+        </Link>
+      </div>
     </div>
   )
 }
