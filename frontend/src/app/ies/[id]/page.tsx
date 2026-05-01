@@ -129,6 +129,36 @@ export default function IesDetailPage() {
           <h2 className="font-semibold text-gray-800 text-sm">
             Carreras ({carreras.length})
           </h2>
+          {carreras.length > 0 && (
+            <button
+              onClick={() => {
+                const headers = ['Carrera', 'Matrícula', 'D1 Riesgo', 'D2 Oportunidades', 'D3 Mercado', 'D6 Estudiantil', 'Urgencia Benchmark']
+                const rows = carreras.map(c => {
+                  const bm = c.benchmark_slug ? benchmarkMap[c.benchmark_slug] : null
+                  return [
+                    c.nombre,
+                    c.matricula ?? '',
+                    c.kpi?.d1_obsolescencia.score.toFixed(4) ?? '',
+                    c.kpi?.d2_oportunidades.score.toFixed(4) ?? '',
+                    c.kpi?.d3_mercado.score.toFixed(4) ?? '',
+                    c.kpi?.d6_estudiantil.score.toFixed(4) ?? '',
+                    bm?.urgencia_curricular ?? '',
+                  ]
+                })
+                const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `carreras_${detalle.nombre_corto ?? detalle.nombre}_${new Date().toISOString().slice(0, 10)}.csv`
+                a.click()
+                URL.revokeObjectURL(url)
+              }}
+              className="text-xs px-3 py-1 border rounded hover:bg-gray-50 text-gray-600"
+            >
+              ↓ CSV
+            </button>
+          )}
         </div>
 
         {carreras.length === 0 && (
