@@ -215,6 +215,16 @@ class Contacto(Base):
     created_at   = Column(DateTime(timezone=True), default=datetime.utcnow)
 
 
+class PipelineRun(Base):
+    __tablename__ = "pipeline_runs"
+
+    id      = Column(Integer, primary_key=True, autoincrement=True)
+    job_id  = Column(String(64), nullable=False, index=True)
+    ran_at  = Column(DateTime(timezone=True), nullable=False)
+    status  = Column(String(16), nullable=False)   # 'ok' | 'error'
+    message = Column(Text, nullable=True)
+
+
 # Importar modelos del Radar para que Alembic los detecte
 from pipeline.db.models_radar import EventoIADespido, EventoIAEmpleo, SkillEmergente  # noqa: F401
 from pipeline.db.models_predictor import PrediccionKpi  # noqa: F401
