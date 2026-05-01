@@ -53,6 +53,7 @@ export default function CarrerasListPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [benchmarkMap, setBenchmarkMap] = useState<Map<string, number>>(new Map())
   const [filterUrgenciaAlta, setFilterUrgenciaAlta] = useState(false)
+  const [filterDobleAlerta, setFilterDobleAlerta] = useState(false)
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -65,7 +66,12 @@ export default function CarrerasListPage() {
 
   const sorted = useMemo(() => {
     let base = carreras
-    if (filterUrgenciaAlta) {
+    if (filterDobleAlerta) {
+      base = base.filter(c =>
+        (c.kpi?.d1_obsolescencia.score ?? 0) >= 0.6 &&
+        c.benchmark_slug && (benchmarkMap.get(c.benchmark_slug) ?? 0) >= 60
+      )
+    } else if (filterUrgenciaAlta) {
       base = base.filter(c => c.benchmark_slug && (benchmarkMap.get(c.benchmark_slug) ?? 0) >= 60)
     }
     if (sortKey === 'none') return base
@@ -80,7 +86,7 @@ export default function CarrerasListPage() {
       if (sortKey === 'matricula') { av = a.matricula ?? -1; bv = b.matricula ?? -1 }
       return sortDir === 'asc' ? av - bv : bv - av
     })
-  }, [carreras, sortKey, sortDir, filterUrgenciaAlta, benchmarkMap])
+  }, [carreras, sortKey, sortDir, filterUrgenciaAlta, filterDobleAlerta, benchmarkMap])
 
   useEffect(() => {
     getAreasCarreras().then(setAreas).catch(() => {})
@@ -190,11 +196,18 @@ export default function CarrerasListPage() {
           )}
           <span className="ml-2 text-xs text-gray-300">|</span>
           <button
-            onClick={() => setFilterUrgenciaAlta(v => !v)}
+            onClick={() => { setFilterUrgenciaAlta(v => !v); setFilterDobleAlerta(false) }}
             title="Mostrar solo carreras con urgencia curricular ≥ 60"
             className={`px-2.5 py-1 text-xs rounded border transition-colors ${filterUrgenciaAlta ? 'bg-red-50 border-red-300 text-red-700 font-semibold' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
           >
             U ≥ 60
+          </button>
+          <button
+            onClick={() => { setFilterDobleAlerta(v => !v); setFilterUrgenciaAlta(false) }}
+            title="Mostrar solo carreras con D1 ≥ 0.60 Y urgencia ≥ 60 (doble alerta)"
+            className={`px-2.5 py-1 text-xs rounded border transition-colors ${filterDobleAlerta ? 'bg-red-100 border-red-400 text-red-800 font-semibold' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+          >
+            ⚠ Doble alerta
           </button>
         </div>
       )}
