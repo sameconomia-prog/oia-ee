@@ -16,7 +16,7 @@ import SkillTipoMatrix from '@/components/benchmarks/SkillTipoMatrix'
 import Card from '@/components/ui/Card'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Badge from '@/components/ui/Badge'
-import { BENCHMARK_TO_ARTICLE } from '@/lib/benchmark-articles'
+import { BENCHMARK_TO_ARTICLE, BENCHMARK_ALL_ARTICLES } from '@/lib/benchmark-articles'
 
 function exportCSV(detail: BenchmarkCareerDetail, sources: BenchmarkSource[]) {
   const header = ['Habilidad', 'Tipo', ...sources.map(s => s.nombre.split('—')[0].trim()), 'Global', 'Consenso%', 'Acción'].join(',')
@@ -63,6 +63,7 @@ export default function BenchmarkCareerPage() {
   const [lecturas, setLecturas] = useState<ArticleCard[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (!slug) return
@@ -112,19 +113,30 @@ export default function BenchmarkCareerPage() {
             <h1 className="text-2xl font-bold text-slate-900">{detail.nombre}</h1>
             <p className="text-sm text-slate-500 mt-1">{detail.area}</p>
           </div>
-          <div className="flex items-center gap-3 ml-6 mt-1 shrink-0">
+          <div className="flex items-center gap-2 ml-6 mt-1 shrink-0 flex-wrap justify-end">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2000)
+                })
+              }}
+              className="text-xs text-slate-500 border border-slate-200 px-3 py-1.5 rounded hover:bg-slate-50 transition-colors font-medium"
+            >
+              {copied ? '✓ Copiado' : 'Copiar enlace'}
+            </button>
             <Link
               href={`/benchmarks/comparar?a=${slug}`}
               className="text-xs text-brand-600 border border-brand-200 px-3 py-1.5 rounded hover:bg-brand-50 transition-colors font-medium"
             >
               Comparar →
             </Link>
-            {article && (
+            {(BENCHMARK_ALL_ARTICLES[slug]?.length ?? 0) > 0 && (
               <Link
-                href={`/investigaciones/${article}`}
+                href={`/investigaciones?benchmark=${slug}`}
                 className="text-xs text-brand-600 hover:underline font-medium"
               >
-                Análisis completo →
+                {BENCHMARK_ALL_ARTICLES[slug].length} artículo{BENCHMARK_ALL_ARTICLES[slug].length !== 1 ? 's' : ''} →
               </Link>
             )}
           </div>
