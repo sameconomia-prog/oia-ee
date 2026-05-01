@@ -77,6 +77,11 @@ export default function InvestigacionDetallePage({ params }: Props) {
     .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
     .slice(0, 3)
 
+  // todos is sorted newest-first; anterior = older (higher index), siguiente = newer (lower index)
+  const currentIdx = todos.findIndex(i => i.slug === params.slug)
+  const anterior = currentIdx < todos.length - 1 ? todos[currentIdx + 1] : null
+  const siguiente = currentIdx > 0 ? todos[currentIdx - 1] : null
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-16">
       <script
@@ -209,6 +214,27 @@ export default function InvestigacionDetallePage({ params }: Props) {
             ))}
           </div>
         </aside>
+      )}
+
+      {(anterior || siguiente) && (
+        <nav className="mt-10 border-t border-gray-100 pt-8 flex items-start justify-between gap-4">
+          <div className="flex-1">
+            {anterior && (
+              <Link href={`/investigaciones/${anterior.slug}`} className="group block">
+                <p className="text-xs text-gray-400 mb-1">← Publicación anterior</p>
+                <p className="text-sm font-medium text-gray-700 group-hover:text-[#1D4ED8] transition-colors leading-snug line-clamp-2">{anterior.titulo}</p>
+              </Link>
+            )}
+          </div>
+          <div className="flex-1 text-right">
+            {siguiente && (
+              <Link href={`/investigaciones/${siguiente.slug}`} className="group block">
+                <p className="text-xs text-gray-400 mb-1">Publicación siguiente →</p>
+                <p className="text-sm font-medium text-gray-700 group-hover:text-[#1D4ED8] transition-colors leading-snug line-clamp-2">{siguiente.titulo}</p>
+              </Link>
+            )}
+          </div>
+        </nav>
       )}
     </main>
   )
