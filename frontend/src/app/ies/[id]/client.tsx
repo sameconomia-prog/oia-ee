@@ -141,6 +141,14 @@ export default function IesDetailPage() {
               Copiar
             </button>
             <a
+              href={`https://wa.me/?text=${encodeURIComponent(`📊 Diagnóstico IA — ${detalle.nombre}\nD1: ${detalle.promedio_d1.toFixed(2)} | D2: ${detalle.promedio_d2.toFixed(2)}${detalle.carreras_riesgo_alto > 0 ? ` | ${detalle.carreras_riesgo_alto} carreras en riesgo alto` : ''}\nhttps://oia-ee.mx/ies/${id}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-green-600 border border-green-200 px-3 py-1.5 rounded hover:bg-green-50 transition-colors font-medium"
+            >
+              WhatsApp
+            </a>
+            <a
               href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://oia-ee.mx/ies/${id}`)}`}
               target="_blank"
               rel="noopener noreferrer"

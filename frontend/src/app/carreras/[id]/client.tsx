@@ -302,6 +302,14 @@ export default function CarreraDetallePage() {
               Copiar
             </button>
             <a
+              href={`https://wa.me/?text=${encodeURIComponent(`📊 Diagnóstico IA — ${d.nombre}\n${d.kpi ? `D1: ${d.kpi.d1_obsolescencia.score.toFixed(2)} | D2: ${d.kpi.d2_oportunidades.score.toFixed(2)}` : ''}${benchmarkSummary ? ` | Urgencia: ${benchmarkSummary.urgencia_curricular}/100` : ''}\nhttps://oia-ee.mx/carreras/${id}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-green-600 border border-green-200 px-3 py-1.5 rounded hover:bg-green-50 transition-colors font-medium whitespace-nowrap"
+            >
+              WhatsApp
+            </a>
+            <a
               href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://oia-ee.mx/carreras/${id}`)}`}
               target="_blank"
               rel="noopener noreferrer"
