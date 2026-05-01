@@ -44,7 +44,7 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 162, 2026-04-30)
+## Estado actual (Sprint 164, 2026-04-30)
 - 458 pytest · 0 errores TypeScript · 76 artículos investigaciones
 - P117-P126: benchmark signals, urgencia badges, brecha/calientes panels, tag cloud
 - P127-P132: URL params persistence (carreras/vacantes/noticias/ies), BenchmarksSection homepage, comparar U column, CarrerasRanking U column, "Situación en México" en benchmarks/[slug]
@@ -78,6 +78,8 @@ OIA-EE/
 - P160: urgencia curricular media row en /comparar aggregate comparison table
 - P161: portfolioUrgencia vs. promedio nacional + card clickable → /benchmarks en /ies/[id]
 - P162: CLAUDE.md sync + git history cleanup
+- P163: top 5 IES por riesgo D1 mini-table en /estadisticas + LinkedIn share button en /benchmarks/[slug]
+- P164: ?sort= URL param persistence en /ies listing
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
