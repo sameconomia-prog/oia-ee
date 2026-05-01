@@ -553,6 +553,29 @@ export default function CarreraDetallePage() {
         </Card>
       )}
 
+      {/* Top skills nacionales en demanda */}
+      {vacanteSkills.length > 0 && (
+        <Card className="mb-6 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">Top skills en vacantes — mercado MX</h3>
+            <Link href="/vacantes" className="text-[11px] text-brand-600 hover:underline">Ver vacantes →</Link>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {vacanteSkills.slice(0, 8).map(sf => (
+              <Link
+                key={sf.nombre}
+                href={`/vacantes?q=${encodeURIComponent(sf.nombre)}`}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 border border-indigo-100 text-indigo-800 hover:bg-indigo-100 transition-colors"
+              >
+                {sf.nombre}
+                <span className="text-[10px] opacity-60 ml-0.5">{sf.count}</span>
+              </Link>
+            ))}
+          </div>
+          <p className="text-[10px] text-slate-400 mt-2">Vacantes activas en plataformas mexicanas. Número = menciones.</p>
+        </Card>
+      )}
+
       {/* IES que ofrecen la carrera */}
       {d.instituciones.length > 0 && (
         <Card className="p-0 overflow-hidden">
