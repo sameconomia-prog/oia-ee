@@ -423,6 +423,29 @@ export default function BenchmarkCareerPage() {
           ))}
         </div>
       </Card>
+
+      {/* Rector CTA — show when urgencia alta */}
+      {(() => {
+        const isAlta = (declining / (detail.skills.length || 1)) * 100 >= 30
+        return isAlta ? (
+          <div className="mt-2 rounded-xl bg-indigo-50 border border-indigo-200 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-indigo-900 mb-1">
+                ¿Tienes {detail.nombre} en tu institución?
+              </p>
+              <p className="text-xs text-indigo-700">
+                Solicita el análisis personalizado: diagnóstico D1–D6, benchmarks y recomendaciones curriculares. Sin costo.
+              </p>
+            </div>
+            <Link
+              href={`/pertinencia?carrera=${encodeURIComponent(detail.nombre)}`}
+              className="shrink-0 text-sm font-semibold text-white bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap"
+            >
+              Solicitar análisis →
+            </Link>
+          </div>
+        ) : null
+      })()}
     </div>
   )
 }
