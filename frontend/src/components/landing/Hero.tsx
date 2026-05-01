@@ -58,6 +58,9 @@ export default function Hero({ totalIes, totalCarreras }: HeroProps) {
               Solicitar análisis de mi institución
             </Link>
           </div>
+          <Link href="/guia" className="mt-3 text-xs text-gray-400 hover:text-[#1D4ED8] transition-colors inline-block">
+            ¿Primera vez? Empieza aquí →
+          </Link>
         </div>
         <div className="flex justify-center lg:justify-end">
           <div className="relative">
