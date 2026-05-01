@@ -76,6 +76,15 @@ export default function IesDetailPage() {
     return Math.round(benchmarkList.reduce((a, b) => a + b.urgencia_curricular, 0) / benchmarkList.length)
   }, [benchmarkList])
 
+  const distribucionD1 = useMemo(() => {
+    const withKpi = carreras.filter(c => c.kpi != null)
+    if (withKpi.length === 0) return null
+    const bajo = withKpi.filter(c => c.kpi!.d1_obsolescencia.score < 0.4).length
+    const medio = withKpi.filter(c => c.kpi!.d1_obsolescencia.score >= 0.4 && c.kpi!.d1_obsolescencia.score < 0.6).length
+    const alto = withKpi.filter(c => c.kpi!.d1_obsolescencia.score >= 0.6).length
+    return { bajo, medio, alto, total: withKpi.length }
+  }, [carreras])
+
   if (loading) {
     return <p className="text-gray-400 text-sm py-8 text-center">Cargando...</p>
   }
@@ -180,6 +189,31 @@ export default function IesDetailPage() {
           </Link>
         )}
       </div>
+
+      {/* Distribución D1 mini chart */}
+      {distribucionD1 && distribucionD1.total > 1 && (
+        <div className="mb-4 bg-white rounded-xl border shadow-sm px-4 py-3">
+          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Distribución de riesgo D1 — portfolio</p>
+          <div className="space-y-1.5">
+            {([
+              { label: 'Alto  (≥0.60)', count: distribucionD1.alto, color: 'bg-red-500' },
+              { label: 'Medio (0.40–0.59)', count: distribucionD1.medio, color: 'bg-yellow-400' },
+              { label: 'Bajo  (<0.40)', count: distribucionD1.bajo, color: 'bg-emerald-500' },
+            ]).map(({ label, count, color }) => (
+              <div key={label} className="flex items-center gap-2">
+                <span className="text-[10px] text-gray-500 w-32 shrink-0 font-mono">{label}</span>
+                <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${color} transition-all`}
+                    style={{ width: `${(count / distribucionD1.total) * 100}%` }}
+                  />
+                </div>
+                <span className="text-[10px] font-mono text-gray-600 w-6 text-right">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Perfil de riesgo — narrative interpretation for non-technical rectors */}
       {(() => {
