@@ -157,9 +157,32 @@ export default function InvestigacionesPage({
         </p>
       )}
 
+      {/* Featured: carta a rectores (solo cuando no hay filtros activos) */}
+      {!query && !filtro && !benchmarkFilter && (() => {
+        const carta = investigaciones.find(i => i.slug === '2026-05-carta-rectores-urgencia-curricular')
+        if (!carta) return null
+        return (
+          <Link href={`/investigaciones/${carta.slug}`} className="block mb-8">
+            <article className="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-6 hover:border-indigo-400 hover:shadow-md transition-all">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="text-xs font-bold px-2 py-1 rounded-full bg-indigo-200 text-indigo-900 uppercase tracking-wide">
+                  Destacado · Rectores
+                </span>
+                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${TIPO_COLOR[carta.tipo]}`}>
+                  {getTipoLabel(carta.tipo)}
+                </span>
+              </div>
+              <h2 className="font-bold text-indigo-900 text-xl leading-snug mb-2">{carta.titulo}</h2>
+              <p className="text-indigo-700 text-sm leading-relaxed mb-3">{carta.resumen}</p>
+              <span className="text-xs text-indigo-500">{carta.tiempo_lectura} de lectura →</span>
+            </article>
+          </Link>
+        )
+      })()}
+
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {investigaciones.map(inv => {
+        {investigaciones.filter(i => i.slug !== '2026-05-carta-rectores-urgencia-curricular' || query || filtro || benchmarkFilter).map(inv => {
           const bmSlug = ARTICLE_TO_BENCHMARK[inv.slug]
           const bmLabel = bmSlug ? BENCHMARK_LABELS[bmSlug] : undefined
           return (
