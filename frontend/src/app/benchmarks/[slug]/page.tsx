@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers } from '@/lib/api'
-import type { BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary } from '@/lib/types'
+import { getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getCarrerasPublico } from '@/lib/api'
+import type { BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, CarreraKpi } from '@/lib/types'
 import SkillConvergenceTable from '@/components/benchmarks/SkillConvergenceTable'
 import CurriculumActionSummary from '@/components/benchmarks/CurriculumActionSummary'
 import HorizonteTimeline from '@/components/benchmarks/HorizonteTimeline'
@@ -52,6 +52,7 @@ export default function BenchmarkCareerPage() {
   const [detail, setDetail] = useState<BenchmarkCareerDetail | null>(null)
   const [sources, setSources] = useState<BenchmarkSource[]>([])
   const [related, setRelated] = useState<BenchmarkCareerSummary[]>([])
+  const [mexicoCarreras, setMexicoCarreras] = useState<CarreraKpi[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -66,6 +67,10 @@ export default function BenchmarkCareerPage() {
         setDetail(d)
         setSources(s)
         setRelated(all.filter(c => c.slug !== slug && c.area === d.area).slice(0, 3))
+        return getCarrerasPublico({ q: d.nombre, limit: 30 })
+      })
+      .then(carreras => {
+        setMexicoCarreras(carreras.filter(c => c.benchmark_slug === slug))
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false))
@@ -176,6 +181,47 @@ export default function BenchmarkCareerPage() {
       <Card className="mb-6 p-5">
         <HorizonteTimeline skills={detail.skills} careerSlug={slug} />
       </Card>
+
+      {/* Situación en México */}
+      {mexicoCarreras.length > 0 && (
+        <Card className="mb-6 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">
+              Situación en México · {mexicoCarreras.length} {mexicoCarreras.length === 1 ? 'carrera' : 'carreras'} registradas
+            </h3>
+            <Link href={`/carreras?q=${encodeURIComponent(detail.nombre)}`} className="text-[11px] text-brand-600 hover:underline">
+              Ver todas →
+            </Link>
+          </div>
+          <div className="border border-slate-200 rounded-lg overflow-hidden text-xs">
+            <div className="grid grid-cols-5 bg-slate-50 text-slate-500 font-semibold px-3 py-2">
+              <div className="col-span-2">Carrera / IES</div>
+              <div className="text-center">D1 Riesgo</div>
+              <div className="text-center">D2 Oport.</div>
+              <div className="text-center">D3 Mercado</div>
+            </div>
+            {mexicoCarreras.map(c => {
+              const d1 = c.kpi?.d1_obsolescencia.score
+              const d2 = c.kpi?.d2_oportunidades.score
+              const d3 = c.kpi?.d3_mercado.score
+              const d1Cls = d1 == null ? '' : d1 >= 0.6 ? 'text-red-600' : d1 >= 0.4 ? 'text-amber-600' : 'text-emerald-600'
+              const d2Cls = d2 == null ? '' : d2 >= 0.6 ? 'text-emerald-600' : d2 >= 0.4 ? 'text-amber-600' : 'text-red-600'
+              const d3Cls = d3 == null ? '' : d3 >= 0.6 ? 'text-emerald-600' : d3 >= 0.4 ? 'text-amber-600' : 'text-red-600'
+              return (
+                <div key={c.id} className="grid grid-cols-5 border-t border-slate-100 px-3 py-2 hover:bg-slate-50">
+                  <div className="col-span-2 truncate">
+                    <Link href={`/carreras/${c.id}`} className="text-slate-700 hover:text-indigo-700 hover:underline font-medium">{c.nombre}</Link>
+                  </div>
+                  <div className={`text-center font-mono font-semibold ${d1Cls}`}>{d1 != null ? d1.toFixed(2) : '—'}</div>
+                  <div className={`text-center font-mono font-semibold ${d2Cls}`}>{d2 != null ? d2.toFixed(2) : '—'}</div>
+                  <div className={`text-center font-mono font-semibold ${d3Cls}`}>{d3 != null ? d3.toFixed(2) : '—'}</div>
+                </div>
+              )
+            })}
+          </div>
+          <p className="text-[11px] text-slate-400 mt-1">D1: menor=mejor · D2/D3: mayor=mejor</p>
+        </Card>
+      )}
 
       {/* Related careers in same area */}
       {related.length > 0 && (
