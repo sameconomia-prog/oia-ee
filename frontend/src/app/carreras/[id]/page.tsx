@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills, getCarrerasPublico, getTendenciasNacionales } from '@/lib/api'
-import type { CarreraDetalle, CarreraKpi, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq, TendenciaNacional } from '@/lib/types'
+import type { CarreraDetalle, CarreraKpi, KpiResult, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq, TendenciaNacional } from '@/lib/types'
 
 function normSkill(s: string) {
   return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -92,6 +92,60 @@ const SEMAFORO_VARIANT: Record<string, 'risk' | 'oportunidad' | 'neutro'> = {
 }
 
 const BENCHMARK_ARTICLE_MAP = BENCHMARK_TO_ARTICLE
+
+function narrativaImpacto(
+  kpi: KpiResult,
+  nombre: string,
+  benchmarkSummary: BenchmarkCareerSummary | null,
+  tendenciaNacional: TendenciaNacional | null,
+): { titulo: string; texto: string; accion: string; color: 'rojo' | 'ambar' | 'verde' } {
+  const d1 = kpi.d1_obsolescencia.score
+  const d2 = kpi.d2_oportunidades.score
+  const urgencia = benchmarkSummary?.urgencia_curricular ?? null
+  const natD1 = tendenciaNacional?.d1_score ?? null
+  const natD2 = tendenciaNacional?.d2_score ?? null
+  const vsNat = natD1 != null ? (d1 > natD1 ? `${(d1 - natD1).toFixed(2)} puntos sobre el promedio nacional` : `${(natD1 - d1).toFixed(2)} puntos bajo el promedio nacional`) : null
+
+  if (d1 >= 0.6 && urgencia != null && urgencia >= 60) {
+    return {
+      titulo: 'Intervención curricular urgente',
+      texto: `${nombre} registra D1 ${d1.toFixed(2)} y urgencia benchmark ${urgencia}/100 confirmada por 5 fuentes internacionales. La convergencia de señales locales y globales indica obsolescencia acelerada por automatización.${vsNat ? ` La carrera se ubica ${vsNat}.` : ''}`,
+      accion: 'Rediseño profundo del plan de estudios con incorporación de IA aplicada y competencias digitales avanzadas.',
+      color: 'rojo',
+    }
+  }
+  if (d1 >= 0.6) {
+    return {
+      titulo: 'Riesgo de obsolescencia elevado',
+      texto: `Con D1 ${d1.toFixed(2)}, ${nombre} presenta exposición alta a desplazamiento por automatización.${vsNat ? ` Se ubica ${vsNat}.` : ''}${urgencia != null ? ` Urgencia benchmark: ${urgencia}/100.` : ''}`,
+      accion: 'Revisar contenidos con mayor exposición a automatización e integrar habilidades digitales emergentes.',
+      color: 'rojo',
+    }
+  }
+  if (d2 >= 0.6 && d1 < 0.4) {
+    const natMsg = natD2 != null ? ` D2 ${d2 >= natD2 ? `${(d2 - natD2).toFixed(2)} sobre` : `${(natD2 - d2).toFixed(2)} bajo`} media nacional.` : ''
+    return {
+      titulo: 'Perfil de alta oportunidad curricular',
+      texto: `${nombre} muestra alta oportunidad digital (D2 ${d2.toFixed(2)}) con baja obsolescencia (D1 ${d1.toFixed(2)}).${natMsg}${urgencia != null ? ` Urgencia benchmark ${urgencia}/100 — ${urgencia < 30 ? 'perfil estable.' : 'actualización preventiva recomendada.'}` : ''}`,
+      accion: 'Fortalecer habilidades emergentes identificadas en benchmarks internacionales.',
+      color: 'verde',
+    }
+  }
+  if (d1 >= 0.4) {
+    return {
+      titulo: 'Riesgo moderado — monitoreo activo recomendado',
+      texto: `${nombre} registra D1 ${d1.toFixed(2)}, rango de riesgo medio.${vsNat ? ` Se ubica ${vsNat}.` : ''}${urgencia != null ? ` Urgencia benchmark ${urgencia}/100${urgencia >= 30 ? ' — actualización preventiva recomendada.' : '.'}` : ''}`,
+      accion: 'Mapear competencias en declive y diseñar actualizaciones incrementales.',
+      color: 'ambar',
+    }
+  }
+  return {
+    titulo: 'Perfil curricular estable',
+    texto: `${nombre} presenta baja obsolescencia (D1 ${d1.toFixed(2)}) y oportunidad digital ${d2 >= 0.4 ? 'moderada-alta' : 'en desarrollo'} (D2 ${d2.toFixed(2)}).${urgencia != null ? ` Urgencia benchmark ${urgencia}/100 dentro de parámetros normales.` : ''}`,
+    accion: 'Mantener actualización continua de habilidades digitales como medida preventiva.',
+    color: 'verde',
+  }
+}
 
 export default function CarreraDetallePage() {
   const { id } = useParams<{ id: string }>()
@@ -321,6 +375,25 @@ export default function CarreraDetallePage() {
           />
         </Card>
       )}
+
+      {/* Narrativa de impacto IA */}
+      {d.kpi && (() => {
+        const n = narrativaImpacto(d.kpi, d.nombre, benchmarkSummary, tendenciaNacional)
+        const cls = n.color === 'rojo'
+          ? 'bg-red-50 border-red-200 text-red-900'
+          : n.color === 'ambar'
+          ? 'bg-amber-50 border-amber-200 text-amber-900'
+          : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+        const titleCls = n.color === 'rojo' ? 'text-red-800' : n.color === 'ambar' ? 'text-amber-800' : 'text-emerald-800'
+        const accionCls = n.color === 'rojo' ? 'text-red-700' : n.color === 'ambar' ? 'text-amber-700' : 'text-emerald-700'
+        return (
+          <div className={`mb-6 rounded-xl border p-4 ${cls}`}>
+            <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${titleCls}`}>{n.titulo}</p>
+            <p className="text-xs leading-relaxed mb-2">{n.texto}</p>
+            <p className={`text-xs font-semibold ${accionCls}`}>→ {n.accion}</p>
+          </div>
+        )
+      })()}
 
       {/* Mapa de Skills P5 */}
       <Card className="mb-6 p-5">
