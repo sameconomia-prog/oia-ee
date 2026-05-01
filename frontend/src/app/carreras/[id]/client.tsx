@@ -164,6 +164,14 @@ export default function CarreraDetallePage() {
   const [similares, setSimilares] = useState<CarreraKpi[]>([])
   const [tendenciaNacional, setTendenciaNacional] = useState<TendenciaNacional | null>(null)
 
+  const promedioArea = useMemo(() => {
+    const conKpi = similares.filter(c => c.kpi != null)
+    if (conKpi.length === 0) return null
+    const d1 = conKpi.reduce((s, c) => s + c.kpi!.d1_obsolescencia.score, 0) / conKpi.length
+    const d2 = conKpi.reduce((s, c) => s + c.kpi!.d2_oportunidades.score, 0) / conKpi.length
+    return { d1, d2, n: conKpi.length }
+  }, [similares])
+
   const demandaLaboral = useMemo(() => {
     if (!benchmarkDetail || vacanteSkills.length === 0) return []
     const vacMap = new Map(vacanteSkills.map(sf => [normSkill(sf.nombre), sf.count]))
@@ -348,6 +356,17 @@ export default function CarreraDetallePage() {
                     D2 {d.kpi!.d2_oportunidades.score >= tendenciaNacional.d2_score ? '▲' : '▼'} {Math.abs(d.kpi!.d2_oportunidades.score - tendenciaNacional.d2_score).toFixed(2)} {d.kpi!.d2_oportunidades.score >= tendenciaNacional.d2_score ? 'sobre' : 'bajo'} media
                   </span>
                 )}
+              </div>
+            )}
+            {promedioArea && (
+              <div className="mt-2 pt-2 border-t border-slate-100 flex gap-4 text-[10px] text-slate-400">
+                <span>vs. área ({promedioArea.n} carreras):</span>
+                <span className={d.kpi!.d1_obsolescencia.score > promedioArea.d1 ? 'text-red-600 font-semibold' : 'text-emerald-600 font-semibold'}>
+                  D1 {d.kpi!.d1_obsolescencia.score > promedioArea.d1 ? '▲' : '▼'} {Math.abs(d.kpi!.d1_obsolescencia.score - promedioArea.d1).toFixed(2)} {d.kpi!.d1_obsolescencia.score > promedioArea.d1 ? 'sobre' : 'bajo'} área
+                </span>
+                <span className={d.kpi!.d2_oportunidades.score >= promedioArea.d2 ? 'text-emerald-600 font-semibold' : 'text-red-600 font-semibold'}>
+                  D2 {d.kpi!.d2_oportunidades.score >= promedioArea.d2 ? '▲' : '▼'} {Math.abs(d.kpi!.d2_oportunidades.score - promedioArea.d2).toFixed(2)} {d.kpi!.d2_oportunidades.score >= promedioArea.d2 ? 'sobre' : 'bajo'} área
+                </span>
               </div>
             )}
             <details className="mt-3 pt-3 border-t border-slate-100">
