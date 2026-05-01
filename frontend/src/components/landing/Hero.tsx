@@ -112,7 +112,7 @@ export default function Hero({ totalIes, totalCarreras }: HeroProps) {
               type="text"
               name="q"
               placeholder="Busca tu institución…"
-              className="flex-1 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 transition-colors"
+              className="flex-1 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
               style={{
                 background: 'var(--l-bg-3)',
                 border: '1px solid var(--l-border-mid)',
