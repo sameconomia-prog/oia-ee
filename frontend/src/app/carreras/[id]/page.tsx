@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources } from '@/lib/api'
-import type { CarreraDetalle, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource } from '@/lib/types'
+import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers } from '@/lib/api'
+import type { CarreraDetalle, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary } from '@/lib/types'
 import FanChart from '@/components/FanChart'
 import SkillTreemap from '@/components/SkillTreemap'
 import KpiRadarChart from '@/components/KpiRadarChart'
@@ -116,6 +116,7 @@ export default function CarreraDetallePage() {
   const [semaforoRes, setSemaforoRes] = useState<SemaforoData | null>(null)
   const [benchmarkDetail, setBenchmarkDetail] = useState<BenchmarkCareerDetail | null>(null)
   const [benchmarkSources, setBenchmarkSources] = useState<BenchmarkSource[]>([])
+  const [benchmarkSummary, setBenchmarkSummary] = useState<BenchmarkCareerSummary | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -123,8 +124,10 @@ export default function CarreraDetallePage() {
       .then(d => {
         setDetalle(d)
         if (d.benchmark_slug) {
-          getBenchmarkCareerDetail(d.benchmark_slug).then(setBenchmarkDetail).catch(() => {})
+          const slug = d.benchmark_slug
+          getBenchmarkCareerDetail(slug).then(setBenchmarkDetail).catch(() => {})
           getBenchmarkSources().then(setBenchmarkSources).catch(() => {})
+          getBenchmarkCareers().then(list => setBenchmarkSummary(list.find(c => c.slug === slug) ?? null)).catch(() => {})
         }
       })
       .catch(() => setNotFound(true))
@@ -253,14 +256,30 @@ export default function CarreraDetallePage() {
               title="Benchmarks Globales"
               subtitle="Convergencia de 5 fuentes internacionales sobre las habilidades de esta carrera"
             />
-            {d.benchmark_slug && BENCHMARK_ARTICLE_MAP[d.benchmark_slug] && (
-              <Link
-                href={`/investigaciones/${BENCHMARK_ARTICLE_MAP[d.benchmark_slug]}`}
-                className="shrink-0 text-xs text-brand-600 hover:underline font-medium ml-4"
-              >
-                Leer análisis completo →
-              </Link>
-            )}
+            <div className="flex items-center gap-3 ml-4 shrink-0">
+              {benchmarkSummary && (() => {
+                const s = benchmarkSummary.urgencia_curricular
+                const cls = s >= 60
+                  ? 'bg-red-50 text-red-700 border-red-200'
+                  : s >= 30
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-green-50 text-green-700 border-green-200'
+                return (
+                  <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10px] font-semibold ${cls}`}
+                    title="Urgencia curricular (0–100): % skills en declive × consenso promedio">
+                    Urgencia <span className="font-mono">{s}</span>
+                  </span>
+                )
+              })()}
+              {d.benchmark_slug && BENCHMARK_ARTICLE_MAP[d.benchmark_slug] && (
+                <Link
+                  href={`/investigaciones/${BENCHMARK_ARTICLE_MAP[d.benchmark_slug]}`}
+                  className="text-xs text-brand-600 hover:underline font-medium"
+                >
+                  Leer análisis completo →
+                </Link>
+              )}
+            </div>
           </div>
           <SkillConvergenceTable
             skills={benchmarkDetail.skills}
