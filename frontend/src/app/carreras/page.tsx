@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
-import { getCarrerasPublico, getAreasCarreras } from '@/lib/api'
+import { getCarrerasPublico, getAreasCarreras, getBenchmarkCareers } from '@/lib/api'
 import type { CarreraKpi } from '@/lib/types'
 
 type SortKey = 'none' | 'nombre' | 'd1' | 'd2' | 'matricula'
@@ -49,6 +49,7 @@ export default function CarrerasListPage() {
   const [hasMore, setHasMore] = useState(true)
   const [sortKey, setSortKey] = useState<SortKey>('none')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [benchmarkMap, setBenchmarkMap] = useState<Map<string, number>>(new Map())
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -76,6 +77,9 @@ export default function CarrerasListPage() {
 
   useEffect(() => {
     getAreasCarreras().then(setAreas).catch(() => {})
+    getBenchmarkCareers().then(list => {
+      setBenchmarkMap(new Map(list.map(c => [c.slug, c.urgencia_curricular])))
+    }).catch(() => {})
   }, [])
 
   const cargar = useCallback((q: string, area: string, newSkip: number, append: boolean) => {
@@ -211,12 +215,23 @@ export default function CarrerasListPage() {
                 )}
               </div>
             </div>
-            {c.kpi && (
-              <div className="flex gap-1.5 flex-wrap justify-end shrink-0">
-                <ScoreBadge label="D1" score={c.kpi.d1_obsolescencia.score} invert />
-                <ScoreBadge label="D2" score={c.kpi.d2_oportunidades.score} />
-              </div>
-            )}
+            <div className="flex gap-1.5 flex-wrap justify-end shrink-0 items-center">
+              {c.benchmark_slug && benchmarkMap.has(c.benchmark_slug) && (() => {
+                const u = benchmarkMap.get(c.benchmark_slug!)!
+                const cls = u >= 60 ? 'bg-red-50 text-red-700' : u >= 30 ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'
+                return (
+                  <span className={`inline-block px-1.5 py-0.5 rounded text-xs font-mono font-semibold ${cls}`} title="Urgencia curricular (benchmarks internacionales)">
+                    U {u}
+                  </span>
+                )
+              })()}
+              {c.kpi && (
+                <>
+                  <ScoreBadge label="D1" score={c.kpi.d1_obsolescencia.score} invert />
+                  <ScoreBadge label="D2" score={c.kpi.d2_oportunidades.score} />
+                </>
+              )}
+            </div>
           </div>
         ))}
       </div>
