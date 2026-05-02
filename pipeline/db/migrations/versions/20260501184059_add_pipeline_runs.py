@@ -31,6 +31,11 @@ def upgrade() -> None:
     )
     # Create index on job_id for faster lookups
     op.create_index('ix_pipeline_runs_job_id', 'pipeline_runs', ['job_id'])
+    # Seed heartbeat so /health returns 200 immediately after first deploy
+    op.execute(
+        "INSERT INTO pipeline_runs (job_id, ran_at, status, message) "
+        "VALUES ('_heartbeat', CURRENT_TIMESTAMP, 'ok', 'migration seed')"
+    )
 
 
 def downgrade() -> None:
