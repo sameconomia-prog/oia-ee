@@ -1,5 +1,6 @@
 # api/main.py
 import os
+import traceback
 import structlog
 from contextlib import asynccontextmanager
 import redis.asyncio as aioredis
@@ -15,6 +16,7 @@ from pipeline.jobs.kpi_snapshot_job import run_kpi_snapshot
 from pipeline.jobs.radar_job import run_radar_despidos_job, run_radar_empleos_job, run_obsidian_sync_job
 from pipeline.jobs.forecast_job import run_forecast_job, run_skills_job
 from pipeline.jobs.occ_ingest_job import run_occ_ingest as _occ_ingest
+from pipeline.monitoring import notify_job_result
 
 # Sentry — solo en producción
 _SENTRY_DSN = os.getenv("SENTRY_DSN", "")
@@ -37,26 +39,203 @@ _scheduler = BackgroundScheduler()
 
 
 def _run_alert_job_scheduled() -> None:
-    with get_session() as db:
-        run_alert_job(db)
+    error = None
+    traceback_str = None
+    try:
+        with get_session() as db:
+            run_alert_job(db)
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("alert_job", error=error, traceback_str=traceback_str)
 
 
 def _run_news_job_scheduled() -> None:
-    with get_session() as db:
-        run_news_ingest(db)
-        db.commit()
+    error = None
+    traceback_str = None
+    try:
+        with get_session() as db:
+            run_news_ingest(db)
+            db.commit()
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("news_scraper", error=error, traceback_str=traceback_str)
 
 
 def _run_snapshot_job_scheduled() -> None:
-    with get_session() as db:
-        run_kpi_snapshot(db)
-        db.commit()
+    error = None
+    traceback_str = None
+    try:
+        with get_session() as db:
+            run_kpi_snapshot(db)
+            db.commit()
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("kpi_snapshot", error=error, traceback_str=traceback_str)
 
 
 def _run_occ_job_scheduled() -> None:
-    with get_session() as db:
-        _occ_ingest(db)
-        db.commit()
+    error = None
+    traceback_str = None
+    try:
+        with get_session() as db:
+            _occ_ingest(db)
+            db.commit()
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("occ_ingest", error=error, traceback_str=traceback_str)
+
+
+def _run_radar_despidos_scheduled() -> None:
+    error = None
+    traceback_str = None
+    try:
+        run_radar_despidos_job()
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("radar_despidos", error=error, traceback_str=traceback_str)
+
+
+def _run_radar_empleos_scheduled() -> None:
+    error = None
+    traceback_str = None
+    try:
+        run_radar_empleos_job()
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("radar_empleos", error=error, traceback_str=traceback_str)
+
+
+def _run_obsidian_sync_scheduled() -> None:
+    error = None
+    traceback_str = None
+    try:
+        run_obsidian_sync_job()
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("obsidian_sync", error=error, traceback_str=traceback_str)
+
+
+def _run_forecast_scheduled() -> None:
+    error = None
+    traceback_str = None
+    try:
+        run_forecast_job()
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("forecast_job", error=error, traceback_str=traceback_str)
+
+
+def _run_skills_scheduled() -> None:
+    error = None
+    traceback_str = None
+    try:
+        run_skills_job()
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("skills_job", error=error, traceback_str=traceback_str)
+
+
+def _run_stps_scheduled() -> None:
+    error = None
+    traceback_str = None
+    try:
+        from pipeline.jobs.stps_ingest_job import run_stps_ingest
+        with get_session() as db:
+            run_stps_ingest(db)
+            db.commit()
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("stps_loader", error=error, traceback_str=traceback_str)
+
+
+def _run_anuies_scheduled() -> None:
+    error = None
+    traceback_str = None
+    try:
+        path_env = os.getenv("ANUIES_CSV_PATH")
+        if not path_env:
+            return
+        from pathlib import Path
+        from pipeline.loaders.anuies_loader import AnuiesLoader
+        from pipeline.jobs.anuies_ingest_job import ingest_anuies
+        records = AnuiesLoader().load_csv(Path(path_env))
+        with get_session() as db:
+            ingest_anuies(records, db)
+            db.commit()
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        if os.getenv("ANUIES_CSV_PATH"):
+            notify_job_result("anuies_loader", error=error, traceback_str=traceback_str)
+
+
+def _run_imss_scheduled() -> None:
+    error = None
+    traceback_str = None
+    try:
+        from pipeline.jobs.imss_ingest_job import run_imss_ingest
+        with get_session() as db:
+            run_imss_ingest(db)
+            db.commit()
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("imss_loader", error=error, traceback_str=traceback_str)
+
+
+def _run_enoe_scheduled() -> None:
+    error = None
+    traceback_str = None
+    try:
+        from pipeline.jobs.enoe_ingest_job import run_enoe_ingest
+        with get_session() as db:
+            run_enoe_ingest(db)
+            db.commit()
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("enoe_loader", error=error, traceback_str=traceback_str)
+
+
+def _run_resumen_semanal_scheduled() -> None:
+    error = None
+    traceback_str = None
+    try:
+        from pipeline.services.resumen_semanal import send_resumen_semanal
+        with get_session() as db:
+            send_resumen_semanal(db)
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("resumen_semanal", error=error, traceback_str=traceback_str)
+
+
+def _write_heartbeat() -> None:
+    notify_job_result("_heartbeat", error=None)
 
 
 @asynccontextmanager
@@ -77,11 +256,17 @@ async def lifespan(app: FastAPI):
         _scheduler.add_job(_run_news_job_scheduled, "cron", hour="*/6")
         _scheduler.add_job(_run_occ_job_scheduled, "cron", hour="*/6", minute=15)
         _scheduler.add_job(_run_snapshot_job_scheduled, "cron", day_of_week="mon", hour=5)
-        _scheduler.add_job(run_radar_despidos_job, "cron", hour="*/12")
-        _scheduler.add_job(run_radar_empleos_job, "cron", hour="*/12", minute=30)
-        _scheduler.add_job(run_obsidian_sync_job, "cron", day_of_week="sun", hour=6)
-        _scheduler.add_job(run_forecast_job, "cron", day_of_week="sun", hour=4)
-        _scheduler.add_job(run_skills_job, "cron", day_of_week="sun", hour=5)
+        _scheduler.add_job(_run_stps_scheduled, "cron", hour=2, minute=0)
+        _scheduler.add_job(_run_anuies_scheduled, "cron", day_of_week="sun", hour=4)
+        _scheduler.add_job(_run_imss_scheduled, "cron", day=15, hour=3, minute=0)
+        _scheduler.add_job(_run_enoe_scheduled, "cron", month="1,4,7,10", day=20, hour=4, minute=0)
+        _scheduler.add_job(_run_resumen_semanal_scheduled, "cron", day_of_week="mon", hour=8, minute=0)
+        _scheduler.add_job(_run_radar_despidos_scheduled, "cron", hour="*/12")
+        _scheduler.add_job(_run_radar_empleos_scheduled, "cron", hour="*/12", minute=30)
+        _scheduler.add_job(_run_obsidian_sync_scheduled, "cron", day_of_week="sun", hour=6)
+        _scheduler.add_job(_run_forecast_scheduled, "cron", day_of_week="sun", hour=4)
+        _scheduler.add_job(_run_skills_scheduled, "cron", day_of_week="sun", hour=5)
+        _scheduler.add_job(_write_heartbeat, "cron", minute="*/30")
         _scheduler.start()
         logger.info("scheduler_started")
 

@@ -11,13 +11,20 @@ from pipeline.db.models import PipelineRun
 router = APIRouter(tags=["health"])
 
 JOB_THRESHOLDS: dict[str, int] = {
-    "news_scraper":   8,
-    "stps_loader":    30,
-    "kpi_snapshot":   192,
+    "news_scraper":    8,
+    "stps_loader":     30,
+    "kpi_snapshot":    192,
     "resumen_semanal": 192,
-    "anuies_loader":  192,
-    "imss_loader":    840,
-    "enoe_loader":    2400,
+    "anuies_loader":   192,
+    "imss_loader":     840,
+    "enoe_loader":     2400,
+    "alert_job":       26,
+    "occ_ingest":      8,
+    "radar_despidos":  14,
+    "radar_empleos":   14,
+    "obsidian_sync":   192,
+    "forecast_job":    192,
+    "skills_job":      192,
 }
 HEARTBEAT_THRESHOLD_HOURS = 1
 
