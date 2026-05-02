@@ -44,8 +44,8 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
-## Estado actual (Sprint 203, 2026-05-01)
-- 459 pytest · 0 errores TypeScript · 78 artículos investigaciones
+## Estado actual (Sprint 204, 2026-05-01)
+- 471 pytest · 0 errores TypeScript · 78 artículos investigaciones
 - P117-P126: benchmark signals, urgencia badges, brecha/calientes panels, tag cloud
 - P127-P132: URL params persistence (carreras/vacantes/noticias/ies), BenchmarksSection homepage, comparar U column, CarrerasRanking U column, "Situación en México" en benchmarks/[slug]
 - P133: URL params persistence (?q=) en /ies listing con botón clear
@@ -119,6 +119,7 @@ OIA-EE/
 - P201: rediseño editorial InvestigacionesGrid homepage — 1 principal (3/5) + 3 secundarios (2/5)
 - P202: stats de cobertura en header de /investigaciones (total · tipos · carreras cubiertas)
 - P203: bloque rector en /investigaciones amplía a 5 artículos (1 principal + 4 secundarios 2×2)
+- P204: sistema de monitoreo de continuidad — PipelineRun model + migración Alembic (con seed _heartbeat), pipeline/monitoring.py (notify_job_result, deduplicación email ok→error/error→ok vía Resend), scheduler wrapping de 7 jobs + job _heartbeat cada 30 min, GET /health con thresholds por job (503 si scheduler muerto, 200 degraded si job estancado/error), 471 tests · Railway Scheduler Worker Service + UptimeRobot pendientes configuración manual
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
