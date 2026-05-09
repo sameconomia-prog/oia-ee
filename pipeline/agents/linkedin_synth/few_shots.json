@@ -1,0 +1,170 @@
+{
+  "diagnostico_semanal": [
+    {
+      "input_mdx_summary": "Análisis de la carrera de Contaduría con urgencia curricular 72/100, donde 14 de 28 skills clave están en 'declining' por automatización del SAT digital y herramientas como QuickBooks AI.",
+      "output": {
+        "pillar": "diagnostico_semanal",
+        "source_slug": "2026-04-contaduria-ia-2030",
+        "hook": "Contaduría tiene urgencia curricular de 72 sobre 100 en el OIA-EE. La mitad de las habilidades del plan estándar mexicano están bajo presión de automatización en los próximos 5 años.",
+        "bullets": [
+          "→ 14 de 28 skills clave clasificadas como 'declining' por consenso entre WEF, McKinsey y Frey-Osborne",
+          "→ Conciliación bancaria, captura de pólizas y cumplimiento SAT básico — automatizables al 80%+ con herramientas ya disponibles",
+          "→ Las skills 'growing': análisis financiero estratégico, auditoría de modelos algorítmicos, contabilidad ESG"
+        ],
+        "cuerpo": "Contaduría tiene urgencia curricular de 72 sobre 100 en el OIA-EE. La mitad de las habilidades del plan estándar mexicano están bajo presión de automatización en los próximos 5 años.\n\nEl diagnóstico no es \"la contaduría va a desaparecer\" — es que el plan que enseñamos hoy ya no responde a lo que el mercado paga.\n\n→ 14 de 28 skills clave clasificadas como 'declining' por consenso entre WEF, McKinsey y Frey-Osborne\n→ Conciliación bancaria, captura de pólizas y cumplimiento SAT básico — automatizables al 80%+ con herramientas ya disponibles\n→ Las skills 'growing': análisis financiero estratégico, auditoría de modelos algorítmicos, contabilidad ESG\n\nLa actualización curricular no es opcional. Es la diferencia entre formar contadores empleables y contadores reemplazables.",
+        "cta": "Revisa el benchmark completo de Contaduría con plan curricular accionable: /benchmarks/contaduria",
+        "hashtags": ["#EducaciónSuperior", "#Contaduría", "#PertinenciaCurricular", "#IAyEducación", "#IES"],
+        "carousel": null
+      }
+    },
+    {
+      "input_mdx_summary": "Investigación sobre Derecho en México: D1=0.61, growth en 'litigios algorítmicos' y 'compliance ESG', declining en 'búsqueda jurisprudencial manual' y 'redacción de contratos estándar'.",
+      "output": {
+        "pillar": "diagnostico_semanal",
+        "source_slug": "2026-04-abogados-mexico-ia",
+        "hook": "Derecho en México: D1 de 0,61. Lo que se está volviendo obsoleto no es la profesión — son tres tareas específicas que ocupan el 40% del tiempo del abogado júnior mexicano.",
+        "bullets": [
+          "→ Búsqueda jurisprudencial manual: ya cubierta por Lex Machina, Harvey y herramientas locales como Vlex AI",
+          "→ Redacción de contratos estándar: GPT y Claude sustituyen 70% del primer borrador en firmas medianas",
+          "→ En contraste, las skills growing son litigios algorítmicos, compliance ESG y due diligence asistido por IA"
+        ],
+        "cuerpo": "Derecho en México: D1 de 0,61. Lo que se está volviendo obsoleto no es la profesión — son tres tareas específicas que ocupan el 40% del tiempo del abogado júnior mexicano.\n\n→ Búsqueda jurisprudencial manual: ya cubierta por Lex Machina, Harvey y herramientas locales como Vlex AI\n→ Redacción de contratos estándar: GPT y Claude sustituyen 70% del primer borrador en firmas medianas\n→ En contraste, las skills growing son litigios algorítmicos, compliance ESG y due diligence asistido por IA\n\nLa pregunta para una facultad de Derecho no es si actualizar el plan. Es cuál de las tres tareas en declive seguir enseñando como si fuera el centro del trabajo.",
+        "cta": "Diagnóstico completo de Derecho con consenso de 5 fuentes internacionales: /benchmarks/derecho",
+        "hashtags": ["#Derecho", "#EducaciónSuperior", "#FuturoDelTrabajo", "#PertinenciaCurricular", "#IES"],
+        "carousel": null
+      }
+    }
+  ],
+  "metrica_explicada": [
+    {
+      "input_mdx_summary": "Artículo metodológico explicando el índice de urgencia curricular: cómo se calcula (pct_declining × avg_consenso_declining / 100), por qué un score 0-100 es más legible que decimales, qué umbrales accionar.",
+      "output": {
+        "pillar": "metrica_explicada",
+        "source_slug": "2026-04-metodologia-urgencia-curricular",
+        "hook": "Urgencia curricular = porcentaje de skills declining × consenso promedio entre fuentes. Score 0-100. Si tu carrera marca arriba de 60, hay decisiones que no se postergan más.",
+        "bullets": [
+          "→ Por debajo de 30: el plan está alineado con la demanda. Iteración menor cada ciclo",
+          "→ Entre 30 y 60: hay 3-5 skills bajo presión. Revisión focalizada en 12-18 meses",
+          "→ Arriba de 60: rediseño curricular obligatorio. Los datos no dejan espacio interpretativo"
+        ],
+        "cuerpo": "Urgencia curricular = porcentaje de skills declining × consenso promedio entre fuentes. Score 0-100. Si tu carrera marca arriba de 60, hay decisiones que no se postergan más.\n\nLa fórmula combina dos preguntas: cuánto del plan está expuesto, y qué tan robusta es la evidencia. Una carrera con 50% de skills declining pero consenso bajo entre fuentes (40%) marca 20 — señal débil. Una carrera con 30% declining y consenso alto (90%) marca 27 — señal fuerte.\n\n→ Por debajo de 30: el plan está alineado con la demanda. Iteración menor cada ciclo\n→ Entre 30 y 60: hay 3-5 skills bajo presión. Revisión focalizada en 12-18 meses\n→ Arriba de 60: rediseño curricular obligatorio. Los datos no dejan espacio interpretativo\n\nEl índice no predice quién encontrará trabajo. Mide cuán defendible es tu plan ante el consejo en 2030.",
+        "cta": "Cómo se calcula y qué cubre cada fuente: /benchmarks",
+        "hashtags": ["#PertinenciaCurricular", "#EducaciónSuperior", "#Métricas", "#IES", "#IAyEducación"],
+        "carousel": [
+          {"titulo": "Urgencia curricular en una fórmula", "cuerpo": "% skills declining × consenso promedio. Score 0-100. Más simple que un dashboard de 14 KPIs."},
+          {"titulo": "¿Por qué multiplicar?", "cuerpo": "Para distinguir señal débil (mucho ruido, poca evidencia) de señal fuerte (poca exposición pero datos sólidos)."},
+          {"titulo": "Lectura por umbrales", "cuerpo": "<30 alineado · 30-60 revisar · >60 rediseñar. Sin matices innecesarios para la decisión rectoral."},
+          {"titulo": "Las 5 fuentes", "cuerpo": "WEF Future of Jobs · McKinsey AI Index · CEPAL · Frey-Osborne · Eloundou/Anthropic. Consenso ponderado, no promedio simple."},
+          {"titulo": "Lo que NO mide", "cuerpo": "No mide calidad docente, prestigio, ni empleabilidad individual. Mide la pertinencia del plan ante demanda global."}
+        ]
+      }
+    },
+    {
+      "input_mdx_summary": "Artículo explicativo del KPI D1 (Obsolescencia): por qué puede subir aunque no cambies tu plan, cómo descomponerlo, qué significa un D1 alto vs bajo.",
+      "output": {
+        "pillar": "metrica_explicada",
+        "source_slug": "2026-04-d1-sube-aunque-no-cambies-nada",
+        "hook": "El D1 de tu carrera puede subir 0,12 en un trimestre sin que cambies una sola materia. Por qué: el numerador no es tu plan — es lo que el mercado deja de pedir.",
+        "bullets": [
+          "→ D1 = ratio de skills 'declining' del plan respecto al universo de skills demandadas en vacantes IA",
+          "→ Si OCC publica 30% más vacantes con skills 'growing' en un trimestre, tu D1 sube aunque no cambies tu plan",
+          "→ Por eso el observatorio actualiza datos cada 24h: el dato no es estático, la demanda tampoco"
+        ],
+        "cuerpo": "El D1 de tu carrera puede subir 0,12 en un trimestre sin que cambies una sola materia. Por qué: el numerador no es tu plan — es lo que el mercado deja de pedir.\n\n→ D1 = ratio de skills 'declining' del plan respecto al universo de skills demandadas en vacantes IA\n→ Si OCC publica 30% más vacantes con skills 'growing' en un trimestre, tu D1 sube aunque no cambies tu plan\n→ Por eso el observatorio actualiza datos cada 24h: el dato no es estático, la demanda tampoco\n\nLa lectura correcta no es \"el plan empeoró\". Es \"el contexto cambió y el plan se quedó donde estaba\". Misma cosa para el rector. Distinto énfasis para el cuerpo académico.",
+        "cta": "Explora cómo evoluciona D1 en cada carrera mes a mes: /estadisticas",
+        "hashtags": ["#EducaciónSuperior", "#PertinenciaCurricular", "#Métricas", "#FuturoDelTrabajo", "#IES"],
+        "carousel": [
+          {"titulo": "D1 sube sin que toques tu plan", "cuerpo": "El numerador es la demanda externa, no tu currícula. Datos del mercado mueven el indicador en tiempo real."},
+          {"titulo": "Por qué importa", "cuerpo": "Significa que tu plan se quedó atrás del cambio, no que empeoró. Diagnóstico distinto, conversación distinta."},
+          {"titulo": "Cómo medirlo", "cuerpo": "Ratio skills declining / universo skills demandadas en vacantes IA mexicanas. Frecuencia: actualización diaria con OCC."},
+          {"titulo": "Lectura accionable", "cuerpo": "Si D1 subió >0,1 en 3 meses sin cambios curriculares, hay 1-2 skills nuevas que el mercado pide y no enseñas."},
+          {"titulo": "Lo que el dashboard te muestra", "cuerpo": "Comparativo D1 trimestre vs trimestre, descomposición por skill, alertas automáticas si rebasas umbral 0,60."}
+        ]
+      }
+    }
+  ],
+  "lectura_rectores": [
+    {
+      "input_mdx_summary": "Carta a rectores sobre qué hacer cuando el benchmark dice urgencia ≥60. Tres pasos: validar localmente, separar skills específicas, construir caso interno con propuesta concreta.",
+      "output": {
+        "pillar": "lectura_rectores",
+        "source_slug": "2026-05-carta-rectores-urgencia-curricular",
+        "hook": "Si tu IES tiene una carrera con urgencia curricular ≥60 en OIA-EE, hay tres cosas que no debes hacer todavía. Y una que sí, hoy mismo.",
+        "bullets": [
+          "→ NO actualices el plan completo: la urgencia se concentra en 6-8 habilidades específicas, no en 20 materias",
+          "→ NO uses el dato global sin validar con empleadores locales — el benchmark es internacional, tu mercado es regional",
+          "→ NO presentes esto al cuerpo académico como debate filosófico: necesitas propuesta concreta de qué reemplazar"
+        ],
+        "cuerpo": "Si tu IES tiene una carrera con urgencia curricular ≥60 en OIA-EE, hay tres cosas que no debes hacer todavía. Y una que sí, hoy mismo.\n\n→ NO actualices el plan completo: la urgencia se concentra en 6-8 habilidades específicas, no en 20 materias\n→ NO uses el dato global sin validar con empleadores locales — el benchmark es internacional, tu mercado es regional\n→ NO presentes esto al cuerpo académico como debate filosófico: necesitas propuesta concreta de qué reemplazar\n\nLo que sí: hoy mismo, abre el benchmark de la carrera y separa las skills en 3 categorías — retirar (consenso ≥70%), revisar (50-70%), mantener (growing/mixed). Eso es 30 minutos de trabajo. El resto se decide con datos en mano, no con intuiciones.",
+        "cta": "Solicita un Diagnóstico Express gratuito de hasta 3 carreras de tu IES: /pertinencia",
+        "hashtags": ["#Rectores", "#IES", "#PertinenciaCurricular", "#EducaciónSuperior", "#LiderazgoInstitucional"],
+        "carousel": [
+          {"titulo": "Urgencia ≥60: tres cosas que NO hacer", "cuerpo": "1) actualizar plan completo · 2) usar dato global sin validar · 3) abrir debate filosófico con cuerpo académico."},
+          {"titulo": "Lo que sí: 30 minutos hoy", "cuerpo": "Abre el benchmark, separa skills en 3 categorías: retirar, revisar, mantener. La urgencia se concentra en 6-8 skills, no en 20 materias."},
+          {"titulo": "Validación local primero", "cuerpo": "Habla con 3-5 empleadores que contratan tus egresados. Pregunta: ¿qué competencias les faltan? Datos locales > intuición global."},
+          {"titulo": "Caso interno antes de propuesta", "cuerpo": "Sin propuesta concreta — qué materias reemplazar y por cuáles — la conversación con el cuerpo académico se vuelve filosofía."},
+          {"titulo": "Diagnóstico Express OIA-EE", "cuerpo": "Análisis gratuito de hasta 3 carreras de tu IES. Reporte ejecutivo en 7-10 días. Sin tarjeta, sin compromiso."}
+        ]
+      }
+    },
+    {
+      "input_mdx_summary": "Guía sobre cómo presentar un benchmark a Consejo Académico para defender una decisión de actualización curricular: estructura del argumento, cifras a destacar, contraargumentos típicos.",
+      "output": {
+        "pillar": "lectura_rectores",
+        "source_slug": "2026-04-guia-benchmark-consejo-academico",
+        "hook": "Defender un rediseño curricular ante Consejo Académico es 60% datos y 40% lenguaje. Aquí el guion exacto que estamos viendo funcionar con 3 IES piloto.",
+        "bullets": [
+          "→ Abrir con la cifra contraintuitiva: \"el plan no está mal, está desactualizado en 6 skills específicas\"",
+          "→ Mostrar el consenso entre fuentes: \"esto no es opinión, es agregado de WEF, McKinsey, Frey-Osborne, CEPAL y Eloundou\"",
+          "→ Cerrar con propuesta acotada: \"reemplazar materias X, Y, Z por estas 3 alternativas. No tocar el resto del plan\""
+        ],
+        "cuerpo": "Defender un rediseño curricular ante Consejo Académico es 60% datos y 40% lenguaje. Aquí el guion exacto que estamos viendo funcionar con 3 IES piloto.\n\n→ Abrir con la cifra contraintuitiva: \"el plan no está mal, está desactualizado en 6 skills específicas\"\n→ Mostrar el consenso entre fuentes: \"esto no es opinión, es agregado de WEF, McKinsey, Frey-Osborne, CEPAL y Eloundou\"\n→ Cerrar con propuesta acotada: \"reemplazar materias X, Y, Z por estas 3 alternativas. No tocar el resto del plan\"\n\nLos rediseños curriculares mueren cuando se presentan como reforma total. Sobreviven cuando se presentan como cirugía focalizada con evidencia agregada y propuesta de reemplazo concreta.",
+        "cta": "Plantilla descargable de presentación ejecutiva: /investigaciones/2026-04-guia-benchmark-consejo-academico",
+        "hashtags": ["#Rectores", "#GobernanzaAcadémica", "#PertinenciaCurricular", "#IES", "#LiderazgoInstitucional"],
+        "carousel": [
+          {"titulo": "60% datos, 40% lenguaje", "cuerpo": "Defender un rediseño curricular es tanto análisis como retórica institucional. Aquí el guion observado en 3 pilotos."},
+          {"titulo": "Hook contraintuitivo", "cuerpo": "Abre con: \"el plan no está mal, está desactualizado en 6 skills específicas\". Bajas la temperatura defensiva inmediatamente."},
+          {"titulo": "Consenso, no opinión", "cuerpo": "Muestra el agregado entre WEF, McKinsey, Frey-Osborne, CEPAL y Eloundou. Quita el debate sobre si el dato es válido."},
+          {"titulo": "Propuesta acotada", "cuerpo": "\"Reemplazar materias X, Y, Z por estas 3 alternativas. No tocar el resto del plan\". Cirugía, no reforma total."},
+          {"titulo": "Por qué funciona", "cuerpo": "Los rediseños mueren como reforma total. Sobreviven como cirugía focalizada con evidencia agregada y propuesta concreta de reemplazo."}
+        ]
+      }
+    }
+  ],
+  "build_in_public": [
+    {
+      "input_mdx_summary": "Anuncio de nuevo benchmark agregado: Ciencias Políticas. Por qué se agregó (gap detectado por usuarios), metodología aplicada, primeros hallazgos.",
+      "output": {
+        "pillar": "build_in_public",
+        "source_slug": "2026-04-nuevo-benchmark-ciencias-politicas",
+        "hook": "Ciencias Políticas entra al observatorio OIA-EE. Diecisiete carreras cubiertas, 100% del catálogo SEP. Lo construimos porque tres rectores lo pidieron en el mismo mes.",
+        "bullets": [
+          "→ Mismo motor metodológico: 5 fuentes internacionales × consenso ponderado por carrera × cruce con vacantes IA mexicanas",
+          "→ Primer hallazgo: D2 (oportunidades) de 0,71 — análisis de políticas públicas con IA es la skill growing más fuerte",
+          "→ Lo que falta: educación media superior. En cola para Q3 2026"
+        ],
+        "cuerpo": "Ciencias Políticas entra al observatorio OIA-EE. Diecisiete carreras cubiertas, 100% del catálogo SEP. Lo construimos porque tres rectores lo pidieron en el mismo mes.\n\n→ Mismo motor metodológico: 5 fuentes internacionales × consenso ponderado por carrera × cruce con vacantes IA mexicanas\n→ Primer hallazgo: D2 (oportunidades) de 0,71 — análisis de políticas públicas con IA es la skill growing más fuerte\n→ Lo que falta: educación media superior. En cola para Q3 2026\n\nConstruir en público obliga a publicar lo que se agrega y lo que falta. Lo segundo es la parte incómoda, pero es la que define dónde vamos.",
+        "cta": "Explora el benchmark completo de Ciencias Políticas: /benchmarks/ciencias-politicas",
+        "hashtags": ["#BuildInPublic", "#EdTech", "#CienciasPolíticas", "#EducaciónSuperior", "#OIA"],
+        "carousel": null
+      }
+    },
+    {
+      "input_mdx_summary": "Anuncio técnico de la integración con datos IMSS de empleo formal en tiempo real. Por qué importa metodológicamente, cómo cambia la confianza en D5 (Geografía).",
+      "output": {
+        "pillar": "build_in_public",
+        "source_slug": "2026-04-integracion-imss-empleo-formal",
+        "hook": "OIA-EE ya cruza datos IMSS de empleo formal en tiempo real. El KPI D5 (geografía) pasó de estimación basada en vacantes a empleo realmente registrado por estado y sector.",
+        "bullets": [
+          "→ Antes: D5 derivaba de OCC y proyecciones. Margen de error visible en estados con poca actividad scrapeable",
+          "→ Ahora: empleo formal registrado por sector SCIAN, mes a mes, dato oficial federal",
+          "→ Cambio metodológico: el observatorio puede mostrar dónde el empleo formal IA está creciendo, no solo dónde se publican vacantes"
+        ],
+        "cuerpo": "OIA-EE ya cruza datos IMSS de empleo formal en tiempo real. El KPI D5 (geografía) pasó de estimación basada en vacantes a empleo realmente registrado por estado y sector.\n\n→ Antes: D5 derivaba de OCC y proyecciones. Margen de error visible en estados con poca actividad scrapeable\n→ Ahora: empleo formal registrado por sector SCIAN, mes a mes, dato oficial federal\n→ Cambio metodológico: el observatorio puede mostrar dónde el empleo formal IA está creciendo, no solo dónde se publican vacantes\n\nLa diferencia entre vacante y empleo formal es la distancia entre lo que el mercado pide y lo que efectivamente contrata. Para un rector planeando expansión regional, eso ya no es lo mismo.",
+        "cta": "Cómo cambian los KPIs estado por estado con datos IMSS: /estadisticas",
+        "hashtags": ["#BuildInPublic", "#DatosAbiertos", "#IMSS", "#EducaciónSuperior", "#FuturoDelTrabajo"],
+        "carousel": null
+      }
+    }
+  ]
+}
