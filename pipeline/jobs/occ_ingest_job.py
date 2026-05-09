@@ -22,7 +22,7 @@ def run_occ_ingest(session: Session) -> OccIngestResult:
     insertadas = duplicadas = 0
 
     for vac in vacantes:
-        existing = session.query(Vacante).filter_by(fuente="occ", raw_json=vac.url).first()
+        existing = session.query(Vacante).filter_by(fuente="occ", url=vac.url).first()
         if existing:
             duplicadas += 1
             continue
@@ -38,7 +38,7 @@ def run_occ_ingest(session: Session) -> OccIngestResult:
             pais="México",
             estado=vac.estado,
             nivel_educativo=vac.nivel_educativo,
-            raw_json=vac.url,
+            url=vac.url,
         )
         session.add(v)
         insertadas += 1
