@@ -31,6 +31,19 @@ from pipeline.agents.common.anthropic_client import AgentClient, cached_block
 from pipeline.agents.common.router_client import RouterClient
 from pipeline.agents.rag.retriever import search
 
+# Para artículos largos académicos, Groq llama-3.1-8b genera filler.
+# Reordenamos providers priorizando los que escriben narrativa rica:
+# DeepSeek (excelente prosa larga) > Qwen plus > Cerebras 70B > Mistral > Groq último.
+_EDITORIAL_PROVIDER_ORDER = ["DeepSeek", "Qwen", "Cerebras", "Mistral", "OpenRouter", "Cohere", "ZAI", "Groq"]
+
+
+def _editorial_router() -> RouterClient:
+    from pipeline.ai_router.providers import active_providers
+    all_p = active_providers()
+    by_name = {p["name"]: p for p in all_p}
+    ordered = [by_name[n] for n in _EDITORIAL_PROVIDER_ORDER if n in by_name]
+    return RouterClient(providers=ordered)
+
 AGENT = "editorial_writer"
 ANTHROPIC_MODEL = "claude-sonnet-4-6"
 Backend = Literal["router", "anthropic"]
@@ -132,7 +145,7 @@ def write_mdx(
         model_to_use = ANTHROPIC_MODEL
     elif backend == "router":
         system_payload = [{"type": "text", "text": system_prompt}]
-        cli = client or RouterClient()
+        cli = client or _editorial_router()
         model_to_use = None
     else:
         raise ValueError(f"backend desconocido: {backend!r}")

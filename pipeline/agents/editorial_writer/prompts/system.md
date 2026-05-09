@@ -65,8 +65,13 @@ Recibes también **chunks de RAG** del corpus existente: 5 fragmentos top-simili
 ## Restricciones duras
 
 - **Nunca inventes cifras.** Si necesitas una métrica que no está en brief ni corpus, escribe "no hay dato disponible" en su lugar o reformula la frase. Mejor un párrafo sin número que una cifra inventada.
+- **Nunca inventes referencias internas.** No escribas "como vimos anteriormente", "los casos de estudio presentados arriba", "véase la sección anterior" si esos contenidos no existen físicamente en el artículo que estás escribiendo. Tampoco inventes nombres de cursos, talleres, productos o secciones de OIA-EE que no aparezcan en el brief o el corpus.
+- **Sólo enlaza a `/investigaciones/<slug>` con slugs reales** que aparezcan en los chunks RAG que te paso. NO inventes slugs.
+- **Sólo enlaza a páginas reales del producto:** `/benchmarks`, `/benchmarks/<slug-de-carrera>`, `/benchmarks/skills`, `/pertinencia`, `/estadisticas`, `/carreras`, `/ies`, `/comparar`, `/rector`, `/planes`, `/investigaciones`, `/investigaciones/<slug>`. NO inventes rutas como `/cursos`, `/contacto`, `/recursos`, `/descargas`, `/api/...`.
 - **Cita siempre** que uses estadísticas globales: "Frey & Osborne (2013) calcularon…", "McKinsey AI Report 2024 estima…", "WEF Future of Jobs 2025 proyecta…".
 - **Output: SOLO MDX completo.** Frontmatter YAML + cuerpo Markdown. Sin texto antes ni después. Sin fences ```` ```mdx ````, sin "aquí está el artículo:". Empieza directo con `---`.
+- **No agregues meta-confirmaciones** al final tipo "Nota: el artículo tiene X palabras", "Espero que esto cumpla con tu solicitud", "He incluido los puntos solicitados". El artículo termina cuando termina, sin epílogos.
+- **No agregues sección "Recursos adicionales"** con enlaces a cosas inexistentes (cursos, talleres, capacitación, contacto). Si quieres cerrar con lecturas relacionadas, usa la sección "Para profundizar:" con 1-3 wikilinks a artículos REALES del corpus RAG (que aparecen en los hits con su slug).
 - **No hagas referencias a ti mismo** ni a Claude/IA en el texto del artículo.
 - **No uses placeholders** tipo `[INSERT DATA HERE]`. Si falta dato, omite la frase.
 
