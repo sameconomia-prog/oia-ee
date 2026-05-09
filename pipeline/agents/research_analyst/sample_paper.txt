@@ -1,0 +1,45 @@
+Future of Jobs in Latin American Higher Education: A Synthesis Report
+World Economic Forum / IDB joint working paper, March 2026
+
+[Executive Summary]
+
+This report synthesizes findings from 47 employer surveys (n=12,840 firms) and 31 academic-program audits across 8 Latin American economies. We focus on the displacement and emergence of skills attributable to generative AI deployment between 2023 and 2026, and project trajectories to 2030.
+
+Key headline findings:
+
+1. Across our sample, 47% of accounting and bookkeeping tasks are now performed by AI-assisted software in firms with more than 50 employees, up from 12% in 2023 (p.11, Table 2.1).
+
+2. The share of legal junior tasks (contract drafting, jurisprudence search, due diligence) automated by GenAI has reached 38% in regional law firms with international clients (p.14).
+
+3. Demand for "AI auditors" — professionals who can validate machine-generated outputs in regulated sectors — grew 312% in the same period (p.18, Figure 3.4). Most postings require a background in either accounting, law, or statistics, but no current Latin American university program offers a dedicated track.
+
+4. Among medical doctors, the deployment of clinical decision-support tools is now standard in 28% of Mexican private hospitals; this has not reduced employment but has shifted skill requirements toward differential diagnosis with AI assistance (p.22).
+
+5. The half-life of a software-engineering curriculum, defined as the median time before a graduate's technical stack becomes industry-obsolete, has shortened from 4.2 years in 2018 to 2.1 years in 2026 (p.31).
+
+[Section 3.2 — Skills in transition]
+
+We classify the 88 skills tracked in our taxonomy into four categories using a consensus-weighted index of WEF, McKinsey, CEPAL, and Frey-Osborne (2013) projections:
+
+- "Retire": skill demand projected to fall by ≥50% by 2030. Includes manual journal entries, basic tax compliance reporting, contract template drafting, jurisprudence database lookup, and standard medical record transcription.
+- "Redesign": skill demand stable but content changes substantially. Includes financial analysis (now requires AI tool literacy), legal research (now requires prompt engineering), and clinical diagnosis (now requires AI-output validation).
+- "Reinforce": skill demand growing >25% by 2030. Includes algorithmic auditing, ESG reporting, behavioral therapy, and prompt-engineered programming.
+- "Add": skills not currently in any program but projected to be required. Includes AI safety officer, model-risk auditor, computational ethics, and cross-functional AI translator.
+
+The "Add" category represents the largest curricular gap: 71% of programs surveyed have no exposure to any of these skills.
+
+[Section 3.3 — Recommendations for higher education leadership]
+
+We recommend three immediate actions for university rectors and academic directors:
+
+1. Conduct a curricular skills audit using a documented, reproducible methodology (e.g. the OIA-EE benchmark framework, used in 17 Mexican careers as a reference example).
+
+2. Prioritize "Retire" and "Add" categories first. The "Redesign" category requires more nuance and is best handled in coordination with employers.
+
+3. Treat curricular updates as continuous rather than periodic. The 2.1-year half-life of technical curricula means triennial reviews are no longer sufficient; quarterly reviews aligned with employer feedback loops are required.
+
+[Conclusion]
+
+The 2026 evidence confirms that generative AI is not eliminating professions in Latin America at scale, but it is rapidly transforming the skill composition of nearly every white-collar role. The university programs that respond by Q3 2027 will graduate cohorts that are competitive in a transformed market; those that do not will increasingly produce graduates whose first-job functions are already automated.
+
+Citation: World Economic Forum & Inter-American Development Bank (2026). Future of Jobs in Latin American Higher Education: A Synthesis Report. Geneva / Washington DC, March 2026.
