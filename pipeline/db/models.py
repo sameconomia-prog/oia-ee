@@ -52,7 +52,9 @@ class Vacante(Base):
     estado           = Column(String(100))
     nivel_educativo  = Column(String(50))
     experiencia_anios = Column(SmallInteger)
+    url              = Column(String(500))
     raw_json         = Column(Text)
+    __table_args__ = (UniqueConstraint("fuente", "url", name="uq_vacante_fuente_url"),)
 
 
 class Ocupacion(Base):
@@ -168,7 +170,7 @@ class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
     id          = Column(String(36), primary_key=True, default=_uuid)
     usuario_id  = Column(String(36), ForeignKey("usuarios.id"), nullable=False)
-    token       = Column(String(255), unique=True, nullable=False)
+    token_hash  = Column(String(64), unique=True, nullable=False)
     expires_at  = Column(DateTime(timezone=True), nullable=False)
     revocado    = Column(Boolean, default=False)
     created_at  = Column(DateTime(timezone=True), default=datetime.utcnow)

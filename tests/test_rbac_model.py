@@ -31,7 +31,7 @@ def test_refresh_token_model(session):
 
     rt = RefreshToken(
         usuario_id="usr-001",
-        token="tok-abc123",
+        token_hash="a" * 64,
         expires_at=datetime.now(UTC) + timedelta(days=30),
     )
     session.add(rt)

@@ -5,7 +5,16 @@ import os
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+pysqlite:///:memory:")
 
-engine = create_engine(DATABASE_URL, echo=False)
+_engine_kwargs: dict = {"echo": False}
+if DATABASE_URL.startswith("postgres"):
+    _engine_kwargs.update(
+        pool_size=int(os.getenv("DB_POOL_SIZE", "20")),
+        max_overflow=int(os.getenv("DB_MAX_OVERFLOW", "10")),
+        pool_recycle=int(os.getenv("DB_POOL_RECYCLE", "3600")),
+        pool_pre_ping=True,
+    )
+
+engine = create_engine(DATABASE_URL, **_engine_kwargs)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
