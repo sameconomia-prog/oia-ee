@@ -120,6 +120,7 @@ OIA-EE/
 - P202: stats de cobertura en header de /investigaciones (total · tipos · carreras cubiertas)
 - P203: bloque rector en /investigaciones amplía a 5 artículos (1 principal + 4 secundarios 2×2)
 - P204: sistema de monitoreo de continuidad — PipelineRun model + migración Alembic (con seed _heartbeat), pipeline/monitoring.py (notify_job_result, deduplicación email ok→error/error→ok vía Resend), 14 jobs envueltos en api/main.py con try/except/notify_job_result + _write_heartbeat cada 30 min (Option C: inline scheduler, sin Railway Scheduler separado), GET /health con thresholds por 14 job_ids (503 si scheduler muerto, 200 degraded si job estancado/error), 471 tests · UptimeRobot pendiente configuración manual
+- F0 (2026-05-08): bloqueadores de auditoría 360° — pool DB config (postgres only), OCC timeout uniforme 15s, unique constraint vacantes(fuente,url) + columna url + backfill desde raw_json (migration 20260508000001), refresh tokens hasheados SHA-256 + rename column token→token_hash + purge plaintext (migration 20260508000002), frontend refreshAccessToken + authedFetch interceptor 401 con retry, decodeJwtPayload helper sustituye atob() manual frágil. ⚠️ APScheduler sin distributed lock — ver `docs/SCALING.md` antes de escalar Railway a 2+ instancias.
 - Código en GitHub: https://github.com/sameconomia-prog/oia-ee.git
 - Frontend: https://frontend-one-psi-80.vercel.app (Vercel ✅)
 - Backend: https://oia-api-production.up.railway.app (Railway ✅ corriendo)
