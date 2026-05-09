@@ -30,6 +30,8 @@ import yaml
 from pipeline.agents.common.anthropic_client import AgentClient, cached_block
 from pipeline.agents.common.router_client import RouterClient
 from pipeline.agents.rag.retriever import search
+from pipeline.agents.tools import benchmark_lookup, kpi_lookup, list_benchmark_slugs, source_lookup
+from pipeline.agents.validators import validate_frontmatter as _shared_validate_frontmatter
 
 # Para artículos largos académicos, Groq llama-3.1-8b genera filler.
 # Reordenamos providers priorizando los que escriben narrativa rica:
@@ -77,29 +79,72 @@ def _strip_fences(text: str) -> str:
 
 
 def _validate_frontmatter(mdx: str) -> dict:
-    """Verifica que el MDX tenga frontmatter YAML válido. Retorna el dict parseado."""
-    m = _FRONTMATTER_RE.match(mdx)
-    if not m:
-        raise ValueError("MDX sin frontmatter válido (debe empezar con --- y cerrar con ---)")
-    fm_raw = m.group(1)
+    """Wrapper sobre el validador compartido (mantiene compat con llamadores previos)."""
+    return _shared_validate_frontmatter(mdx)
+
+
+def _detect_benchmark_slug(brief: str, explicit: str | None) -> str | None:
+    """Heurística: detecta slug de carrera benchmark mencionado en el brief."""
+    if explicit:
+        return explicit
     try:
-        fm = yaml.safe_load(fm_raw) or {}
-    except yaml.YAMLError as e:
-        raise ValueError(f"Frontmatter YAML inválido: {e}") from e
+        slugs = list_benchmark_slugs()
+    except Exception:
+        return None
+    if not slugs:
+        return None
+    brief_lower = brief.lower()
+    # Match exacto del slug
+    for s in slugs:
+        if s in brief_lower:
+            return s
+    # Match por nombre legible (slug → "ingenieria sistemas" / "ingeniería sistemas")
+    for s in slugs:
+        # contaduria → "contaduria" o "contaduría"; ingenieria-sistemas → "ingeniería de sistemas"
+        words = s.replace("-", " ")
+        if words in brief_lower:
+            return s
+    return None
 
-    required = {"titulo", "tipo", "fecha", "resumen", "tags", "acceso"}
-    missing = required - set(fm.keys())
-    if missing:
-        raise ValueError(f"Frontmatter incompleto, falta: {sorted(missing)}")
 
-    if fm.get("tipo") not in ("analisis", "nota", "investigacion", "carta"):
-        raise ValueError(f"tipo inválido: {fm.get('tipo')!r}")
-    if fm.get("acceso") not in ("abierto", "premium"):
-        raise ValueError(f"acceso inválido: {fm.get('acceso')!r}")
-    if not isinstance(fm.get("tags"), list) or len(fm["tags"]) < 3:
-        raise ValueError(f"tags debe ser lista de ≥3 elementos, recibido: {fm.get('tags')!r}")
+def _prefetch_tool_data(slug: str | None) -> dict:
+    """Devuelve datos verificados pre-fetched. Vacío si no hay slug."""
+    out: dict = {}
+    if slug:
+        try:
+            kpi = kpi_lookup(slug, metric="summary")
+            if kpi:
+                out["kpi_lookup"] = kpi
+        except Exception as e:
+            out["kpi_lookup_error"] = str(e)
+        try:
+            bench = benchmark_lookup(slug)
+            if bench:
+                # Solo campos clave para no inflar prompt
+                out["benchmark_summary"] = {
+                    k: v for k, v in bench.items()
+                    if k in ("nombre", "slug", "urgencia_curricular", "skills_declining",
+                             "skills_growing", "skills_mixed_stable", "fuentes",
+                             "carrera", "carrera_nombre", "descripcion")
+                }
+        except Exception as e:
+            out["benchmark_lookup_error"] = str(e)
+    return out
 
-    return fm
+
+def _format_tool_data(data: dict) -> str:
+    """Renderiza el bloque de datos verificados para el prompt."""
+    if not data:
+        return ""
+    import json
+    parts = ["## Datos verificados del observatorio (USA SOLO ESTOS números, no inventes otros)\n"]
+    for key, val in data.items():
+        if key.endswith("_error"):
+            parts.append(f"### {key}\n*Error al consultar — omite este recurso en el artículo*\n")
+            continue
+        parts.append(f"### {key}\n```json\n{json.dumps(val, ensure_ascii=False, indent=2)}\n```\n")
+    parts.append("\n*Cita estos datos cuando los uses: `(OIA-EE Benchmarks, 2026)` o `según el observatorio`.*")
+    return "\n".join(parts)
 
 
 def _format_corpus_hits(hits: list[dict]) -> str:
@@ -136,6 +181,14 @@ def write_mdx(
     hits = search(brief, k=rag_k)
     corpus_block = _format_corpus_hits(hits)
 
+    # 1b. Pre-fetch tools si detectamos slug de carrera benchmark
+    detected_slug = _detect_benchmark_slug(brief, carrera_benchmark)
+    tool_data = _prefetch_tool_data(detected_slug)
+    tool_block = _format_tool_data(tool_data)
+    # Si el detectado no fue explícito, considerarlo para el frontmatter benchmark
+    if detected_slug and not carrera_benchmark:
+        carrera_benchmark = detected_slug
+
     # 2. System prompt + corpus (cached si Anthropic)
     system_prompt = _load_prompt()
 
@@ -166,6 +219,8 @@ def write_mdx(
     if extra_context:
         user_lines += ["", "## Contexto adicional", extra_context]
 
+    if tool_block:
+        user_lines += ["", tool_block]
     user_lines += ["", corpus_block, "", "---", "Genera el MDX completo. Empieza con `---` del frontmatter, sin texto antes."]
 
     kwargs = dict(
@@ -194,4 +249,37 @@ def write_mdx(
     return mdx, fm
 
 
-__all__ = ["write_mdx", "AGENT", "ANTHROPIC_MODEL", "Backend"]
+def quality_report(mdx: str) -> dict:
+    """Ejecuta los 3 validadores y retorna un reporte combinado.
+
+    Usable post-generación o sobre cualquier MDX existente.
+    """
+    from pipeline.agents.validators import cifras_summary, wikilinks_summary, split_frontmatter
+
+    fm = _shared_validate_frontmatter(mdx)
+    _, body = split_frontmatter(mdx)
+    cifras = cifras_summary(body)
+    links = wikilinks_summary(body)
+    return {
+        "frontmatter_ok": True,
+        "frontmatter": {k: fm[k] for k in ("titulo", "tipo", "tags", "acceso") if k in fm},
+        "body_chars": len(body),
+        "body_words_est": len(body.split()),
+        "cifras": cifras,
+        "wikilinks": links,
+        "warnings": _build_warnings(cifras, links),
+    }
+
+
+def _build_warnings(cifras: dict, links: dict) -> list[str]:
+    w: list[str] = []
+    if cifras.get("uncited", 0) > 0:
+        ratio = cifras.get("ratio_cited", 1)
+        w.append(f"⚠️ {cifras['uncited']} cifra(s) sin cita verificable (ratio cited={ratio:.0%}).")
+    if links.get("invalid", 0) > 0:
+        bad = ", ".join(p["path"] for p in links["invalid_paths"][:3])
+        w.append(f"⚠️ {links['invalid']} wikilink(s) rotos o inventados: {bad}")
+    return w
+
+
+__all__ = ["write_mdx", "quality_report", "AGENT", "ANTHROPIC_MODEL", "Backend"]
