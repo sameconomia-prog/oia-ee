@@ -8,6 +8,7 @@ jest.mock('@/lib/api')
 jest.mock('@/lib/reporte-pdf', () => ({ generarReporteRector: jest.fn() }))
 const mockGetRectorData = api.getRectorData as jest.MockedFunction<typeof api.getRectorData>
 const mockGetKpisIes = api.getKpisIes as jest.MockedFunction<typeof api.getKpisIes>
+const mockGetBenchmarkCareers = api.getBenchmarkCareers as jest.MockedFunction<typeof api.getBenchmarkCareers>
 
 const mockData = {
   ies: { id: '1', nombre: 'Universidad Humanitas', nombre_corto: 'UH' },
@@ -40,6 +41,7 @@ const mockData = {
 
 beforeEach(() => {
   mockGetKpisIes.mockResolvedValue(null)
+  mockGetBenchmarkCareers.mockResolvedValue([])
 })
 
 test('renderiza nombre de la IES', async () => {
