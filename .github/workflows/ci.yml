@@ -28,8 +28,8 @@ jobs:
 
       - name: Run backend tests
         env:
-          DATABASE_URL: sqlite+pysqlite:///:memory:
-          JWT_SECRET_KEY: ci-test-secret
+          DATABASE_URL: "sqlite+pysqlite:///:memory:"
+          JWT_SECRET_KEY: "ci-test-secret"
         run: |
           python -m pytest tests/ -q --tb=short --cov=api --cov=pipeline --cov-report=term-missing
 
