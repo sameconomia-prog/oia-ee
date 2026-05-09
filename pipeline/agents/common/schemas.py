@@ -29,8 +29,8 @@ class LinkedInPost(BaseModel):
     source_slug: str = Field(..., description="Slug del MDX fuente")
     hook: str = Field(..., min_length=20, max_length=240, description="Primera línea, dato fuerte real")
     bullets: list[str] = Field(..., min_length=3, max_length=5)
-    cuerpo: str = Field(..., min_length=80, max_length=900, description="Texto completo del post (sin hook ni CTA, bullets ya integrados con prefijos visuales)")
-    cta: str = Field(..., max_length=200, description="Llamada a la acción al final, con link interno OIA-EE")
+    cuerpo: str = Field(..., min_length=80, max_length=1300, description="Texto completo del post (LinkedIn permite ~3000 chars; mantener bajo 1300 para legibilidad)")
+    cta: str = Field(..., max_length=240, description="Llamada a la acción al final, con link interno OIA-EE")
     hashtags: list[str] = Field(..., min_length=3, max_length=6)
     carousel: list[CarouselSlide] | None = Field(None, description="Versión carrusel 5 slides, opcional")
 

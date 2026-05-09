@@ -59,6 +59,8 @@ def main() -> int:
     parser.add_argument("--list-pillars", action="store_true", help="Lista los pillars disponibles y sale")
     parser.add_argument("--dry-run", action="store_true",
                         help="No llama API. Imprime el system+user que se enviaría y tokens estimados.")
+    parser.add_argument("--backend", choices=["router", "anthropic"], default="router",
+                        help="router=free-ai-stack (gratis, default) · anthropic=Haiku 4.5 (paga)")
     args = parser.parse_args()
 
     if args.list_pillars:
@@ -86,7 +88,7 @@ def main() -> int:
         return 0
 
     try:
-        post = synthesize(slug=args.slug, pillar=args.pillar, extra_context=args.extra)
+        post = synthesize(slug=args.slug, pillar=args.pillar, extra_context=args.extra, backend=args.backend)
     except FileNotFoundError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         return 2
