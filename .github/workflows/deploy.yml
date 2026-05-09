@@ -21,7 +21,7 @@ jobs:
       - name: Deploy backend
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway up --detach
+        run: railway up --detach --service oia-api
 
       - name: Notify deploy
         if: always()
