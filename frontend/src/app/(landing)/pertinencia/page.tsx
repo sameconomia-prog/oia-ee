@@ -11,12 +11,21 @@ import type { BenchmarkCareerSummary, TendenciaNacional } from '@/lib/types'
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
 const INCLUDES = [
-  'Análisis de 5 fuentes internacionales (WEF, McKinsey, CEPAL, Frey-Osborne, Anthropic)',
-  'Matriz de convergencia skill-por-skill con dirección y horizonte de impacto',
-  'Diagnóstico D1–D6: obsolescencia, oportunidades, mercado laboral y perfil estudiantil',
-  'Recomendaciones curriculares accionables por competencia',
-  'Comparativo vs. promedio nacional de la carrera',
-  'Reporte PDF ejecutivo para presentar a rectoría',
+  'Análisis de hasta 3 carreras de tu institución',
+  'Diagnóstico D1–D2 con score y semáforo por carrera',
+  'Top 5 skills en riesgo y top 5 en oportunidad por carrera',
+  'Comparativo vs. promedio nacional',
+  'Reporte ejecutivo PDF de 4 páginas por carrera',
+  'Sin costo, sin compromisos, sin tarjeta',
+]
+
+const ESTUDIO_PROFUNDO = [
+  'Análisis de hasta 17 carreras + benchmarks globales',
+  'Matriz de convergencia 5 fuentes (WEF, McKinsey, CEPAL, Frey-Osborne, Anthropic)',
+  'Diagnóstico D1–D7 completo con plan curricular accionable',
+  'Skills clasificadas por acción: retirar / rediseñar / fortalecer / agregar',
+  'Reporte ejecutivo PDF de 11 páginas + sesión de presentación',
+  'Entregable en 15 días hábiles',
 ]
 
 const STEPS = [
@@ -28,28 +37,32 @@ const STEPS = [
 
 const FAQ = [
   {
-    q: '¿Cuánto cuesta el estudio?',
-    a: 'Nada. El estudio de pertinencia curricular es completamente gratuito para instituciones de educación superior en México. OIA-EE es un observatorio académico independiente, no una consultora.',
+    q: '¿Diagnóstico Express y Estudio Profundo: cuál es la diferencia?',
+    a: 'El Diagnóstico Express es gratuito, cubre hasta 3 carreras, entrega un PDF ejecutivo de 4 páginas por carrera con D1/D2 y top skills. Es la mejor entrada para conocer la metodología y obtener una primera lectura accionable. El Estudio Profundo (MXN $120,000) cubre hasta 17 carreras, incluye D1–D7 completo, matriz de convergencia 5 fuentes, plan curricular por skill y sesión de presentación a consejo. Si tu institución necesita un análisis para Consejo Directivo o rediseño curricular formal, el Profundo es lo apropiado.',
+  },
+  {
+    q: '¿Por qué hay una versión gratuita?',
+    a: 'OIA-EE es un observatorio independiente. El Express es nuestra forma de demostrar la metodología sin barrera económica: las IES que pasan por el Express conocen la profundidad real del análisis y deciden si su caso requiere el Estudio Profundo o suscribirse al observatorio.',
   },
   {
     q: '¿Qué necesito proporcionar?',
-    a: 'Solo el nombre de la carrera que quieres analizar y tu correo institucional. No necesitas subir documentos ni planes de estudio. Trabajamos con datos públicos y benchmarks internacionales.',
+    a: 'Para Express: nombre de hasta 3 carreras y tu correo institucional. Para Profundo: además, lista de carreras prioritarias, contexto curricular y, si aplica, agenda con el Consejo Académico para la sesión de presentación.',
   },
   {
     q: '¿Cómo sé que el análisis es riguroso?',
-    a: 'La metodología cruza 5 fuentes internacionales (WEF Future of Jobs, McKinsey, CEPAL, Frey-Osborne y Anthropic). Cada skill se clasifica por consenso porcentual entre fuentes y horizonte de impacto. Puedes explorar la metodología en /benchmarks antes de solicitar.',
+    a: 'La metodología cruza 5 fuentes internacionales (WEF Future of Jobs, McKinsey, CEPAL, Frey-Osborne, Anthropic) más datos del mercado laboral mexicano (IMSS, INEGI ENOE, OCC). El Express usa el mismo motor; lo que reduce es la cobertura por carrera y los entregables, no la calidad metodológica. Puedes explorar la metodología en /benchmarks antes de solicitar.',
   },
   {
     q: '¿El estudio habla solo de IA o es curricular en general?',
-    a: 'Es específico al impacto de la automatización e IA generativa. Diagnóstica qué competencias de tu plan de estudios tienen riesgo de obsolescencia (D1), cuáles representan oportunidades emergentes (D2) y qué habilidades pide hoy el mercado laboral mexicano.',
+    a: 'Es específico al impacto de la automatización e IA generativa sobre competencias profesionales. Diagnóstica qué competencias de tu plan de estudios tienen riesgo de obsolescencia (D1), cuáles representan oportunidades emergentes (D2) y qué habilidades pide hoy el mercado laboral mexicano.',
   },
   {
     q: '¿Con quién voy a hablar?',
-    a: 'Con Samuel Ruiz, economista y fundador de OIA-EE. El análisis no es automatizado: Sam revisa cada solicitud personalmente y te contacta en máximo 24 horas hábiles para confirmar detalles.',
+    a: 'Con Samuel Ruiz, economista y fundador de OIA-EE. Sam revisa cada solicitud personalmente y te contacta en máximo 24 horas hábiles para confirmar detalles, tanto para Express como para Profundo.',
   },
   {
     q: '¿Qué hago con el reporte cuando lo recibo?',
-    a: 'El PDF está diseñado para presentarse a Consejo Académico o Rectoría. Incluye diagnóstico ejecutivo, matriz de skills por acción (retirar/rediseñar/fortalecer/agregar) y comparativo vs. promedio nacional de la carrera.',
+    a: 'El PDF está diseñado para presentarse a Consejo Académico o Rectoría. El Express es ideal para abrir conversación interna; el Profundo trae el plan curricular detallado por competencia y la sesión de presentación.',
   },
 ]
 
@@ -122,18 +135,24 @@ function PertinenciaContent() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-3">
-          <Badge variant="oportunidad">Gratuito</Badge>
+          <Badge variant="oportunidad">Diagnóstico Express · Gratuito</Badge>
           <Badge variant="neutro">Para instituciones</Badge>
         </div>
-        <h1 className="text-3xl font-bold text-slate-900">Estudio de Pertinencia Curricular</h1>
+        <h1 className="text-3xl font-bold text-slate-900">Diagnóstico Express de Pertinencia</h1>
         <p className="text-slate-600 mt-2 text-base leading-relaxed max-w-2xl">
-          Analizamos una carrera de tu institución con datos reales: benchmarks internacionales,
-          tendencias del mercado laboral mexicano y exposición a la automatización por IA.
-          Sin costo, sin compromisos.
+          Analizamos hasta <strong>3 carreras</strong> de tu institución con la metodología OIA-EE:
+          5 fuentes internacionales, mercado laboral mexicano y exposición a IA. Reporte ejecutivo
+          PDF entregado en 7–10 días hábiles. Sin costo, sin compromisos.
+        </p>
+        <p className="text-slate-500 mt-2 text-sm leading-relaxed max-w-2xl">
+          ¿Necesitas las 17 carreras + plan curricular completo + sesión a Consejo?{' '}
+          <a href="#estudio-profundo" className="text-brand-600 hover:underline font-medium">
+            Conoce el Estudio Profundo →
+          </a>
         </p>
         {totalSolicitudes !== null && totalSolicitudes >= 10 && (
           <p className="mt-3 text-sm text-emerald-700 font-medium">
-            ✓ {totalSolicitudes} instituciones ya solicitaron su análisis
+            ✓ {totalSolicitudes} instituciones ya solicitaron su diagnóstico
           </p>
         )}
       </div>
@@ -167,7 +186,7 @@ function PertinenciaContent() {
             </Card>
           ) : (
             <Card className="p-6">
-              <h2 className="text-base font-semibold text-slate-800 mb-5">Solicitar estudio gratuito</h2>
+              <h2 className="text-base font-semibold text-slate-800 mb-5">Solicitar Diagnóstico Express gratuito</h2>
               <form onSubmit={submit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -259,7 +278,7 @@ function PertinenciaContent() {
                   disabled={loading}
                   className="w-full py-2.5 bg-brand-600 text-white font-semibold text-sm rounded-md hover:bg-brand-700 transition-colors disabled:opacity-60"
                 >
-                  {loading ? 'Enviando…' : 'Solicitar estudio gratuito'}
+                  {loading ? 'Enviando…' : 'Solicitar Diagnóstico Express gratuito'}
                 </button>
 
                 <p className="text-[11px] text-slate-400 text-center">
@@ -274,7 +293,7 @@ function PertinenciaContent() {
         <div className="space-y-4">
           {/* What's included */}
           <Card className="p-4">
-            <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest mb-3">El estudio incluye</h3>
+            <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest mb-3">Diagnóstico Express incluye</h3>
             <ul className="space-y-2">
               {INCLUDES.map((item, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs text-slate-600">
@@ -363,6 +382,48 @@ function PertinenciaContent() {
             </Link>
           </Card>
         </div>
+      </div>
+
+      {/* Estudio Profundo */}
+      <div id="estudio-profundo" className="mt-12 scroll-mt-20">
+        <Card className="p-6 border-amber-200 bg-amber-50/40">
+          <div className="flex flex-col md:flex-row md:items-start gap-6">
+            <div className="flex-1">
+              <Badge variant="neutro">Producto Pago</Badge>
+              <h2 className="text-2xl font-bold text-slate-900 mt-3 mb-2">Estudio Profundo de Pertinencia</h2>
+              <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                Cuando el Diagnóstico Express deja preguntas abiertas, el Estudio Profundo entrega
+                la matriz completa: 17 carreras, plan curricular accionable por skill, sesión de
+                presentación a Consejo Académico. Es el mismo motor con la cobertura completa.
+              </p>
+              <ul className="space-y-2 mb-1">
+                {ESTUDIO_PROFUNDO.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                    <span className="text-amber-600 mt-0.5 shrink-0">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="text-center shrink-0 md:w-56">
+              <p className="text-3xl font-bold text-slate-900">$120,000</p>
+              <p className="text-xs text-slate-500">MXN · ≈ $6,000 USD</p>
+              <p className="text-[11px] text-slate-400 mt-0.5 mb-4">Pago único · 15 días hábiles</p>
+              <Link
+                href="mailto:sam.economia@gmail.com?subject=Cotización%20Estudio%20Profundo%20de%20Pertinencia"
+                className="inline-block w-full bg-amber-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-amber-600 transition-colors"
+              >
+                Solicitar cotización →
+              </Link>
+              <p className="text-[11px] text-slate-400 mt-2">
+                ¿Suscribes Pro o Enterprise?{' '}
+                <Link href="/planes" className="text-brand-600 hover:underline">
+                  Incluye 1 Estudio Profundo/año
+                </Link>
+              </p>
+            </div>
+          </div>
+        </Card>
       </div>
 
       {/* FAQ */}

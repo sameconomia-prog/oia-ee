@@ -21,6 +21,7 @@ const FEATURES_PRO = [
   'Exportación CSV / API',
   'Hasta 15 usuarios',
   'Sesión ejecutiva mensual',
+  '1 Estudio Profundo de Pertinencia incluido/año',
   'SLA 99.5 % / respuesta 24 h',
 ]
 const FEATURES_ENT = [
@@ -32,12 +33,15 @@ const FEATURES_ENT = [
   'SLA 99.9 % / respuesta 4 h',
   'Onboarding y capacitación in-situ',
   'Cuenta dedicada de éxito',
+  '2 Estudios Profundos de Pertinencia/año',
 ]
 const FEATURES_ADDON = [
-  'Estudio de pertinencia ad-hoc',
-  'Reporte PDF de 11 páginas',
-  'Comparativo vs media nacional',
-  'Plan curricular de mejora',
+  'Hasta 17 carreras + benchmarks globales',
+  'Diagnóstico D1–D7 completo (no solo D1/D2)',
+  'Matriz de convergencia 5 fuentes',
+  'Plan curricular accionable por skill',
+  'Reporte ejecutivo PDF 11 páginas',
+  'Sesión de presentación a Consejo',
   'Entregable en 15 días hábiles',
 ]
 
@@ -110,8 +114,15 @@ export default function PlanesPage() {
         <h1 className="text-3xl font-bold text-slate-900 mb-3">
           Inteligencia institucional para decisiones académicas
         </h1>
-        <p className="text-slate-500 text-base max-w-xl mx-auto">
+        <p className="text-slate-500 text-base max-w-xl mx-auto mb-4">
           Sustituye estudios de pertinencia de $300k–$800k MXN con un observatorio vivo, actualizable y defendible ante consejo directivo.
+        </p>
+        <p className="text-sm text-emerald-700 max-w-xl mx-auto">
+          ✓ <strong>Diagnóstico Express gratuito</strong> (3 carreras) disponible para cualquier IES.{' '}
+          <Link href="/pertinencia" className="text-emerald-700 hover:underline font-medium">
+            Solicítalo aquí
+          </Link>
+          {' '}antes de suscribir.
         </p>
       </div>
 
@@ -150,31 +161,41 @@ export default function PlanesPage() {
         />
       </div>
 
-      {/* Add-on */}
+      {/* Estudio Profundo (add-on / incluido en Pro+Ent) */}
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-10">
-        <div className="flex flex-col md:flex-row md:items-center gap-6">
+        <div className="flex flex-col md:flex-row md:items-start gap-6">
           <div className="flex-1">
-            <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Add-on puntual</span>
-            <h2 className="text-xl font-bold text-slate-900 mt-0.5 mb-1">Estudio de Pertinencia Ad-hoc</h2>
-            <p className="text-sm text-slate-600">
-              Reporte ejecutivo PDF de 11 páginas sobre una carrera específica: riesgo D1–D7, comparativo nacional,
-              proyecciones y plan de mejora curricular. Puerta de entrada ideal antes de suscribir un plan anual.
+            <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">
+              Producto Profundo · Pago único o incluido en suscripción
+            </span>
+            <h2 className="text-xl font-bold text-slate-900 mt-0.5 mb-1">Estudio Profundo de Pertinencia</h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              La versión completa del diagnóstico: 17 carreras, D1–D7, plan curricular accionable
+              por skill y sesión de presentación a Consejo Académico. Es el formato que sustituye
+              el estudio de pertinencia tradicional de consultoras ($300k–$800k MXN).
+            </p>
+            <p className="text-xs text-slate-500 italic">
+              ¿Quieres una primera lectura sin costo? El{' '}
+              <Link href="/pertinencia" className="text-brand-600 hover:underline font-medium">Diagnóstico Express gratuito</Link>{' '}
+              cubre 3 carreras y usa el mismo motor metodológico.
             </p>
           </div>
-          <div className="text-center shrink-0">
+          <div className="text-center shrink-0 md:w-64">
             <p className="text-3xl font-bold text-slate-900">$120,000</p>
             <p className="text-xs text-slate-500">MXN · ≈ $6,000 USD</p>
-            <p className="text-xs text-slate-400 mb-3">Entrega en 15 días hábiles</p>
+            <p className="text-[11px] text-emerald-700 mt-1 mb-3 font-medium">
+              Incluido en Pro (1/año) y Enterprise (2/año)
+            </p>
             <ul className="text-xs text-slate-600 space-y-1 text-left mb-4">
               {FEATURES_ADDON.map(f => (
-                <li key={f} className="flex items-center gap-1.5"><Check />{f}</li>
+                <li key={f} className="flex items-start gap-1.5"><Check /><span>{f}</span></li>
               ))}
             </ul>
             <Link
-              href="/pertinencia"
-              className="inline-block bg-amber-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-amber-600 transition-colors"
+              href="mailto:sam.economia@gmail.com?subject=Cotización%20Estudio%20Profundo%20de%20Pertinencia"
+              className="inline-block w-full bg-amber-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-amber-600 transition-colors"
             >
-              Solicitar estudio →
+              Solicitar cotización →
             </Link>
           </div>
         </div>
