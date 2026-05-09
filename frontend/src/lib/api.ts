@@ -1,11 +1,38 @@
 import type { Noticia, KpiResult, IngestResult, RectorData, AlertasHistorial, SimularInput, SimResult, EscenariosHistorialResult, ResumenPublico, IesKpiResult, EstadoKpiResult, NoticiasKpiResult, CarreraKpi, KpisNacionalResumen, SkillFreq, VacantePublico, TopRiesgoItem, TendenciaNacional, CarreraDetalle, IesDetalle, EstadisticasPublicas, KpisDistribucion, VacanteTendencia, ImpactoData, SkillGraphData, TopRiesgoItemOut, PertinenciaReportData } from './types'
-import { getToken } from './auth'
+import { getToken, refreshAccessToken } from './auth'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
 function authHeaders(): Record<string, string> {
   const token = getToken()
   return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+/**
+ * Fetch que adjunta Authorization actual y, si recibe 401, intenta refrescar
+ * el access token vía /auth/refresh y reintenta la request una vez.
+ */
+async function authedFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  const buildHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = {}
+    const src = init.headers
+    if (src) {
+      if (src instanceof Headers) src.forEach((v, k) => { headers[k] = v })
+      else if (Array.isArray(src)) for (const [k, v] of src) headers[k] = v
+      else Object.assign(headers, src as Record<string, string>)
+    }
+    const token = getToken()
+    if (token) headers['Authorization'] = `Bearer ${token}`
+    return headers
+  }
+
+  let res = await fetch(url, { ...init, headers: buildHeaders() })
+  if (res.status !== 401) return res
+
+  const refreshed = await refreshAccessToken()
+  if (!refreshed) return res
+
+  return fetch(url, { ...init, headers: buildHeaders() })
 }
 
 export async function getNoticias(
@@ -39,9 +66,7 @@ export async function postIngestGdelt(adminKey: string): Promise<IngestResult> {
 }
 
 export async function getRectorData(iesId: string): Promise<RectorData> {
-  const res = await fetch(`${BASE}/rector?ies_id=${iesId}`, {
-    headers: authHeaders(),
-  })
+  const res = await authedFetch(`${BASE}/rector?ies_id=${iesId}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }
@@ -53,23 +78,20 @@ export async function getAlertas(
   const q = new URLSearchParams({ ies_id: iesId })
   if (options.skip !== undefined) q.set('skip', String(options.skip))
   if (options.limit !== undefined) q.set('limit', String(options.limit))
-  const res = await fetch(`${BASE}/alertas?${q}`, { headers: authHeaders() })
+  const res = await authedFetch(`${BASE}/alertas?${q}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }
 
 export async function markAlertaRead(alertaId: string): Promise<void> {
-  const res = await fetch(`${BASE}/alertas/${alertaId}/leer`, {
-    method: 'PUT',
-    headers: authHeaders(),
-  })
+  const res = await authedFetch(`${BASE}/alertas/${alertaId}/leer`, { method: 'PUT' })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
 }
 
 export async function postSimular(input: SimularInput): Promise<SimResult> {
-  const res = await fetch(`${BASE}/escenarios/simular`, {
+  const res = await authedFetch(`${BASE}/escenarios/simular`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -346,7 +368,7 @@ export async function getEscenarios(
   if (options.skip !== undefined) q.set('skip', String(options.skip))
   if (options.limit !== undefined) q.set('limit', String(options.limit))
   const qs = q.toString()
-  const res = await fetch(`${BASE}/escenarios/${qs ? `?${qs}` : ''}`, { headers: authHeaders() })
+  const res = await authedFetch(`${BASE}/escenarios/${qs ? `?${qs}` : ''}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }
@@ -360,7 +382,7 @@ export async function getSkillGraph(carreraId: string, topN = 20): Promise<Skill
 export async function getPrediccionSemaforo(
   carreraId: string,
 ): Promise<{ d1_score: number; proyeccion_1a: string; proyeccion_3a: string; proyeccion_5a: string } | null> {
-  const res = await fetch(`${BASE}/predicciones/carrera/${carreraId}/semaforo`, { headers: authHeaders() })
+  const res = await authedFetch(`${BASE}/predicciones/carrera/${carreraId}/semaforo`)
   if (res.status === 404 || res.status === 422) return null
   if (!res.ok) return null
   return await res.json()
@@ -477,10 +499,7 @@ export async function getBenchmarkSourceDetail(sourceId: string): Promise<import
 }
 
 export async function marcarTodasAlertas(): Promise<{ marcadas: number }> {
-  const res = await fetch(`${BASE}/alertas/leer-todas`, {
-    method: 'PUT',
-    headers: { ...authHeaders() },
-  })
+  const res = await authedFetch(`${BASE}/alertas/leer-todas`, { method: 'PUT' })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json()
 }

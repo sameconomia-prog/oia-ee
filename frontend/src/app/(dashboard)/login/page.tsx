@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { saveAuth, isAuthenticated } from '@/lib/auth'
+import { saveAuth, isAuthenticated, decodeJwtPayload } from '@/lib/auth'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -32,15 +32,17 @@ export default function LoginPage() {
         return
       }
       const data = await res.json()
-      const payloadB64 = data.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
-      const payload = JSON.parse(atob(payloadB64.padEnd(payloadB64.length + (4 - payloadB64.length % 4) % 4, '=')))
-      // Fetch IES nombre via /auth/me
+      const payload = decodeJwtPayload(data.access_token)
+      if (!payload) {
+        setError('Respuesta del servidor inválida')
+        return
+      }
       let iesNombre: string | undefined
       try {
         const me = await fetch(`${BASE}/auth/me`, { headers: { Authorization: `Bearer ${data.access_token}` } })
         if (me.ok) { const md = await me.json(); iesNombre = md.ies_nombre }
       } catch { /* silencioso */ }
-      saveAuth(data.access_token, payload.ies_id, iesNombre, payload.rol)
+      saveAuth(data.access_token, payload.ies_id, iesNombre, payload.rol, data.refresh_token)
       router.push('/rector')
     } catch {
       setError('Error de conexión con el servidor')
