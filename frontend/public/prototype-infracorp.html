@@ -8,6 +8,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/math/MeshSurfaceSampler.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
@@ -750,7 +758,7 @@
 ══════════════════════════════════════════════ */
 (function() {
   const canvas = document.getElementById('particle-canvas');
-  const N = 10000;
+  const N = 25000;
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -1471,10 +1479,509 @@
     done(); return out;
   }
 
+  /* ── Face from OBJ (anatomical perfil — Walt head) ──
+     Carga `/models/WaltHead.obj`, muestrea N puntos uniformes con
+     MeshSurfaceSampler, aplica:
+     - normalización a unit sphere
+     - rotación a perfil lateral mirando a la izquierda
+     - dispersión Perlin/radial creciente para bandas DIM/GLOW (efecto desintegración)
+     Mantiene la paleta indexada actual: orden de generación = orden de banda
+     (white → accent → dim → glow). Devuelve Promise<Float32Array(N*3)>.
+  */
+  function loadFace3DFromOBJ() {
+    return new Promise((resolve, reject) => {
+      if (typeof THREE.OBJLoader !== 'function') {
+        return reject(new Error('OBJLoader no disponible'));
+      }
+      if (typeof THREE.MeshSurfaceSampler !== 'function') {
+        return reject(new Error('MeshSurfaceSampler no disponible'));
+      }
+      const loader = new THREE.OBJLoader();
+      loader.load('/models/WaltHead.obj',
+        (object) => {
+          try {
+            // Encontrar el primer mesh con geometry
+            let mesh = null;
+            object.traverse(c => { if (!mesh && c.isMesh && c.geometry) mesh = c; });
+            if (!mesh) return reject(new Error('No mesh in OBJ'));
+            mesh.geometry.computeVertexNormals();
+
+            // Normalizar a unit-ish sphere centrada en origen
+            const box = new THREE.Box3().setFromObject(mesh);
+            const center = new THREE.Vector3(); box.getCenter(center);
+            const size = new THREE.Vector3(); box.getSize(size);
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const targetSize = 1.55; // cabeza grande
+            const scale = targetSize / maxDim;
+
+            // Weighted sampling: más partículas en cara/ojos/nariz/boca
+            // WaltHead bbox: x[-28,28], y[-3,76], z[-31,26]. Zona facial frontal: z>5, y 30-65.
+            const posAttr = mesh.geometry.attributes.position;
+            const vCount = posAttr.count;
+            const weights = new Float32Array(vCount);
+            for (let v = 0; v < vCount; v++) {
+              const x = posAttr.getX(v), y = posAttr.getY(v), z = posAttr.getZ(v);
+              let w = 1.0;
+              // zona facial frontal (cara visible)
+              if (z > 5 && y > 28 && y < 66) w += 2.5;
+              // zona detalle (ojos / nariz / labios)
+              if (z > 12 && y > 38 && y < 60) w += 3.5;
+              // boca / mentón
+              if (z > 8 && y > 28 && y < 42 && Math.abs(x) < 14) w += 2.0;
+              // contorno mandíbula
+              if (z > 0 && z < 14 && y > 18 && y < 36 && Math.abs(x) > 14) w += 1.0;
+              weights[v] = w;
+            }
+            mesh.geometry.setAttribute('weight', new THREE.BufferAttribute(weights, 1));
+            const sampler = new THREE.MeshSurfaceSampler(mesh).setWeightAttribute('weight').build();
+            const tmpPos = new THREE.Vector3();
+            const tmpNrm = new THREE.Vector3();
+            const out = new Float32Array(N * 3);
+
+            // Helper: aplica transform completo (centrar, escalar, rotar)
+            // Rotación Y = -20°
+            const ROT = -20 * Math.PI / 180;
+            const cosR = Math.cos(ROT), sinR = Math.sin(ROT);
+            const transform = (v) => {
+              // centrar
+              let x = (v.x - center.x) * scale;
+              let y = (v.y - center.y) * scale;
+              let z = (v.z - center.z) * scale;
+              // rotar Y
+              const rx = x * cosR + z * sinR;
+              const rz = -x * sinR + z * cosR;
+              x = rx; z = rz;
+              // shift sutil para alinear con landing
+              return [x, y - 0.02, z];
+            };
+
+            // Pseudo-noise (sustituto de Perlin sin dependencia)
+            const noise = (x, y, z) => {
+              const s = Math.sin(x * 13.7 + y * 7.3 + z * 17.1) * 43758.5453;
+              return (s - Math.floor(s)) * 2 - 1;
+            };
+
+            // Bandas:
+            // 0..BAND_W (8% ≈ 800): contorno frontal nítido — bias hacia caras visibles
+            // BAND_W..BAND_A (50% ≈ 4200): superficie completa uniforme
+            // BAND_A..BAND_D (90% ≈ 4000): muestreo + offset radial creciente (dispersión hacia atrás)
+            // BAND_D..N (10% ≈ 1000): dispersión amplia (halo desintegrado)
+            const BAND_W = Math.floor(N * 0.08);
+            const BAND_A = Math.floor(N * 0.50);
+            const BAND_D = Math.floor(N * 0.90);
+
+            // Dirección preferida del viento — desintegración sutil hacia atrás-arriba
+            const WIND = { x: 0.10, y: 0.08, z: -0.04 };
+
+            // Ayudante: muestrea un punto y opcionalmente lo descarta si su normal
+            // no apunta hacia el viewer (banda WHITE — contorno frontal visible)
+            const sampleOnce = (filterNormalX = null) => {
+              for (let attempt = 0; attempt < 12; attempt++) {
+                sampler.sample(tmpPos, tmpNrm);
+                if (filterNormalX !== null) {
+                  // Tras la rotación Y +π/2, la normal "frontal" (hacia el viewer / -Z mundo)
+                  // corresponde a normal original con componente +X. Filtramos:
+                  if (tmpNrm.x < filterNormalX) continue;
+                }
+                return [tmpPos.clone(), tmpNrm.clone()];
+              }
+              sampler.sample(tmpPos, tmpNrm);
+              return [tmpPos.clone(), tmpNrm.clone()];
+            };
+
+            for (let k = 0; k < N; k++) {
+              let band, offsetMag, jitter;
+              if (k < BAND_W) {
+                // contorno frontal — superficie sin offset, jitter mínimo
+                const [pos] = sampleOnce(0.30);
+                const [x, y, z] = transform(pos);
+                out[k*3]   = x;
+                out[k*3+1] = y;
+                out[k*3+2] = z;
+              } else if (k < BAND_A) {
+                // superficie general — sin offset, jitter mínimo
+                const [pos] = sampleOnce();
+                const [x, y, z] = transform(pos);
+                out[k*3]   = x + (Math.random()-0.5) * 0.006;
+                out[k*3+1] = y + (Math.random()-0.5) * 0.006;
+                out[k*3+2] = z + (Math.random()-0.5) * 0.006;
+              } else if (k < BAND_D) {
+                // dispersión sutil — la cara se mantiene reconocible
+                const [pos] = sampleOnce();
+                const [x, y, z] = transform(pos);
+                const t = (k - BAND_A) / (BAND_D - BAND_A);
+                const mag = Math.pow(t, 1.5) * 0.28;
+                const nx = noise(x, y, z) * 0.5 + WIND.x;
+                const ny = noise(y, z, x) * 0.4 + WIND.y;
+                const nz = noise(z, x, y) * 0.3 + WIND.z;
+                out[k*3]   = x + nx * mag;
+                out[k*3+1] = y + ny * mag;
+                out[k*3+2] = z + nz * mag;
+              } else {
+                // halo desintegrado — partículas dispersas hacia atrás-arriba
+                const [pos] = sampleOnce();
+                const [x, y, z] = transform(pos);
+                const t = (k - BAND_D) / (N - BAND_D);
+                const mag = 0.30 + Math.pow(t, 1.6) * 0.70;
+                const nx = noise(x*1.3, y*0.9, z*1.1) * 0.7 + WIND.x * 1.4;
+                const ny = noise(y*1.3, z*0.9, x*1.1) * 0.6 + WIND.y * 1.4;
+                const nz = noise(z*1.3, x*0.9, y*1.1) * 0.4 + WIND.z * 1.4;
+                out[k*3]   = x + nx * mag;
+                out[k*3+1] = y + ny * mag;
+                out[k*3+2] = z + nz * mag;
+              }
+            }
+
+            // ── k-NN line pairs (sobre los puntos muestreados) — sutiles ──
+            const linePairs = [];
+            const KNN_K = 2;
+            const KNN_MAX_DIST_SQ = 0.08 * 0.08;
+            const cellSize = 0.07;
+            const cellKey = (x, y, z) =>
+              `${Math.floor(x/cellSize)},${Math.floor(y/cellSize)},${Math.floor(z/cellSize)}`;
+            const grid = new Map();
+            for (let i = 0; i < BAND_A; i++) {
+              const k = cellKey(out[i*3], out[i*3+1], out[i*3+2]);
+              if (!grid.has(k)) grid.set(k, []);
+              grid.get(k).push(i);
+            }
+            for (let i = 0; i < BAND_A; i++) {
+              const x = out[i*3], y = out[i*3+1], z = out[i*3+2];
+              const cx = Math.floor(x/cellSize), cy = Math.floor(y/cellSize), cz = Math.floor(z/cellSize);
+              const candidates = [];
+              for (let dx = -1; dx <= 1; dx++)
+                for (let dy = -1; dy <= 1; dy++)
+                  for (let dz = -1; dz <= 1; dz++) {
+                    const arr = grid.get(`${cx+dx},${cy+dy},${cz+dz}`);
+                    if (arr) for (const j of arr) {
+                      if (j === i) continue;
+                      const ddx = out[j*3]-x, ddy = out[j*3+1]-y, ddz = out[j*3+2]-z;
+                      const d2 = ddx*ddx + ddy*ddy + ddz*ddz;
+                      if (d2 < KNN_MAX_DIST_SQ) candidates.push([j, d2]);
+                    }
+                  }
+              candidates.sort((a, b) => a[1] - b[1]);
+              const taken = candidates.slice(0, KNN_K);
+              for (const [j] of taken) linePairs.push(i, j);
+            }
+
+            // ── Edges anatómicas del mesh real (nariz, pómulo, mandíbula, ojo) ──
+            // EdgesGeometry extrae aristas con ángulo dihedral > threshold
+            const edgesGeom = new THREE.EdgesGeometry(mesh.geometry, 14); // 14° threshold
+            const edgePosAttr = edgesGeom.attributes.position;
+            const eN = edgePosAttr.count;
+            const edgePositions = new Float32Array(eN * 3);
+            // Aplicar la misma transformación que a los puntos muestreados
+            for (let v = 0; v < eN; v++) {
+              const ev = new THREE.Vector3(
+                edgePosAttr.getX(v),
+                edgePosAttr.getY(v),
+                edgePosAttr.getZ(v)
+              );
+              const [tx, ty, tz] = transform(ev);
+              edgePositions[v*3]   = tx;
+              edgePositions[v*3+1] = ty;
+              edgePositions[v*3+2] = tz;
+            }
+            console.log('[Face3D] k-NN pairs:', linePairs.length / 2,
+                        '| mesh edges:', eN / 2);
+
+            resolve({ positions: out, linePairs, edgePositions });
+          } catch (err) { reject(err); }
+        },
+        undefined,
+        (err) => reject(err)
+      );
+    });
+  }
+
+  /* ── State 0 alterno: perfil femenino 2D procedural con relieves anatómicos ──
+     Mira a la izquierda. Plano XY con jitter sutil en Z (~0.05) para fingir 3D
+     mediante densidad variable: pómulos altos, labios marcados, ojo almendra,
+     pestañas, ceja arqueada, mandíbula afilada, cuello largo, pelo flotante. ── */
+  function genFace2DFemale() {
+    const out = new Float32Array(N * 3);
+    let idx = 0;
+    function p(x, y, z, j) {
+      if (idx >= N) return -1;
+      j = j === undefined ? 0.005 : j;
+      out[idx*3]   = x + (Math.random()-0.5)*j;
+      out[idx*3+1] = y + (Math.random()-0.5)*j;
+      out[idx*3+2] = (z||0) + (Math.random()-0.5)*0.04;
+      return idx++;
+    }
+    // Bézier helpers
+    const bz2 = (a, b, c, t) => (1-t)*(1-t)*a + 2*(1-t)*t*b + t*t*c;
+    const bz3 = (a, b, c, d, t) => (1-t)**3*a + 3*(1-t)**2*t*b + 3*(1-t)*t*t*c + t*t*t*d;
+
+    // ── WHITE band (0-8% ≈ 2000 a N=25000): silueta + rasgos definitorios ──
+
+    // 1) Silueta del perfil mirando a la izquierda (lado izquierdo del rostro visible)
+    // De arriba a abajo: corona → frente → ceja → cuenca → puente nasal → punta nariz →
+    // filtrum → labio sup → labio inf → mentón → cuello frente → cuello base
+    const silN = 380;
+    const silCx = -0.05; // x base (perfil hacia la izq)
+    for (let s = 0; s < silN; s++) {
+      const t = s / silN;
+      let x, y;
+      if      (t < 0.06) { y =  0.62 - t * 0.10;  x = silCx - 0.20 + t * 0.6; }    // corona
+      else if (t < 0.16) { y =  0.56 - (t-0.06)*1.2; x = silCx - 0.26 + Math.sin((t-0.06)*4)*0.04; } // frente
+      else if (t < 0.22) { y =  0.44 - (t-0.16)*0.8; x = silCx - 0.27 - (t-0.16)*0.9; } // ceja saliente
+      else if (t < 0.28) { y =  0.39 - (t-0.22)*0.6; x = silCx - 0.32 + (t-0.22)*1.6; } // cuenca ojo (retroceso)
+      else if (t < 0.36) { y =  0.36 - (t-0.28)*1.0; x = silCx - 0.22 - (t-0.28)*2.6; } // puente nasal (sale)
+      else if (t < 0.42) { y =  0.28 - (t-0.36)*0.6; x = silCx - 0.43 - (t-0.36)*1.2; } // tip nariz (respingada — femenina)
+      else if (t < 0.46) { y =  0.24 - (t-0.42)*1.6; x = silCx - 0.50 + (t-0.42)*3.2; } // base nariz
+      else if (t < 0.50) { y =  0.18 - (t-0.46)*0.4; x = silCx - 0.37 - (t-0.46)*1.0; } // filtrum
+      else if (t < 0.54) { y =  0.16 - (t-0.50)*1.4; x = silCx - 0.41 - (t-0.50)*1.2; } // labio superior (sale)
+      else if (t < 0.58) { y =  0.10 - (t-0.54)*1.0; x = silCx - 0.46 + (t-0.54)*1.5; } // entre labios
+      else if (t < 0.62) { y =  0.06 - (t-0.58)*1.6; x = silCx - 0.40 - (t-0.58)*1.4; } // labio inferior (más prominente — femenino)
+      else if (t < 0.66) { y = -0.001 - (t-0.62)*1.4; x = silCx - 0.46 + (t-0.62)*1.6; } // surco mentón
+      else if (t < 0.72) { y = -0.06 - (t-0.66)*1.4; x = silCx - 0.39 - (t-0.66)*0.4; } // mentón (afilado)
+      else if (t < 0.78) { y = -0.14 - (t-0.72)*1.6; x = silCx - 0.42 + (t-0.72)*1.4; } // sub-mentón
+      else if (t < 0.86) { y = -0.24 - (t-0.78)*1.6; x = silCx - 0.33 + (t-0.78)*0.6; } // cuello frente
+      else               { y = -0.36 - (t-0.86)*1.5; x = silCx - 0.28 + (t-0.86)*0.4; } // cuello base
+      p(x, y, 0.0, 0.004);
+    }
+
+    // 2) Línea trasera del cráneo (curvado) — desde corona hacia atrás-abajo
+    for (let s = 0; s < 140; s++) {
+      const t = s / 140;
+      const x = silCx + 0.18 + Math.sin(t*Math.PI*0.5) * 0.18;
+      const y = 0.58 - t * 0.85;
+      p(x, y, -0.02, 0.005);
+    }
+
+    // 3) Cuello posterior (línea tras nuca → hombro)
+    for (let s = 0; s < 80; s++) {
+      const t = s / 80;
+      const x = silCx + 0.10 - t * 0.08;
+      const y = -0.10 - t * 0.55;
+      p(x, y, -0.02, 0.005);
+    }
+
+    // 4) Ojo almendra (anillo completo + iris + pupila + brillo)
+    const eyeCx = silCx - 0.08, eyeCy = 0.34;
+    const eyeRX = 0.060, eyeRY = 0.022;
+    // contorno almendra
+    for (let j = 0; j < 80; j++) {
+      const t = (j/80) * Math.PI * 2;
+      const x = eyeCx + Math.cos(t) * eyeRX;
+      const y = eyeCy + Math.sin(t) * eyeRY * (Math.cos(t) > 0 ? 1.0 : 0.7); // forma almendra
+      p(x, y, 0.01, 0.002);
+    }
+    // iris
+    for (let j = 0; j < 60; j++) {
+      const t = (j/60) * Math.PI * 2;
+      const r = 0.018;
+      p(eyeCx + Math.cos(t)*r, eyeCy + Math.sin(t)*r, 0.012, 0.002);
+    }
+    // pupila densa
+    for (let j = 0; j < 30; j++) {
+      const t = (j/30) * Math.PI * 2;
+      const r = Math.random() * 0.008;
+      p(eyeCx + Math.cos(t)*r, eyeCy + Math.sin(t)*r, 0.013, 0.002);
+    }
+    // brillo (catchlight)
+    for (let j = 0; j < 12; j++) {
+      p(eyeCx - 0.005, eyeCy + 0.008, 0.014, 0.003);
+    }
+    // pestañas superiores (arco)
+    for (let j = 0; j < 70; j++) {
+      const t = j/70;
+      const x = bz3(eyeCx - eyeRX, eyeCx - 0.02, eyeCx + 0.04, eyeCx + eyeRX*0.9, t);
+      const y = bz3(eyeCy + 0.022, eyeCy + 0.036, eyeCy + 0.034, eyeCy + 0.022, t);
+      p(x, y + Math.random()*0.006, 0.01, 0.002);
+    }
+    // pestañas inferiores (más cortas)
+    for (let j = 0; j < 30; j++) {
+      const t = j/30;
+      const x = bz2(eyeCx - eyeRX*0.9, eyeCx, eyeCx + eyeRX*0.8, t);
+      const y = bz2(eyeCy - 0.022, eyeCy - 0.030, eyeCy - 0.020, t);
+      p(x, y - Math.random()*0.004, 0.008, 0.002);
+    }
+
+    // 5) Ceja arqueada (femenina — fina y elevada)
+    for (let j = 0; j < 100; j++) {
+      const t = j/100;
+      const x = bz3(silCx - 0.15, silCx - 0.10, silCx - 0.02, silCx + 0.04, t);
+      const y = bz3(0.40, 0.42, 0.41, 0.39, t);
+      p(x, y + (Math.random()-0.5)*0.005, 0.008, 0.002);
+    }
+
+    // 6) Pómulo alto (línea diagonal de ojo a mandíbula)
+    for (let j = 0; j < 90; j++) {
+      const t = j/90;
+      const x = bz2(eyeCx - 0.02, silCx - 0.05, silCx + 0.02, t);
+      const y = bz2(eyeCy - 0.04, 0.18, 0.06, t);
+      p(x, y, 0.006, 0.004);
+    }
+
+    // 7) Labios — labio superior con arco de Cupido + labio inferior carnoso (femenino)
+    for (let j = 0; j < 80; j++) {
+      const t = j/80;
+      // labio superior
+      const xu = bz3(silCx - 0.42, silCx - 0.30, silCx - 0.16, silCx - 0.06, t);
+      const cupid = (Math.abs(t-0.5) < 0.18) ? -0.012 : 0; // hendidura cupido
+      const yu = 0.10 + Math.sin(t*Math.PI)*0.012 + cupid;
+      p(xu, yu, 0.008, 0.003);
+    }
+    for (let j = 0; j < 60; j++) {
+      const t = j/60;
+      const xl = bz3(silCx - 0.40, silCx - 0.28, silCx - 0.16, silCx - 0.08, t);
+      const yl = 0.06 - Math.sin(t*Math.PI)*0.022; // más prominente
+      p(xl, yl, 0.008, 0.003);
+    }
+    // línea entre labios (centro)
+    for (let j = 0; j < 50; j++) {
+      const t = j/50;
+      const x = silCx - 0.42 + t * 0.34;
+      p(x, 0.085 + (Math.random()-0.5)*0.004, 0.009, 0.002);
+    }
+
+    // 8) Filtrum (canalito nariz → labio)
+    for (let j = 0; j < 24; j++) {
+      const t = j/24;
+      p(silCx - 0.28, 0.18 - t*0.06, 0.008, 0.002);
+    }
+
+    // 9) Mandíbula (línea de oreja a mentón)
+    for (let j = 0; j < 100; j++) {
+      const t = j/100;
+      const x = bz3(silCx + 0.16, silCx + 0.04, silCx - 0.18, silCx - 0.32, t);
+      const y = bz3(0.10, -0.06, -0.18, -0.18, t);
+      p(x, y, 0.004, 0.003);
+    }
+
+    // 10) Aleta nasal sutil
+    for (let j = 0; j < 30; j++) {
+      const t = (j/30) * Math.PI;
+      p(silCx - 0.40 + Math.cos(t)*0.018, 0.20 + Math.sin(t)*0.010, 0.011, 0.002);
+    }
+
+    // ── ACCENT band (8-50% ≈ 10500): volumen y relieve ──
+
+    // Volumen del pómulo (alta densidad → brilla con bloom = sensación de relieve)
+    for (let j = 0; j < 1500; j++) {
+      const u = Math.random(), v = Math.random();
+      const x = silCx - 0.04 + (u-0.5)*0.16;
+      const y = 0.18 + (v-0.5)*0.18;
+      p(x, y, 0.005 + Math.random()*0.02, 0.012);
+    }
+    // Volumen de mejilla (entre pómulo y mentón)
+    for (let j = 0; j < 1100; j++) {
+      const x = silCx - 0.06 + (Math.random()-0.5)*0.18;
+      const y = 0.04 + (Math.random()-0.5)*0.20;
+      p(x, y, 0.003 + Math.random()*0.018, 0.014);
+    }
+    // Frente
+    for (let j = 0; j < 900; j++) {
+      const x = silCx - 0.10 + (Math.random()-0.5)*0.30;
+      const y = 0.46 + Math.random()*0.16;
+      p(x, y, 0.002 + Math.random()*0.012, 0.014);
+    }
+    // Volumen de labios (relleno)
+    for (let j = 0; j < 600; j++) {
+      const t = Math.random();
+      const lx = silCx - 0.42 + t * 0.34;
+      const ly = 0.085 + (Math.random()-0.5)*0.05;
+      p(lx, ly, 0.008 + Math.random()*0.006, 0.005);
+    }
+    // Sombra ocular (debajo del pómulo)
+    for (let j = 0; j < 400; j++) {
+      const x = silCx - 0.08 + (Math.random()-0.5)*0.10;
+      const y = 0.26 + (Math.random()-0.5)*0.06;
+      p(x, y, 0.002, 0.012);
+    }
+    // Cuello (largo y elegante)
+    for (let j = 0; j < 700; j++) {
+      const x = silCx - 0.05 + (Math.random()-0.5)*0.12;
+      const y = -0.30 - Math.random()*0.40;
+      p(x, y, 0.002, 0.012);
+    }
+    // Pelo frontal (mass arriba y atrás de la frente)
+    for (let j = 0; j < 1800; j++) {
+      const u = Math.random();
+      const angle = (Math.random() - 0.3) * Math.PI;
+      const r = 0.18 + Math.random()*0.22;
+      const x = silCx + 0.05 + Math.cos(angle) * r;
+      const y = 0.40 + u * 0.40;
+      p(x, y, -0.005 + Math.random()*0.02, 0.020);
+    }
+    // Cabello cayendo (hacia atrás-abajo)
+    for (let j = 0; j < 1400; j++) {
+      const x = silCx + 0.20 + Math.random()*0.30;
+      const y = 0.30 - Math.random()*0.85;
+      p(x, y, -0.05 + (Math.random()-0.5)*0.04, 0.022);
+    }
+    // Hombros sugeridos
+    for (let j = 0; j < 700; j++) {
+      const x = silCx + (Math.random()-0.4)*0.70;
+      const y = -0.78 - Math.random()*0.18;
+      p(x, y, 0.0, 0.020);
+    }
+    // Sub-mentón sombra
+    for (let j = 0; j < 300; j++) {
+      const x = silCx - 0.20 + (Math.random()-0.5)*0.18;
+      const y = -0.18 + (Math.random()-0.5)*0.10;
+      p(x, y, 0.0, 0.012);
+    }
+
+    // ── DIM band (50-90% ≈ 10000): halo y dispersión ──
+
+    // Pelo masivo de fondo
+    for (let j = 0; j < 2500; j++) {
+      const a = Math.random()*Math.PI*2;
+      const r = 0.30 + Math.random()*0.45;
+      p(silCx + Math.cos(a)*r*0.7, 0.18 + Math.sin(a)*r*0.65, -0.08 + (Math.random()-0.5)*0.04, 0.025);
+    }
+    // Halo difuso alrededor de la cara
+    for (let j = 0; j < 2200; j++) {
+      const a = Math.random()*Math.PI*2;
+      const r = 0.55 + Math.random()*0.30;
+      p(silCx + Math.cos(a)*r*0.7, 0.10 + Math.sin(a)*r*0.65, -0.10 + (Math.random()-0.5)*0.06, 0.025);
+    }
+    // Background ambient
+    for (let j = 0; j < 2000; j++) {
+      p((Math.random()-0.4)*1.6, (Math.random()-0.4)*1.6, -0.30 + (Math.random()-0.5)*0.20, 0.030);
+    }
+    // Particles flotantes (efecto IA — datos dispersos)
+    for (let j = 0; j < 1500; j++) {
+      const a = Math.random()*Math.PI*2;
+      const r = 0.40 + Math.random()*0.90;
+      p(silCx + 0.3 + Math.cos(a)*r, 0.10 + Math.sin(a)*r, 0.05 + (Math.random()-0.5)*0.10, 0.015);
+    }
+    // Streaks hacia atrás (efecto desintegración suave)
+    for (let j = 0; j < 1800; j++) {
+      const t = Math.random();
+      p(silCx + 0.30 + t*1.0, 0.0 + (Math.random()-0.5)*0.80, -0.05 + (Math.random()-0.5)*0.10, 0.014);
+    }
+
+    // ── GLOW band (90-100% ≈ 2500): halo lejano ──
+    while (idx < N) {
+      const a = Math.random()*Math.PI*2;
+      const r = 0.85 + Math.random()*0.50;
+      out[idx*3]   = silCx + Math.cos(a)*r*0.8;
+      out[idx*3+1] = 0.10 + Math.sin(a)*r*0.7;
+      out[idx*3+2] = -0.20 + (Math.random()-0.5)*0.18;
+      idx++;
+    }
+
+    return out;
+  }
+
   /* ── Pre-generate all shapes ── */
   let FACE_LINE_PAIRS = [];
-  const SHAPES   = [genFace3D(), genHourglass(), genGlobe(), genProcession(), genNebula()];
-  const OFFSETS  = [0.50, 0.45, -0.45, 0.40, 0.0];
+  const SHAPES   = [genFace2DFemale(), genHourglass(), genGlobe(), genProcession(), genNebula()];
+
+  /* ── Async upgrade Face3D from procedural → OBJ-sampled + k-NN líneas + mesh edges.
+     Hace tween suave (1.4s) entre la versión procedural actual y la nueva. ── */
+  let faceUpgrade = {
+    tween: 0, fromShape: null, toShape: null, active: false,
+    pendingPairs: null, pendingEdges: null
+  };
+  // OBJ load deshabilitado — usamos genFace2DFemale() procedural 2D con relieves
+  // loadFace3DFromOBJ().then(...).catch(...);
+  const OFFSETS  = [3.60, 0.45, -0.45, 0.40, 0.0];
   const ROTATIONS= [-0.45, 0, 0.30, -0.10, 0];
   const SCALES   = [1.0, 1.90, 0.80, 0.85, 1.0];
 
@@ -1496,11 +2003,86 @@
   const points = new THREE.Points(geometry, material);
   scene.add(points);
 
-  /* ── Wireframe (visible only on Face3D state) ── */
+  /* ── Bokeh layer: partículas grandes desenfocadas dispersas (efecto IA premium) ── */
+  const BOKEH_N = 220;
+  const bokehGeom = new THREE.BufferGeometry();
+  const bokehPos = new Float32Array(BOKEH_N * 3);
+  const bokehSize = new Float32Array(BOKEH_N);
+  const bokehColor = new Float32Array(BOKEH_N * 3);
+  const bColAcc = new THREE.Color(0xc5a47e);
+  const bColGold = new THREE.Color(0xd4af37);
+  const bColWhite = new THREE.Color(0xf0ede8);
+  for (let i = 0; i < BOKEH_N; i++) {
+    // distribuir en plano XY del Hero (z negativo, detrás del rostro)
+    bokehPos[i*3]   = (Math.random() - 0.5) * 4.0;
+    bokehPos[i*3+1] = (Math.random() - 0.5) * 2.4;
+    bokehPos[i*3+2] = -0.4 - Math.random() * 1.6;
+    bokehSize[i]    = 0.04 + Math.random() * 0.10;
+    const c = i % 3 === 0 ? bColWhite : (i % 2 === 0 ? bColGold : bColAcc);
+    bokehColor[i*3]   = c.r;
+    bokehColor[i*3+1] = c.g;
+    bokehColor[i*3+2] = c.b;
+  }
+  bokehGeom.setAttribute('position', new THREE.BufferAttribute(bokehPos, 3));
+  bokehGeom.setAttribute('aSize',    new THREE.BufferAttribute(bokehSize, 1));
+  bokehGeom.setAttribute('aColor',   new THREE.BufferAttribute(bokehColor, 3));
+  const bokehVtx = `
+    attribute float aSize;
+    attribute vec3 aColor;
+    varying vec3 vColor;
+    uniform float uTime;
+    uniform float uPxRatio;
+    void main() {
+      vColor = aColor;
+      vec3 p = position;
+      // drift orgánico lento (flotación)
+      p.x += sin(uTime * 0.18 + position.y * 1.7) * 0.06;
+      p.y += sin(uTime * 0.22 + position.x * 1.3) * 0.04;
+      vec4 mv = modelViewMatrix * vec4(p, 1.0);
+      gl_Position = projectionMatrix * mv;
+      gl_PointSize = aSize * (480.0 * uPxRatio / -mv.z);
+    }`;
+  const bokehFrg = `
+    varying vec3 vColor;
+    void main() {
+      vec2 c = gl_PointCoord - 0.5;
+      float r = length(c) * 2.0;
+      if (r > 1.0) discard;
+      // gaussian con falloff suave (look bokeh blurry)
+      float a = exp(-r * r * 3.5) * 0.6;
+      gl_FragColor = vec4(vColor, a);
+    }`;
+  const bokehMat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uPxRatio: { value: renderer.getPixelRatio() } },
+    vertexShader: bokehVtx,
+    fragmentShader: bokehFrg,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    depthTest: false,
+  });
+  const bokeh = new THREE.Points(bokehGeom, bokehMat);
+  scene.add(bokeh);
+
+  /* ── Postprocess: UnrealBloomPass para resplandor ── */
+  const composer = new THREE.EffectComposer(renderer);
+  composer.setSize(window.innerWidth, window.innerHeight);
+  composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  composer.addPass(new THREE.RenderPass(scene, camera));
+  const bloomPass = new THREE.UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    /* strength */  0.95,
+    /* radius   */  0.55,
+    /* threshold*/  0.05
+  );
+  composer.addPass(bloomPass);
+
+  /* ── Wireframe (k-NN sobre la cara — solo visible en estado Face3D) ── */
+  const MAX_LINE_PAIRS = N * 4; // capacidad para hasta 4 conexiones por punto
   const lineGeom = new THREE.BufferGeometry();
-  const lineCount = FACE_LINE_PAIRS.length;
-  const linePositions = new Float32Array(lineCount * 3);
+  const linePositions = new Float32Array(MAX_LINE_PAIRS * 2 * 3); // pares × 2 vértices × xyz
   lineGeom.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+  lineGeom.setDrawRange(0, FACE_LINE_PAIRS.length); // arranca con las pairs procedurales
   const lineMaterial = new THREE.LineBasicMaterial({
     color: 0xc5a47e,
     transparent: true,
@@ -1510,7 +2092,26 @@
     depthTest: false,
   });
   const faceLines = new THREE.LineSegments(lineGeom, lineMaterial);
-  scene.add(faceLines);
+  faceLines.visible = false;
+  // scene.add(faceLines); // deshabilitado para 2D — la silueta vive en los puntos densos
+
+  /* ── Mesh edges anatómicas (sólo si se reactivara el OBJ) ── */
+  const MAX_MESH_EDGE_VERTS = 60000;
+  const meshEdgeGeom = new THREE.BufferGeometry();
+  const meshEdgeBuf = new Float32Array(MAX_MESH_EDGE_VERTS * 3);
+  meshEdgeGeom.setAttribute('position', new THREE.BufferAttribute(meshEdgeBuf, 3));
+  meshEdgeGeom.setDrawRange(0, 0);
+  const meshEdgeMat = new THREE.LineBasicMaterial({
+    color: 0xc5a47e,
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    depthTest: false,
+  });
+  const meshEdgeLines = new THREE.LineSegments(meshEdgeGeom, meshEdgeMat);
+  meshEdgeLines.visible = false;
+  // scene.add(meshEdgeLines); // deshabilitado para 2D
 
   /* ── Morph state ── */
   let currentProgress = 0;
@@ -1519,6 +2120,15 @@
   let currentExtraX   = 0;
   let currentRotY     = 0;
   let currentScale    = 1;
+
+  /* ── Head sway (cara mira al mouse + auto-animación) ── */
+  const mouse = { x: 0, y: 0 };
+  let headSwayY = 0;
+  let headSwayX = 0;
+  window.addEventListener('mousemove', (e) => {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;   // [-1, 1]
+    mouse.y = (e.clientY / window.innerHeight) * 2 - 1;  // [-1, 1]
+  }, { passive: true });
 
   /* ── Intro: nebula disperses → face forms ── */
   let introT = 0;
@@ -1557,6 +2167,29 @@
     requestAnimationFrame(animate);
     const elapsed = clock.getElapsedTime();
     material.uniforms.uTime.value = elapsed;
+
+    // Face upgrade tween: SHAPES[0] = lerp(fromShape, toShape, eased)
+    if (faceUpgrade.active) {
+      faceUpgrade.tween = Math.min(1, faceUpgrade.tween + 0.012);
+      const ut = faceUpgrade.tween;
+      const ue = ut < 0.5 ? 2*ut*ut : -1+(4-2*ut)*ut;
+      const from = faceUpgrade.fromShape, to = faceUpgrade.toShape, dst = SHAPES[0];
+      for (let i = 0; i < N*3; i++) dst[i] = from[i] * (1 - ue) + to[i] * ue;
+      // A mitad del tween, intercambiar las pairs y poblar las mesh edges
+      if (ut >= 0.5 && faceUpgrade.pendingPairs) {
+        FACE_LINE_PAIRS = faceUpgrade.pendingPairs;
+        faceUpgrade.pendingPairs = null;
+        const ep = faceUpgrade.pendingEdges;
+        if (ep && ep.length <= meshEdgeBuf.length) {
+          meshEdgeBuf.set(ep);
+          meshEdgeGeom.attributes.position.needsUpdate = true;
+          meshEdgeGeom.setDrawRange(0, ep.length / 3);
+          console.log('[Face3D] mesh edges loaded:', ep.length / 6);
+        }
+        faceUpgrade.pendingEdges = null;
+      }
+      if (ut >= 1) { faceUpgrade.active = false; faceUpgrade.fromShape = null; }
+    }
 
     // Intro blend: nebula (SHAPES[4]) → current morph state
     if (introStarted && introT < 1) introT = Math.min(1, introT + 0.008);
@@ -1603,8 +2236,9 @@
     currentScale += (tgtScale*introEased + (1-introEased) - currentScale) * 0.05;
     points.scale.setScalar(currentScale);
 
-    // Wireframe (Face3D only): copy positions of paired indices + fade by progress
+    // Wireframes (k-NN + mesh edges): solo visibles en Face3D, fade al scrollear
     const faceVisibility = Math.max(0, 1 - currentProgress * 1.8) * introEased;
+    const lineCount = FACE_LINE_PAIRS.length;
     if (faceVisibility > 0.01 && lineCount > 0) {
       for (let k = 0; k < lineCount; k++) {
         const pi = FACE_LINE_PAIRS[k];
@@ -1613,20 +2247,58 @@
         linePositions[k*3+2] = pos[pi*3+2];
       }
       lineGeom.attributes.position.needsUpdate = true;
+      lineGeom.setDrawRange(0, lineCount);
       faceLines.visible = true;
-      faceLines.material.opacity = 0.22 * faceVisibility;
+      faceLines.material.opacity = 0.20 * faceVisibility;
       faceLines.position.x = currentOffsetX + currentExtraX;
-      faceLines.rotation.y = currentRotY;
       faceLines.scale.setScalar(currentScale);
     } else {
       faceLines.visible = false;
+    }
+    // Mesh edges (anatómicas) — siguen la misma transform/sway que los puntos
+    if (faceVisibility > 0.01 && meshEdgeGeom.drawRange.count > 0) {
+      meshEdgeLines.visible = true;
+      meshEdgeLines.material.opacity = 0.55 * faceVisibility;
+      meshEdgeLines.position.x = currentOffsetX + currentExtraX;
+      meshEdgeLines.scale.setScalar(currentScale);
+    } else {
+      meshEdgeLines.visible = false;
+    }
+
+    // Head micro-sway: solo activo cuando estamos cerca del estado Face3D (state 0)
+    // - auto-sway (sin/cos lentos)
+    // - mouse parallax sutil
+    if (faceVisibility > 0.01) {
+      const autoY = Math.sin(elapsed * 0.45) * 0.06;
+      const autoX = Math.sin(elapsed * 0.32) * 0.025;
+      const mouseY = mouse.x * 0.16;
+      const mouseX = mouse.y * 0.08;
+      const targetHeadY = (autoY + mouseY) * faceVisibility;
+      const targetHeadX = (autoX + mouseX) * faceVisibility;
+      headSwayY += (targetHeadY - headSwayY) * 0.06;
+      headSwayX += (targetHeadX - headSwayX) * 0.06;
+      points.rotation.y = currentRotY + headSwayY;
+      points.rotation.x = headSwayX;
+      faceLines.rotation.y = currentRotY + headSwayY;
+      faceLines.rotation.x = headSwayX;
+      meshEdgeLines.rotation.y = currentRotY + headSwayY;
+      meshEdgeLines.rotation.x = headSwayX;
+    } else {
+      headSwayY += (0 - headSwayY) * 0.06;
+      headSwayX += (0 - headSwayX) * 0.06;
+      points.rotation.x = headSwayX;
+      faceLines.rotation.y = currentRotY + headSwayY;
+      faceLines.rotation.x = headSwayX;
+      meshEdgeLines.rotation.y = currentRotY + headSwayY;
+      meshEdgeLines.rotation.x = headSwayX;
     }
 
     // Gentle camera sway
     camera.position.x = Math.sin(elapsed*0.08)*0.06 + currentOffsetX;
     camera.position.y = Math.sin(elapsed*0.12)*0.04;
     camera.lookAt(currentOffsetX, 0, 0);
-    renderer.render(scene, camera);
+    bokehMat.uniforms.uTime.value = elapsed;
+    composer.render();
   }
   animate();
 
@@ -1634,6 +2306,8 @@
   window.addEventListener('resize', () => {
     const w=window.innerWidth, h=window.innerHeight;
     renderer.setSize(w, h);
+    composer.setSize(w, h);
+    bloomPass.resolution.set(w, h);
     camera.aspect = w/h;
     camera.updateProjectionMatrix();
     computeBounds();
