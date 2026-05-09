@@ -123,7 +123,7 @@ class OccScraper(BaseScraper):
 
     def _fetch_page(self, page: int) -> list[OccVacante] | None:
         try:
-            with httpx.Client(timeout=30.0) as client:
+            with httpx.Client(timeout=15.0) as client:
                 resp = client.get(
                     OCC_SEARCH_URL,
                     headers=_HEADERS,
