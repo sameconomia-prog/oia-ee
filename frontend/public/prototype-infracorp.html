@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OIA-EE — Observatorio de Impacto de la IA en Educación y Empleo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0a;
+      --bg-soft:   #101010;
+      --bg-card:   #141414;
+      --accent:    #c5a47e;
+      --accent-dim: rgba(197,164,126,0.18);
+      --text:      #f0ede8;
+      --text-dim:  rgba(240,237,232,0.48);
+      --text-muted:rgba(240,237,232,0.28);
+      --border:    rgba(197,164,126,0.14);
+      --border-dim:rgba(240,237,232,0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-weight: 300;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 28px 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: padding 0.4s, background 0.4s, backdrop-filter 0.4s;
+    }
+    nav.scrolled {
+      padding: 18px 60px;
+      background: rgba(10,10,10,0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-dim);
+    }
+    .nav-logo {
+      font-size: 13px; font-weight: 600; letter-spacing: 0.14em;
+      color: var(--accent); text-decoration: none; text-transform: uppercase;
+    }
+    .nav-links { display: flex; gap: 40px; align-items: center; }
+    .nav-links a {
+      font-size: 12px; font-weight: 300; letter-spacing: 0.08em;
+      color: var(--text-dim); text-decoration: none; text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      font-size: 12px; font-weight: 400; letter-spacing: 0.08em;
+      color: var(--accent) !important;
+      border: 1px solid var(--border);
+      padding: 9px 22px; border-radius: 2px;
+      transition: background 0.2s, color 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--accent-dim) !important; color: var(--accent) !important; }
+
+    /* ── CANVAS (fixed, full page) ── */
+    #particle-canvas {
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0; pointer-events: none;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: grid; grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 0 60px;
+    }
+    .hero-left { padding-top: 120px; padding-bottom: 80px; }
+    .hero-tag {
+      font-size: 11px; font-weight: 400; letter-spacing: 0.18em;
+      color: var(--accent); text-transform: uppercase;
+      margin-bottom: 28px; display: block;
+      opacity: 0; transform: translateY(14px);
+    }
+    .hero-headline {
+      font-size: clamp(36px, 4vw, 64px);
+      font-weight: 200; line-height: 1.12;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      margin-bottom: 28px;
+      opacity: 0; transform: translateY(20px);
+    }
+    .hero-sub {
+      font-size: 16px; font-weight: 300; line-height: 1.7;
+      color: var(--text-dim); max-width: 440px;
+      margin-bottom: 48px;
+      opacity: 0; transform: translateY(16px);
+    }
+    .hero-ctas {
+      display: flex; gap: 16px; align-items: center;
+      opacity: 0; transform: translateY(12px);
+    }
+    .btn-primary {
+      font-size: 13px; font-weight: 400; letter-spacing: 0.06em;
+      background: var(--accent); color: #0a0a0a;
+      padding: 14px 32px; border-radius: 2px; text-decoration: none;
+      transition: opacity 0.2s; display: inline-block;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-ghost {
+      font-size: 13px; font-weight: 300; letter-spacing: 0.06em;
+      color: var(--text-dim); text-decoration: none;
+      padding: 14px 0; border-bottom: 1px solid var(--border);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--text-dim); }
+    .hero-scroll-hint {
+      position: absolute; bottom: 40px; left: 60px;
+      font-size: 11px; letter-spacing: 0.14em; color: var(--text-muted);
+      text-transform: uppercase; display: flex; align-items: center; gap: 12px;
+      opacity: 0;
+    }
+    .scroll-line {
+      width: 40px; height: 1px; background: var(--border);
+      position: relative; overflow: hidden;
+    }
+    .scroll-line::after {
+      content: ''; position: absolute; top: 0; left: -100%;
+      width: 100%; height: 100%; background: var(--accent);
+      animation: slideRight 2s ease-in-out infinite;
+    }
+    @keyframes slideRight { 0%{left:-100%} 100%{left:100%} }
+
+    /* ── HR DIVIDER ── */
+    .hr { border: none; border-top: 1px solid var(--border-dim); margin: 0; }
+
+    /* ── SERVICE SECTIONS ── */
+    .service-section {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: grid; grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 100px 60px;
+      background: transparent;
+    }
+    .service-section.alt { direction: rtl; }
+    .service-section.alt > * { direction: ltr; }
+    .service-num {
+      font-size: 11px; font-weight: 400; letter-spacing: 0.2em;
+      color: var(--text-muted); text-transform: uppercase;
+      margin-bottom: 20px; display: block;
+    }
+    .service-tag {
+      font-size: 11px; font-weight: 400; letter-spacing: 0.18em;
+      color: var(--accent); text-transform: uppercase;
+      margin-bottom: 24px; display: block;
+    }
+    .service-headline {
+      font-size: clamp(28px, 3vw, 52px);
+      font-weight: 200; line-height: 1.16;
+      letter-spacing: -0.02em; color: var(--text);
+      margin-bottom: 24px;
+    }
+    .service-body {
+      font-size: 16px; line-height: 1.75;
+      color: var(--text-dim); max-width: 420px;
+    }
+    .service-body em { font-style: normal; color: var(--accent); }
+
+    .stat-pair {
+      display: flex; flex-direction: column; gap: 40px;
+      padding-left: 60px;
+    }
+    .alt .stat-pair { padding-left: 0; padding-right: 60px; }
+    .stat-item {}
+    .stat-num {
+      font-size: clamp(48px, 5vw, 80px); font-weight: 200;
+      color: var(--text); line-height: 1;
+      letter-spacing: -0.04em;
+    }
+    .stat-num .accent { color: var(--accent); }
+    .stat-label {
+      font-size: 13px; color: var(--text-dim);
+      margin-top: 8px; line-height: 1.5; max-width: 240px;
+    }
+    .stat-divider { width: 40px; height: 1px; background: var(--border); margin: 32px 0; }
+
+    /* ── METRICS GRID ── */
+    .metrics-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; border: 1px solid var(--border-dim);
+      background: var(--border-dim); margin-top: 60px;
+    }
+    .metric-cell {
+      background: rgba(10,10,10,0.55); padding: 36px 28px;
+    }
+    .metric-big {
+      font-size: 44px; font-weight: 200; color: var(--text);
+      letter-spacing: -0.04em; line-height: 1;
+    }
+    .metric-desc {
+      font-size: 12px; color: var(--text-muted); margin-top: 10px;
+      letter-spacing: 0.04em; line-height: 1.6;
+    }
+
+    /* ── METHODOLOGY ── */
+    #metodologia {
+      position: relative; z-index: 1;
+      padding: 120px 60px;
+      background: transparent;
+    }
+    .section-label {
+      font-size: 11px; letter-spacing: 0.2em; color: var(--accent);
+      text-transform: uppercase; margin-bottom: 60px; display: block;
+    }
+    .method-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: var(--border-dim); border: 1px solid var(--border-dim);
+    }
+    .method-card {
+      background: rgba(10,10,10,0.45); padding: 48px 36px;
+      transition: background 0.3s;
+    }
+    .method-card:hover { background: rgba(20,20,20,0.60); }
+    .method-n {
+      font-size: 11px; letter-spacing: 0.16em; color: var(--text-muted);
+      text-transform: uppercase; margin-bottom: 28px; display: block;
+    }
+    .method-title {
+      font-size: 22px; font-weight: 200; color: var(--text);
+      margin-bottom: 16px; letter-spacing: -0.01em;
+    }
+    .method-body {
+      font-size: 13px; color: var(--text-dim); line-height: 1.7;
+    }
+    .method-accent { width: 20px; height: 1px; background: var(--accent); margin-top: 28px; }
+
+    /* ── STAKEHOLDERS ── */
+    #stakeholders {
+      position: relative; z-index: 1;
+      padding: 120px 60px;
+      background: transparent;
+      border-top: 1px solid var(--border-dim);
+      border-bottom: 1px solid var(--border-dim);
+    }
+    .stake-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 0; }
+    .stake-card {
+      padding: 44px 36px; border: 1px solid var(--border-dim);
+      background: rgba(10,10,10,0.60);
+      transition: border-color 0.3s;
+    }
+    .stake-card:hover { border-color: var(--border); }
+    .stake-icon {
+      width: 36px; height: 36px; margin-bottom: 28px;
+      opacity: 0.5;
+    }
+    .stake-title {
+      font-size: 17px; font-weight: 300; color: var(--text);
+      margin-bottom: 16px;
+    }
+    .stake-body {
+      font-size: 13px; color: var(--text-dim); line-height: 1.7;
+    }
+
+    /* ── TEAM ── */
+    #equipo {
+      position: relative; z-index: 1;
+      padding: 120px 60px;
+      background: transparent;
+    }
+    .team-inner {
+      display: grid; grid-template-columns: 1fr 1.6fr;
+      gap: 80px; align-items: center; max-width: 960px;
+    }
+    .team-photo {
+      width: 240px; height: 240px; border-radius: 2px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-dim);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 64px; color: var(--text-muted);
+    }
+    .team-role {
+      font-size: 11px; letter-spacing: 0.16em; color: var(--accent);
+      text-transform: uppercase; margin-bottom: 16px; display: block;
+    }
+    .team-name {
+      font-size: 34px; font-weight: 200; letter-spacing: -0.02em;
+      color: var(--text); margin-bottom: 20px;
+    }
+    .team-bio { font-size: 15px; color: var(--text-dim); line-height: 1.75; }
+    .team-link {
+      display: inline-block; margin-top: 24px;
+      font-size: 12px; color: var(--accent); text-decoration: none;
+      letter-spacing: 0.1em; border-bottom: 1px solid var(--border);
+      padding-bottom: 3px; transition: border-color 0.2s;
+    }
+    .team-link:hover { border-color: var(--accent); }
+
+    /* ── CONTACT ── */
+    #contacto {
+      position: relative; z-index: 1;
+      padding: 120px 60px;
+      background: transparent;
+      border-top: 1px solid var(--border-dim);
+    }
+    .contact-inner { max-width: 640px; }
+    .contact-headline {
+      font-size: clamp(28px, 3.5vw, 52px);
+      font-weight: 200; letter-spacing: -0.025em;
+      color: var(--text); line-height: 1.15; margin-bottom: 16px;
+    }
+    .contact-sub {
+      font-size: 15px; color: var(--text-dim); margin-bottom: 56px; line-height: 1.7;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block; font-size: 11px; letter-spacing: 0.1em;
+      color: var(--text-muted); text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .form-input, .form-textarea, .form-select {
+      width: 100%; background: transparent;
+      border: none; border-bottom: 1px solid var(--border-dim);
+      padding: 12px 0; font-family: 'Sora', sans-serif;
+      font-size: 14px; font-weight: 300; color: var(--text);
+      transition: border-color 0.2s; outline: none;
+      appearance: none;
+    }
+    .form-input::placeholder { color: var(--text-muted); }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: var(--accent);
+    }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .form-select { cursor: pointer; background: transparent; }
+    .form-select option { background: #111; color: var(--text); }
+    .form-submit {
+      margin-top: 40px; width: 100%;
+      background: transparent; border: 1px solid var(--accent);
+      color: var(--accent); padding: 16px;
+      font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 400;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.25s, color 0.25s;
+    }
+    .form-submit:hover { background: var(--accent); color: var(--bg); }
+    .form-success {
+      display: none; text-align: center; padding: 40px;
+      border: 1px solid var(--border); color: var(--accent);
+      font-size: 14px; letter-spacing: 0.06em;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      background: rgba(10,10,10,0.92);
+      border-top: 1px solid var(--border-dim);
+      padding: 60px;
+      display: flex; justify-content: space-between; align-items: flex-end;
+    }
+    .footer-logo {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.16em;
+      color: var(--accent); text-transform: uppercase; margin-bottom: 8px;
+    }
+    .footer-sub { font-size: 12px; color: var(--text-muted); max-width: 300px; line-height: 1.6; }
+    .footer-right { text-align: right; }
+    .footer-right a {
+      display: block; font-size: 12px; color: var(--text-muted);
+      text-decoration: none; margin-bottom: 6px; transition: color 0.2s;
+    }
+    .footer-right a:hover { color: var(--text-dim); }
+    .footer-copy { font-size: 11px; color: var(--text-muted); margin-top: 16px; }
+
+    /* ── REVEAL (initial state) ── */
+    .reveal { opacity: 0; transform: translateY(24px); }
+    .reveal-left { opacity: 0; transform: translateX(-24px); }
+    .reveal-right { opacity: 0; transform: translateX(24px); }
+    .reveal.visible, .reveal-left.visible, .reveal-right.visible {
+      opacity: 1; transform: none;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 24px 24px; }
+      nav.scrolled { padding: 16px 24px; }
+      .nav-links { display: none; }
+      #hero { grid-template-columns: 1fr; padding: 100px 24px 60px; }
+      .service-section { grid-template-columns: 1fr; padding: 80px 24px; }
+      .service-section.alt { direction: ltr; }
+      .stat-pair { padding-left: 0; padding-right: 0; }
+      .method-grid { grid-template-columns: 1fr 1fr; }
+      .stake-grid { grid-template-columns: 1fr; }
+      .team-inner { grid-template-columns: 1fr; gap: 40px; }
+      .metrics-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 40px; padding: 40px 24px; }
+      .footer-right { text-align: left; }
+      #contacto, #metodologia, #stakeholders, #equipo { padding: 80px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── CANVAS ── -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- ── NAV ── -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">OIA-EE</a>
+  <div class="nav-links">
+    <a href="#metodologia">Metodología</a>
+    <a href="#stakeholders">Para quién</a>
+    <a href="#equipo">Analista</a>
+    <a href="#contacto" class="nav-cta">Solicitar análisis</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section id="hero">
+  <div class="hero-left">
+    <span class="hero-tag">Observatorio · México · 2026</span>
+    <h1 class="hero-headline">
+      La brecha entre lo que se enseña<br>
+      y lo que el mercado necesita.
+    </h1>
+    <p class="hero-sub">
+      OIA-EE mide el impacto de la IA en 17 carreras universitarias mexicanas
+      en tiempo real. Inteligencia accionable para rectores y policy makers.
+    </p>
+    <div class="hero-ctas">
+      <a href="#contacto" class="btn-primary">Solicitar análisis</a>
+      <a href="/benchmarks" class="btn-ghost">Ver benchmarks →</a>
+    </div>
+  </div>
+  <div class="hero-right"></div>
+  <span class="hero-scroll-hint">
+    <span class="scroll-line"></span>
+    Scroll
+  </span>
+</section>
+
+<hr class="hr">
+
+<!-- ── SECTION 1: EL PROBLEMA ── -->
+<section class="service-section" id="el-problema" style="align-items: flex-start;">
+  <div class="service-text reveal-left" style="padding-top: 80px;">
+    <span class="service-num">01</span>
+    <span class="service-tag">El rezago curricular</span>
+    <h2 class="service-headline">
+      Los planes de estudio se actualizan<br>
+      cada <em>4.2 años.</em><br>
+      La IA cambia cada <em>4.2 meses.</em>
+    </h2>
+    <p class="service-body" style="margin-top:24px;">
+      Esa brecha tiene nombre: <em>rezago curricular</em>. Y tiene consecuencias medibles
+      para cada egresado, cada institución y cada decisión de política pública.
+      Sin datos, no hay tiempo de reacción.
+    </p>
+  </div>
+  <div class="stat-pair reveal-right" style="flex-direction:column; gap:48px; padding-left:60px; padding-top:80px;">
+    <div class="stat-item">
+      <div class="stat-num"><span class="counter" data-target="60">0</span><span class="accent">%</span></div>
+      <div class="stat-label">de las habilidades en declive global ya se enseñan en México.</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-num"><span class="accent">50×</span></div>
+      <div class="stat-label">más rápida es la velocidad de cambio de la IA que la actualización curricular.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="hr">
+
+<!-- ── SECTION 2: EL OBSERVATORIO ── -->
+<section class="service-section alt" id="el-observatorio">
+  <div class="service-text reveal-right">
+    <span class="service-num">02</span>
+    <span class="service-tag">Inteligencia en tiempo real</span>
+    <h2 class="service-headline">
+      <em>17</em> carreras.<br>
+      <em>5</em> fuentes internacionales.<br>
+      <em>88</em> habilidades evaluadas.
+    </h2>
+    <p class="service-body" style="margin-top:24px;">
+      OIA-EE convierte señales del mercado global —World Economic Forum, LinkedIn,
+      OECD, Burning Glass, IMF— en decisiones curriculares accionables para
+      instituciones educativas mexicanas.
+    </p>
+  </div>
+  <div class="stat-pair reveal-left">
+    <div class="metrics-grid">
+      <div class="metric-cell">
+        <div class="metric-big counter" data-target="17">0</div>
+        <div class="metric-desc">carreras universitarias<br>monitoreadas</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-big counter" data-target="88">0</div>
+        <div class="metric-desc">habilidades evaluadas<br>por fuentes</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-big counter" data-target="5">0</div>
+        <div class="metric-desc">fuentes internacionales<br>de referencia</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="hr">
+
+<!-- ── SECTION 3: LA DECISIÓN ── -->
+<section class="service-section" id="la-decision">
+  <div class="service-text reveal-left">
+    <span class="service-num">03</span>
+    <span class="service-tag">Para rectores y policy makers</span>
+    <h2 class="service-headline">
+      Cada decisión curricular<br>que tomas hoy define<br>
+      la empleabilidad de tu<br>generación <em>2028.</em>
+    </h2>
+    <p class="service-body" style="margin-top:24px;">
+      ¿Con qué datos respaldas esas decisiones? OIA-EE ofrece un semáforo de
+      urgencia curricular por carrera: qué enseñar, qué retirar, qué fortalecer
+      — antes de que sea tarde.
+    </p>
+    <div style="margin-top:40px;">
+      <a href="#contacto" class="btn-primary">Solicitar análisis gratuito</a>
+    </div>
+  </div>
+  <div class="stat-pair reveal-right">
+    <div class="stat-item">
+      <div class="stat-num" style="font-size:clamp(20px,2vw,28px); letter-spacing:0.01em; font-weight:300; color:var(--text-dim); line-height:1.6;">
+        "Imagina decidir con señales del mercado de hoy.<br>
+        No con intuición.<br>
+        <span style="color:var(--accent);">Con datos.</span>"
+      </div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item" style="display:flex; gap:24px; align-items:flex-start;">
+      <div style="flex:1">
+        <div style="font-size:11px; letter-spacing:0.12em; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Semáforo OIA-EE</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:block;flex-shrink:0"></span>
+            <span style="font-size:13px;color:var(--text-dim)">Urgencia alta — retirar o rediseñar</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:block;flex-shrink:0"></span>
+            <span style="font-size:13px;color:var(--text-dim)">Urgencia media — fortalecer</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:block;flex-shrink:0"></span>
+            <span style="font-size:13px;color:var(--text-dim)">Oportunidad — agregar ahora</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="hr">
+
+<!-- ── METHODOLOGY ── -->
+<section id="metodologia">
+  <span class="section-label reveal">Metodología</span>
+  <div class="method-grid">
+    <div class="method-card reveal">
+      <span class="method-n">01</span>
+      <div class="method-title">Mapeo</div>
+      <div class="method-body">Rastreo continuo de señales de demanda laboral en 5 fuentes internacionales de referencia sobre el futuro del trabajo.</div>
+      <div class="method-accent"></div>
+    </div>
+    <div class="method-card reveal" style="transition-delay:0.1s">
+      <span class="method-n">02</span>
+      <div class="method-title">Análisis</div>
+      <div class="method-body">Cruce de 88 habilidades contra los planes curriculares de 17 carreras en las IES mexicanas más relevantes.</div>
+      <div class="method-accent"></div>
+    </div>
+    <div class="method-card reveal" style="transition-delay:0.18s">
+      <span class="method-n">03</span>
+      <div class="method-title">Semáforo</div>
+      <div class="method-body">Índice D1/D2 de urgencia curricular: cada habilidad clasificada como en declive, emergente o crítica con consenso de fuentes.</div>
+      <div class="method-accent"></div>
+    </div>
+    <div class="method-card reveal" style="transition-delay:0.26s">
+      <span class="method-n">04</span>
+      <div class="method-title">Inteligencia</div>
+      <div class="method-body">Reportes accionables entregados directamente a rectores, directores académicos y policy makers con recomendaciones curriculares.</div>
+      <div class="method-accent"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STAKEHOLDERS ── -->
+<section id="stakeholders">
+  <span class="section-label reveal">Para quién</span>
+  <div class="stake-grid">
+    <div class="stake-card reveal">
+      <svg class="stake-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1" style="color:var(--accent)">
+        <rect x="4" y="10" width="28" height="20" rx="1"/><path d="M12 10V7a6 6 0 0 1 12 0v3"/>
+        <circle cx="18" cy="20" r="3"/>
+      </svg>
+      <div class="stake-title">Instituciones de Educación Superior</div>
+      <div class="stake-body">
+        Rectores, vicerrectores y directores académicos que toman decisiones
+        de actualización curricular. OIA-EE les da la señal antes de que el
+        mercado les muestre el rezago.
+      </div>
+    </div>
+    <div class="stake-card reveal" style="transition-delay:0.1s">
+      <svg class="stake-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1" style="color:var(--accent)">
+        <polygon points="18,4 32,28 4,28"/>
+        <line x1="18" y1="14" x2="18" y2="22"/><circle cx="18" cy="24" r="1.5" fill="currentColor"/>
+      </svg>
+      <div class="stake-title">Gobierno y Policy Makers</div>
+      <div class="stake-body">
+        SEP, CONAHCYT, gobiernos estatales y organismos internacionales que
+        diseñan política educativa. Datos agregados y benchmarks nacionales
+        para fundamentar marcos regulatorios.
+      </div>
+    </div>
+    <div class="stake-card reveal" style="transition-delay:0.18s">
+      <svg class="stake-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1" style="color:var(--accent)">
+        <circle cx="18" cy="18" r="12"/><line x1="18" y1="10" x2="18" y2="18"/>
+        <line x1="18" y1="18" x2="24" y2="21"/>
+      </svg>
+      <div class="stake-title">Investigadores y Periodistas</div>
+      <div class="stake-body">
+        Académicos y medios especializados que estudian la intersección entre
+        tecnología, educación y mercado laboral en México. Acceso a datos
+        limpios y metodología transparente.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TEAM ── -->
+<section id="equipo">
+  <span class="section-label reveal">El Analista</span>
+  <div class="team-inner">
+    <div class="reveal-left">
+      <div class="team-photo">👤</div>
+    </div>
+    <div class="reveal-right">
+      <span class="team-role">Economista · Mercados Laborales</span>
+      <div class="team-name">Arturo Aguilar</div>
+      <p class="team-bio">
+        Economista especializado en mercados laborales e impacto tecnológico.
+        Candidato a Doctor, ha trabajado con instituciones educativas en México
+        analizando brechas entre formación profesional y demanda del mercado.
+        OIA-EE nació de la observación de que las IES toman decisiones
+        curriculares sin datos en tiempo real sobre hacia dónde se mueve el empleo.
+      </p>
+      <a href="https://linkedin.com/in/arturoaguilar" target="_blank" class="team-link">
+        LinkedIn →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTACT ── -->
+<section id="contacto">
+  <div class="contact-inner">
+    <h2 class="contact-headline reveal">
+      ¿Tu institución está lista para<br>
+      el impacto de la IA?
+    </h2>
+    <p class="contact-sub reveal">
+      Cuéntanos sobre tu institución. Te enviamos un primer análisis de pertinencia sin costo.
+    </p>
+
+    <form id="contact-form" class="reveal">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="nombre">Nombre completo</label>
+          <input id="nombre" class="form-input" type="text" placeholder="Tu nombre" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cargo">Cargo</label>
+          <input id="cargo" class="form-input" type="text" placeholder="Rector / Director académico">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="institucion">Institución</label>
+        <input id="institucion" class="form-input" type="text" placeholder="Universidad / Secretaría" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">Email institucional</label>
+        <input id="email" class="form-input" type="email" placeholder="correo@universidad.edu.mx" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="tipo">Tipo de institución</label>
+        <select id="tipo" class="form-select">
+          <option value="ies">Institución de Educación Superior</option>
+          <option value="gobierno">Gobierno / Política pública</option>
+          <option value="investigacion">Investigación académica</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="mensaje">Mensaje (opcional)</label>
+        <textarea id="mensaje" class="form-textarea" placeholder="¿En qué carreras tienes mayor interés?"></textarea>
+      </div>
+      <button type="submit" class="form-submit">Solicitar análisis gratuito</button>
+    </form>
+    <div class="form-success" id="form-success">
+      Solicitud recibida — te contactamos en menos de 24 horas.
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div>
+    <div class="footer-logo">OIA-EE</div>
+    <div class="footer-sub">
+      Observatorio de Impacto de la IA en Educación y Empleo.<br>
+      México, 2026. Datos actualizados en tiempo real.
+    </div>
+    <div class="footer-copy" style="margin-top:24px;">© 2026 OIA-EE · Arturo Aguilar</div>
+  </div>
+  <div class="footer-right">
+    <a href="/benchmarks">Benchmarks globales</a>
+    <a href="/carreras">Carreras</a>
+    <a href="/investigaciones">Investigaciones</a>
+    <a href="/pertinencia">Estudio de pertinencia</a>
+    <a href="https://linkedin.com/in/arturoaguilar" target="_blank">LinkedIn</a>
+  </div>
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════
+   THREE.JS — CINEMATIC PARTICLE STORY SYSTEM
+   5 states: face → gap-bars → network → flow → nebula
+   Continuous canvas visible through all page sections.
+══════════════════════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('particle-canvas');
+  const N = 10000;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.01, 100);
+  camera.position.z = 3.2;
+
+  /* ── Shaders ── */
+  const vertexShader = `
+    attribute float aSize;
+    attribute vec3 aColor;
+    varying vec3 vColor;
+    varying float vAlpha;
+    uniform float uTime;
+    uniform float uSandT;
+    uniform float uFillLevel;
+    uniform float uDrainLevel;
+
+    void main() {
+      vColor = aColor;
+      vec3 pos = position;
+      float yOrig = position.y;
+      float axisR0 = length(vec2(position.x, position.z));
+
+      float drift = sin(uTime * 0.4 + pos.x * 2.3 + pos.y * 1.7) * 0.012;
+      pos.x += drift;
+      pos.y += sin(uTime * 0.3 + pos.z * 2.1) * 0.010;
+
+      // Falling sand stream through hourglass waist, top→bottom
+      float axisR = length(vec2(pos.x, pos.z));
+      float sandMask = smoothstep(0.062, 0.010, axisR) * uSandT;
+      float sPhase = fract(pos.x * 8.3 + pos.z * 6.1 + 0.37);
+      float fallSpeed = 0.13 + sPhase * 0.08;
+      float fallT = fract(sPhase + uTime * fallSpeed);
+      float sandY = mix(0.50, -0.44, pow(fallT, 1.7));
+      float floorFade = smoothstep(-0.60, -0.20, pos.y);
+      pos.y += sandMask * floorFade * (sandY - pos.y) * 0.92;
+
+      // Sand accumulation: hide interior particles above fill level (bottom cone)
+      // and below drain level (top cone) — only affects non-wall particles (axisR0 < 0.32)
+      float interior = step(axisR0, 0.32);
+      float bottomHidden = step(uFillLevel, yOrig) * step(yOrig, -0.04) * interior;
+      float topHidden    = step(yOrig, uDrainLevel) * step(0.04, yOrig) * interior;
+      float hide = max(bottomHidden, topHidden) * uSandT;
+      vAlpha = 1.0 - hide;
+
+      vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
+      gl_PointSize = aSize * (280.0 / -mvPos.z);
+      gl_Position = projectionMatrix * mvPos;
+    }
+  `;
+  const fragmentShader = `
+    varying vec3 vColor;
+    varying float vAlpha;
+
+    void main() {
+      vec2 cxy = 2.0 * gl_PointCoord - 1.0;
+      float r = dot(cxy, cxy);
+      if (r > 1.0) discard;
+      float glow = exp(-r * 2.8);
+      gl_FragColor = vec4(vColor * (0.6 + glow * 0.6), glow * vAlpha);
+    }
+  `;
+
+  /* ── Color palette ── */
+  const ACCENT = new THREE.Color('#c5a47e');
+  const DIM    = new THREE.Color('#7a6248');
+  const WHITE  = new THREE.Color('#f0ede8');
+  const GLOW   = new THREE.Color().lerpColors(ACCENT, DIM, 0.4);
+
+  /* ── Index-based static colors (same particle always same color across states) ── */
+  const colors = new Float32Array(N * 3);
+  const sizes  = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    const f = i / N;
+    let col, sz;
+    if      (f < 0.08) { col = WHITE;  sz = 0.015 + Math.random() * 0.004; }
+    else if (f < 0.50) { col = ACCENT; sz = 0.009 + Math.random() * 0.006; }
+    else if (f < 0.90) { col = DIM;    sz = 0.007 + Math.random() * 0.005; }
+    else               { col = GLOW;   sz = 0.008 + Math.random() * 0.004; }
+    colors[i*3]   = col.r;
+    colors[i*3+1] = col.g;
+    colors[i*3+2] = col.b;
+    sizes[i] = sz;
+  }
+
+  /* ─────────────────────────────────────────
+     SHAPE GENERATORS
+     Generators place key-feature particles first (indices 0–8% = WHITE).
+  ───────────────────────────────────────── */
+
+  function makeWriter(out) {
+    let idx = 0;
+    function pt(x, y, z, j) {
+      if (idx >= N) return;
+      z = z || 0; j = j === undefined ? 0.014 : j;
+      out[idx*3]   = x + (Math.random()-0.5)*j;
+      out[idx*3+1] = y + (Math.random()-0.5)*j;
+      out[idx*3+2] = z + (Math.random()-0.5)*j;
+      idx++;
+    }
+    function done() {
+      while (idx < N) {
+        const a = Math.random()*Math.PI*2, r = 2.0 + Math.random()*0.8;
+        out[idx*3]   = Math.cos(a)*r*0.50;
+        out[idx*3+1] = Math.sin(a)*r*0.40;
+        out[idx*3+2] = (Math.random()-0.5)*0.30;
+        idx++;
+      }
+    }
+    return { pt, done };
+  }
+
+  /* ── State 0: AI Face (hero) ── */
+  function genFace() {
+    const out = new Float32Array(N * 3);
+    const { pt, done } = makeWriter(out);
+
+    // WHITE (0–8%): face contour top arc + both eye rings
+    const ctN = Math.floor(N * 0.04);
+    for (let j = 0; j < ctN; j++) {
+      const t = (j/ctN) * Math.PI;
+      pt(Math.cos(t)*0.58, Math.sin(t)*0.78-0.04, 0, 0.012);
+    }
+    const eyN = Math.floor(N * 0.02);
+    for (let j = 0; j < eyN; j++) {
+      const t = (j/eyN)*Math.PI*2;
+      pt(-0.24+Math.cos(t)*0.115, 0.24+Math.sin(t)*0.063, 0, 0.007);
+    }
+    for (let j = 0; j < eyN; j++) {
+      const t = (j/eyN)*Math.PI*2;
+      pt(0.24+Math.cos(t)*0.115, 0.24+Math.sin(t)*0.063, 0, 0.007);
+    }
+
+    // ACCENT (8–50%): face contour bottom + irises + eyebrows + nose + lips + chin + circuit spokes
+    const cbN = Math.floor(N * 0.14);
+    for (let j = 0; j < cbN; j++) {
+      const t = Math.PI + (j/cbN)*Math.PI;
+      pt(Math.cos(t)*0.58, Math.sin(t)*0.78-0.04, 0, 0.012);
+    }
+    const irN = Math.floor(N * 0.03);
+    for (let s = 0; s < 2; s++) {
+      const ex = s===0 ? -0.24 : 0.24;
+      for (let j = 0; j < irN; j++) {
+        const t=(j/irN)*Math.PI*2;
+        pt(ex+Math.cos(t)*0.052, 0.24+Math.sin(t)*0.032, 0.05, 0.005);
+      }
+    }
+    const brN = Math.floor(N * 0.04);
+    for (let j = 0; j < brN; j++) {
+      const t=j/brN;
+      pt(-0.34+t*0.22, 0.38+Math.sin(t*Math.PI)*0.04, 0, 0.007);
+    }
+    for (let j = 0; j < brN; j++) {
+      const t=j/brN;
+      pt(0.12+t*0.22, 0.38+Math.sin(t*Math.PI)*0.04, 0, 0.007);
+    }
+    const nsN = Math.floor(N * 0.05);
+    for (let j = 0; j < nsN; j++) {
+      pt((Math.random()-0.5)*0.06, 0.14-(j/nsN)*0.32, 0, 0.010);
+    }
+    const lpN = Math.floor(N * 0.05);
+    for (let j = 0; j < lpN; j++) {
+      const t=j/lpN, lx=(t-0.5)*0.38;
+      pt(lx, -0.36+(Math.abs(lx)<0.08?-0.016:0)+(Math.abs(lx)>0.14?0.012:0), 0, 0.010);
+    }
+    for (let j = 0; j < Math.floor(lpN*0.6); j++) {
+      const t=j/Math.floor(lpN*0.6);
+      pt((t-0.5)*0.32, -0.395-Math.sin(t*Math.PI)*0.028, 0, 0.010);
+    }
+    const spN = Math.floor(N * 0.025);
+    for (let j = 0; j < spN; j++) {
+      const angle=(j/spN)*Math.PI*2, r=0.16+(j%4)*0.09;
+      pt(-0.24+Math.cos(angle)*r, 0.24+Math.sin(angle)*r*0.6, 0.02, 0.009);
+      pt( 0.24+Math.cos(angle)*r, 0.24+Math.sin(angle)*r*0.6, 0.02, 0.009);
+    }
+
+    // DIM (50–90%): interior fill
+    const fillTarget = Math.floor(N * 0.38);
+    let tries = 0, filled = 0;
+    while (filled < fillTarget && tries < fillTarget * 10) {
+      tries++;
+      const x=(Math.random()-0.5)*1.18, y=(Math.random()-0.5)*1.60;
+      if ((x*x)/(0.58*0.58)+(y*y)/(0.78*0.78) < 0.78) {
+        pt(x*0.9, y*0.9, (Math.random()-0.5)*0.06, 0.018);
+        filled++;
+      }
+    }
+
+    done();
+    return out;
+  }
+
+  /* ── State 1: Gap Bars (el-problema — 4.2 años vs 4.2 meses) ── */
+  function genGapBars() {
+    const out = new Float32Array(N * 3);
+    const { pt, done } = makeWriter(out);
+    const LX=-0.30, RX=0.30, BW=0.068;
+
+    // WHITE (0–8%): left bar top cap + right bar bright high fragments
+    const topN = Math.floor(N * 0.04);
+    for (let j = 0; j < topN; j++)
+      pt(LX-BW+(j/topN)*BW*2, 0.65, 0, 0.009);
+    for (let j = 0; j < topN; j++) {
+      const t=j/topN, spread=0.10+t*0.28;
+      pt(RX+(Math.random()-0.5)*spread*2, 0.25+t*0.40, 0, 0.010);
+    }
+
+    // ACCENT (8–50%): bar outlines + fills + measurement line
+    const loN = Math.floor(N * 0.06);
+    for (let j = 0; j < loN; j++)
+      pt(LX+(j%2===0?-BW:BW), -0.65+(j/loN)*1.30, 0, 0.007);
+    const roN = Math.floor(N * 0.04);
+    for (let j = 0; j < roN; j++)
+      pt(RX+(j%2===0?-BW:BW), -0.65+(j/roN)*0.43, 0, 0.007);
+    const lfN = Math.floor(N * 0.20);
+    for (let j = 0; j < lfN; j++)
+      pt(LX+(Math.random()-0.5)*BW*1.8, -0.65+Math.random()*1.30, 0, 0.010);
+    const rfN = Math.floor(N * 0.10);
+    for (let j = 0; j < rfN; j++)
+      pt(RX+(Math.random()-0.5)*BW*1.8, -0.65+Math.random()*0.43, 0, 0.010);
+    const lnN = Math.floor(N * 0.02);
+    for (let j = 0; j < lnN; j++)
+      pt(LX+(j/lnN)*(RX-LX), 0, 0, 0.005);
+
+    // DIM (50–90%): scattered fragments above right bar (exploding upward)
+    const scN = Math.floor(N * 0.38);
+    for (let j = 0; j < scN; j++) {
+      const t=j/scN, yBase=-0.22+t*0.47, spread=0.07+t*0.30;
+      pt(RX+(Math.random()-0.5)*spread*2, yBase+(Math.random()-0.5)*0.10, 0, 0.010);
+    }
+
+    done();
+    return out;
+  }
+
+  /* ── State 2: Network constellation (el-observatorio — 17 carreras, 5 fuentes, 88 skills) ── */
+  function genNetwork() {
+    const out = new Float32Array(N * 3);
+    const { pt, done } = makeWriter(out);
+    const innerR=0.20, outerR=0.54;
+    const iA = [0,72,144,216,288].map(d => d*Math.PI/180);
+
+    // WHITE (0–8%): 5 inner source hub rings
+    const ihN = Math.floor(N * 0.016);
+    for (let s = 0; s < 5; s++) {
+      const ax=Math.cos(iA[s])*innerR, ay=Math.sin(iA[s])*innerR;
+      for (let j = 0; j < ihN; j++) {
+        const t=(j/ihN)*Math.PI*2;
+        pt(ax+Math.cos(t)*0.038, ay+Math.sin(t)*0.038, 0, 0.006);
+      }
+    }
+
+    // ACCENT (8–50%): 17 outer career nodes + connection lines
+    const ohN = Math.floor(N * 0.013);
+    for (let c = 0; c < 17; c++) {
+      const angle=(c/17)*Math.PI*2;
+      const ox=Math.cos(angle)*outerR, oy=Math.sin(angle)*outerR;
+      for (let j = 0; j < ohN; j++) {
+        const t=(j/ohN)*Math.PI*2;
+        pt(ox+Math.cos(t)*0.026, oy+Math.sin(t)*0.026, 0, 0.006);
+      }
+    }
+    const cnN = Math.floor(N * 0.22);
+    for (let j = 0; j < cnN; j++) {
+      const s=Math.floor(Math.random()*5), c=Math.floor(Math.random()*17);
+      const ax=Math.cos(iA[s])*innerR, ay=Math.sin(iA[s])*innerR;
+      const cx=Math.cos((c/17)*Math.PI*2)*outerR, cy=Math.sin((c/17)*Math.PI*2)*outerR;
+      const t=Math.random();
+      pt(ax+(cx-ax)*t, ay+(cy-ay)*t, 0, 0.008);
+    }
+
+    // DIM (50–90%): 88 skill dots in mid annulus
+    const skN = Math.floor(N * 0.38);
+    for (let j = 0; j < skN; j++) {
+      const angle=Math.random()*Math.PI*2, r=0.28+Math.random()*0.22;
+      pt(Math.cos(angle)*r, Math.sin(angle)*r, 0, 0.018);
+    }
+
+    done();
+    return out;
+  }
+
+  /* ── State 3: Directional flow (la-decision — streamlines toward decision) ── */
+  function genFlow() {
+    const out = new Float32Array(N * 3);
+    const { pt, done } = makeWriter(out);
+    const streams = [-0.52,-0.32,-0.14,0,0.14,0.32,0.52];
+
+    // WHITE (0–8%): arrow tips — right-edge leading clusters
+    const tipN = Math.floor(N * 0.08 / streams.length);
+    for (const sy of streams)
+      for (let j = 0; j < tipN; j++)
+        pt(0.44+(j/tipN)*0.14, sy+(Math.random()-0.5)*0.04, 0, 0.008);
+
+    // ACCENT (8–50%): main stream bodies (right-density-biased)
+    const bdN = Math.floor(N * 0.42 / streams.length);
+    for (const sy of streams)
+      for (let j = 0; j < bdN; j++) {
+        const x = -0.60 + Math.pow(Math.random(), 1.4) * 1.04;
+        pt(x, sy+(Math.random()-0.5)*0.055, 0, 0.010);
+      }
+
+    // DIM (50–90%): trailing sparse left zone
+    const trN = Math.floor(N * 0.38);
+    for (let j = 0; j < trN; j++)
+      pt(-0.72+Math.random()*0.52, -0.60+Math.random()*1.20, 0, 0.020);
+
+    done();
+    return out;
+  }
+
+  /* ── State 4: Nebula (ambient intro + metodologia onwards) ── */
+  function genNebula() {
+    const out = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      const r=1.8+Math.random()*1.1, theta=Math.random()*Math.PI*2;
+      const phi=Math.acos(2*Math.random()-1);
+      out[i*3]   = r*Math.sin(phi)*Math.cos(theta)*0.90;
+      out[i*3+1] = r*Math.sin(phi)*Math.sin(theta)*0.50;
+      out[i*3+2] = r*Math.cos(phi)*0.35;
+    }
+    return out;
+  }
+
+  /* ── State 0: Human Face 3/4 profile (hero) — anatomical, no birrete ── */
+  function genFace3D() {
+    const out = new Float32Array(N * 3);
+    let idx = 0;
+    const linePairs = [];
+    function p(x, y, z, j) {
+      if (idx >= N) return -1;
+      j = j === undefined ? 0.014 : j;
+      out[idx*3]   = x + (Math.random()-0.5)*j;
+      out[idx*3+1] = y + (Math.random()-0.5)*j;
+      out[idx*3+2] = z + (Math.random()-0.5)*j;
+      return idx++;
+    }
+    function ln(a, b) { if (a >= 0 && b >= 0 && a !== b) { linePairs.push(a, b); } }
+
+    const eyeRimL = [], eyeRimR = [];
+    const browL = [], browR = [], jawline = [], lipUpper = [], lipLower = [];
+    const noseProfile = [], silhouette = [];
+    let chinIdx = -1, foreheadCenter = -1;
+
+    /* ── WHITE (0–8% ≈ 800): silhouette + iris + brows + nose bridge + lips + jaw ── */
+
+    // 1) Side silhouette of the face profile (left side dominant, what camera sees)
+    const silN = 220;
+    for (let s = 0; s < silN; s++) {
+      const t = s / silN;
+      let z;
+      if      (t < 0.08) z = 0.05 + t * 4.20;                 // top of skull
+      else if (t < 0.16) z = 0.39 + (t-0.08) * 0.5;           // forehead bulge
+      else if (t < 0.22) z = 0.43 - (t-0.16) * 0.6;           // brow ridge
+      else if (t < 0.30) z = 0.39 - (t-0.22) * 0.7;           // eye socket inset
+      else if (t < 0.38) z = 0.34 + (t-0.30) * 1.6;           // nose bridge out
+      else if (t < 0.46) z = 0.46 + (t-0.38) * 0.9;           // nose tip
+      else if (t < 0.50) z = 0.53 - (t-0.46) * 1.7;           // under nose
+      else if (t < 0.56) z = 0.46 - (t-0.50) * 0.4;           // upper lip
+      else if (t < 0.62) z = 0.44 + (t-0.56) * 0.6;           // lower lip
+      else if (t < 0.70) z = 0.47 - (t-0.62) * 0.6;           // chin retreat
+      else if (t < 0.78) z = 0.42 + (t-0.70) * 0.5;           // chin tip
+      else if (t < 0.90) z = 0.46 - (t-0.78) * 1.3;           // jaw under
+      else               z = 0.30 - (t-0.90) * 1.8;           // neck back
+      const y =  0.55 - t * 1.20;
+      const x = -0.20 + (Math.random()-0.5) * 0.04;
+      const id = p(x, y, z, 0.005);
+      silhouette.push(id);
+      if (s > 0) ln(silhouette[s-1], id);
+    }
+
+    // 2) Iris + eyelid (visible eye, slightly toward viewer)
+    for (let j = 0; j < 32; j++) {
+      const t = (j/32) * Math.PI * 2;
+      const id = p(-0.06 + Math.cos(t) * 0.024, 0.10 + Math.sin(t) * 0.020, 0.44, 0.003);
+      eyeRimL.push(id);
+      if (j > 0) ln(eyeRimL[j-1], id);
+    }
+    ln(eyeRimL[0], eyeRimL[eyeRimL.length-1]);
+    for (let j = 0; j < 22; j++) {
+      const t = (j/22) * Math.PI * 2;
+      const id = p(0.18 + Math.cos(t) * 0.020, 0.10 + Math.sin(t) * 0.018, 0.30, 0.003);
+      eyeRimR.push(id);
+      if (j > 0) ln(eyeRimR[j-1], id);
+    }
+    ln(eyeRimR[0], eyeRimR[eyeRimR.length-1]);
+
+    // 3) Brow lines
+    for (let j = 0; j < 44; j++) {
+      const t = j/44;
+      const id = p(-0.18 + t * 0.24, 0.20 + Math.sin(t*Math.PI)*0.026, 0.40 - t*0.06, 0.004);
+      browL.push(id);
+      if (j > 0) ln(browL[j-1], id);
+    }
+    for (let j = 0; j < 30; j++) {
+      const t = j/30;
+      const id = p(0.06 + t * 0.20, 0.20 + Math.sin(t*Math.PI)*0.020, 0.32 - t*0.06, 0.004);
+      browR.push(id);
+      if (j > 0) ln(browR[j-1], id);
+    }
+
+    // 4) Nose bridge profile (top to tip)
+    for (let j = 0; j < 44; j++) {
+      const t = j/44;
+      const y = 0.18 - t * 0.32;
+      const z = 0.42 + Math.sin(t*Math.PI*0.55) * 0.12;
+      const id = p(-0.02 - t*0.05, y, z, 0.005);
+      noseProfile.push(id);
+      if (j > 0) ln(noseProfile[j-1], id);
+    }
+    // Nostril (visible)
+    for (let j = 0; j < 22; j++) {
+      const t = (j/22) * Math.PI;
+      p(-0.08 + Math.cos(t) * 0.022, -0.09 + Math.sin(t) * 0.013, 0.46, 0.005);
+    }
+
+    // 5) Lip lines (upper + lower with cupid's bow)
+    for (let j = 0; j < 44; j++) {
+      const t = j/44, lx = (t-0.5) * 0.20 - 0.05;
+      const cupid = (Math.abs((t-0.5)*2) < 0.25) ? -0.014 : 0;
+      const id = p(lx, -0.21 + cupid - Math.abs(lx)*0.04, 0.43 - Math.abs(lx)*0.45, 0.005);
+      lipUpper.push(id);
+      if (j > 0) ln(lipUpper[j-1], id);
+    }
+    for (let j = 0; j < 32; j++) {
+      const t = j/32, lx = (t-0.5) * 0.18 - 0.05;
+      const id = p(lx, -0.27 + Math.sin(t*Math.PI)*0.014, 0.44 - Math.abs(lx)*0.45, 0.005);
+      lipLower.push(id);
+      if (j > 0) ln(lipLower[j-1], id);
+    }
+    ln(lipUpper[0], lipLower[0]);
+    ln(lipUpper[lipUpper.length-1], lipLower[lipLower.length-1]);
+
+    // 6) Jaw line (left ear → chin)
+    const jawN = 60;
+    for (let j = 0; j < jawN; j++) {
+      const t = j/jawN;
+      const x = -0.34 + t * 0.30;
+      const y = -0.05 - t * 0.37 + Math.sin(t*Math.PI)*0.04;
+      const z = 0.0 + Math.pow(t, 1.4) * 0.42;
+      const id = p(x, y, z, 0.005);
+      jawline.push(id);
+      if (j > 0) ln(jawline[j-1], id);
+    }
+    chinIdx = jawline[jawline.length-1];
+    // Right side jawline (subtle)
+    for (let j = 0; j < 32; j++) {
+      const t = j/32;
+      const x = 0.34 - t * 0.30;
+      const y = -0.05 - t * 0.37 + Math.sin(t*Math.PI)*0.03;
+      const z = -0.05 + Math.pow(t, 1.4) * 0.45;
+      const id = p(x, y, z, 0.005);
+      if (j > 0) ln(id-1, id);
+    }
+
+    // 7) Forehead crown arc (front contour)
+    for (let j = 0; j < 40; j++) {
+      const t = j/40;
+      const x = -0.22 + t * 0.34;
+      const y = 0.42 - Math.sin(t*Math.PI)*0.04;
+      const z = 0.32 + Math.sin(t*Math.PI)*0.10;
+      const id = p(x, y, z, 0.005);
+      if (j > 0) ln(id-1, id);
+      if (j === 20) foreheadCenter = id;
+    }
+
+    /* ── ACCENT (8–50% ≈ 4200): facial structure + skull surface + hair front ── */
+
+    // Skull surface (biased to visible side: front + left)
+    for (let j = 0; j < 1100; j++) {
+      const u = Math.pow(Math.random(), 0.7);
+      const phi = Math.acos(2*Math.random()-1);
+      const theta = Math.random() * Math.PI * 2;
+      const rx = 0.42 * (0.86 + u*0.14);
+      const ry = 0.55 * (0.86 + u*0.14);
+      const rz = 0.48 * (0.86 + u*0.14);
+      let x = rx * Math.sin(phi) * Math.cos(theta);
+      const y = ry * Math.cos(phi) - 0.04;
+      let z = rz * Math.sin(phi) * Math.sin(theta);
+      // Bias toward front-left
+      if (Math.random() > 0.30) { x = -Math.abs(x) * 0.85 + 0.04; }
+      if (Math.random() > 0.45) { z = Math.abs(z) * 0.9; }
+      p(x, y, z, 0.011);
+    }
+
+    // Cheek (left, dominant)
+    for (let j = 0; j < 280; j++) {
+      p(-0.20 + (Math.random()-0.5)*0.12, -0.05 + (Math.random()-0.5)*0.20, 0.30 + Math.random()*0.12, 0.010);
+    }
+    // Cheek (right, subtle far side)
+    for (let j = 0; j < 110; j++) {
+      p(0.22 + (Math.random()-0.5)*0.08, -0.05 + (Math.random()-0.5)*0.16, 0.18 + Math.random()*0.10, 0.010);
+    }
+
+    // Eye socket fill (sunken)
+    for (let j = 0; j < 160; j++) {
+      p(-0.06 + (Math.random()-0.5)*0.07, 0.10 + (Math.random()-0.5)*0.04, 0.40 + Math.random()*0.04, 0.008);
+    }
+    for (let j = 0; j < 80; j++) {
+      p(0.18 + (Math.random()-0.5)*0.06, 0.10 + (Math.random()-0.5)*0.04, 0.27 + Math.random()*0.04, 0.008);
+    }
+
+    // Nose volume (bridge → wings → tip)
+    for (let j = 0; j < 320; j++) {
+      const t = Math.random();
+      const y = 0.18 - t * 0.32;
+      const flare = 0.02 + Math.pow(t, 2) * 0.09;
+      p(-0.04 - t*0.05 + (Math.random()-0.5)*flare, y, 0.42 + Math.sin(t*Math.PI*0.55)*0.12 + (Math.random()-0.5)*0.03, 0.009);
+    }
+
+    // Lip volume
+    for (let j = 0; j < 200; j++) {
+      const t = Math.random();
+      const lx = (t-0.5) * 0.22 - 0.05;
+      p(lx, -0.24 + (Math.random()-0.5)*0.06, 0.42 - Math.abs(lx)*0.45, 0.009);
+    }
+
+    // Hair front mass (top + sides)
+    for (let j = 0; j < 600; j++) {
+      const u = Math.random();
+      const angle = (Math.random()-0.5) * Math.PI;
+      const r = 0.45 + Math.random() * 0.10;
+      const x = -0.10 + Math.cos(angle) * r * 0.5 - Math.random()*0.22;
+      const y = 0.30 + u * 0.36;
+      const z = -0.12 + Math.sin(angle) * r * 0.7;
+      p(x, y, z, 0.012);
+    }
+
+    // Neck cylinder
+    for (let j = 0; j < 380; j++) {
+      const angle = Math.random() * Math.PI * 2;
+      const r = 0.10 + Math.random() * 0.05;
+      const y = -0.50 - Math.random() * 0.36;
+      p(-0.04 + Math.cos(angle) * r, y, 0.05 + Math.sin(angle) * r, 0.011);
+    }
+
+    // Under-jaw shadow + chin volume
+    for (let j = 0; j < 220; j++) {
+      const t = Math.random();
+      p(-0.30 + t * 0.32 + (Math.random()-0.5)*0.04, -0.22 - Math.random()*0.18, 0.10 + t*0.32, 0.009);
+    }
+
+    // Ear (left, visible)
+    for (let j = 0; j < 110; j++) {
+      const t = (j/110) * Math.PI * 2;
+      const r = 0.045 + (j%3)*0.005;
+      p(-0.34 + Math.cos(t)*r*0.6, 0.05 + Math.sin(t)*r, -0.06, 0.008);
+    }
+
+    // Forehead surface
+    for (let j = 0; j < 420; j++) {
+      const x = -0.22 + Math.random() * 0.42;
+      const y = 0.30 + Math.random() * 0.20;
+      const z = 0.30 + Math.random() * 0.12 - Math.abs(x)*0.18;
+      p(x, y, z, 0.010);
+    }
+
+    // Chin / lower face front
+    for (let j = 0; j < 260; j++) {
+      p(-0.08 + (Math.random()-0.5)*0.18, -0.34 - Math.random()*0.10, 0.36 + (Math.random()-0.5)*0.10, 0.010);
+    }
+
+    // Some far-side hair scatter
+    for (let j = 0; j < 240; j++) {
+      p(0.15 + Math.random()*0.30, 0.10 + Math.random()*0.50, -0.30 - Math.random()*0.20, 0.014);
+    }
+
+    /* ── DIM (50–90% ≈ 4000): hair mass + skull interior + shoulder + halo ── */
+
+    // Hair mass (back/down)
+    for (let j = 0; j < 1500; j++) {
+      const u = Math.random();
+      const a = Math.random()*Math.PI*2;
+      const r = 0.40 + Math.random()*0.32;
+      const x = 0.05 + Math.cos(a)*r*0.5;
+      const y = 0.10 + u * 0.50 - 0.04;
+      const z = -0.18 + Math.sin(a)*r*0.5;
+      p(x, y, z, 0.018);
+    }
+
+    // Skull interior
+    for (let j = 0; j < 800; j++) {
+      const cosT=2*Math.random()-1, sinT=Math.sqrt(1-cosT*cosT);
+      const phi = Math.random()*Math.PI*2;
+      const r = Math.random() * 0.36;
+      p(r * sinT * Math.cos(phi), r * cosT - 0.05, r * sinT * Math.sin(phi), 0.020);
+    }
+
+    // Shoulder hint
+    for (let j = 0; j < 700; j++) {
+      const side = Math.random() < 0.5 ? -1 : 1;
+      const x = side * (0.30 + Math.random() * 0.36);
+      const y = -0.85 - Math.random() * 0.30;
+      const z = -0.18 + Math.random() * 0.40;
+      p(x, y, z, 0.020);
+    }
+
+    // Background ambient halo
+    for (let j = 0; j < 1000; j++) {
+      const a = Math.random()*Math.PI*2, r = 0.70 + Math.random()*0.40;
+      p(Math.cos(a)*r*0.6, Math.sin(a)*r*0.6, -0.25 + Math.random()*0.15, 0.022);
+    }
+
+    // Fill remaining (~10%) with soft ambient gas
+    while (idx < N) {
+      const a = Math.random()*Math.PI*2, r = 1.0 + Math.random()*0.6;
+      out[idx*3]   = Math.cos(a)*r*0.50;
+      out[idx*3+1] = Math.sin(a)*r*0.40;
+      out[idx*3+2] = (Math.random()-0.5)*0.30;
+      idx++;
+    }
+
+    /* ── Wireframe supplementary lines (hub-and-spoke + constellation) ── */
+    const hubs = [foreheadCenter, chinIdx];
+    if (noseProfile.length) hubs.push(noseProfile[noseProfile.length-1]);
+    eyeRimL.forEach((v,i) => { if (i % 4 === 0) hubs.push(v); });
+    jawline.forEach((v,i) => { if (i % 8 === 0) hubs.push(v); });
+    for (const hub of hubs) {
+      if (hub < 0) continue;
+      const hx = out[hub*3], hy = out[hub*3+1], hz = out[hub*3+2];
+      let found = 0;
+      for (let attempts = 0; attempts < 60 && found < 5; attempts++) {
+        const cand = Math.floor(Math.random() * Math.min(idx, Math.floor(N*0.50)));
+        if (cand === hub) continue;
+        const dx = out[cand*3] - hx, dy = out[cand*3+1] - hy, dz = out[cand*3+2] - hz;
+        const d2 = dx*dx + dy*dy + dz*dz;
+        if (d2 < 0.045*0.045) { ln(hub, cand); found++; }
+      }
+    }
+    // Constellation lines between WHITE-tier indices
+    for (let j = 0; j < 80; j++) {
+      const a = Math.floor(Math.random() * Math.floor(N*0.06));
+      const b = Math.floor(Math.random() * Math.floor(N*0.06));
+      if (a === b) continue;
+      const dx = out[a*3] - out[b*3], dy = out[a*3+1] - out[b*3+1], dz = out[a*3+2] - out[b*3+2];
+      const d2 = dx*dx + dy*dy + dz*dz;
+      if (d2 < 0.085*0.085) ln(a, b);
+    }
+
+    FACE_LINE_PAIRS = linePairs;
+    return out;
+  }
+
+  /* ── State 1: Hourglass (el-problema — curriculum slow vs AI fast) ── */
+  function genHourglass() {
+    const out = new Float32Array(N * 3);
+    const { pt, done } = makeWriter(out);
+    const HH=0.90,TRmax=0.55,BRmax=0.50,wR=0.06;
+    // WHITE (0-8%=360): waist ring + top rim + bottom rim (120 each)
+    for(let j=0;j<120;j++){const t=(j/120)*Math.PI*2;pt(Math.cos(t)*wR,0,Math.sin(t)*wR*0.5,0.006);}
+    for(let j=0;j<120;j++){const t=(j/120)*Math.PI*2;pt(Math.cos(t)*TRmax,HH,Math.sin(t)*TRmax*0.4,0.008);}
+    for(let j=0;j<120;j++){const t=(j/120)*Math.PI*2;pt(Math.cos(t)*BRmax,-HH,Math.sin(t)*BRmax*0.4,0.008);}
+    // ACCENT (8-50%): bottom cone dense (AI fast) + slant outlines
+    for(let j=0;j<1200;j++){
+      const y=-Math.pow(Math.random(),0.5)*HH;
+      const r=(wR+(BRmax-wR)*(-y/HH))*Math.random(),t=Math.random()*Math.PI*2;
+      pt(Math.cos(t)*r,y,Math.sin(t)*r*0.45,0.012);
+    }
+    for(let s=0;s<14;s++){const a=(s/14)*Math.PI*2;for(let k=0;k<30;k++){const t=k/30,y=-HH*t,r=wR+(BRmax-wR)*t;pt(Math.cos(a)*r,y,Math.sin(a)*r*0.45,0.006);}}
+    // DIM (50-90%): top cone sparse (curriculum slow)
+    for(let j=0;j<1600;j++){
+      const y=Math.pow(Math.random(),1.8)*HH;
+      const r=(wR+(TRmax-wR)*(y/HH))*Math.random(),t=Math.random()*Math.PI*2;
+      pt(Math.cos(t)*r,y,Math.sin(t)*r*0.45,0.018);
+    }
+    done(); return out;
+  }
+
+  /* ── State 2: 3D Globe (el-observatorio — 17 carreras, 5 fuentes, 88 skills) ── */
+  function genGlobe() {
+    const out = new Float32Array(N * 3);
+    const { pt, done } = makeWriter(out);
+    const GR=0.68;
+    const iA=[0,72,144,216,288].map(d=>d*Math.PI/180);
+    // WHITE (0-8%=360): 5 source hub rings (72 pts each)
+    iA.forEach(a=>{
+      const hx=Math.cos(a)*GR*0.5,hy=Math.sin(a)*GR*0.3;
+      const hz=Math.sqrt(Math.max(0,GR*GR-hx*hx-hy*hy))*0.5;
+      for(let j=0;j<72;j++){const t=(j/72)*Math.PI*2;pt(hx+Math.cos(t)*0.030,hy+Math.sin(t)*0.030,hz,0.007);}
+    });
+    // ACCENT (8-50%): lat/lon wireframe + 17 career nodes
+    for(let lat=-2;lat<=2;lat++){const phi=(lat/3)*Math.PI/2,cosP=Math.cos(phi),sinP=Math.sin(phi);for(let j=0;j<120;j++){const t=(j/120)*Math.PI*2;pt(GR*cosP*Math.cos(t),GR*sinP,GR*cosP*Math.sin(t)*0.55,0.008);}}
+    for(let m=0;m<8;m++){const lon=(m/8)*Math.PI;for(let j=0;j<80;j++){const phi=-Math.PI/2+(j/80)*Math.PI;pt(GR*Math.cos(phi)*Math.cos(lon),GR*Math.sin(phi),GR*Math.cos(phi)*Math.sin(lon)*0.55,0.008);}}
+    for(let c=0;c<17;c++){const a=(c/17)*Math.PI*2,nx=GR*Math.cos(a),ny=(Math.random()-0.5)*0.18,nz=GR*Math.sin(a)*0.55;for(let j=0;j<20;j++){const t=(j/20)*Math.PI*2;pt(nx+Math.cos(t)*0.028,ny+Math.sin(t)*0.028,nz,0.007);}}
+    // DIM (50-90%): 88 skill dots + surface fill
+    for(let j=0;j<880;j++){const cosT=2*Math.random()-1,sinT=Math.sqrt(1-cosT*cosT),phi=Math.random()*Math.PI*2,r=GR*(0.85+Math.random()*0.18);pt(r*sinT*Math.cos(phi),r*cosT,r*sinT*Math.sin(phi)*0.55,0.018);}
+    for(let j=0;j<880;j++){const cosT=2*Math.random()-1,sinT=Math.sqrt(1-cosT*cosT),phi=Math.random()*Math.PI*2;pt(GR*sinT*Math.cos(phi),GR*cosT,GR*sinT*Math.sin(phi)*0.55,0.010);}
+    done(); return out;
+  }
+
+  /* ── State 3: Procession (la-decision — graduates marching with birretes) ── */
+  function genProcession() {
+    const out = new Float32Array(N * 3);
+    const { pt, done } = makeWriter(out);
+    const figures=5,spacing=0.32,zStep=0.10;
+    // WHITE (0-8%=360): 5 birretes (72 pts each)
+    for(let f=0;f<figures;f++){
+      const fx=(f-2)*spacing,fy=0.54+f*0.014,fz=-f*zStep,sz=0.14-f*0.008;
+      for(let j=0;j<72;j++){const t=j/72,side=Math.floor(t*4),p=(t*4)%1;
+        if(side===0)pt(fx-sz+p*sz*2,fy,fz,0.005);
+        else if(side===1)pt(fx+sz,fy,fz-p*sz,0.005);
+        else if(side===2)pt(fx+sz-p*sz*2,fy,fz-sz,0.005);
+        else pt(fx-sz,fy,fz-sz+p*sz,0.005);}
+    }
+    // ACCENT (8-50%): heads + bodies
+    for(let f=0;f<figures;f++){
+      const fx=(f-2)*spacing,fz=-f*zStep,sc=1-f*0.06;
+      const hR=0.07*sc,hY=0.35*sc;
+      for(let j=0;j<120;j++){const t=(j/120)*Math.PI*2;pt(fx+Math.cos(t)*hR,hY+Math.sin(t)*hR*0.9,fz,0.008);}
+      for(let j=0;j<200;j++){const by=hY-0.08-Math.random()*0.44*sc,bx=(Math.random()-0.5)*0.11*sc;pt(fx+bx,by,fz+(Math.random()-0.5)*0.05,0.009);}
+    }
+    // DIM (50-90%): ground + trail scatter
+    for(let j=0;j<900;j++)pt((Math.random()-0.5)*1.6,-0.22-Math.random()*0.15,(Math.random()-0.5)*0.40,0.020);
+    for(let j=0;j<700;j++)pt(-0.8+Math.random()*0.5,-0.15+Math.random()*0.65,(Math.random()-0.5)*0.30,0.020);
+    done(); return out;
+  }
+
+  /* ── Pre-generate all shapes ── */
+  let FACE_LINE_PAIRS = [];
+  const SHAPES   = [genFace3D(), genHourglass(), genGlobe(), genProcession(), genNebula()];
+  const OFFSETS  = [0.50, 0.45, -0.45, 0.40, 0.0];
+  const ROTATIONS= [-0.45, 0, 0.30, -0.10, 0];
+  const SCALES   = [1.0, 1.90, 0.80, 0.85, 1.0];
+
+  /* ── Geometry (starts at nebula positions) ── */
+  const positions = new Float32Array(SHAPES[4]);
+  const geometry  = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('aColor',   new THREE.BufferAttribute(colors, 3));
+  geometry.setAttribute('aSize',    new THREE.BufferAttribute(sizes,  1));
+
+  const material = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uSandT: { value: 0 }, uFillLevel: { value: -0.90 }, uDrainLevel: { value: 0.90 } },
+    vertexShader, fragmentShader,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false, depthTest: false,
+  });
+
+  const points = new THREE.Points(geometry, material);
+  scene.add(points);
+
+  /* ── Wireframe (visible only on Face3D state) ── */
+  const lineGeom = new THREE.BufferGeometry();
+  const lineCount = FACE_LINE_PAIRS.length;
+  const linePositions = new Float32Array(lineCount * 3);
+  lineGeom.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+  const lineMaterial = new THREE.LineBasicMaterial({
+    color: 0xc5a47e,
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    depthTest: false,
+  });
+  const faceLines = new THREE.LineSegments(lineGeom, lineMaterial);
+  scene.add(faceLines);
+
+  /* ── Morph state ── */
+  let currentProgress = 0;
+  let targetProgress  = 0;
+  let currentOffsetX  = 0;
+  let currentExtraX   = 0;
+  let currentRotY     = 0;
+  let currentScale    = 1;
+
+  /* ── Intro: nebula disperses → face forms ── */
+  let introT = 0;
+  let introStarted = false;
+  setTimeout(() => { introStarted = true; }, 900);
+
+  /* ── Section bounds (maps scroll position → target shape state) ── */
+  let sectionBounds = [];
+  function computeBounds() {
+    const ids = ['hero','el-problema','el-observatorio','la-decision','metodologia'];
+    sectionBounds = ids.map(id => { const el=document.getElementById(id); return el ? el.offsetTop : 0; });
+  }
+  computeBounds();
+
+  /* ── Scroll → targetProgress ── */
+  function onScroll() {
+    const scrollY = window.scrollY;
+    const b = sectionBounds;
+    if (b.length < 5) return;
+    for (let s = 0; s < b.length-1; s++) {
+      if (scrollY < b[s+1]) {
+        const transStart = b[s] + (b[s+1]-b[s]) * 0.55;
+        targetProgress = scrollY < transStart
+          ? s
+          : s + Math.min(1, (scrollY-transStart) / (b[s+1]-transStart));
+        return;
+      }
+    }
+    targetProgress = b.length - 1;
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ── Animation loop ── */
+  const clock = new THREE.Clock();
+  function animate() {
+    requestAnimationFrame(animate);
+    const elapsed = clock.getElapsedTime();
+    material.uniforms.uTime.value = elapsed;
+
+    // Intro blend: nebula (SHAPES[4]) → current morph state
+    if (introStarted && introT < 1) introT = Math.min(1, introT + 0.008);
+    const iT = introT, introEased = iT < 0.5 ? 2*iT*iT : -1+(4-2*iT)*iT;
+
+    // Falling sand: peak strength when at hourglass state (state index 1)
+    const sandStrength = Math.max(0, 1 - Math.abs(currentProgress - 1) * 3.5) * introEased;
+    material.uniforms.uSandT.value = sandStrength;
+    // Sand pile cycle: 14s fill (bottom rises), then reset
+    const cycleP = (elapsed % 14) / 14;
+    const fillEase = Math.min(1, cycleP / 0.92);
+    material.uniforms.uFillLevel.value  = (-0.90 + 0.90 * fillEase) * sandStrength + (-0.90 * (1 - sandStrength));
+    material.uniforms.uDrainLevel.value = ( 0.90 - 0.90 * fillEase) * sandStrength + ( 0.90 * (1 - sandStrength));
+
+    // Normal multi-state morph
+    currentProgress += (targetProgress - currentProgress) * 0.035;
+    const clamped = Math.max(0, Math.min(SHAPES.length-1.001, currentProgress));
+    const sA = Math.floor(clamped), sB = Math.min(SHAPES.length-1, sA+1);
+    const rawT = clamped - sA;
+    const morphT = rawT < 0.5 ? 2*rawT*rawT : -1+(4-2*rawT)*rawT;
+
+    const posA=SHAPES[sA], posB=SHAPES[sB], neb=SHAPES[4];
+    const pos = geometry.attributes.position.array;
+    for (let i = 0; i < N*3; i++) {
+      const morphed = posA[i]*(1-morphT) + posB[i]*morphT;
+      pos[i] = neb[i]*(1-introEased) + morphed*introEased;
+    }
+    geometry.attributes.position.needsUpdate = true;
+
+    // x-offset lerp (particles shift left/right per state on desktop)
+    const wide = window.innerWidth > 900;
+    const tgtOff = wide ? OFFSETS[sA]*(1-morphT)+OFFSETS[sB]*morphT : 0;
+    currentOffsetX += (tgtOff*introEased - currentOffsetX) * 0.06;
+    const EXTRA_OFFSETS = [0, 1.50, 0, 0, 0];
+    const tgtExtra = wide ? EXTRA_OFFSETS[sA]*(1-morphT)+EXTRA_OFFSETS[sB]*morphT : 0;
+    currentExtraX += (tgtExtra*introEased - currentExtraX) * 0.06;
+    points.position.x = currentOffsetX + currentExtraX;
+
+    const tgtRot = ROTATIONS[sA]*(1-morphT) + ROTATIONS[sB]*morphT;
+    currentRotY += (tgtRot*introEased - currentRotY) * 0.04;
+    points.rotation.y = currentRotY;
+
+    const tgtScale = SCALES[sA]*(1-morphT) + SCALES[sB]*morphT;
+    currentScale += (tgtScale*introEased + (1-introEased) - currentScale) * 0.05;
+    points.scale.setScalar(currentScale);
+
+    // Wireframe (Face3D only): copy positions of paired indices + fade by progress
+    const faceVisibility = Math.max(0, 1 - currentProgress * 1.8) * introEased;
+    if (faceVisibility > 0.01 && lineCount > 0) {
+      for (let k = 0; k < lineCount; k++) {
+        const pi = FACE_LINE_PAIRS[k];
+        linePositions[k*3]   = pos[pi*3];
+        linePositions[k*3+1] = pos[pi*3+1];
+        linePositions[k*3+2] = pos[pi*3+2];
+      }
+      lineGeom.attributes.position.needsUpdate = true;
+      faceLines.visible = true;
+      faceLines.material.opacity = 0.22 * faceVisibility;
+      faceLines.position.x = currentOffsetX + currentExtraX;
+      faceLines.rotation.y = currentRotY;
+      faceLines.scale.setScalar(currentScale);
+    } else {
+      faceLines.visible = false;
+    }
+
+    // Gentle camera sway
+    camera.position.x = Math.sin(elapsed*0.08)*0.06 + currentOffsetX;
+    camera.position.y = Math.sin(elapsed*0.12)*0.04;
+    camera.lookAt(currentOffsetX, 0, 0);
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  /* ── Resize ── */
+  window.addEventListener('resize', () => {
+    const w=window.innerWidth, h=window.innerHeight;
+    renderer.setSize(w, h);
+    camera.aspect = w/h;
+    camera.updateProjectionMatrix();
+    computeBounds();
+  });
+})();
+
+
+/* ══════════════════════════════════════════════
+   GSAP — SCROLL REVEALS
+══════════════════════════════════════════════ */
+(function() {
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Generic reveals
+  const reveals = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+  reveals.forEach(el => {
+    const isLeft  = el.classList.contains('reveal-left');
+    const isRight = el.classList.contains('reveal-right');
+    const delay = parseFloat(el.style.transitionDelay || '0') * 1000;
+
+    gsap.fromTo(el,
+      { opacity: 0, x: isLeft ? -28 : isRight ? 28 : 0, y: (!isLeft && !isRight) ? 24 : 0 },
+      {
+        opacity: 1, x: 0, y: 0,
+        duration: 0.9, ease: 'power3.out',
+        delay: delay / 1000,
+        scrollTrigger: { trigger: el, start: 'top 82%', toggleActions: 'play none none none' },
+      }
+    );
+  });
+
+  // Counters
+  document.querySelectorAll('.counter').forEach(el => {
+    const target = parseInt(el.dataset.target, 10);
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 80%',
+      once: true,
+      onEnter: () => {
+        gsap.fromTo({ val: 0 }, { val: target, duration: 1.8, ease: 'power2.out',
+          onUpdate: function() { el.textContent = Math.round(this.targets()[0].val); }
+        });
+      }
+    });
+  });
+})();
+
+
+/* ══════════════════════════════════════════════
+   HERO ENTRANCE
+══════════════════════════════════════════════ */
+(function() {
+  const tl = gsap.timeline({ delay: 0.3 });
+  tl.to('.hero-tag',     { opacity:1, y:0, duration:0.7, ease:'power3.out' })
+    .to('.hero-headline', { opacity:1, y:0, duration:0.9, ease:'power3.out' }, '-=0.3')
+    .to('.hero-sub',      { opacity:1, y:0, duration:0.8, ease:'power3.out' }, '-=0.5')
+    .to('.hero-ctas',     { opacity:1, y:0, duration:0.7, ease:'power3.out' }, '-=0.4')
+    .to('.hero-scroll-hint', { opacity:1, duration:0.6 }, '-=0.2');
+})();
+
+
+/* ══════════════════════════════════════════════
+   NAVBAR SCROLL BEHAVIOR
+══════════════════════════════════════════════ */
+(function() {
+  const nav = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  }, { passive: true });
+})();
+
+
+/* ══════════════════════════════════════════════
+   CONTACT FORM
+══════════════════════════════════════════════ */
+(function() {
+  const form = document.getElementById('contact-form');
+  const success = document.getElementById('form-success');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('.form-submit');
+    btn.textContent = 'Enviando...';
+    btn.disabled = true;
+
+    try {
+      const body = {
+        nombre:      document.getElementById('nombre').value,
+        cargo:       document.getElementById('cargo').value,
+        institucion: document.getElementById('institucion').value,
+        email:       document.getElementById('email').value,
+        tipo:        document.getElementById('tipo').value,
+        mensaje:     document.getElementById('mensaje').value,
+      };
+      const res = await fetch('/api/contacto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        form.style.display = 'none';
+        success.style.display = 'block';
+      } else {
+        btn.textContent = 'Solicitar análisis gratuito';
+        btn.disabled = false;
+      }
+    } catch {
+      // In prototype mode, show success anyway
+      form.style.display = 'none';
+      success.style.display = 'block';
+    }
+  });
+})();
+</script>
+</body>
+</html>
