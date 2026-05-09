@@ -88,7 +88,7 @@ class Finding(BaseModel):
                            description="Afirmación neta en español, lista para citar")
     metric_value: str | None = Field(None, max_length=120,
                                      description="Cifra o magnitud asociada (ej. '47%', '2 años', '14 millones')")
-    source_quote: str = Field(..., min_length=10, max_length=600,
+    source_quote: str = Field(..., min_length=10, max_length=1500,
                               description="Cita textual del documento que respalda el hallazgo")
     page: str | None = Field(None, max_length=20,
                              description="Página o sección (ej. 'p.12', 'Section 3.2'); null si desconocida")
