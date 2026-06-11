@@ -1,0 +1,74 @@
+# Monitoreo de disponibilidad sin servicio externo (sustituye UptimeRobot):
+# ping a /health cada 30 min; si falla, abre UN issue (dedup por label) y lo
+# cierra solo cuando el servicio se recupera.
+name: Health check
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /health
+        id: ping
+        continue-on-error: true
+        env:
+          # Repository variable OIA_API_URL permite cambiar el dominio sin tocar el workflow
+          API_URL: ${{ vars.OIA_API_URL || 'https://oia-api-production.up.railway.app' }}
+        run: |
+          status=$(curl -s -o /tmp/health_body -w "%{http_code}" --max-time 30 "$API_URL/health" || echo "000")
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          echo "HTTP $status"
+          cat /tmp/health_body 2>/dev/null | head -c 500 || true
+          # 200 (ok/degraded) y 503 con cuerpo JSON significan "app viva";
+          # solo cuenta como caída un fallo de red/edge (000, 404, 502, etc.)
+          if [ "$status" = "200" ]; then exit 0; else exit 1; fi
+
+      - name: Abrir o cerrar issue según resultado
+        uses: actions/github-script@v7
+        env:
+          PING_STATUS: ${{ steps.ping.outputs.status }}
+          PING_OK: ${{ steps.ping.outcome == 'success' }}
+        with:
+          script: |
+            const label = 'health-check';
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: label,
+            });
+            const ok = process.env.PING_OK === 'true';
+            const status = process.env.PING_STATUS;
+            if (!ok && open.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title: `🔴 Backend caído — /health respondió HTTP ${status}`,
+                labels: [label],
+                body: [
+                  `El health check programado falló con **HTTP ${status}**.`,
+                  '',
+                  '- 404 "Application not found" en el edge de Railway = el servicio o el dominio ya no existe (revisar proyecto Railway / `railway login`).',
+                  '- 503 = scheduler muerto según los thresholds de /health.',
+                  '- 000 = timeout o DNS.',
+                  '',
+                  'Este issue se cierra automáticamente cuando /health vuelva a responder 200.',
+                ].join('\n'),
+              });
+            } else if (ok && open.length > 0) {
+              for (const issue of open) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: '🟢 /health respondió 200 — servicio recuperado. Cierro.',
+                });
+                await github.rest.issues.update({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: issue.number, state: 'closed',
+                });
+              }
+            }
