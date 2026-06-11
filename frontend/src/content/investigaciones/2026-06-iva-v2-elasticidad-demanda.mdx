@@ -1,0 +1,44 @@
+---
+titulo: "Por qué medir el riesgo de automatización sin mirar la demanda lleva a cerrar carreras buenas"
+resumen: "El OIA-EE incorpora el IVA v2: un indicador que ajusta la exposición técnica a IA por la elasticidad de demanda del sector. Qué corrige, cómo se calcula y por qué una ocupación muy expuesta puede tener futuro."
+fecha: "2026-06-11"
+tipo: analisis
+autor: "Samuel Aguilar"
+acceso: abierto
+tags:
+  - metodología
+  - IVA
+  - elasticidad
+  - IEX
+  - Jevons
+---
+
+# Por qué medir el riesgo de automatización sin mirar la demanda lleva a cerrar carreras buenas
+
+Un índice de automatización que solo mide qué tan bien hace la IA las tareas de una ocupación responde la pregunta equivocada. La pregunta de un rector no es "¿puede la IA hacer esto?", sino "¿habrá empleo para mis egresados?". Entre una y otra media un factor que la mayoría de los rankings de riesgo ignora: **la elasticidad de la demanda**.
+
+## El falso positivo que queríamos corregir
+
+Cuando la IA abarata un servicio, pueden pasar dos cosas. Si la demanda del sector está saturada — el cumplimiento fiscal de una empresa no crece porque facturar sea más barato — la productividad extra se traduce en menos puestos. Pero si existe demanda reprimida, el abaratamiento la libera: se consume más servicio, no menos trabajo. Es la paradoja de Jevons aplicada al empleo, y es la razón por la que un indicador puramente técnico tiende a sobrestimar el riesgo en salud o educación y a producir lo que en nuestro análisis interno llamamos un *falso positivo institucionalmente costoso*: recomendar la contracción de un programa cuyo mercado laboral va a crecer.
+
+## Qué cambia con el IVA v2
+
+El IVA v2 que hoy se incorpora al observatorio combina tres componentes:
+
+**IVA v2 = (IEX/10) × (1 − FES) × (1 − FA)**
+
+- **IEX** es el Índice de Exposición a IA: mide, tarea por tarea (O*NET) y validado contra adopción observada, qué tan expuesta está una ocupación a la IA generativa. Se calcula en nuestro proyecto de investigación hermano sobre un piloto de 22 ocupaciones y la plataforma lo consume tal cual — la metodología se decide en sede académica, no en el producto.
+- **FES** es el factor de elasticidad sectorial: descuenta riesgo donde la demanda reprimida puede absorber productividad (elasticidad alta descuenta 50%, media 25%, baja 0%). La clasificación por ocupación está documentada con evidencia para México — escasez crónica en oficios y transporte según ManpowerGroup y CANACAR, techo presupuestal en educación según cifras SEP, demanda no solvente en servicios jurídicos básicos.
+- **FA** es la fricción de adopción: la automatización técnicamente posible no ocurre de un día para otro. Hoy es una constante conservadora (0.25) en proceso de refinamiento con indicadores de regulación y estructura sectorial.
+
+## Tres ejemplos del piloto
+
+- **Auxiliares contables**: exposición muy alta (IEX 8.0) en un sector de demanda fija por obligación fiscal (E-Baja). IVA v2 ≈ 0.60 — el riesgo técnico se confirma como riesgo de empleo.
+- **Desarrolladores de software**: exposición media-alta (IEX 5.8), pero siete de cada diez empresas mexicanas no logran cubrir vacantes de TI (E-Alta). IVA v2 ≈ 0.22 — la herramienta desplaza tareas, la demanda absorbe personas.
+- **Enfermería**: exposición baja (IEX 3.1) y un matiz importante: el déficit de personal es real, pero la demanda reprimida depende de plazas presupuestales (E-Media). IVA v2 ≈ 0.18 — lejos del rojo en el que la habría puesto un índice puramente técnico de la generación Frey-Osborne.
+
+## Lo que el indicador no dice
+
+El IVA v2 hereda los supuestos de su insumo académico: frontera de capacidades de IA a 2026, piloto de 22 ocupaciones, horizonte de validez 2026–2030. El IVA v1 sigue publicándose en paralelo como referencia técnica, y ninguna decisión curricular debería tomarse con un solo número — para eso existe el estudio de pertinencia, que baja estos indicadores al contexto específico de cada institución.
+
+La versión completa de la metodología, con las fórmulas y los datos de referencia por ocupación, está disponible en la ficha de cada carrera del observatorio.
