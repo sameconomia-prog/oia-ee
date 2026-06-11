@@ -12,7 +12,7 @@ from pipeline.db.models import Usuario
 from pipeline.db.models_apikey import ApiKey
 from api.middleware.rate_limit import apply_rate_limit, dynamic_rate_limiter
 
-_SECRET = os.getenv("JWT_SECRET_KEY", "dev-secret-change-in-prod")
+_SECRET = os.environ["JWT_SECRET_KEY"]  # falla en startup si JWT_SECRET_KEY no está definida
 _ALGORITHM = "HS256"
 
 _oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")

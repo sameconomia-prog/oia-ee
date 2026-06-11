@@ -9,17 +9,14 @@ export default function WidgetAdminPage() {
   const [ies, setIes] = useState<IesItem[]>([])
   const [selected, setSelected] = useState('')
   const [copied, setCopied] = useState(false)
-  const adminKey = process.env.NEXT_PUBLIC_ADMIN_KEY ?? ''
-
   useEffect(() => {
-    if (!adminKey) return
-    getAdminIes(adminKey)
+    getAdminIes()
       .then(data => {
         setIes(data)
         if (data.length > 0) setSelected(data[0].id)
       })
       .catch(() => {})
-  }, [adminKey])
+  }, [])
 
   const embedUrl = selected ? `${APP_URL}/embed/ies/${selected}` : ''
 
@@ -41,8 +38,8 @@ export default function WidgetAdminPage() {
         Genera un iframe con los KPIs de tu institución para incrustar en tu sitio web.
       </p>
 
-      {!adminKey ? (
-        <p className="text-sm text-red-500">Se requiere clave de administrador. Inicia sesión en /admin.</p>
+      {ies.length === 0 ? (
+        <p className="text-sm text-slate-400">Cargando instituciones...</p>
       ) : (
         <>
           {/* Selector de IES */}

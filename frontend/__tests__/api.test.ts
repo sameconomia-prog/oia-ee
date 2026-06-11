@@ -55,16 +55,16 @@ describe('getKpis', () => {
 })
 
 describe('postIngestGdelt', () => {
-  it('posts with X-Admin-Key header and returns IngestResult', async () => {
+  it('posts via admin proxy Route Handler and returns IngestResult', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ fetched: 45, stored: 38, classified: 35, embedded: 33 }),
     })
-    const result = await postIngestGdelt('test-key')
+    const result = await postIngestGdelt()
     expect(result.fetched).toBe(45)
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/admin/ingest/gdelt'),
-      expect.objectContaining({ headers: { 'X-Admin-Key': 'test-key' } })
+      expect.stringContaining('/api/admin/proxy'),
+      expect.objectContaining({ method: 'POST' })
     )
   })
 })

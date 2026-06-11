@@ -21,11 +21,13 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
     try {
-      const formData = new URLSearchParams({ username, password })
-      const res = await fetch(`${BASE}/auth/login`, {
+      const formData = new FormData()
+      formData.set('username', username)
+      formData.set('password', password)
+      // Usamos el Route Handler proxy: setea cookie HttpOnly oiaee_jwt + devuelve tokens
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData.toString(),
+        body: formData,
       })
       if (!res.ok) {
         setError('Usuario o contraseña incorrectos')
@@ -39,7 +41,9 @@ export default function LoginPage() {
       }
       let iesNombre: string | undefined
       try {
-        const me = await fetch(`${BASE}/auth/me`, { headers: { Authorization: `Bearer ${data.access_token}` } })
+        const me = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'}/auth/me`, {
+          headers: { Authorization: `Bearer ${data.access_token}` },
+        })
         if (me.ok) { const md = await me.json(); iesNombre = md.ies_nombre }
       } catch { /* silencioso */ }
       saveAuth(data.access_token, payload.ies_id, iesNombre, payload.rol, data.refresh_token)

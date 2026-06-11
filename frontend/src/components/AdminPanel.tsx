@@ -47,8 +47,6 @@ export default function AdminPanel() {
   const [newUser, setNewUser] = useState({ username: '', password: '', ies_id: '', email: '' })
   const [userMsg, setUserMsg] = useState<{ ok: boolean; text: string } | null>(null)
 
-  const adminKey = process.env.NEXT_PUBLIC_ADMIN_KEY ?? ''
-
   const addHistory = useCallback((action: string, detail: string) => {
     const entry: HistoryEntry = { timestamp: new Date().toISOString(), action, detail }
     const updated = [entry, ...loadHistory()].slice(0, MAX_HISTORY)
@@ -74,7 +72,7 @@ export default function AdminPanel() {
     setLoading('status')
     setError(null)
     try {
-      const s = await getAdminStatus(adminKey)
+      const s = await getAdminStatus()
       setStatus(s)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error')
@@ -85,7 +83,7 @@ export default function AdminPanel() {
 
   async function fetchIes() {
     try {
-      const list = await getAdminIes(adminKey)
+      const list = await getAdminIes()
       setIesOptions(list)
       if (list.length > 0 && !newUser.ies_id) {
         setNewUser(u => ({ ...u, ies_id: list[0].id }))
@@ -100,7 +98,7 @@ export default function AdminPanel() {
     setLoading('crear-usuario')
     setUserMsg(null)
     try {
-      const user = await postAdminUsuario(adminKey, newUser)
+      const user = await postAdminUsuario(newUser)
       setUserMsg({ ok: true, text: `Usuario "${user.username}" creado.${user.email ? ' Email de alertas registrado.' : ''}` })
       setNewUser(u => ({ ...u, username: '', password: '', email: '' }))
       addHistory('Crear Usuario', `${user.username} → ${user.ies_id}`)
@@ -156,37 +154,37 @@ export default function AdminPanel() {
             id="seed"
             label="Seed Demo"
             color="green"
-            onClick={() => runAction('seed', 'Seed Demo', () => postSeedDemo(adminKey))}
+            onClick={() => runAction('seed', 'Seed Demo', () => postSeedDemo())}
           />
           <Btn
             id="noticias"
             label="Ingest Noticias"
             color="blue"
-            onClick={() => runAction('noticias', 'Ingest Noticias', () => postIngestNoticias(adminKey))}
+            onClick={() => runAction('noticias', 'Ingest Noticias', () => postIngestNoticias())}
           />
           <Btn
             id="gdelt"
             label="Ingest GDELT"
             color="purple"
-            onClick={() => runAction('gdelt', 'Ingest GDELT', () => postIngestGdelt(adminKey))}
+            onClick={() => runAction('gdelt', 'Ingest GDELT', () => postIngestGdelt())}
           />
           <Btn
             id="alertas"
             label="Generar Alertas"
             color="orange"
-            onClick={() => runAction('alertas', 'Alert Job', () => postTriggerAlertJob(adminKey))}
+            onClick={() => runAction('alertas', 'Alert Job', () => postTriggerAlertJob())}
           />
           <Btn
             id="snapshot"
             label="Snapshot KPIs"
             color="gray"
-            onClick={() => runAction('snapshot', 'KPI Snapshot', () => postKpiSnapshot(adminKey))}
+            onClick={() => runAction('snapshot', 'KPI Snapshot', () => postKpiSnapshot())}
           />
           <Btn
             id="clear-cache"
             label="Limpiar Cache"
             color="orange"
-            onClick={() => runAction('clear-cache', 'Cache Clear', () => postClearCache(adminKey))}
+            onClick={() => runAction('clear-cache', 'Cache Clear', () => postClearCache())}
           />
         </div>
         <p className="text-xs text-gray-400 mt-2">

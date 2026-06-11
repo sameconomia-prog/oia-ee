@@ -1,3 +1,10 @@
+import os
+
+# Env vars requeridas por api.deps y api.routers.auth antes del import
+os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key-for-pytest-only")
+os.environ.setdefault("ADMIN_API_KEY", "test-admin-key-for-pytest-only")
+os.environ.setdefault("LOGIN_RATE_LIMIT_TIMES", "10000")
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

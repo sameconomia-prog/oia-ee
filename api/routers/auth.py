@@ -3,14 +3,27 @@ import hashlib
 import os
 import secrets
 from datetime import datetime, timedelta, UTC
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from api.deps import get_db, get_current_user
+from api.middleware.rate_limit import _mem_limiter
 from pipeline.db.models import Usuario, RefreshToken, IES
+
+_LOGIN_LIMIT_TIMES = int(os.getenv("LOGIN_RATE_LIMIT_TIMES", "10"))
+_LOGIN_LIMIT_SECONDS = int(os.getenv("LOGIN_RATE_LIMIT_SECONDS", "60"))
+
+
+def _check_login_rate(request: Request) -> None:
+    ip = request.client.host if request.client else "unknown"
+    if not _mem_limiter.is_allowed(f"login:{ip}", _LOGIN_LIMIT_TIMES, _LOGIN_LIMIT_SECONDS):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Demasiados intentos. Espera {_LOGIN_LIMIT_SECONDS}s antes de volver a intentar.",
+        )
 
 
 def _hash_token(token: str) -> str:
@@ -19,7 +32,7 @@ def _hash_token(token: str) -> str:
 
 router = APIRouter()
 
-_SECRET = os.getenv("JWT_SECRET_KEY", "dev-secret-change-in-prod")
+_SECRET = os.environ["JWT_SECRET_KEY"]  # falla en startup si JWT_SECRET_KEY no está definida
 _ALGORITHM = "HS256"
 _ACCESS_EXPIRE_MINUTES = 15        # 15 minutos
 _REFRESH_EXPIRE_DAYS = 30          # 30 días
@@ -54,7 +67,11 @@ def _create_refresh_token(user: Usuario, db: Session) -> str:
 
 
 @router.post("/login")
-def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(
+    form: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+    _rl: None = Depends(_check_login_rate),
+):
     user = db.query(Usuario).filter_by(username=form.username, activo=True).first()
     if not user or not _pwd.verify(form.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales inválidas")

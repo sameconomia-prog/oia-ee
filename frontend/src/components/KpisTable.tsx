@@ -126,6 +126,18 @@ export default function KpisTable() {
           ↓ Exportar CSV ({sorted.length})
         </button>
       </div>
+
+      {/* Aviso metodológico: D1 no incorpora elasticidad sectorial */}
+      <div className="mb-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+        <span className="mt-0.5 shrink-0">⚠</span>
+        <span>
+          <strong>Nota metodológica:</strong> El score D1 (Obsolescencia) mide vulnerabilidad técnica a la automatización
+          pero <strong>no incorpora elasticidad sectorial de la demanda</strong>. Carreras en sectores con alta demanda
+          reprimida (salud, educación, psicología) pueden mostrar D1 elevado y aun así conservar o expandir empleo
+          (paradoja de Jevons). Interpreta D1 alto en esos sectores con cautela antes de tomar decisiones curriculares.
+        </span>
+      </div>
+
       <div className="overflow-x-auto rounded-xl border border-slate-200">
         <table className="w-full text-sm border-collapse">
           <thead>

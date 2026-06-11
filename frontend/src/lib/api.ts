@@ -56,15 +56,6 @@ export async function getKpis(carreraId: number): Promise<KpiResult | null> {
   return await res.json()
 }
 
-export async function postIngestGdelt(adminKey: string): Promise<IngestResult> {
-  const res = await fetch(`${BASE}/admin/ingest/gdelt`, {
-    method: 'POST',
-    headers: { 'X-Admin-Key': adminKey },
-  })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return await res.json()
-}
-
 export async function getRectorData(iesId: string): Promise<RectorData> {
   const res = await authedFetch(`${BASE}/rector?ies_id=${iesId}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -143,77 +134,67 @@ export async function buscarNoticias(q: string, topK: number = 5): Promise<Notic
   return await res.json()
 }
 
-export async function getAdminStatus(adminKey: string): Promise<Record<string, number>> {
-  const res = await fetch(`${BASE}/admin/status`, { headers: { 'X-Admin-Key': adminKey } })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return await res.json()
-}
+// — Admin functions — redirigen al Route Handler server-side (ADMIN_API_KEY nunca sale al browser)
 
-export async function postIngestNoticias(adminKey: string): Promise<{ fetched: number; stored: number; classified: number }> {
-  const res = await fetch(`${BASE}/admin/ingest/noticias`, {
+async function adminProxy(action: string): Promise<unknown> {
+  const res = await authedFetch('/api/admin/proxy', {
     method: 'POST',
-    headers: { 'X-Admin-Key': adminKey },
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action }),
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return await res.json()
 }
 
-export async function getAdminIes(adminKey: string): Promise<{ id: string; nombre: string; nombre_corto: string | null }[]> {
-  const res = await fetch(`${BASE}/admin/ies`, { headers: { 'X-Admin-Key': adminKey } })
+export async function getAdminStatus(): Promise<Record<string, number>> {
+  const res = await authedFetch('/api/admin/proxy?resource=status')
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return await res.json()
+  return await res.json() as Record<string, number>
+}
+
+export async function postIngestNoticias(): Promise<{ fetched: number; stored: number; classified: number }> {
+  return await adminProxy('noticias') as { fetched: number; stored: number; classified: number }
+}
+
+export async function getAdminIes(): Promise<{ id: string; nombre: string; nombre_corto: string | null }[]> {
+  const res = await authedFetch('/api/admin/proxy?resource=ies')
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json() as { id: string; nombre: string; nombre_corto: string | null }[]
 }
 
 export async function postAdminUsuario(
-  adminKey: string,
   body: { username: string; password: string; ies_id: string; email?: string }
 ): Promise<{ id: string; username: string; ies_id: string; activo: boolean; email: string | null }> {
-  const res = await fetch(`${BASE}/admin/usuarios`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
+  const res = await authedFetch('/api/admin/proxy', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
   if (!res.ok) {
-    const detail = await res.json().catch(() => ({}))
+    const detail = await res.json().catch(() => ({})) as { detail?: string }
     throw new Error(detail?.detail ?? `HTTP ${res.status}`)
   }
-  return await res.json()
+  return await res.json() as { id: string; username: string; ies_id: string; activo: boolean; email: string | null }
 }
 
-export async function postKpiSnapshot(adminKey: string): Promise<{ carreras_procesadas: number; kpis_guardados: number; kpis_actualizados: number }> {
-  const res = await fetch(`${BASE}/admin/jobs/kpi-snapshot`, {
-    method: 'POST',
-    headers: { 'X-Admin-Key': adminKey },
-  })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return await res.json()
+export async function postKpiSnapshot(): Promise<{ carreras_procesadas: number; kpis_guardados: number; kpis_actualizados: number }> {
+  return await adminProxy('snapshot') as { carreras_procesadas: number; kpis_guardados: number; kpis_actualizados: number }
 }
 
-export async function postTriggerAlertJob(adminKey: string): Promise<{ alertas_creadas: number }> {
-  const res = await fetch(`${BASE}/admin/jobs/alertas`, {
-    method: 'POST',
-    headers: { 'X-Admin-Key': adminKey },
-  })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return await res.json()
+export async function postTriggerAlertJob(): Promise<{ alertas_creadas: number }> {
+  return await adminProxy('alert-job') as { alertas_creadas: number }
 }
 
-export async function postSeedDemo(adminKey: string): Promise<Record<string, number>> {
-  const res = await fetch(`${BASE}/admin/jobs/seed-demo`, {
-    method: 'POST',
-    headers: { 'X-Admin-Key': adminKey },
-  })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return await res.json()
+export async function postSeedDemo(): Promise<Record<string, number>> {
+  return await adminProxy('seed') as Record<string, number>
 }
 
-export async function postClearCache(adminKey: string): Promise<{ ok: boolean }> {
-  const res = await fetch(`${BASE}/admin/cache/clear`, {
-    method: 'POST',
-    headers: { 'X-Admin-Key': adminKey },
-  })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return await res.json()
+export async function postIngestGdelt(): Promise<IngestResult> {
+  return await adminProxy('gdelt') as IngestResult
+}
+
+export async function postClearCache(): Promise<{ ok: boolean }> {
+  return await adminProxy('clear-cache') as { ok: boolean }
 }
 
 export async function getKpisIes(iesId: string): Promise<IesKpiResult | null> {

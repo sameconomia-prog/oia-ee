@@ -40,7 +40,8 @@ export function saveAuth(
   if (iesNombre) localStorage.setItem(IES_NOMBRE_KEY, iesNombre)
   if (rol) localStorage.setItem(ROL_KEY, rol)
   if (refreshToken) localStorage.setItem(REFRESH_KEY, refreshToken)
-  document.cookie = 'oiaee_authed=1; path=/; max-age=86400; SameSite=Strict'
+  // La cookie HttpOnly oiaee_jwt es seteada por el Route Handler /api/auth/login
+  // No seteamos nada aquí para rutas de autenticación
 }
 
 export function getToken(): string | null {
@@ -68,13 +69,14 @@ export function getStoredRol(): string | null {
   return localStorage.getItem(ROL_KEY)
 }
 
-export function clearAuth(): void {
+export async function clearAuth(): Promise<void> {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(REFRESH_KEY)
   localStorage.removeItem(IES_ID_KEY)
   localStorage.removeItem(IES_NOMBRE_KEY)
   localStorage.removeItem(ROL_KEY)
-  document.cookie = 'oiaee_authed=; path=/; max-age=0'
+  // Limpiar la cookie HttpOnly via Route Handler
+  await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
 }
 
 export function isAuthenticated(): boolean {
@@ -90,19 +92,20 @@ export async function refreshAccessToken(): Promise<string | null> {
 
   _refreshInFlight = (async () => {
     try {
-      const res = await fetch(`${BASE}/auth/refresh`, {
+      // Proxy: renueva también la cookie HttpOnly oiaee_jwt
+      const res = await fetch('/api/auth/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refresh_token: refresh }),
       })
       if (!res.ok) {
-        clearAuth()
+        await clearAuth()
         return null
       }
-      const data = await res.json()
+      const data = await res.json() as { access_token?: string }
       if (!data.access_token) return null
       localStorage.setItem(TOKEN_KEY, data.access_token)
-      return data.access_token as string
+      return data.access_token
     } catch {
       return null
     } finally {
