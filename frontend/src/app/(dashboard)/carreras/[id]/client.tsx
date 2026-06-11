@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills, getCarrerasPublico, getTendenciasNacionales, getIvaV2 } from '@/lib/api'
-import type { CarreraDetalle, CarreraKpi, KpiResult, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq, TendenciaNacional, IvaV2Data } from '@/lib/types'
+import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills, getCarrerasPublico, getTendenciasNacionales, getIvaV2, getRecomendacion } from '@/lib/api'
+import type { CarreraDetalle, CarreraKpi, KpiResult, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq, TendenciaNacional, IvaV2Data, RecomendacionData } from '@/lib/types'
 
 function normSkill(s: string) {
   return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -164,6 +164,7 @@ export default function CarreraDetallePage() {
   const [similares, setSimilares] = useState<CarreraKpi[]>([])
   const [tendenciaNacional, setTendenciaNacional] = useState<TendenciaNacional | null>(null)
   const [ivaV2, setIvaV2] = useState<IvaV2Data | null>(null)
+  const [recomendacion, setRecomendacion] = useState<RecomendacionData | null>(null)
 
   const promedioArea = useMemo(() => {
     const conKpi = similares.filter(c => c.kpi != null)
@@ -212,6 +213,7 @@ export default function CarreraDetallePage() {
     getVacantesTopSkills(50).then(setVacanteSkills).catch(() => {})
     getTendenciasNacionales(7).then((list: TendenciaNacional[]) => setTendenciaNacional(list[list.length - 1] ?? null)).catch(() => {})
     getIvaV2(id).then(setIvaV2).catch(() => {})
+    getRecomendacion(id).then(setRecomendacion).catch(() => {})
     getKpisHistorico(id, 'd1_score', 30).then(setHistD1).catch(() => {})
     getKpisHistorico(id, 'd2_score', 30).then(setHistD2).catch(() => {})
     fetch(`${BASE}/predicciones/carrera/${id}?kpi=D1`)
@@ -505,6 +507,42 @@ export default function CarreraDetallePage() {
               </p>
             </div>
           </details>
+        </Card>
+      )}
+
+      {/* Recomendación accionable (M6/D8) */}
+      {recomendacion && recomendacion.accion !== 'sin_datos' && (
+        <Card className="mb-6 p-5">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold text-slate-800 text-sm">Lectura accionable</h2>
+            <span className="flex items-center gap-2">
+              <span className="text-[10px] text-slate-400">horizonte {recomendacion.horizonte}</span>
+              <Badge variant={
+                recomendacion.accion === 'mantener' ? 'oportunidad'
+                : recomendacion.accion === 'actualizar' ? 'neutro'
+                : 'risk'
+              }>
+                {recomendacion.accion === 'mantener' ? 'Mantener con monitoreo'
+                  : recomendacion.accion === 'actualizar' ? 'Actualizar plan'
+                  : recomendacion.accion === 'redisenar' ? 'Rediseñar'
+                  : 'Evaluar fusión o cierre'}
+              </Badge>
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mb-3">{recomendacion.justificacion}</p>
+          <ol className="space-y-1.5 mb-3">
+            {recomendacion.acciones.map((a, i) => (
+              <li key={i} className="text-xs text-slate-600 flex gap-2">
+                <span className="font-mono text-slate-400 shrink-0">{i + 1}.</span>{a}
+              </li>
+            ))}
+          </ol>
+          <p className="text-[10px] text-slate-400 pt-2 border-t border-slate-100">
+            {recomendacion.disclaimer}{' '}
+            <Link href={`/pertinencia?carrera=${encodeURIComponent(d.nombre)}`} className="text-brand-600 hover:underline">
+              Solicitar estudio de pertinencia →
+            </Link>
+          </p>
         </Card>
       )}
 

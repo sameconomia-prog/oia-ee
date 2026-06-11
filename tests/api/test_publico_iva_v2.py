@@ -57,6 +57,22 @@ def test_iva_v2_con_datos_retorna_componentes(client, carrera, db_session):
     assert occ["iex"] == pytest.approx(6.0)
 
 
+def test_recomendacion_404_carrera_inexistente(client):
+    assert client.get("/publico/carreras/no-existe/recomendacion").status_code == 404
+
+
+def test_recomendacion_retorna_accion_y_disclaimer(client, carrera, db_session):
+    soc = "96-1111"
+    db_session.add(ExposicionIEX(soc_code=soc, iex_v2=9.0, elasticidad_mx="E-Baja"))
+    db_session.add(CarreraSocMap(carrera_id=carrera.id, soc_code=soc))
+    db_session.flush()
+    data = client.get(f"/publico/carreras/{carrera.id}/recomendacion").json()
+    assert data["accion"] == "evaluar_fusion_cierre"
+    assert data["fuente_riesgo"] == "iva_v2"
+    assert len(data["acciones"]) == 3
+    assert "estudio de pertinencia" in data["disclaimer"]
+
+
 def test_iva_v2_incluye_costo_ia_cuando_existe(client, carrera, db_session):
     soc = "97-5432"
     db_session.add(ExposicionIEX(soc_code=soc, iex_v2=5.0, elasticidad_mx="E-Media"))

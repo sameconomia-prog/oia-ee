@@ -87,6 +87,18 @@ export interface IvaV2Data {
   ocupaciones: IvaV2Ocupacion[]
 }
 
+export interface RecomendacionData {
+  carrera_id: string
+  accion: 'mantener' | 'actualizar' | 'redisenar' | 'evaluar_fusion_cierre' | 'sin_datos'
+  horizonte: string
+  confianza: string
+  riesgo_base: number | null
+  fuente_riesgo: string
+  justificacion: string
+  acciones: string[]
+  disclaimer: string
+}
+
 export interface IngestResult {
   fetched: number
   stored: number

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from api.deps import get_db, rate_limit_public
-from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut, IesDetalleOut, KpisDistribucionOut, KpisBinOut, IvaV2Out, IvaV2OcupacionOut
+from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut, IesDetalleOut, KpisDistribucionOut, KpisBinOut, IvaV2Out, IvaV2OcupacionOut, RecomendacionOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 
@@ -742,6 +742,24 @@ def iva_v2_carrera(carrera_id: str, db: Session = Depends(get_db)):
         fecha_dataset=fecha_dataset,
         costo_ia_hora_mxn=costo_ia_hora,
         ocupaciones=ocupaciones,
+    )
+
+
+@router.get("/carreras/{carrera_id}/recomendacion", response_model=RecomendacionOut)
+def recomendacion_carrera(carrera_id: str, db: Session = Depends(get_db)):
+    """Recomendación accionable por carrera (módulo M6/D8) — motor de reglas auditable."""
+    from fastapi import HTTPException
+    from pipeline.services.recomendacion import DISCLAIMER, recomendar
+
+    carrera = db.query(Carrera).filter_by(id=carrera_id).first()
+    if not carrera:
+        raise HTTPException(status_code=404, detail="Carrera no encontrada")
+    r = recomendar(carrera, db)
+    return RecomendacionOut(
+        carrera_id=carrera_id, accion=r.accion, horizonte=r.horizonte,
+        confianza=r.confianza, riesgo_base=r.riesgo_base,
+        fuente_riesgo=r.fuente_riesgo, justificacion=r.justificacion,
+        acciones=r.acciones, disclaimer=DISCLAIMER,
     )
 
 

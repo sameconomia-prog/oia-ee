@@ -169,6 +169,19 @@ class IvaV2Out(BaseModel):
     ocupaciones: list[IvaV2OcupacionOut] = []
 
 
+class RecomendacionOut(BaseModel):
+    """Recomendación accionable por carrera (módulo M6/D8). Orientativa."""
+    carrera_id: str
+    accion: str
+    horizonte: str
+    confianza: str
+    riesgo_base: Optional[float] = None
+    fuente_riesgo: str
+    justificacion: str
+    acciones: list[str] = []
+    disclaimer: str
+
+
 class AlertaItemOut(BaseModel):
     id: str
     carrera_nombre: str
