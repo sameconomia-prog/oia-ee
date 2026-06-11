@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills, getCarrerasPublico, getTendenciasNacionales } from '@/lib/api'
-import type { CarreraDetalle, CarreraKpi, KpiResult, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq, TendenciaNacional } from '@/lib/types'
+import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills, getCarrerasPublico, getTendenciasNacionales, getIvaV2, getRecomendacion } from '@/lib/api'
+import type { CarreraDetalle, CarreraKpi, KpiResult, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq, TendenciaNacional, IvaV2Data, RecomendacionData } from '@/lib/types'
 
 function normSkill(s: string) {
   return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -163,6 +163,8 @@ export default function CarreraDetallePage() {
   const [lecturas, setLecturas] = useState<ArticleCard[]>([])
   const [similares, setSimilares] = useState<CarreraKpi[]>([])
   const [tendenciaNacional, setTendenciaNacional] = useState<TendenciaNacional | null>(null)
+  const [ivaV2, setIvaV2] = useState<IvaV2Data | null>(null)
+  const [recomendacion, setRecomendacion] = useState<RecomendacionData | null>(null)
 
   const promedioArea = useMemo(() => {
     const conKpi = similares.filter(c => c.kpi != null)
@@ -210,6 +212,8 @@ export default function CarreraDetallePage() {
       .finally(() => setLoading(false))
     getVacantesTopSkills(50).then(setVacanteSkills).catch(() => {})
     getTendenciasNacionales(7).then((list: TendenciaNacional[]) => setTendenciaNacional(list[list.length - 1] ?? null)).catch(() => {})
+    getIvaV2(id).then(setIvaV2).catch(() => {})
+    getRecomendacion(id).then(setRecomendacion).catch(() => {})
     getKpisHistorico(id, 'd1_score', 30).then(setHistD1).catch(() => {})
     getKpisHistorico(id, 'd2_score', 30).then(setHistD2).catch(() => {})
     fetch(`${BASE}/predicciones/carrera/${id}?kpi=D1`)
@@ -416,6 +420,131 @@ export default function CarreraDetallePage() {
           </Card>
         )}
       </div>
+
+      {/* IVA v2 — exposición IEX ajustada por elasticidad (módulo M2) */}
+      {ivaV2 && ivaV2.iva_v2 != null && (
+        <Card className="mb-6 p-5">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="font-semibold text-slate-800 text-sm">Riesgo de automatización ajustado por demanda (IVA v2)</h2>
+            {ivaV2.fecha_dataset && (
+              <span className="text-[10px] text-slate-400">dataset IEX {ivaV2.fecha_dataset}</span>
+            )}
+          </div>
+          <p className="text-xs text-slate-500 mb-4">
+            La versión 2 pondera la exposición técnica a IA (índice IEX por ocupación) con la
+            elasticidad de demanda del sector: donde la demanda insatisfecha puede absorber
+            ganancias de productividad, el riesgo efectivo sobre el empleo es menor.
+          </p>
+          <div className="grid grid-cols-2 gap-6 mb-4">
+            <div className="space-y-4">
+              <ScoreBar label="IVA v1 (técnico)" score={ivaV2.iva_v1} invert />
+              <ScoreBar label="IVA v2 (ajustado)" score={ivaV2.iva_v2} invert />
+              {ivaV2.delta != null && (
+                <p className="text-[11px] text-slate-500">
+                  Ajuste por elasticidad:{' '}
+                  <span className={`font-mono font-semibold ${ivaV2.delta <= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    {ivaV2.delta > 0 ? '+' : ''}{ivaV2.delta.toFixed(2)}
+                  </span>{' '}
+                  {ivaV2.delta <= 0 ? 'puntos menos de riesgo efectivo' : 'puntos más de riesgo efectivo'}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                Ocupaciones de referencia ({ivaV2.n_soc})
+              </p>
+              <div className="space-y-1.5">
+                {ivaV2.ocupaciones.map(o => (
+                  <div key={o.soc_code} className="flex items-center justify-between text-xs">
+                    <span className="text-slate-600 truncate pr-2">{o.titulo ?? o.soc_code}</span>
+                    <span className="flex items-center gap-2 shrink-0">
+                      {o.iex != null && <span className="font-mono text-slate-500">IEX {o.iex.toFixed(1)}</span>}
+                      {o.trc != null && (
+                        <span className="font-mono text-slate-400" title="Rutinariedad cognitiva (D7 del IEX, 0-10)">
+                          TRC {o.trc.toFixed(1)}
+                        </span>
+                      )}
+                      {o.elasticidad_mx && (
+                        <Badge variant={o.elasticidad_mx === 'E-Alta' ? 'oportunidad' : o.elasticidad_mx === 'E-Media' ? 'neutro' : 'risk'}>
+                          {o.elasticidad_mx}
+                        </Badge>
+                      )}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {(() => {
+                const ratios = ivaV2.ocupaciones.map(o => o.ratio_costo_ia).filter((r): r is number => r != null)
+                if (ratios.length === 0) return null
+                const prom = ratios.reduce((s, r) => s + r, 0) / ratios.length
+                return (
+                  <p className="mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-400">
+                    Coste por hora cognitiva equivalente: la IA opera a ≈{' '}
+                    <span className="font-mono text-slate-500">{Math.round(prom * 100)}%</span>{' '}
+                    del coste humano (ingreso mediano ENOE; supuestos en metodología).
+                  </p>
+                )
+              })()}
+            </div>
+          </div>
+          <details className="pt-3 border-t border-slate-100">
+            <summary className="text-[10px] text-slate-400 cursor-pointer hover:text-slate-600 select-none">
+              ¿Cómo se calcula y qué supuestos tiene?
+            </summary>
+            <div className="mt-2 text-[10px] text-slate-500 leading-snug space-y-1.5">
+              <p>
+                <span className="font-semibold text-slate-700">Fórmula</span> — IVA v2 = (IEX/10) × (1 − FES) × (1 − FA).
+                IEX: exposición ocupacional a IA generativa medida a nivel tarea (O*NET) y validada contra
+                adopción observada. FES: factor de elasticidad sectorial ({ivaV2.fes_factor?.toFixed(2)}) — E-Alta descuenta 50%,
+                E-Media 25%, E-Baja 0%. FA: fricción de adopción (constante inicial {ivaV2.fa.toFixed(2)}, en refinamiento con
+                indicadores de regulación y estructura sectorial). TRC: rutinariedad cognitiva (dimensión D7 del IEX,
+                0-10) — ya pondera dentro del índice; se muestra solo como referencia interpretativa.
+              </p>
+              <p>
+                <span className="font-semibold text-slate-700">Alcance</span> — Estimación válida bajo los supuestos del marco
+                IEX (frontera de capacidades IA a 2026, horizonte 2026–2030). El IVA v1 se conserva como referencia técnica;
+                ninguna decisión curricular debería tomarse con un solo indicador.
+              </p>
+            </div>
+          </details>
+        </Card>
+      )}
+
+      {/* Recomendación accionable (M6/D8) */}
+      {recomendacion && recomendacion.accion !== 'sin_datos' && (
+        <Card className="mb-6 p-5">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold text-slate-800 text-sm">Lectura accionable</h2>
+            <span className="flex items-center gap-2">
+              <span className="text-[10px] text-slate-400">horizonte {recomendacion.horizonte}</span>
+              <Badge variant={
+                recomendacion.accion === 'mantener' ? 'oportunidad'
+                : recomendacion.accion === 'actualizar' ? 'neutro'
+                : 'risk'
+              }>
+                {recomendacion.accion === 'mantener' ? 'Mantener con monitoreo'
+                  : recomendacion.accion === 'actualizar' ? 'Actualizar plan'
+                  : recomendacion.accion === 'redisenar' ? 'Rediseñar'
+                  : 'Evaluar fusión o cierre'}
+              </Badge>
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mb-3">{recomendacion.justificacion}</p>
+          <ol className="space-y-1.5 mb-3">
+            {recomendacion.acciones.map((a, i) => (
+              <li key={i} className="text-xs text-slate-600 flex gap-2">
+                <span className="font-mono text-slate-400 shrink-0">{i + 1}.</span>{a}
+              </li>
+            ))}
+          </ol>
+          <p className="text-[10px] text-slate-400 pt-2 border-t border-slate-100">
+            {recomendacion.disclaimer}{' '}
+            <Link href={`/pertinencia?carrera=${encodeURIComponent(d.nombre)}`} className="text-brand-600 hover:underline">
+              Solicitar estudio de pertinencia →
+            </Link>
+          </p>
+        </Card>
+      )}
 
       {/* Tendencia histórica */}
       {histD1 && histD2 && (

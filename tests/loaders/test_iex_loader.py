@@ -31,6 +31,11 @@ ELASTICIDAD_CSV = """soc_code,elasticidad_mx
 43-3031,E-Baja
 """
 
+DIMENSIONES_CSV = """soc_code,dim_d1,dim_d2,dim_d3,dim_d4,dim_d5,dim_d6,dim_d7,n_tareas
+15-1252,9.1,7.2,6.8,7.5,6.0,7.9,5.3,17
+43-3031,8.3,6.9,7.7,7.8,5.2,7.1,7.9,28
+"""
+
 
 @pytest.fixture
 def session():
@@ -51,6 +56,7 @@ def data_dir(tmp_path):
     (tmp_path / "db").mkdir()
     (tmp_path / "outputs" / "iex_ocupacion.csv").write_text(IEX_CSV)
     (tmp_path / "outputs" / "exposicion_baseline.csv").write_text(BASELINE_CSV)
+    (tmp_path / "outputs" / "iex_dimensiones_ocupacion.csv").write_text(DIMENSIONES_CSV)
     (tmp_path / "docs" / "elasticidad_mx.csv").write_text(ELASTICIDAD_CSV)
     con = sqlite3.connect(tmp_path / "db" / "tesis.db")
     con.execute(
@@ -75,6 +81,16 @@ def test_fetch_fusiona_las_cuatro_fuentes(data_dir):
     assert dev["beta_eloundou"] == pytest.approx(0.8968)
     assert dev["uso_aei_pct"] == pytest.approx(3.0042)
     assert dev["fecha_dataset"] is not None
+    assert dev["dim_d7"] == pytest.approx(5.3)   # TRC del panel = D7 del IEX
+    assert dev["dim_d1"] == pytest.approx(9.1)
+
+
+def test_fetch_sin_dimensiones_carga_con_nulls(data_dir, tmp_path):
+    """El CSV de dimensiones es opcional: sin él, dims quedan None."""
+    (tmp_path / "outputs" / "iex_dimensiones_ocupacion.csv").unlink()
+    records = {r["soc_code"]: r for r in fetch_iex_records(data_dir)}
+    assert records["15-1252"]["dim_d7"] is None
+    assert records["15-1252"]["iex_v1"] == pytest.approx(6.5)
 
 
 def test_fetch_columna_faltante_lanza_error(data_dir, tmp_path):

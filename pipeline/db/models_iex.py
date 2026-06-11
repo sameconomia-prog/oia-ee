@@ -3,12 +3,16 @@
 La plataforma CONSUME estos datos (cargados por pipeline/loaders/iex_loader.py);
 nunca recalcula el IEX. La metodología vive en ~/Documents/oia-ee-research.
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import (
     Column, String, Text, Float, Boolean, Date, DateTime,
     ForeignKey, UniqueConstraint, Index,
 )
 from pipeline.db.models import Base, _uuid
+
+
+def _now_utc():
+    return datetime.now(timezone.utc)
 
 
 class ExposicionIEX(Base):
@@ -32,7 +36,38 @@ class ExposicionIEX(Base):
     beta_eloundou  = Column(Float)
     uso_aei_pct    = Column(Float)
     fecha_dataset  = Column(Date)
-    fecha_carga    = Column(DateTime(timezone=True), default=datetime.utcnow)
+    fecha_carga    = Column(DateTime(timezone=True), default=_now_utc)
+    # Dimensiones D1-D7 del IEX agregadas a ocupación (0-10), export descriptivo
+    # del repo hermano (outputs/iex_dimensiones_ocupacion.csv). Transparencia:
+    # dim_d7 es la TRC (rutinariedad cognitiva) del panel — ya ponderada DENTRO
+    # del IEX, se expone como explicación, nunca se re-suma a la fórmula.
+    dim_d1         = Column(Float)
+    dim_d2         = Column(Float)
+    dim_d3         = Column(Float)
+    dim_d4         = Column(Float)
+    dim_d5         = Column(Float)
+    dim_d6         = Column(Float)
+    dim_d7         = Column(Float)
+
+
+class CostoIAOcupacion(Base):
+    """Comparativo coste IA vs humano por ocupación (módulo M3 del panel).
+
+    Cálculo de PRODUCTO (no del repo de investigación): salario mediano ENOE
+    (tesis.db::ocupaciones_mx) vs coste estimado de una hora cognitiva
+    equivalente con un modelo Claude de referencia. Los supuestos viajan en
+    la columna `supuestos` (JSON) para auditoría.
+    """
+    __tablename__ = "costo_ia_ocupacion"
+
+    soc_code          = Column(String(10), primary_key=True)
+    salario_mes_mxn   = Column(Float)
+    salario_hora_mxn  = Column(Float)
+    costo_ia_hora_mxn = Column(Float)
+    ratio_costo       = Column(Float)    # costo_ia / costo_humano; <1 = IA más barata
+    modelo_ref        = Column(String(40))
+    supuestos         = Column(Text)     # JSON con tokens/hora, FX, fecha pricing
+    fecha_calculo     = Column(DateTime(timezone=True), default=_now_utc)
 
 
 class CarreraSocMap(Base):
@@ -50,8 +85,8 @@ class CarreraSocMap(Base):
     peso            = Column(Float, nullable=False, default=1.0)
     es_aproximacion = Column(Boolean, nullable=False, default=True)
     fuente          = Column(String(50), default="seed_onet_truncado")
-    updated_at      = Column(DateTime(timezone=True), default=datetime.utcnow,
-                             onupdate=datetime.utcnow)
+    updated_at      = Column(DateTime(timezone=True), default=_now_utc,
+                             onupdate=_now_utc)
 
     __table_args__ = (
         UniqueConstraint("carrera_id", "soc_code", name="uq_carrera_soc"),

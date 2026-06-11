@@ -62,6 +62,43 @@ export interface KpiResult {
   d6_estudiantil: D6Result
 }
 
+export interface IvaV2Ocupacion {
+  soc_code: string
+  titulo: string | null
+  iex: number | null
+  tipo: string | null
+  elasticidad_mx: string | null
+  trc: number | null
+  salario_mes_mxn: number | null
+  ratio_costo_ia: number | null
+}
+
+export interface IvaV2Data {
+  carrera_id: string
+  iva_v1: number
+  iva_v2: number | null
+  delta: number | null
+  iex_norm: number | null
+  fes_factor: number | null
+  fa: number
+  n_soc: number
+  fecha_dataset: string | null
+  costo_ia_hora_mxn: number | null
+  ocupaciones: IvaV2Ocupacion[]
+}
+
+export interface RecomendacionData {
+  carrera_id: string
+  accion: 'mantener' | 'actualizar' | 'redisenar' | 'evaluar_fusion_cierre' | 'sin_datos'
+  horizonte: string
+  confianza: string
+  riesgo_base: number | null
+  fuente_riesgo: string
+  justificacion: string
+  acciones: string[]
+  disclaimer: string
+}
+
 export interface IngestResult {
   fetched: number
   stored: number

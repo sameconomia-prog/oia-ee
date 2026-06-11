@@ -138,6 +138,50 @@ class CarreraDetalleOut(BaseModel):
     benchmark_slug: Optional[str] = None
 
 
+class IvaV2OcupacionOut(BaseModel):
+    soc_code: str
+    titulo: Optional[str] = None
+    iex: Optional[float] = None          # 0-10; iex_v2 si existe, si no iex_v1
+    tipo: Optional[str] = None           # A/B/C
+    elasticidad_mx: Optional[str] = None
+    trc: Optional[float] = None          # D7 rutinariedad cognitiva (0-10), ya
+                                         # ponderada DENTRO del IEX — solo explica
+    salario_mes_mxn: Optional[float] = None
+    ratio_costo_ia: Optional[float] = None   # costo IA / costo humano por hora; <1 = IA más barata
+
+
+class IvaV2Out(BaseModel):
+    """IVA versionado: v1 (legacy) + v2 ajustado por elasticidad sectorial.
+
+    iva_v2 es None cuando la carrera no tiene crosswalk SOC o no hay datos
+    IEX cargados — el consumidor decide cómo presentarlo (nunca se inventa).
+    """
+    carrera_id: str
+    iva_v1: float
+    iva_v2: Optional[float] = None
+    delta: Optional[float] = None        # iva_v2 − iva_v1
+    iex_norm: Optional[float] = None
+    fes_factor: Optional[float] = None
+    fa: float
+    n_soc: int
+    fecha_dataset: Optional[str] = None
+    costo_ia_hora_mxn: Optional[float] = None   # módulo M3; supuestos en costo_ia_ocupacion
+    ocupaciones: list[IvaV2OcupacionOut] = []
+
+
+class RecomendacionOut(BaseModel):
+    """Recomendación accionable por carrera (módulo M6/D8). Orientativa."""
+    carrera_id: str
+    accion: str
+    horizonte: str
+    confianza: str
+    riesgo_base: Optional[float] = None
+    fuente_riesgo: str
+    justificacion: str
+    acciones: list[str] = []
+    disclaimer: str
+
+
 class AlertaItemOut(BaseModel):
     id: str
     carrera_nombre: str
