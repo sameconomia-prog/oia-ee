@@ -69,6 +69,8 @@ export interface IvaV2Ocupacion {
   tipo: string | null
   elasticidad_mx: string | null
   trc: number | null
+  salario_mes_mxn: number | null
+  ratio_costo_ia: number | null
 }
 
 export interface IvaV2Data {
@@ -81,6 +83,7 @@ export interface IvaV2Data {
   fa: number
   n_soc: number
   fecha_dataset: string | null
+  costo_ia_hora_mxn: number | null
   ocupaciones: IvaV2Ocupacion[]
 }
 

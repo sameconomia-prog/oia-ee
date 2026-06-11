@@ -471,6 +471,18 @@ export default function CarreraDetallePage() {
                   </div>
                 ))}
               </div>
+              {(() => {
+                const ratios = ivaV2.ocupaciones.map(o => o.ratio_costo_ia).filter((r): r is number => r != null)
+                if (ratios.length === 0) return null
+                const prom = ratios.reduce((s, r) => s + r, 0) / ratios.length
+                return (
+                  <p className="mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-400">
+                    Coste por hora cognitiva equivalente: la IA opera a ≈{' '}
+                    <span className="font-mono text-slate-500">{Math.round(prom * 100)}%</span>{' '}
+                    del coste humano (ingreso mediano ENOE; supuestos en metodología).
+                  </p>
+                )
+              })()}
             </div>
           </div>
           <details className="pt-3 border-t border-slate-100">

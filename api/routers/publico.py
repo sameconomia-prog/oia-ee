@@ -698,7 +698,7 @@ def iva_v2_carrera(carrera_id: str, db: Session = Depends(get_db)):
     y corrige por elasticidad sectorial (módulo M2 del panel de expertos).
     """
     from fastapi import HTTPException
-    from pipeline.db.models_iex import CarreraSocMap, ExposicionIEX
+    from pipeline.db.models_iex import CarreraSocMap, CostoIAOcupacion, ExposicionIEX
     from pipeline.kpi_engine.d1_iva_v2 import calcular_iva_v2
     from pipeline.kpi_engine.d1_obsolescencia import calcular_iva
 
@@ -711,15 +711,21 @@ def iva_v2_carrera(carrera_id: str, db: Session = Depends(get_db)):
 
     ocupaciones: list[IvaV2OcupacionOut] = []
     fecha_dataset = None
+    costo_ia_hora = None
     for soc in r.soc_codes:
         exp = db.get(ExposicionIEX, soc)
         if not exp:
             continue
         iex = exp.iex_v2 if exp.iex_v2 is not None else exp.iex_v1
+        costo = db.get(CostoIAOcupacion, soc)
+        if costo and costo.costo_ia_hora_mxn is not None:
+            costo_ia_hora = costo.costo_ia_hora_mxn
         ocupaciones.append(IvaV2OcupacionOut(
             soc_code=soc, titulo=exp.titulo, iex=iex,
             tipo=exp.tipo, elasticidad_mx=exp.elasticidad_mx,
             trc=exp.dim_d7,
+            salario_mes_mxn=costo.salario_mes_mxn if costo else None,
+            ratio_costo_ia=costo.ratio_costo if costo else None,
         ))
         if exp.fecha_dataset:
             fecha_dataset = str(exp.fecha_dataset)
@@ -734,6 +740,7 @@ def iva_v2_carrera(carrera_id: str, db: Session = Depends(get_db)):
         fa=r.fa,
         n_soc=r.n_soc,
         fecha_dataset=fecha_dataset,
+        costo_ia_hora_mxn=costo_ia_hora,
         ocupaciones=ocupaciones,
     )
 

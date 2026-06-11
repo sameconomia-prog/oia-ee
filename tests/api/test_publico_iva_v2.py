@@ -5,7 +5,7 @@ import uuid
 import pytest
 
 from pipeline.db.models import Carrera
-from pipeline.db.models_iex import CarreraSocMap, ExposicionIEX
+from pipeline.db.models_iex import CarreraSocMap, CostoIAOcupacion, ExposicionIEX
 
 
 @pytest.fixture
@@ -55,3 +55,19 @@ def test_iva_v2_con_datos_retorna_componentes(client, carrera, db_session):
     assert occ["soc_code"] == soc
     assert occ["elasticidad_mx"] == "E-Alta"
     assert occ["iex"] == pytest.approx(6.0)
+
+
+def test_iva_v2_incluye_costo_ia_cuando_existe(client, carrera, db_session):
+    soc = "97-5432"
+    db_session.add(ExposicionIEX(soc_code=soc, iex_v2=5.0, elasticidad_mx="E-Media"))
+    db_session.add(CostoIAOcupacion(
+        soc_code=soc, salario_mes_mxn=16000.0, salario_hora_mxn=100.0,
+        costo_ia_hora_mxn=25.0, ratio_costo=0.25, modelo_ref="claude-sonnet-4-6"))
+    db_session.add(CarreraSocMap(carrera_id=carrera.id, soc_code=soc))
+    db_session.flush()
+
+    data = client.get(f"/publico/carreras/{carrera.id}/iva-v2").json()
+    assert data["costo_ia_hora_mxn"] == pytest.approx(25.0)
+    occ = data["ocupaciones"][0]
+    assert occ["ratio_costo_ia"] == pytest.approx(0.25)
+    assert occ["salario_mes_mxn"] == pytest.approx(16000.0)

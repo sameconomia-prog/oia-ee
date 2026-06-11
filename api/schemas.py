@@ -146,6 +146,8 @@ class IvaV2OcupacionOut(BaseModel):
     elasticidad_mx: Optional[str] = None
     trc: Optional[float] = None          # D7 rutinariedad cognitiva (0-10), ya
                                          # ponderada DENTRO del IEX — solo explica
+    salario_mes_mxn: Optional[float] = None
+    ratio_costo_ia: Optional[float] = None   # costo IA / costo humano por hora; <1 = IA más barata
 
 
 class IvaV2Out(BaseModel):
@@ -163,6 +165,7 @@ class IvaV2Out(BaseModel):
     fa: float
     n_soc: int
     fecha_dataset: Optional[str] = None
+    costo_ia_hora_mxn: Optional[float] = None   # módulo M3; supuestos en costo_ia_ocupacion
     ocupaciones: list[IvaV2OcupacionOut] = []
 
 

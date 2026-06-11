@@ -46,6 +46,26 @@ class ExposicionIEX(Base):
     dim_d7         = Column(Float)
 
 
+class CostoIAOcupacion(Base):
+    """Comparativo coste IA vs humano por ocupación (módulo M3 del panel).
+
+    Cálculo de PRODUCTO (no del repo de investigación): salario mediano ENOE
+    (tesis.db::ocupaciones_mx) vs coste estimado de una hora cognitiva
+    equivalente con un modelo Claude de referencia. Los supuestos viajan en
+    la columna `supuestos` (JSON) para auditoría.
+    """
+    __tablename__ = "costo_ia_ocupacion"
+
+    soc_code          = Column(String(10), primary_key=True)
+    salario_mes_mxn   = Column(Float)
+    salario_hora_mxn  = Column(Float)
+    costo_ia_hora_mxn = Column(Float)
+    ratio_costo       = Column(Float)    # costo_ia / costo_humano; <1 = IA más barata
+    modelo_ref        = Column(String(40))
+    supuestos         = Column(Text)     # JSON con tokens/hora, FX, fecha pricing
+    fecha_calculo     = Column(DateTime(timezone=True), default=datetime.utcnow)
+
+
 class CarreraSocMap(Base):
     """Crosswalk carrera→ocupación SOC para consumir exposicion_iex.
 
