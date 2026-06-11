@@ -248,3 +248,86 @@ def trigger_resumen_semanal(
     """Dispara el envío del resumen semanal manualmente."""
     from pipeline.services.resumen_semanal import send_resumen_semanal
     return send_resumen_semanal(db)
+
+
+# ── Crosswalk carrera→SOC (JWT superadmin) ───────────────────────────────
+# El seed automático es una aproximación (es_aproximacion=True); estas rutas
+# permiten al superadmin corregirla. Ediciones quedan con fuente='superadmin'
+# y nunca son pisadas por el re-seed del job de refresco IEX.
+
+
+class SocMapOut(BaseModel):
+    id: str
+    carrera_id: str
+    soc_code: str
+    peso: float
+    es_aproximacion: bool
+    fuente: str | None = None
+
+    class Config:
+        from_attributes = True
+
+
+class SocMapUpsertIn(BaseModel):
+    carrera_id: str
+    soc_code: str
+    peso: float = 1.0
+
+
+@router.get("/soc-map", response_model=list[SocMapOut])
+def listar_soc_map(
+    carrera_id: str | None = None,
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(get_superadmin_user),
+):
+    """Lista el crosswalk carrera→SOC (filtro opcional por carrera)."""
+    from pipeline.db.models_iex import CarreraSocMap
+    q = db.query(CarreraSocMap)
+    if carrera_id:
+        q = q.filter_by(carrera_id=carrera_id)
+    return q.order_by(CarreraSocMap.carrera_id, CarreraSocMap.soc_code).all()
+
+
+@router.put("/soc-map", response_model=SocMapOut)
+def upsert_soc_map(
+    body: SocMapUpsertIn,
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(get_superadmin_user),
+):
+    """Crea o actualiza un par carrera→SOC (superadmin via JWT)."""
+    from pipeline.db.models import Carrera
+    from pipeline.db.models_iex import CarreraSocMap, ExposicionIEX
+    if not db.query(Carrera).filter_by(id=body.carrera_id).first():
+        raise HTTPException(status_code=404, detail="Carrera no encontrada")
+    if not db.get(ExposicionIEX, body.soc_code):
+        raise HTTPException(
+            status_code=422,
+            detail=f"soc_code {body.soc_code} no existe en exposicion_iex")
+    row = db.query(CarreraSocMap).filter_by(
+        carrera_id=body.carrera_id, soc_code=body.soc_code).first()
+    if row:
+        row.peso = body.peso
+    else:
+        row = CarreraSocMap(carrera_id=body.carrera_id, soc_code=body.soc_code,
+                            peso=body.peso)
+        db.add(row)
+    row.es_aproximacion = False
+    row.fuente = "superadmin"
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+@router.delete("/soc-map/{map_id}", status_code=status.HTTP_204_NO_CONTENT)
+def borrar_soc_map(
+    map_id: str,
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(get_superadmin_user),
+):
+    """Elimina un par carrera→SOC del crosswalk (superadmin via JWT)."""
+    from pipeline.db.models_iex import CarreraSocMap
+    row = db.query(CarreraSocMap).filter_by(id=map_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Mapeo no encontrado")
+    db.delete(row)
+    db.commit()
