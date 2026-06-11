@@ -698,7 +698,7 @@ def iva_v2_carrera(carrera_id: str, db: Session = Depends(get_db)):
     y corrige por elasticidad sectorial (módulo M2 del panel de expertos).
     """
     from fastapi import HTTPException
-    from pipeline.db.models_iex import CarreraSocMap, CostoIAOcupacion, ExposicionIEX
+    from pipeline.db.models_iex import CostoIAOcupacion, ExposicionIEX
     from pipeline.kpi_engine.d1_iva_v2 import calcular_iva_v2
     from pipeline.kpi_engine.d1_obsolescencia import calcular_iva
 

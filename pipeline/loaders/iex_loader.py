@@ -15,7 +15,7 @@ import csv
 import json
 import os
 import sqlite3
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 import structlog
@@ -62,7 +62,7 @@ def _read_csv(base: Path, rel: str) -> list[dict]:
     path = base / rel
     if not path.is_file():
         raise IexDatasetError(f"Dataset faltante: {path}")
-    with open(path, newline="", encoding="utf-8") as fh:
+    with open(path, newline="", encoding="utf-8-sig") as fh:
         reader = csv.DictReader(fh)
         missing = _REQUIRED_COLS[rel] - set(reader.fieldnames or [])
         if missing:
@@ -168,7 +168,7 @@ def load_exposicion_iex(session: Session, data_dir: str | None = None) -> dict:
         if existing:
             for campo, valor in r.items():
                 setattr(existing, campo, valor)
-            existing.fecha_carga = datetime.utcnow()
+            existing.fecha_carga = datetime.now(timezone.utc)
             actualizados += 1
         else:
             session.add(ExposicionIEX(**r))

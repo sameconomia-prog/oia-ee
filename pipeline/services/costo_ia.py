@@ -21,7 +21,7 @@ Supuestos (versionados en cada fila, columna `supuestos`):
 import json
 import os
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import structlog
@@ -101,7 +101,7 @@ def calcular_costos_ia(session: Session, data_dir: str | None = None) -> dict:
         row.ratio_costo = ratio
         row.modelo_ref = MODELO_REF
         row.supuestos = supuestos
-        row.fecha_calculo = datetime.utcnow()
+        row.fecha_calculo = datetime.now(timezone.utc)
         procesados += 1
 
     session.flush()
