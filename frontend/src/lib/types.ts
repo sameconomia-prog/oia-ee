@@ -62,6 +62,27 @@ export interface KpiResult {
   d6_estudiantil: D6Result
 }
 
+export interface IvaV2Ocupacion {
+  soc_code: string
+  titulo: string | null
+  iex: number | null
+  tipo: string | null
+  elasticidad_mx: string | null
+}
+
+export interface IvaV2Data {
+  carrera_id: string
+  iva_v1: number
+  iva_v2: number | null
+  delta: number | null
+  iex_norm: number | null
+  fes_factor: number | null
+  fa: number
+  n_soc: number
+  fecha_dataset: string | null
+  ocupaciones: IvaV2Ocupacion[]
+}
+
 export interface IngestResult {
   fetched: number
   stored: number

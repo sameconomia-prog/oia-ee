@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from api.deps import get_db, rate_limit_public
-from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut, IesDetalleOut, KpisDistribucionOut, KpisBinOut
+from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut, IesDetalleOut, KpisDistribucionOut, KpisBinOut, IvaV2Out, IvaV2OcupacionOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 
@@ -687,6 +687,53 @@ def detalle_carrera(carrera_id: str, db: Session = Depends(get_db)):
         kpi=kpi_out,
         instituciones=instituciones,
         benchmark_slug=_match_benchmark_slug(carrera.nombre_norm),
+    )
+
+
+@router.get("/carreras/{carrera_id}/iva-v2", response_model=IvaV2Out)
+def iva_v2_carrera(carrera_id: str, db: Session = Depends(get_db)):
+    """IVA versionado para una carrera: v1 (legacy) + v2 = (IEX/10)×(1−FES)×(1−FA).
+
+    v2 consume los datasets IEX validados del repo de investigación (tesis IEX)
+    y corrige por elasticidad sectorial (módulo M2 del panel de expertos).
+    """
+    from fastapi import HTTPException
+    from pipeline.db.models_iex import CarreraSocMap, ExposicionIEX
+    from pipeline.kpi_engine.d1_iva_v2 import calcular_iva_v2
+    from pipeline.kpi_engine.d1_obsolescencia import calcular_iva
+
+    carrera = db.query(Carrera).filter_by(id=carrera_id).first()
+    if not carrera:
+        raise HTTPException(status_code=404, detail="Carrera no encontrada")
+
+    iva_v1 = round(calcular_iva(carrera, db), 4)
+    r = calcular_iva_v2(carrera, db)
+
+    ocupaciones: list[IvaV2OcupacionOut] = []
+    fecha_dataset = None
+    for soc in r.soc_codes:
+        exp = db.get(ExposicionIEX, soc)
+        if not exp:
+            continue
+        iex = exp.iex_v2 if exp.iex_v2 is not None else exp.iex_v1
+        ocupaciones.append(IvaV2OcupacionOut(
+            soc_code=soc, titulo=exp.titulo, iex=iex,
+            tipo=exp.tipo, elasticidad_mx=exp.elasticidad_mx,
+        ))
+        if exp.fecha_dataset:
+            fecha_dataset = str(exp.fecha_dataset)
+
+    return IvaV2Out(
+        carrera_id=carrera_id,
+        iva_v1=iva_v1,
+        iva_v2=r.iva_v2,
+        delta=round(r.iva_v2 - iva_v1, 4) if r.iva_v2 is not None else None,
+        iex_norm=r.iex_norm,
+        fes_factor=r.fes_factor,
+        fa=r.fa,
+        n_soc=r.n_soc,
+        fecha_dataset=fecha_dataset,
+        ocupaciones=ocupaciones,
     )
 
 

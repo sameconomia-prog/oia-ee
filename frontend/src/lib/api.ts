@@ -299,6 +299,12 @@ export async function getCarreraDetalle(carreraId: string): Promise<CarreraDetal
   return await res.json()
 }
 
+export async function getIvaV2(carreraId: string): Promise<import('./types').IvaV2Data> {
+  const res = await fetch(`${BASE}/publico/carreras/${carreraId}/iva-v2`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function getIesPublico(params: { q?: string } = {}): Promise<import('./types').IesInfo[]> {
   const qs = params.q ? `?q=${encodeURIComponent(params.q)}` : ''
   const res = await fetch(`${BASE}/publico/ies${qs}`)
