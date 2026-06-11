@@ -18,7 +18,8 @@ def test_migration_applies_cleanly(tmp_path, monkeypatch):
     insp = inspect(engine)
     tables = insp.get_table_names()
 
-    for table in ["ies", "carreras", "usuarios", "noticias", "kpi_historico", "escenarios"]:
+    for table in ["ies", "carreras", "usuarios", "noticias", "kpi_historico", "escenarios",
+                  "exposicion_iex", "carrera_soc_map"]:
         assert table in tables, f"tabla '{table}' no encontrada tras migración"
 
     col_names = [c["name"] for c in insp.get_columns("usuarios")]
