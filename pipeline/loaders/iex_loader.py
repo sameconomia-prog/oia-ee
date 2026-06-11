@@ -32,12 +32,16 @@ ELASTICIDADES_VALIDAS = {"E-Alta", "E-Media", "E-Baja"}
 _CSV_IEX = "outputs/iex_ocupacion.csv"
 _CSV_BASELINE = "outputs/exposicion_baseline.csv"
 _CSV_ELASTICIDAD = "docs/elasticidad_mx.csv"
+_CSV_DIMENSIONES = "outputs/iex_dimensiones_ocupacion.csv"   # opcional
 _DB_TESIS = "db/tesis.db"
+
+_DIM_COLS = [f"dim_d{i}" for i in range(1, 8)]
 
 _REQUIRED_COLS = {
     _CSV_IEX: {"soc_code", "iex", "titulo_es"},
     _CSV_BASELINE: {"soc_code", "beta_ponderada", "uso_aei_total_pct"},
     _CSV_ELASTICIDAD: {"soc_code", "elasticidad_mx"},
+    _CSV_DIMENSIONES: {"soc_code", *_DIM_COLS},
 }
 
 
@@ -108,6 +112,14 @@ def fetch_iex_records(data_dir: str | None = None) -> list[dict]:
                    for r in _read_csv(base, _CSV_ELASTICIDAD)}
     v2 = _read_iex_v2(base)
 
+    # Dimensiones D1-D7 por ocupación: fuente OPCIONAL (export descriptivo del
+    # repo hermano). Si el archivo no existe, las columnas quedan NULL.
+    dimensiones: dict[str, dict] = {}
+    if (base / _CSV_DIMENSIONES).is_file():
+        dimensiones = {r["soc_code"]: r for r in _read_csv(base, _CSV_DIMENSIONES)}
+    else:
+        logger.warning("iex_dimensiones_no_disponibles", archivo=_CSV_DIMENSIONES)
+
     invalidas = set(elasticidad.values()) - ELASTICIDADES_VALIDAS
     if invalidas:
         raise IexDatasetError(f"elasticidad_mx con valores inválidos: {sorted(invalidas)}")
@@ -126,6 +138,7 @@ def fetch_iex_records(data_dir: str | None = None) -> list[dict]:
             raise IexDatasetError(f"iex fuera de rango [0,10] para {soc}: {iex_v1}")
         base_row = baseline.get(soc, {})
         v2_row = v2.get(soc, {})
+        dim_row = dimensiones.get(soc, {})
         records.append({
             "soc_code": soc,
             "titulo": row.get("titulo_es"),
@@ -136,6 +149,7 @@ def fetch_iex_records(data_dir: str | None = None) -> list[dict]:
             "beta_eloundou": _float(base_row.get("beta_ponderada"), "beta_ponderada", soc),
             "uso_aei_pct": _float(base_row.get("uso_aei_total_pct"), "uso_aei_total_pct", soc),
             "fecha_dataset": fecha_dataset,
+            **{col: _float(dim_row.get(col), col, soc) for col in _DIM_COLS},
         })
     logger.info("iex_fetch_ok", registros=len(records), data_dir=str(base),
                 fecha_dataset=str(fecha_dataset))

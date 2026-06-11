@@ -68,6 +68,7 @@ export interface IvaV2Ocupacion {
   iex: number | null
   tipo: string | null
   elasticidad_mx: string | null
+  trc: number | null
 }
 
 export interface IvaV2Data {

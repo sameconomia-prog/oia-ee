@@ -144,6 +144,8 @@ class IvaV2OcupacionOut(BaseModel):
     iex: Optional[float] = None          # 0-10; iex_v2 si existe, si no iex_v1
     tipo: Optional[str] = None           # A/B/C
     elasticidad_mx: Optional[str] = None
+    trc: Optional[float] = None          # D7 rutinariedad cognitiva (0-10), ya
+                                         # ponderada DENTRO del IEX — solo explica
 
 
 class IvaV2Out(BaseModel):

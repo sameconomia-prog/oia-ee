@@ -719,6 +719,7 @@ def iva_v2_carrera(carrera_id: str, db: Session = Depends(get_db)):
         ocupaciones.append(IvaV2OcupacionOut(
             soc_code=soc, titulo=exp.titulo, iex=iex,
             tipo=exp.tipo, elasticidad_mx=exp.elasticidad_mx,
+            trc=exp.dim_d7,
         ))
         if exp.fecha_dataset:
             fecha_dataset = str(exp.fecha_dataset)

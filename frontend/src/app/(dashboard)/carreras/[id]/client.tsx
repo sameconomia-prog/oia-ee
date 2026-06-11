@@ -457,6 +457,11 @@ export default function CarreraDetallePage() {
                     <span className="text-slate-600 truncate pr-2">{o.titulo ?? o.soc_code}</span>
                     <span className="flex items-center gap-2 shrink-0">
                       {o.iex != null && <span className="font-mono text-slate-500">IEX {o.iex.toFixed(1)}</span>}
+                      {o.trc != null && (
+                        <span className="font-mono text-slate-400" title="Rutinariedad cognitiva (D7 del IEX, 0-10)">
+                          TRC {o.trc.toFixed(1)}
+                        </span>
+                      )}
                       {o.elasticidad_mx && (
                         <Badge variant={o.elasticidad_mx === 'E-Alta' ? 'oportunidad' : o.elasticidad_mx === 'E-Media' ? 'neutro' : 'risk'}>
                           {o.elasticidad_mx}
@@ -478,7 +483,8 @@ export default function CarreraDetallePage() {
                 IEX: exposición ocupacional a IA generativa medida a nivel tarea (O*NET) y validada contra
                 adopción observada. FES: factor de elasticidad sectorial ({ivaV2.fes_factor?.toFixed(2)}) — E-Alta descuenta 50%,
                 E-Media 25%, E-Baja 0%. FA: fricción de adopción (constante inicial {ivaV2.fa.toFixed(2)}, en refinamiento con
-                indicadores de regulación y estructura sectorial).
+                indicadores de regulación y estructura sectorial). TRC: rutinariedad cognitiva (dimensión D7 del IEX,
+                0-10) — ya pondera dentro del índice; se muestra solo como referencia interpretativa.
               </p>
               <p>
                 <span className="font-semibold text-slate-700">Alcance</span> — Estimación válida bajo los supuestos del marco

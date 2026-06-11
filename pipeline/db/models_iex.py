@@ -33,6 +33,17 @@ class ExposicionIEX(Base):
     uso_aei_pct    = Column(Float)
     fecha_dataset  = Column(Date)
     fecha_carga    = Column(DateTime(timezone=True), default=datetime.utcnow)
+    # Dimensiones D1-D7 del IEX agregadas a ocupación (0-10), export descriptivo
+    # del repo hermano (outputs/iex_dimensiones_ocupacion.csv). Transparencia:
+    # dim_d7 es la TRC (rutinariedad cognitiva) del panel — ya ponderada DENTRO
+    # del IEX, se expone como explicación, nunca se re-suma a la fórmula.
+    dim_d1         = Column(Float)
+    dim_d2         = Column(Float)
+    dim_d3         = Column(Float)
+    dim_d4         = Column(Float)
+    dim_d5         = Column(Float)
+    dim_d6         = Column(Float)
+    dim_d7         = Column(Float)
 
 
 class CarreraSocMap(Base):
