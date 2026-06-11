@@ -34,8 +34,11 @@ def run_kpi_snapshot(session: Session, fecha: date | None = None) -> SnapshotRes
         result = run_kpis(carrera_id, session)
         if result is None:
             continue
-        for kpi_nombre, extractor in KPI_FIELDS:
-            valor = float(extractor(result))
+        kpi_values = [(nombre, float(extractor(result))) for nombre, extractor in KPI_FIELDS]
+        # iva_v2 solo se persiste si la carrera tiene crosswalk SOC + datos IEX
+        if result.iva_v2 and result.iva_v2.iva_v2 is not None:
+            kpi_values.append(('iva_v2', result.iva_v2.iva_v2))
+        for kpi_nombre, valor in kpi_values:
             existing = (
                 session.query(KpiHistorico)
                 .filter_by(

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from sqlalchemy.orm import Session
 from pipeline.db.models import Carrera, CarreraIES, Ocupacion, IES
 from pipeline.kpi_engine.d1_obsolescencia import calcular_d1, D1Result
+from pipeline.kpi_engine.d1_iva_v2 import calcular_iva_v2, IvaV2Result
 from pipeline.kpi_engine.d2_oportunidades import calcular_d2, D2Result
 from pipeline.kpi_engine.d3_mercado import calcular_d3, D3Result
 from pipeline.kpi_engine.d4_institucional import calcular_d4, D4Result
@@ -22,6 +23,10 @@ class KpiResult:
     d2_oportunidades: D2Result
     d3_mercado: D3Result
     d6_estudiantil: D6Result
+    # IVA versionado: v2 = f(IEX, FES, FA) vía datasets de oia-ee-research.
+    # Paralelo a d1_obsolescencia.iva (v1); iva_v2.iva_v2 es None si la carrera
+    # no tiene crosswalk SOC o exposicion_iex está vacía.
+    iva_v2: IvaV2Result | None = None
 
 
 @dataclass
@@ -64,6 +69,7 @@ def run_kpis(carrera_id: str, session: Session) -> KpiResult | None:
         d2_oportunidades=d2,
         d3_mercado=d3,
         d6_estudiantil=d6,
+        iva_v2=calcular_iva_v2(carrera, session),
     )
 
 
