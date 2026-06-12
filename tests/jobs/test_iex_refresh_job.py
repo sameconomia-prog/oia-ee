@@ -60,7 +60,8 @@ def test_refresh_reporta_conteos_de_carga_y_crosswalk(session, data_dir):
         "actualizados": 0,
         "crosswalk_carreras": 1,
         "crosswalk_insertados": 1,
-        "costos_procesados": 0,   # fixture sin tabla ocupaciones_mx
+        "costos_procesados": 0,    # fixture sin tabla ocupaciones_mx
+        "contexto_procesados": 0,  # ídem
     }
 
 

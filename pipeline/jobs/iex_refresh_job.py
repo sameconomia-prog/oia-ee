@@ -12,22 +12,25 @@ import argparse
 import structlog
 from sqlalchemy.orm import Session
 
-from pipeline.loaders.iex_loader import load_exposicion_iex, seed_carrera_soc_map
+from pipeline.loaders.iex_loader import (
+    load_contexto_mx, load_exposicion_iex, seed_carrera_soc_map)
 from pipeline.services.costo_ia import calcular_costos_ia
 
 logger = structlog.get_logger()
 
 
 def run_iex_refresh(session: Session, data_dir: str | None = None) -> dict:
-    """Carga datasets IEX + siembra crosswalk + recalcula costos IA. Retorna conteos."""
+    """Carga datasets IEX + crosswalk + costos IA + contexto MX. Retorna conteos."""
     carga = load_exposicion_iex(session, data_dir=data_dir)
     crosswalk = seed_carrera_soc_map(session)
     costos = calcular_costos_ia(session, data_dir=data_dir)
+    contexto = load_contexto_mx(session, data_dir=data_dir)
     result = {
         **carga,
         "crosswalk_carreras": crosswalk["carreras_mapeadas"],
         "crosswalk_insertados": crosswalk["insertados"],
         "costos_procesados": costos["costos_procesados"],
+        "contexto_procesados": contexto["contexto_procesados"],
     }
     logger.info("iex_refresh_complete", **result)
     return result

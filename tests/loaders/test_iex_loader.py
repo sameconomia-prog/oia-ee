@@ -7,10 +7,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from pipeline.db.models import Base, Carrera
-from pipeline.db.models_iex import CarreraSocMap, ExposicionIEX
+from pipeline.db.models_iex import CarreraSocMap, ContextoOcupacionMX, ExposicionIEX
 from pipeline.loaders.iex_loader import (
     IexDatasetError,
     fetch_iex_records,
+    load_contexto_mx,
     load_exposicion_iex,
     resolve_data_dir,
     seed_carrera_soc_map,
@@ -65,6 +66,14 @@ def data_dir(tmp_path):
         "INSERT INTO iex_ocupacion_v2 VALUES (?, ?, ?)",
         [("15-1252", 5.769, "B"), ("43-3031", 7.98, "A")],
     )
+    con.execute(
+        "CREATE TABLE ocupaciones_mx (soc_code TEXT, empleo_mx INTEGER, "
+        "ingreso_mensual_mediano_mxn REAL, pct_informalidad REAL, pct_mujeres REAL, "
+        "edad_mediana REAL, escolaridad_media_anios REAL, "
+        "pct_rural_loc_menor_15k REAL, top3_entidades TEXT)")
+    con.execute(
+        "INSERT INTO ocupaciones_mx VALUES "
+        "('15-1252', 400078, 20000.0, 14.6, 17.9, 33.0, 16.5, 9.4, 'CDMX, Edomex, Jalisco')")
     con.commit()
     con.close()
     return str(tmp_path)
@@ -165,6 +174,24 @@ def test_seed_crosswalk_trunca_onet_a_soc(session, data_dir):
     result2 = seed_carrera_soc_map(session)
     assert result2["insertados"] == 0
     assert session.query(CarreraSocMap).count() == 1
+
+
+def test_load_contexto_mx_carga_e_idempotente(session, data_dir):
+    r1 = load_contexto_mx(session, data_dir=data_dir)
+    assert r1 == {"contexto_procesados": 1}
+    row = session.get(ContextoOcupacionMX, "15-1252")
+    assert row.empleo_mx == 400078
+    assert row.pct_mujeres == pytest.approx(17.9)
+    load_contexto_mx(session, data_dir=data_dir)
+    assert session.query(ContextoOcupacionMX).count() == 1
+
+
+def test_load_contexto_mx_sin_tabla_no_truena(session, tmp_path):
+    import sqlite3 as _sq
+    (tmp_path / "db").mkdir()
+    _sq.connect(tmp_path / "db" / "tesis.db").close()
+    r = load_contexto_mx(session, data_dir=str(tmp_path))
+    assert r == {"contexto_procesados": 0}
 
 
 def test_seed_crosswalk_no_pisa_ediciones_manuales(session, data_dir):

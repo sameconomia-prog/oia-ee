@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from api.deps import get_db, rate_limit_public
-from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut, IesDetalleOut, KpisDistribucionOut, KpisBinOut, IvaV2Out, IvaV2OcupacionOut, RecomendacionOut, EscenariosOut, EscenarioProyeccionOut
+from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut, IesDetalleOut, KpisDistribucionOut, KpisBinOut, IvaV2Out, IvaV2OcupacionOut, RecomendacionOut, EscenariosOut, EscenarioProyeccionOut, ContextoMXOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 
@@ -783,6 +783,26 @@ def escenarios_carrera(carrera_id: str, db: Session = Depends(get_db)):
         rango_2030=list(r.rango_2030) if r.rango_2030 else None,
         rango_2035=list(r.rango_2035) if r.rango_2035 else None,
         disclaimer=DISCLAIMER,
+    )
+
+
+@router.get("/carreras/{carrera_id}/contexto-mx", response_model=ContextoMXOut)
+def contexto_mx_carrera(carrera_id: str, db: Session = Depends(get_db)):
+    """Perfil del empleo mexicano + lectura de equidad por carrera (M4/M7 v0)."""
+    from fastapi import HTTPException
+    from pipeline.services.contexto_mx import FUENTE, contexto_carrera
+
+    carrera = db.query(Carrera).filter_by(id=carrera_id).first()
+    if not carrera:
+        raise HTTPException(status_code=404, detail="Carrera no encontrada")
+    r = contexto_carrera(carrera, db)
+    return ContextoMXOut(
+        carrera_id=carrera_id, n_soc=r.n_soc, empleo_mx=r.empleo_mx,
+        ingreso_mensual_mxn=r.ingreso_mensual_mxn,
+        pct_informalidad=r.pct_informalidad, pct_mujeres=r.pct_mujeres,
+        escolaridad_anios=r.escolaridad_anios, pct_rural=r.pct_rural,
+        flags=r.flags, alerta_distributiva=r.alerta_distributiva,
+        nota=r.nota, fuente=FUENTE,
     )
 
 

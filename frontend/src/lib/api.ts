@@ -311,6 +311,12 @@ export async function getRecomendacion(carreraId: string): Promise<import('./typ
   return await res.json()
 }
 
+export async function getContextoMX(carreraId: string): Promise<import('./types').ContextoMXData> {
+  const res = await fetch(`${BASE}/publico/carreras/${carreraId}/contexto-mx`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function getEscenariosMacro(carreraId: string): Promise<import('./types').EscenariosData> {
   const res = await fetch(`${BASE}/publico/carreras/${carreraId}/escenarios`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
