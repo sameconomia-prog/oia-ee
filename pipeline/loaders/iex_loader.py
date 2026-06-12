@@ -22,7 +22,8 @@ import structlog
 from sqlalchemy.orm import Session
 
 from pipeline.db.models import Carrera
-from pipeline.db.models_iex import CarreraSocMap, ContextoOcupacionMX, ExposicionIEX
+from pipeline.db.models_iex import (CarreraSocMap, ContextoOcupacionMX,
+                                    ExposicionIEX, FASectorial)
 
 logger = structlog.get_logger()
 
@@ -225,6 +226,44 @@ def load_contexto_mx(session: Session, data_dir: str | None = None) -> dict:
     session.flush()
     result = {"contexto_procesados": procesados}
     logger.info("contexto_mx_complete", **result)
+    return result
+
+
+# FA por grupo SOC mayor — valores de docs/estrategia/propuesta_fa_sectorial_2026-06.md
+# (aprobada 2026-06-11). Componentes cualitativos: regulación de ejercicio,
+# sindicación/plazas, frontera física bits-átomos.
+FA_SEED = {
+    "29": (0.55, "Cédula obligatoria + responsabilidad civil + plazas públicas (salud)"),
+    "25": (0.50, "USICAMM/plazas + sindicación alta (educación)"),
+    "23": (0.45, "Colegiación + responsabilidad procesal (legal)"),
+    "13": (0.30, "Cumplimiento regulado pero adopción corporativa rápida (finanzas/negocio)"),
+    "15": (0.10, "Sin barrera de ejercicio; adopción nativa (TI)"),
+    "27": (0.15, "Mercado fragmentado sin regulación de ejercicio (creativos/medios)"),
+    "41": (0.20, "Decisión empresarial directa, poca barrera (ventas)"),
+    "43": (0.20, "Decisión empresarial directa, poca barrera (oficina)"),
+    "35": (0.35, "Frontera física bits-átomos + capital físico (servicios)"),
+    "33": (0.35, "Frontera física bits-átomos (seguridad)"),
+    "47": (0.35, "Frontera física bits-átomos (construcción/oficios)"),
+    "51": (0.35, "Frontera física bits-átomos (manufactura)"),
+    "53": (0.35, "Frontera física bits-átomos (transporte)"),
+}
+
+
+def seed_fa_sectorial(session: Session) -> dict:
+    """Siembra FA por grupo SOC. Solo añade grupos faltantes — idempotente,
+    nunca pisa ediciones manuales del superadmin."""
+    insertados = 0
+    for grupo, (fa, justificacion) in FA_SEED.items():
+        if session.get(FASectorial, grupo):
+            continue
+        session.add(FASectorial(grupo_soc=grupo, fa=fa,
+                                justificacion=justificacion,
+                                es_aproximacion=True,
+                                fuente="seed_propuesta_2026-06"))
+        insertados += 1
+    session.flush()
+    result = {"fa_insertados": insertados}
+    logger.info("fa_seed_complete", **result)
     return result
 
 

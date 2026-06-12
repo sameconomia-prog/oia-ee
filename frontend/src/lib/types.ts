@@ -81,6 +81,7 @@ export interface IvaV2Data {
   iex_norm: number | null
   fes_factor: number | null
   fa: number
+  fa_fuente: 'sectorial' | 'mixta' | 'constante'
   n_soc: number
   fecha_dataset: string | null
   costo_ia_hora_mxn: number | null
