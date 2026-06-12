@@ -16,6 +16,8 @@ const FEATURES_STARTER = [
 const FEATURES_PRO = [
   'Todo Starter, más:',
   '7 dimensiones D1–D7 completas',
+  'IVA v2: riesgo ajustado por elasticidad de demanda (metodología IEX con respaldo académico)',
+  'Lectura accionable por carrera con horizonte temporal',
   'Simulador de escenarios',
   'Predicciones con FanChart',
   'Exportación CSV / API',
@@ -26,6 +28,8 @@ const FEATURES_PRO = [
 ]
 const FEATURES_ENT = [
   'Todo Pro, más:',
+  'Comparativo coste IA vs humano por ocupación (orden de magnitud, supuestos auditables)',
+  'Trayectorias 2030/2035 bajo escenarios con rango de sensibilidad',
   'Multi-campus ilimitado',
   'Integración SIIA Enterprise (webhook)',
   'White-label — dominio y branding propios',

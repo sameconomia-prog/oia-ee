@@ -44,6 +44,15 @@ OIA-EE/
 - No hacer git push sin verificar que los tests pasan
 - Al terminar sprints: guardar nota en Obsidian Vault `/Users/arturoaguilar/Documents/Obsidian Vault/01 - Proyectos/OIA-EE/`
 
+## Puente ciencia→producto IEX (2026-06-11) — módulos M1-M7 del panel
+- La plataforma CONSUME los datasets de la tesis (`~/Documents/oia-ee-research`, env `IEX_DATA_DIR`); NUNCA recalcula el IEX. Nomenclatura: `docs/GLOSARIO.md`.
+- Tablas: `exposicion_iex` (+dim_d1..d7), `carrera_soc_map`, `costo_ia_ocupacion`, `contexto_ocupacion_mx`, `fa_sectorial` (migraciones p31–p35).
+- KPI: `IVA v2 = (IEX/10)×(1−FES)×(1−FA)` en `pipeline/kpi_engine/d1_iva_v2.py`, paralelo a iva_v1 (intacto). FA sectorial por grupo SOC con fallback 0.25.
+- Servicios: `recomendacion.py` (M6), `contexto_mx.py` (M4/M7 equidad H9), `costo_ia.py` (M3, FX Banxico opcional `BANXICO_TOKEN`), `scenario_engine/escenarios_macro.py` (M5).
+- Endpoints públicos por carrera: `/iva-v2`, `/recomendacion`, `/escenarios`, `/contexto-mx`. Admin: `/admin/soc-map`, `/admin/fa-sectorial`.
+- Refresco de datos: `DATABASE_URL=... python -m pipeline.jobs.iex_refresh_job [--data-dir]` (idempotente; seeds nunca pisan ediciones manuales).
+- Monitoreo: `.github/workflows/health-check.yml` (cron 30 min → issue con dedup).
+
 ## Estado actual (Sprint 204, 2026-05-01)
 - 471 pytest · 0 errores TypeScript · 78 artículos investigaciones
 - P117-P126: benchmark signals, urgencia badges, brecha/calientes panels, tag cloud
