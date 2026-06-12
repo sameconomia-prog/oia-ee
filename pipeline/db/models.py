@@ -233,3 +233,4 @@ from pipeline.db.models_predictor import PrediccionKpi  # noqa: F401
 from pipeline.db.models_siia import SiiaMatricula, SiiaToken  # noqa: F401
 from pipeline.db.models_whitelabel import WhiteLabelConfig  # noqa: F401
 from pipeline.db.models_iex import ExposicionIEX, CarreraSocMap  # noqa: E402, F401
+from pipeline.db.models_d7_validacion import D7ValidacionSnapshot  # noqa: E402, F401

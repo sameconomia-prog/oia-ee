@@ -14,6 +14,7 @@ JOB_THRESHOLDS: dict[str, int] = {
     "news_scraper":    8,
     "stps_loader":     30,
     "kpi_snapshot":    192,
+    "d7_validacion":   192,
     "resumen_semanal": 192,
     "anuies_loader":   192,
     "imss_loader":     840,

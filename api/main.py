@@ -13,6 +13,7 @@ from pipeline.db import get_session
 from pipeline.jobs.alert_job import run_alert_job
 from pipeline.jobs.news_ingest_job import run_news_ingest
 from pipeline.jobs.kpi_snapshot_job import run_kpi_snapshot
+from pipeline.jobs.d7_validacion_job import run_d7_validacion_snapshot
 from pipeline.jobs.radar_job import run_radar_despidos_job, run_radar_empleos_job, run_obsidian_sync_job
 from pipeline.jobs.forecast_job import run_forecast_job, run_skills_job
 from pipeline.jobs.occ_ingest_job import run_occ_ingest as _occ_ingest
@@ -77,6 +78,20 @@ def _run_snapshot_job_scheduled() -> None:
         traceback_str = traceback.format_exc()
     finally:
         notify_job_result("kpi_snapshot", error=error, traceback_str=traceback_str)
+
+
+def _run_d7_validacion_scheduled() -> None:
+    error = None
+    traceback_str = None
+    try:
+        with get_session() as db:
+            run_d7_validacion_snapshot(db)
+            db.commit()
+    except Exception as e:
+        error = e
+        traceback_str = traceback.format_exc()
+    finally:
+        notify_job_result("d7_validacion", error=error, traceback_str=traceback_str)
 
 
 def _run_occ_job_scheduled() -> None:
@@ -256,6 +271,7 @@ async def lifespan(app: FastAPI):
         _scheduler.add_job(_run_news_job_scheduled, "cron", hour="*/6")
         _scheduler.add_job(_run_occ_job_scheduled, "cron", hour="*/6", minute=15)
         _scheduler.add_job(_run_snapshot_job_scheduled, "cron", day_of_week="mon", hour=5)
+        _scheduler.add_job(_run_d7_validacion_scheduled, "cron", day_of_week="mon", hour=6)
         _scheduler.add_job(_run_stps_scheduled, "cron", hour=2, minute=0)
         _scheduler.add_job(_run_anuies_scheduled, "cron", day_of_week="sun", hour=4)
         _scheduler.add_job(_run_imss_scheduled, "cron", day=15, hour=3, minute=0)
