@@ -22,7 +22,7 @@ import structlog
 from sqlalchemy.orm import Session
 
 from pipeline.db.models import Carrera
-from pipeline.db.models_iex import CarreraSocMap, ExposicionIEX
+from pipeline.db.models_iex import CarreraSocMap, ContextoOcupacionMX, ExposicionIEX
 
 logger = structlog.get_logger()
 
@@ -177,6 +177,54 @@ def load_exposicion_iex(session: Session, data_dir: str | None = None) -> dict:
     result = {"procesados": len(records), "insertados": insertados,
               "actualizados": actualizados}
     logger.info("iex_load_complete", **result)
+    return result
+
+
+def load_contexto_mx(session: Session, data_dir: str | None = None) -> dict:
+    """Upsert del perfil del empleo MX (tesis.db::ocupaciones_mx, ENOE 2026-T1).
+
+    Fuente OPCIONAL: si la tabla no existe en tesis.db se omite con warning
+    (no rompe el refresco). Retorna {"contexto_procesados": N}.
+    """
+    base = resolve_data_dir(data_dir)
+    path = base / _DB_TESIS
+    rows: list[tuple] = []
+    if path.is_file():
+        con = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+        try:
+            rows = con.execute(
+                "SELECT soc_code, empleo_mx, ingreso_mensual_mediano_mxn, "
+                "pct_informalidad, pct_mujeres, edad_mediana, "
+                "escolaridad_media_anios, pct_rural_loc_menor_15k, top3_entidades "
+                "FROM ocupaciones_mx"
+            ).fetchall()
+        except sqlite3.OperationalError as e:
+            logger.warning("contexto_mx_no_disponible", error=str(e))
+        finally:
+            con.close()
+    else:
+        logger.warning("contexto_mx_sin_tesis_db", path=str(path))
+
+    procesados = 0
+    for (soc, empleo, ingreso, informal, mujeres, edad,
+         escolaridad, rural, entidades) in rows:
+        row = session.get(ContextoOcupacionMX, soc)
+        if not row:
+            row = ContextoOcupacionMX(soc_code=soc)
+            session.add(row)
+        row.empleo_mx = empleo
+        row.ingreso_mensual_mxn = ingreso
+        row.pct_informalidad = informal
+        row.pct_mujeres = mujeres
+        row.edad_mediana = edad
+        row.escolaridad_anios = escolaridad
+        row.pct_rural = rural
+        row.top_entidades = entidades
+        row.fecha_carga = datetime.now(timezone.utc)
+        procesados += 1
+    session.flush()
+    result = {"contexto_procesados": procesados}
+    logger.info("contexto_mx_complete", **result)
     return result
 
 

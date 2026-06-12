@@ -87,6 +87,21 @@ export interface IvaV2Data {
   ocupaciones: IvaV2Ocupacion[]
 }
 
+export interface ContextoMXData {
+  carrera_id: string
+  n_soc: number
+  empleo_mx: number | null
+  ingreso_mensual_mxn: number | null
+  pct_informalidad: number | null
+  pct_mujeres: number | null
+  escolaridad_anios: number | null
+  pct_rural: number | null
+  flags: string[]
+  alerta_distributiva: boolean
+  nota: string | null
+  fuente: string
+}
+
 export interface EscenarioProyeccion {
   escenario: 'continuista' | 'polarizacion' | 'disruptivo'
   anio: number

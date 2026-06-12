@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills, getCarrerasPublico, getTendenciasNacionales, getIvaV2, getRecomendacion, getEscenariosMacro } from '@/lib/api'
-import type { CarreraDetalle, CarreraKpi, KpiResult, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq, TendenciaNacional, IvaV2Data, RecomendacionData, EscenariosData } from '@/lib/types'
+import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills, getCarrerasPublico, getTendenciasNacionales, getIvaV2, getRecomendacion, getEscenariosMacro, getContextoMX } from '@/lib/api'
+import type { CarreraDetalle, CarreraKpi, KpiResult, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq, TendenciaNacional, IvaV2Data, RecomendacionData, EscenariosData, ContextoMXData } from '@/lib/types'
 
 function normSkill(s: string) {
   return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -166,6 +166,7 @@ export default function CarreraDetallePage() {
   const [ivaV2, setIvaV2] = useState<IvaV2Data | null>(null)
   const [recomendacion, setRecomendacion] = useState<RecomendacionData | null>(null)
   const [escenarios, setEscenarios] = useState<EscenariosData | null>(null)
+  const [contextoMX, setContextoMX] = useState<ContextoMXData | null>(null)
 
   const promedioArea = useMemo(() => {
     const conKpi = similares.filter(c => c.kpi != null)
@@ -216,6 +217,7 @@ export default function CarreraDetallePage() {
     getIvaV2(id).then(setIvaV2).catch(() => {})
     getRecomendacion(id).then(setRecomendacion).catch(() => {})
     getEscenariosMacro(id).then(setEscenarios).catch(() => {})
+    getContextoMX(id).then(setContextoMX).catch(() => {})
     getKpisHistorico(id, 'd1_score', 30).then(setHistD1).catch(() => {})
     getKpisHistorico(id, 'd2_score', 30).then(setHistD2).catch(() => {})
     fetch(`${BASE}/predicciones/carrera/${id}?kpi=D1`)
@@ -545,6 +547,35 @@ export default function CarreraDetallePage() {
               Solicitar estudio de pertinencia →
             </Link>
           </p>
+        </Card>
+      )}
+
+      {/* Perfil del empleo en México (M4/M7 v0) */}
+      {contextoMX && contextoMX.n_soc > 0 && (
+        <Card className="mb-6 p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-slate-800 text-sm">Perfil del empleo en México</h2>
+            <span className="text-[10px] text-slate-400">{contextoMX.fuente}</span>
+          </div>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-3">
+            {([
+              ['Empleo', contextoMX.empleo_mx != null ? contextoMX.empleo_mx.toLocaleString('es-MX') : null],
+              ['Ingreso mediano', contextoMX.ingreso_mensual_mxn != null ? `$${Math.round(contextoMX.ingreso_mensual_mxn).toLocaleString('es-MX')}` : null],
+              ['Informalidad', contextoMX.pct_informalidad != null ? `${contextoMX.pct_informalidad.toFixed(0)}%` : null],
+              ['Mujeres', contextoMX.pct_mujeres != null ? `${contextoMX.pct_mujeres.toFixed(0)}%` : null],
+              ['Escolaridad', contextoMX.escolaridad_anios != null ? `${contextoMX.escolaridad_anios.toFixed(1)} años` : null],
+            ] as [string, string | null][]).filter(([, v]) => v != null).map(([label, valor]) => (
+              <div key={label}>
+                <p className="text-[10px] text-slate-400 uppercase tracking-wide">{label}</p>
+                <p className="text-sm font-semibold font-mono text-slate-700">{valor}</p>
+              </div>
+            ))}
+          </div>
+          {contextoMX.alerta_distributiva && contextoMX.nota && (
+            <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+              <p className="text-[11px] text-amber-800">{contextoMX.nota}</p>
+            </div>
+          )}
         </Card>
       )}
 

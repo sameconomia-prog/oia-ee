@@ -182,6 +182,22 @@ class RecomendacionOut(BaseModel):
     disclaimer: str
 
 
+class ContextoMXOut(BaseModel):
+    """Perfil del empleo MX por carrera + lectura de equidad (M4/M7 v0)."""
+    carrera_id: str
+    n_soc: int
+    empleo_mx: Optional[int] = None
+    ingreso_mensual_mxn: Optional[float] = None
+    pct_informalidad: Optional[float] = None
+    pct_mujeres: Optional[float] = None
+    escolaridad_anios: Optional[float] = None
+    pct_rural: Optional[float] = None
+    flags: list[str] = []
+    alerta_distributiva: bool = False
+    nota: Optional[str] = None
+    fuente: str
+
+
 class EscenarioProyeccionOut(BaseModel):
     escenario: str          # continuista | polarizacion | disruptivo
     anio: int

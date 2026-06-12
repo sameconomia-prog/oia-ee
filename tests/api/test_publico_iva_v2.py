@@ -5,7 +5,8 @@ import uuid
 import pytest
 
 from pipeline.db.models import Carrera
-from pipeline.db.models_iex import CarreraSocMap, CostoIAOcupacion, ExposicionIEX
+from pipeline.db.models_iex import (CarreraSocMap, ContextoOcupacionMX,
+                                    CostoIAOcupacion, ExposicionIEX)
 
 
 @pytest.fixture
@@ -95,6 +96,26 @@ def test_escenarios_con_datos_retorna_rango(client, carrera, db_session):
     assert len(data["proyecciones"]) == 6
     assert data["rango_2030"][0] <= data["rango_2030"][1]
     assert data["rango_2035"][0] <= data["rango_2035"][1]
+
+
+def test_contexto_mx_404_carrera_inexistente(client):
+    assert client.get("/publico/carreras/no-existe/contexto-mx").status_code == 404
+
+
+def test_contexto_mx_retorna_perfil_y_alerta(client, carrera, db_session):
+    soc = "94-3333"
+    db_session.add(ExposicionIEX(soc_code=soc, iex_v2=9.0, elasticidad_mx="E-Baja"))
+    db_session.add(ContextoOcupacionMX(
+        soc_code=soc, empleo_mx=500000, ingreso_mensual_mxn=8000.0,
+        pct_informalidad=55.0, pct_mujeres=70.0, escolaridad_anios=12.0,
+        pct_rural=10.0))
+    db_session.add(CarreraSocMap(carrera_id=carrera.id, soc_code=soc))
+    db_session.flush()
+    data = client.get(f"/publico/carreras/{carrera.id}/contexto-mx").json()
+    assert data["empleo_mx"] == 500000
+    assert set(data["flags"]) == {"feminizada", "informalidad_alta"}
+    assert data["alerta_distributiva"] is True
+    assert "ENOE" in data["fuente"]
 
 
 def test_iva_v2_incluye_costo_ia_cuando_existe(client, carrera, db_session):

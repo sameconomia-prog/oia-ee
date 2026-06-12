@@ -5,7 +5,7 @@ nunca recalcula el IEX. La metodología vive en ~/Documents/oia-ee-research.
 """
 from datetime import datetime, timezone
 from sqlalchemy import (
-    Column, String, Text, Float, Boolean, Date, DateTime,
+    Column, String, Text, Float, Boolean, Date, DateTime, Integer,
     ForeignKey, UniqueConstraint, Index,
 )
 from pipeline.db.models import Base, _uuid
@@ -48,6 +48,27 @@ class ExposicionIEX(Base):
     dim_d5         = Column(Float)
     dim_d6         = Column(Float)
     dim_d7         = Column(Float)
+
+
+class ContextoOcupacionMX(Base):
+    """Perfil del empleo mexicano por ocupación SOC (módulos M4/M7 v0).
+
+    Dataset de la tesis (tesis.db::ocupaciones_mx, ENOE 2026-T1 SDEM∩COE1):
+    variables distributivas y de equidad ya validadas en las fichas
+    distributivas del repo hermano. La plataforma consume, no recalcula.
+    """
+    __tablename__ = "contexto_ocupacion_mx"
+
+    soc_code            = Column(String(10), primary_key=True)
+    empleo_mx           = Column(Integer)
+    ingreso_mensual_mxn = Column(Float)    # mediano
+    pct_informalidad    = Column(Float)
+    pct_mujeres         = Column(Float)
+    edad_mediana        = Column(Float)
+    escolaridad_anios   = Column(Float)
+    pct_rural           = Column(Float)    # localidades <15k hab
+    top_entidades       = Column(Text)
+    fecha_carga         = Column(DateTime(timezone=True), default=_now_utc)
 
 
 class CostoIAOcupacion(Base):
