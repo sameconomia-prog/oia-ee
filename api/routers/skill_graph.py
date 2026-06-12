@@ -2,8 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from api.deps import get_db, rate_limit_public
 from pipeline.skill_graph.builder import build_skill_graph, build_global_skill_graph
+from pipeline.skill_graph.taxonomy import build_capability_frontier_info
 
 router = APIRouter(dependencies=[Depends(rate_limit_public)])
+
+
+@router.get("/capability-frontier")
+def get_capability_frontier():
+    """Versionado de la skill taxonomy contra la frontera de capacidades de modelos."""
+    return build_capability_frontier_info()
 
 
 @router.get("/carreras/{carrera_id}/skill-graph")

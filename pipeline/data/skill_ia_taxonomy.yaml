@@ -1,6 +1,24 @@
 # Clasificación de skills por impacto de IA.
 # Fuentes: Frey-Osborne (2013), Eloundou et al./OpenAI (2023), O*NET Task Importance
 # Niveles: automated (IA lo hace hoy) | augmented (humano+IA) | resilient (difícil automatizar)
+# Versionado contra capability frontier (alerta #7 del panel):
+# diseño en docs/estrategia/diseno_versionado_taxonomy_2026-06.md
+
+meta:
+  version: "2026-06.1"
+  capability_frontier:
+    modelo_referencia: claude-sonnet-4.6
+    fecha_evaluacion: "2026-04-29"
+  politica_revision: "re-evaluar trimestralmente o ante release mayor de modelo frontier"
+  fuentes:
+    - Frey-Osborne (2013)
+    - Eloundou et al. / OpenAI (2023)
+    - O*NET Task Importance
+  historial:
+    - version: "2026-06.1"
+      modelo_referencia: claude-sonnet-4.6
+      fecha: "2026-06-12"
+      cambios: "versionado inicial (alerta #7); clasificación heredada de 2026-04-29 sin cambios"
 
 automated:
   - captura de datos

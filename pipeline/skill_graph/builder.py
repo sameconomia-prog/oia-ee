@@ -7,7 +7,7 @@ from datetime import date, timedelta
 from sqlalchemy.orm import Session
 
 from pipeline.db.models import Vacante, Carrera
-from pipeline.skill_graph.taxonomy import get_ia_label, get_ia_score
+from pipeline.skill_graph.taxonomy import get_ia_label, get_ia_score, get_taxonomy_meta
 
 _RECENT_DAYS = 180
 _PAST_DAYS = 365
@@ -57,6 +57,7 @@ def build_skill_graph(carrera_id: str, db: Session, top_n: int = 20) -> dict:
             "skill_count": 0,
             "pct_en_transicion": 0.0,
             "skills": [],
+            "taxonomy_meta": get_taxonomy_meta(),
         }
 
     all_vacantes = db.query(Vacante).all()
@@ -73,6 +74,7 @@ def build_skill_graph(carrera_id: str, db: Session, top_n: int = 20) -> dict:
             "skill_count": 0,
             "pct_en_transicion": 0.0,
             "skills": [],
+            "taxonomy_meta": get_taxonomy_meta(),
         }
 
     top_skills = counter.most_common(top_n)
@@ -98,6 +100,7 @@ def build_skill_graph(carrera_id: str, db: Session, top_n: int = 20) -> dict:
         "skill_count": len(skills_out),
         "pct_en_transicion": pct,
         "skills": skills_out,
+        "taxonomy_meta": get_taxonomy_meta(),
     }
 
 
@@ -111,7 +114,12 @@ def build_global_skill_graph(db: Session, top_n: int = 50) -> dict:
             counter[skill] += 1
 
     if not counter:
-        return {"skill_count": 0, "pct_en_transicion": 0.0, "skills": []}
+        return {
+            "skill_count": 0,
+            "pct_en_transicion": 0.0,
+            "skills": [],
+            "taxonomy_meta": get_taxonomy_meta(),
+        }
 
     top_skills = counter.most_common(top_n)
     total_mentions = sum(counter.values())
@@ -134,4 +142,5 @@ def build_global_skill_graph(db: Session, top_n: int = 50) -> dict:
         "skill_count": len(skills_out),
         "pct_en_transicion": pct,
         "skills": skills_out,
+        "taxonomy_meta": get_taxonomy_meta(),
     }

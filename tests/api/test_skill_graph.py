@@ -128,3 +128,31 @@ def test_global_skill_graph_top_n(client, db_session):
 def test_global_skill_graph_top_n_minimo(client, db_session):
     resp = client.get("/skills/global?top_n=5")
     assert resp.status_code == 422
+
+
+def test_capability_frontier_retorna_200(client, db_session):
+    resp = client.get("/capability-frontier")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["version"] == "2026-06.1"
+    assert data["modelo_referencia"] == "claude-sonnet-4.6"
+    assert data["fecha_evaluacion"] == "2026-04-29"
+    assert data["total_skills"] > 0
+    assert isinstance(data["revision_recomendada"], bool)
+    assert isinstance(data["dias_desde_evaluacion"], int)
+
+
+def test_skill_graph_incluye_taxonomy_meta(client, db_session):
+    carrera = _add_carrera(db_session)
+    _add_vacante(db_session, ["python", "sql"])
+    resp = client.get(f"/carreras/{carrera.id}/skill-graph")
+    assert resp.status_code == 200
+    meta = resp.json()["taxonomy_meta"]
+    assert meta["version"] == "2026-06.1"
+    assert meta["modelo_referencia"] == "claude-sonnet-4.6"
+
+
+def test_global_skill_graph_incluye_taxonomy_meta(client, db_session):
+    resp = client.get("/skills/global")
+    assert resp.status_code == 200
+    assert resp.json()["taxonomy_meta"]["version"] == "2026-06.1"
