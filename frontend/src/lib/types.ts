@@ -506,6 +506,8 @@ export interface PertinenciaReportData {
   semaforo: PertinenciaSemaforo | null
   comparables: TopRiesgoItemOut[]
   nacional: { promedio_d1: number; promedio_d2: number; promedio_d3: number }
+  ivaV2: IvaV2Data | null
+  recomendacion: RecomendacionData | null
 }
 
 export type IaLabel = 'automated' | 'augmented' | 'resilient'

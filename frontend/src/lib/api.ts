@@ -417,10 +417,12 @@ export async function fetchPertinenciaReportData(
     getKpisNacionalResumen(),
   ])
 
-  const [skills, semaforo, comparables] = await Promise.all([
+  const [skills, semaforo, comparables, ivaV2, recomendacion] = await Promise.all([
     getSkillGraph(carreraId, 40).catch(() => null),
     getPrediccionSemaforo(carreraId),
     getRankingComparativo(detalle.area_conocimiento, 30),
+    getIvaV2(carreraId).catch(() => null),
+    getRecomendacion(carreraId).catch(() => null),
   ])
 
   const matriculaTotal = detalle.instituciones.reduce((s, i) => s + (i.matricula ?? 0), 0)
@@ -450,6 +452,8 @@ export async function fetchPertinenciaReportData(
       promedio_d2: kpisNacional.promedio_d2,
       promedio_d3: kpisNacional.promedio_d3,
     },
+    ivaV2,
+    recomendacion,
   }
 }
 

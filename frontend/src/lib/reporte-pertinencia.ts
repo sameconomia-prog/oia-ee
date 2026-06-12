@@ -17,7 +17,7 @@ const DARK      = [15, 23, 42]   as [number, number, number]
 
 const W = 216
 const H = 279
-const TOTAL_PAGES = 11
+let totalPages = 11
 
 function scoreColor(score: number, invert = false): [number, number, number] {
   const high = score >= 0.7
@@ -45,7 +45,7 @@ function addHeader(doc: jsPDF, title: string, pageNum: number) {
   doc.text('OIA-EE · Estudio de Pertinencia Ad-hoc', 8, 9)
   doc.setFont('helvetica', 'normal')
   doc.text(title, W / 2, 9, { align: 'center' })
-  doc.text(`Pág. ${pageNum} / ${TOTAL_PAGES}`, W - 8, 9, { align: 'right' })
+  doc.text(`Pág. ${pageNum} / ${totalPages}`, W - 8, 9, { align: 'right' })
 }
 
 function addFooter(doc: jsPDF, fecha: string) {
@@ -798,10 +798,95 @@ function pagRecomendaciones(doc: jsPDF, data: PertinenciaReportData, fecha: stri
   doc.text('Con la plataforma Pro, recibirás actualizaciones automáticas de tus indicadores cada 12 horas.', W / 2, y + 20, { align: 'center' })
 }
 
-// ── P11: Fuentes ──────────────────────────────────────────────────────────
-function pagFuentes(doc: jsPDF, fecha: string) {
+// ── IVA v2 + Recomendación (condicional: requiere crosswalk SOC + datos IEX) ──
+const ACCION_LABEL: Record<string, string> = {
+  mantener: 'Mantener',
+  actualizar: 'Actualizar contenidos',
+  redisenar: 'Rediseñar el programa',
+  evaluar_fusion_cierre: 'Evaluar fusión o cierre',
+  sin_datos: 'Sin datos suficientes',
+}
+
+function pagIvaV2(doc: jsPDF, data: PertinenciaReportData, fecha: string, pageNum: number) {
+  const iva = data.ivaV2!
+  const rec = data.recomendacion
   doc.addPage()
-  addHeader(doc, 'Fuentes, Glosario y Limitaciones', 11)
+  addHeader(doc, 'IVA v2 — Riesgo Ajustado por Demanda y Adopción', pageNum)
+  addFooter(doc, fecha)
+
+  sectionTitle(doc, 'IVA v2: exposición ajustada por elasticidad y fricción', 24)
+  let y = paragraph(
+    doc,
+    'El IVA v2 ajusta la exposición técnica a la IA (IEX, metodología académica a nivel tarea) con dos factores que la lectura puramente técnica no captura: la elasticidad de la demanda sectorial (FES) — en sectores con demanda reprimida la productividad se absorbe en lugar de recortar empleo — y la fricción de adopción del sector (FA): regulación de ejercicio, sindicación y frontera física. Fórmula: IVA v2 = (IEX/10) × (1−FES) × (1−FA).',
+    14, 32,
+  )
+
+  y += 4
+  kpiBox(doc, 14, y, 60, 26, 'IVA v1 (técnico, referencia)', iva.iva_v1, true)
+  kpiBox(doc, 82, y, 60, 26, 'IVA v2 (ajustado)', iva.iva_v2, true)
+  y += 32
+
+  autoTable(doc, {
+    startY: y,
+    head: [['Componente', 'Valor', 'Lectura']],
+    body: [
+      ['IEX normalizado', iva.iex_norm != null ? iva.iex_norm.toFixed(2) : '—', 'Exposición técnica promedio de las ocupaciones de la carrera'],
+      ['FES', iva.fes_factor != null ? iva.fes_factor.toFixed(2) : '—', 'Descuento por elasticidad de demanda del sector'],
+      ['FA', `${iva.fa.toFixed(2)} (${iva.fa_fuente})`, 'Fricción de adopción por grupo ocupacional'],
+      ['Ocupaciones SOC', String(iva.n_soc), 'Ocupaciones mapeadas que sustentan el cálculo'],
+      ['Dataset IEX', iva.fecha_dataset ?? '—', 'Versión del dataset académico consumido'],
+    ],
+    theme: 'striped',
+    headStyles: { fillColor: INDIGO, fontSize: 7.5, textColor: WHITE },
+    bodyStyles: { fontSize: 7 },
+    columnStyles: { 0: { cellWidth: 38 }, 1: { cellWidth: 38 }, 2: { cellWidth: 124 } },
+    margin: { left: 8, right: 8 },
+  })
+  y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8
+
+  if (iva.delta != null && iva.iva_v2 != null) {
+    const direccion = iva.delta < 0 ? 'reduce' : 'incrementa'
+    y = paragraph(
+      doc,
+      `El ajuste por demanda y adopción ${direccion} la lectura de riesgo en ${Math.abs(iva.delta).toFixed(2)} puntos respecto a la versión técnica (de ${iva.iva_v1.toFixed(2)} a ${iva.iva_v2.toFixed(2)}).`,
+      14, y,
+    )
+    y += 4
+  }
+
+  if (rec && rec.accion !== 'sin_datos') {
+    sectionTitle(doc, 'Recomendación curricular', y)
+    y += 9
+    doc.setFontSize(11)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(...INDIGO_DK)
+    doc.text(`${ACCION_LABEL[rec.accion] ?? rec.accion} · horizonte ${rec.horizonte} · confianza ${rec.confianza}`, 14, y)
+    y += 7
+    y = paragraph(doc, rec.justificacion, 14, y)
+    y += 3
+    rec.acciones.forEach(a => {
+      doc.setFillColor(...INDIGO)
+      doc.circle(16, y - 1, 1, 'F')
+      const lines = doc.splitTextToSize(a, W - 34) as string[]
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(...DARK)
+      doc.text(lines, 20, y)
+      y += lines.length * 4.5 + 2.5
+    })
+    y += 3
+    doc.setFontSize(6.5)
+    doc.setFont('helvetica', 'italic')
+    doc.setTextColor(...GRAY)
+    const discLines = doc.splitTextToSize(rec.disclaimer, W - 28) as string[]
+    doc.text(discLines, 14, y)
+  }
+}
+
+// ── P11: Fuentes ──────────────────────────────────────────────────────────
+function pagFuentes(doc: jsPDF, fecha: string, pageNum: number) {
+  doc.addPage()
+  addHeader(doc, 'Fuentes, Glosario y Limitaciones', pageNum)
   addFooter(doc, fecha)
 
   sectionTitle(doc, 'Fuentes de Datos', 24)
@@ -877,6 +962,9 @@ export function generarReportePertinencia(data: PertinenciaReportData): void {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' })
   const fecha = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })
 
+  const conIvaV2 = data.ivaV2?.iva_v2 != null
+  totalPages = conIvaV2 ? 12 : 11
+
   pagPortada(doc, data, fecha)
   pagResumen(doc, data, fecha)
   pagMetodologia(doc, fecha)
@@ -887,7 +975,8 @@ export function generarReportePertinencia(data: PertinenciaReportData): void {
   pagComparativo(doc, data, fecha)
   pagProyeccion(doc, data, fecha)
   pagRecomendaciones(doc, data, fecha)
-  pagFuentes(doc, fecha)
+  if (conIvaV2) pagIvaV2(doc, data, fecha, 11)
+  pagFuentes(doc, fecha, conIvaV2 ? 12 : 11)
 
   const nombre = data.carrera.nombre.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 40)
   doc.save(`pertinencia_${nombre}_${new Date().toISOString().slice(0, 10)}.pdf`)
