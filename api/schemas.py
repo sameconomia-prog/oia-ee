@@ -182,6 +182,27 @@ class RecomendacionOut(BaseModel):
     disclaimer: str
 
 
+class EscenarioProyeccionOut(BaseModel):
+    escenario: str          # continuista | polarizacion | disruptivo
+    anio: int
+    iva_proyectado: float
+    nota: Optional[str] = None
+
+
+class EscenariosOut(BaseModel):
+    """Trayectorias del IVA v2 bajo escenarios del marco IEX (módulo M5).
+
+    Sensibilidad estructural, no predicción: el brief exige reportar rango
+    mejor/peor caso. Sin datos IEX → proyecciones vacía e iva_actual None.
+    """
+    carrera_id: str
+    iva_actual: Optional[float] = None
+    proyecciones: list[EscenarioProyeccionOut] = []
+    rango_2030: Optional[list[float]] = None    # [mejor, peor]
+    rango_2035: Optional[list[float]] = None
+    disclaimer: str
+
+
 class AlertaItemOut(BaseModel):
     id: str
     carrera_nombre: str
