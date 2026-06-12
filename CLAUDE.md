@@ -52,6 +52,9 @@ OIA-EE/
 - Endpoints públicos por carrera: `/iva-v2`, `/recomendacion`, `/escenarios`, `/contexto-mx`. Admin: `/admin/soc-map`, `/admin/fa-sectorial`.
 - Refresco de datos: `DATABASE_URL=... python -m pipeline.jobs.iex_refresh_job [--data-dir]` (idempotente; seeds nunca pisan ediciones manuales).
 - Monitoreo: `.github/workflows/health-check.yml` (cron 30 min → issue con dedup).
+- Alertas del panel cerradas 2026-06-12: #7 versionado taxonomy (`GET /capability-frontier`, bloque `meta` en `skill_ia_taxonomy.yaml`, `taxonomy_meta` en skill-graph) y #4 validación D7 (tabla `d7_validacion_snapshot` p36, job semanal lunes 6:00, `evaluar_validacion_d7` madura ~jun-2027). FA sectorial seed VALIDADA por el usuario; bullets /planes aprobados.
+- PDF pertinencia: página condicional IVA v2 + recomendación M6 (11→12 págs cuando hay datos IEX). /comparar NO expone IVA v2 (es per-carrera; decisión en commit bda1c58).
+- Diseños pendientes de implementar: M4 longitudinal ENOE y M7 ANUIES/CONAPO en `docs/estrategia/diseno_m4_longitudinal_m7_demografia_2026-06.md` (orden: CONAPO F1 → M4 ENOE → ANUIES F2).
 
 ## Estado actual (Sprint 204, 2026-05-01)
 - 471 pytest · 0 errores TypeScript · 78 artículos investigaciones
