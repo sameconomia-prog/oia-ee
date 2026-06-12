@@ -87,6 +87,22 @@ export interface IvaV2Data {
   ocupaciones: IvaV2Ocupacion[]
 }
 
+export interface EscenarioProyeccion {
+  escenario: 'continuista' | 'polarizacion' | 'disruptivo'
+  anio: number
+  iva_proyectado: number
+  nota: string | null
+}
+
+export interface EscenariosData {
+  carrera_id: string
+  iva_actual: number | null
+  proyecciones: EscenarioProyeccion[]
+  rango_2030: [number, number] | null
+  rango_2035: [number, number] | null
+  disclaimer: string
+}
+
 export interface RecomendacionData {
   carrera_id: string
   accion: 'mantener' | 'actualizar' | 'redisenar' | 'evaluar_fusion_cierre' | 'sin_datos'

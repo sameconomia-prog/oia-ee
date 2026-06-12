@@ -15,8 +15,8 @@ Supuestos (versionados en cada fila, columna `supuestos`):
     entrada + 50k de salida (lectura de contexto + redacción, perfil
     "drop-in"). Supuesto inicial grueso — afinar con mediciones reales.
   - Jornada de 160 h/mes para convertir salario mensual a hora.
-  - TODO: FX MXN/USD fijo (env IEX_FX_MXN_USD, default 18.5) — sustituir por
-    serie Banxico SF43718 cuando se automatice el refresco mensual.
+  - FX MXN/USD: serie Banxico SF43718 (FIX) si hay BANXICO_TOKEN; override
+    manual con IEX_FX_MXN_USD; fallback constante 18.5.
 """
 import json
 import os
@@ -24,6 +24,7 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
+import httpx
 import structlog
 from sqlalchemy.orm import Session
 
@@ -41,16 +42,43 @@ TOKENS_INPUT_HORA = 200_000
 TOKENS_OUTPUT_HORA = 50_000
 HORAS_MES = 160.0
 
+FX_DEFAULT = 18.5
+_BANXICO_URL = ("https://www.banxico.org.mx/SieAPIRest/service/v1/"
+                "series/SF43718/datos/oportuno")
 
-def _fx_mxn_usd() -> float:
-    return float(os.getenv("IEX_FX_MXN_USD", "18.5"))
+
+def _fx_banxico(token: str) -> float | None:
+    """Último FIX publicado (serie SF43718) vía API SIE de Banxico."""
+    try:
+        resp = httpx.get(_BANXICO_URL, headers={"Bmx-Token": token}, timeout=10.0)
+        resp.raise_for_status()
+        dato = resp.json()["bmx"]["series"][0]["datos"][0]["dato"]
+        return float(dato)
+    except Exception as e:
+        logger.warning("fx_banxico_error", error=str(e))
+        return None
 
 
-def costo_ia_hora_mxn() -> float:
+def _fx_mxn_usd() -> tuple[float, str]:
+    """Resuelve el FX y su fuente: override manual > Banxico > constante."""
+    override = os.getenv("IEX_FX_MXN_USD")
+    if override:
+        return float(override), "env_IEX_FX_MXN_USD"
+    token = os.getenv("BANXICO_TOKEN")
+    if token:
+        fx = _fx_banxico(token)
+        if fx:
+            return fx, "banxico_SF43718"
+    return FX_DEFAULT, "default_constante"
+
+
+def costo_ia_hora_mxn(fx: float | None = None) -> float:
     """Coste estimado de una hora cognitiva equivalente con el modelo de referencia."""
+    if fx is None:
+        fx, _ = _fx_mxn_usd()
     usd = (TOKENS_INPUT_HORA / 1e6) * USD_INPUT_MTOK + \
           (TOKENS_OUTPUT_HORA / 1e6) * USD_OUTPUT_MTOK
-    return usd * _fx_mxn_usd()
+    return usd * fx
 
 
 def _salarios_enoe(data_dir: str | None) -> dict[str, float]:
@@ -76,13 +104,15 @@ def _salarios_enoe(data_dir: str | None) -> dict[str, float]:
 def calcular_costos_ia(session: Session, data_dir: str | None = None) -> dict:
     """Upsert idempotente de costo_ia_ocupacion para los SOC con salario ENOE."""
     salarios = _salarios_enoe(data_dir)
-    ia_hora = round(costo_ia_hora_mxn(), 2)
+    fx, fx_fuente = _fx_mxn_usd()
+    ia_hora = round(costo_ia_hora_mxn(fx), 2)
     supuestos = json.dumps({
         "tokens_input_hora": TOKENS_INPUT_HORA,
         "tokens_output_hora": TOKENS_OUTPUT_HORA,
         "usd_input_mtok": USD_INPUT_MTOK,
         "usd_output_mtok": USD_OUTPUT_MTOK,
-        "fx_mxn_usd": _fx_mxn_usd(),
+        "fx_mxn_usd": fx,
+        "fx_fuente": fx_fuente,
         "horas_mes": HORAS_MES,
         "pricing_cache": "2026-05-26",
     }, sort_keys=True)

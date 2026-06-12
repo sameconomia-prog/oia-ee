@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills, getCarrerasPublico, getTendenciasNacionales, getIvaV2, getRecomendacion } from '@/lib/api'
-import type { CarreraDetalle, CarreraKpi, KpiResult, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq, TendenciaNacional, IvaV2Data, RecomendacionData } from '@/lib/types'
+import { getCarreraDetalle, getKpisHistorico, getBenchmarkCareerDetail, getBenchmarkSources, getBenchmarkCareers, getVacantesTopSkills, getCarrerasPublico, getTendenciasNacionales, getIvaV2, getRecomendacion, getEscenariosMacro } from '@/lib/api'
+import type { CarreraDetalle, CarreraKpi, KpiResult, HistoricoSerie, BenchmarkCareerDetail, BenchmarkSource, BenchmarkCareerSummary, SkillFreq, TendenciaNacional, IvaV2Data, RecomendacionData, EscenariosData } from '@/lib/types'
 
 function normSkill(s: string) {
   return s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -165,6 +165,7 @@ export default function CarreraDetallePage() {
   const [tendenciaNacional, setTendenciaNacional] = useState<TendenciaNacional | null>(null)
   const [ivaV2, setIvaV2] = useState<IvaV2Data | null>(null)
   const [recomendacion, setRecomendacion] = useState<RecomendacionData | null>(null)
+  const [escenarios, setEscenarios] = useState<EscenariosData | null>(null)
 
   const promedioArea = useMemo(() => {
     const conKpi = similares.filter(c => c.kpi != null)
@@ -214,6 +215,7 @@ export default function CarreraDetallePage() {
     getTendenciasNacionales(7).then((list: TendenciaNacional[]) => setTendenciaNacional(list[list.length - 1] ?? null)).catch(() => {})
     getIvaV2(id).then(setIvaV2).catch(() => {})
     getRecomendacion(id).then(setRecomendacion).catch(() => {})
+    getEscenariosMacro(id).then(setEscenarios).catch(() => {})
     getKpisHistorico(id, 'd1_score', 30).then(setHistD1).catch(() => {})
     getKpisHistorico(id, 'd2_score', 30).then(setHistD2).catch(() => {})
     fetch(`${BASE}/predicciones/carrera/${id}?kpi=D1`)
@@ -543,6 +545,62 @@ export default function CarreraDetallePage() {
               Solicitar estudio de pertinencia →
             </Link>
           </p>
+        </Card>
+      )}
+
+      {/* Escenarios macro (M5) */}
+      {escenarios && escenarios.iva_actual != null && escenarios.proyecciones.length > 0 && (
+        <Card className="mb-6 p-5">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="font-semibold text-slate-800 text-sm">Trayectorias bajo escenarios</h2>
+            <span className="text-[10px] text-slate-400">
+              IVA v2 actual <span className="font-mono">{escenarios.iva_actual.toFixed(2)}</span>
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mb-3">
+            Sensibilidad del riesgo ajustado bajo los tres escenarios del marco IEX. El dato relevante
+            es el rango, no un punto.
+          </p>
+          <table className="w-full text-xs mb-3">
+            <thead>
+              <tr className="text-[10px] text-slate-400 uppercase tracking-wide">
+                <th className="text-left font-medium pb-1.5">Escenario</th>
+                <th className="text-right font-medium pb-1.5">2030</th>
+                <th className="text-right font-medium pb-1.5">2035</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(['continuista', 'polarizacion', 'disruptivo'] as const).map(esc => {
+                const p30 = escenarios.proyecciones.find(p => p.escenario === esc && p.anio === 2030)
+                const p35 = escenarios.proyecciones.find(p => p.escenario === esc && p.anio === 2035)
+                const label = esc === 'continuista' ? 'Continuista' : esc === 'polarizacion' ? 'Polarización' : 'Disruptivo'
+                const cell = (v?: number) => v == null ? '—' : (
+                  <span className={`font-mono font-semibold ${v >= 0.6 ? 'text-red-600' : v >= 0.35 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                    {v.toFixed(2)}
+                  </span>
+                )
+                return (
+                  <tr key={esc} className="border-t border-slate-100">
+                    <td className="py-1.5 text-slate-600">{label}</td>
+                    <td className="py-1.5 text-right">{cell(p30?.iva_proyectado)}</td>
+                    <td className="py-1.5 text-right">{cell(p35?.iva_proyectado)}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+          {escenarios.rango_2030 && escenarios.rango_2035 && (
+            <p className="text-[11px] text-slate-500 mb-2">
+              Rango mejor–peor caso:{' '}
+              <span className="font-mono">2030 [{escenarios.rango_2030[0].toFixed(2)}–{escenarios.rango_2030[1].toFixed(2)}]</span>
+              {' · '}
+              <span className="font-mono">2035 [{escenarios.rango_2035[0].toFixed(2)}–{escenarios.rango_2035[1].toFixed(2)}]</span>
+            </p>
+          )}
+          {escenarios.proyecciones.find(p => p.nota) && (
+            <p className="text-[10px] text-slate-400 mb-2">{escenarios.proyecciones.find(p => p.nota)!.nota}</p>
+          )}
+          <p className="text-[10px] text-slate-400 pt-2 border-t border-slate-100">{escenarios.disclaimer}</p>
         </Card>
       )}
 

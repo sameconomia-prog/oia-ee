@@ -311,6 +311,12 @@ export async function getRecomendacion(carreraId: string): Promise<import('./typ
   return await res.json()
 }
 
+export async function getEscenariosMacro(carreraId: string): Promise<import('./types').EscenariosData> {
+  const res = await fetch(`${BASE}/publico/carreras/${carreraId}/escenarios`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return await res.json()
+}
+
 export async function getIesPublico(params: { q?: string } = {}): Promise<import('./types').IesInfo[]> {
   const qs = params.q ? `?q=${encodeURIComponent(params.q)}` : ''
   const res = await fetch(`${BASE}/publico/ies${qs}`)

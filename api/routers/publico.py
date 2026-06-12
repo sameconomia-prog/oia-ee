@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from api.deps import get_db, rate_limit_public
-from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut, IesDetalleOut, KpisDistribucionOut, KpisBinOut, IvaV2Out, IvaV2OcupacionOut, RecomendacionOut
+from api.schemas import NoticiaOut, CarreraKpiOut, KpiOut, D1Out, D2Out, D3Out, D6Out, IesOut, KpisNacionalResumenOut, SkillFreqOut, VacantePublicoOut, TopRiesgoItemOut, EstadisticasPublicasOut, CarreraDetalleOut, CarreraIesItemOut, IesDetalleOut, KpisDistribucionOut, KpisBinOut, IvaV2Out, IvaV2OcupacionOut, RecomendacionOut, EscenariosOut, EscenarioProyeccionOut
 from pipeline.db.models import IES, Noticia, Alerta, Carrera, CarreraIES
 
 
@@ -760,6 +760,29 @@ def recomendacion_carrera(carrera_id: str, db: Session = Depends(get_db)):
         confianza=r.confianza, riesgo_base=r.riesgo_base,
         fuente_riesgo=r.fuente_riesgo, justificacion=r.justificacion,
         acciones=r.acciones, disclaimer=DISCLAIMER,
+    )
+
+
+@router.get("/carreras/{carrera_id}/escenarios", response_model=EscenariosOut)
+def escenarios_carrera(carrera_id: str, db: Session = Depends(get_db)):
+    """Trayectorias del IVA v2 bajo escenarios del marco IEX (módulo M5)."""
+    from fastapi import HTTPException
+    from pipeline.scenario_engine.escenarios_macro import DISCLAIMER, proyectar_escenarios
+
+    carrera = db.query(Carrera).filter_by(id=carrera_id).first()
+    if not carrera:
+        raise HTTPException(status_code=404, detail="Carrera no encontrada")
+    r = proyectar_escenarios(carrera, db)
+    return EscenariosOut(
+        carrera_id=carrera_id,
+        iva_actual=r.iva_actual,
+        proyecciones=[EscenarioProyeccionOut(
+            escenario=p.escenario, anio=p.anio,
+            iva_proyectado=p.iva_proyectado, nota=p.nota,
+        ) for p in r.proyecciones],
+        rango_2030=list(r.rango_2030) if r.rango_2030 else None,
+        rango_2035=list(r.rango_2035) if r.rango_2035 else None,
+        disclaimer=DISCLAIMER,
     )
 
 

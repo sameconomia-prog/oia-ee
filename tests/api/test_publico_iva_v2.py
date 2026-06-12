@@ -73,6 +73,30 @@ def test_recomendacion_retorna_accion_y_disclaimer(client, carrera, db_session):
     assert "estudio de pertinencia" in data["disclaimer"]
 
 
+def test_escenarios_404_carrera_inexistente(client):
+    assert client.get("/publico/carreras/no-existe/escenarios").status_code == 404
+
+
+def test_escenarios_sin_datos_retorna_vacio(client, carrera):
+    data = client.get(f"/publico/carreras/{carrera.id}/escenarios").json()
+    assert data["iva_actual"] is None
+    assert data["proyecciones"] == []
+    assert "no una" in data["disclaimer"] or "no predic" in data["disclaimer"]
+
+
+def test_escenarios_con_datos_retorna_rango(client, carrera, db_session):
+    soc = "95-2222"
+    db_session.add(ExposicionIEX(soc_code=soc, iex_v2=6.0,
+                                 elasticidad_mx="E-Media", dim_d7=7.0))
+    db_session.add(CarreraSocMap(carrera_id=carrera.id, soc_code=soc))
+    db_session.flush()
+    data = client.get(f"/publico/carreras/{carrera.id}/escenarios").json()
+    assert data["iva_actual"] is not None
+    assert len(data["proyecciones"]) == 6
+    assert data["rango_2030"][0] <= data["rango_2030"][1]
+    assert data["rango_2035"][0] <= data["rango_2035"][1]
+
+
 def test_iva_v2_incluye_costo_ia_cuando_existe(client, carrera, db_session):
     soc = "97-5432"
     db_session.add(ExposicionIEX(soc_code=soc, iex_v2=5.0, elasticidad_mx="E-Media"))
