@@ -20,7 +20,7 @@ def test_migration_applies_cleanly(tmp_path, monkeypatch):
 
     for table in ["ies", "carreras", "usuarios", "noticias", "kpi_historico", "escenarios",
                   "exposicion_iex", "carrera_soc_map", "costo_ia_ocupacion",
-                  "contexto_ocupacion_mx"]:
+                  "contexto_ocupacion_mx", "fa_sectorial"]:
         assert table in tables, f"tabla '{table}' no encontrada tras migración"
 
     col_names = [c["name"] for c in insp.get_columns("usuarios")]

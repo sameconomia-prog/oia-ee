@@ -738,6 +738,7 @@ def iva_v2_carrera(carrera_id: str, db: Session = Depends(get_db)):
         iex_norm=r.iex_norm,
         fes_factor=r.fes_factor,
         fa=r.fa,
+        fa_fuente=r.fa_fuente,
         n_soc=r.n_soc,
         fecha_dataset=fecha_dataset,
         costo_ia_hora_mxn=costo_ia_hora,

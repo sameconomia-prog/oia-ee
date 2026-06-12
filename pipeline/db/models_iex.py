@@ -91,6 +91,26 @@ class CostoIAOcupacion(Base):
     fecha_calculo     = Column(DateTime(timezone=True), default=_now_utc)
 
 
+class FASectorial(Base):
+    """Fricción de adopción por grupo SOC mayor (2 dígitos).
+
+    Sustituye la constante FA_DEFAULT en el IVA v2 cuando hay fila para el
+    grupo (fallback a la constante si no). Seed según
+    docs/estrategia/propuesta_fa_sectorial_2026-06.md (aprobada 2026-06-11);
+    es_aproximacion=True marca el seed — editable por superadmin vía
+    /admin/fa-sectorial, las ediciones nunca son pisadas por el re-seed.
+    """
+    __tablename__ = "fa_sectorial"
+
+    grupo_soc       = Column(String(2), primary_key=True)
+    fa              = Column(Float, nullable=False)
+    justificacion   = Column(Text)
+    fuente          = Column(String(50), default="seed_propuesta_2026-06")
+    es_aproximacion = Column(Boolean, nullable=False, default=True)
+    updated_at      = Column(DateTime(timezone=True), default=_now_utc,
+                             onupdate=_now_utc)
+
+
 class CarreraSocMap(Base):
     """Crosswalk carrera→ocupación SOC para consumir exposicion_iex.
 

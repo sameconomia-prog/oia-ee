@@ -163,6 +163,7 @@ class IvaV2Out(BaseModel):
     iex_norm: Optional[float] = None
     fes_factor: Optional[float] = None
     fa: float
+    fa_fuente: str = "constante"                # sectorial | mixta | constante
     n_soc: int
     fecha_dataset: Optional[str] = None
     costo_ia_hora_mxn: Optional[float] = None   # módulo M3; supuestos en costo_ia_ocupacion

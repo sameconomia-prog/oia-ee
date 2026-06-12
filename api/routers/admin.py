@@ -331,3 +331,59 @@ def borrar_soc_map(
         raise HTTPException(status_code=404, detail="Mapeo no encontrado")
     db.delete(row)
     db.commit()
+
+
+# ── FA sectorial (JWT superadmin) ────────────────────────────────────────
+
+
+class FASectorialOut(BaseModel):
+    grupo_soc: str
+    fa: float
+    justificacion: str | None = None
+    fuente: str | None = None
+    es_aproximacion: bool
+
+    class Config:
+        from_attributes = True
+
+
+class FASectorialUpsertIn(BaseModel):
+    grupo_soc: str
+    fa: float
+    justificacion: str | None = None
+
+
+@router.get("/fa-sectorial", response_model=list[FASectorialOut])
+def listar_fa_sectorial(
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(get_superadmin_user),
+):
+    """Lista la fricción de adopción por grupo SOC (superadmin via JWT)."""
+    from pipeline.db.models_iex import FASectorial
+    return db.query(FASectorial).order_by(FASectorial.grupo_soc).all()
+
+
+@router.put("/fa-sectorial", response_model=FASectorialOut)
+def upsert_fa_sectorial(
+    body: FASectorialUpsertIn,
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(get_superadmin_user),
+):
+    """Crea o ajusta la FA de un grupo SOC (superadmin via JWT)."""
+    from pipeline.db.models_iex import FASectorial
+    if not 0.0 <= body.fa <= 1.0:
+        raise HTTPException(status_code=422, detail="fa debe estar en [0, 1]")
+    if len(body.grupo_soc) != 2 or not body.grupo_soc.isdigit():
+        raise HTTPException(status_code=422, detail="grupo_soc debe ser SOC mayor de 2 dígitos")
+    row = db.get(FASectorial, body.grupo_soc)
+    if not row:
+        row = FASectorial(grupo_soc=body.grupo_soc, fa=body.fa)
+        db.add(row)
+    row.fa = body.fa
+    if body.justificacion is not None:
+        row.justificacion = body.justificacion
+    row.es_aproximacion = False
+    row.fuente = "superadmin"
+    db.commit()
+    db.refresh(row)
+    return row

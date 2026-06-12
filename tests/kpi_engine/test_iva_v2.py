@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from pipeline.db.models import Base, Carrera, CarreraIES
-from pipeline.db.models_iex import CarreraSocMap, ExposicionIEX
+from pipeline.db.models_iex import CarreraSocMap, ExposicionIEX, FASectorial
 from pipeline.kpi_engine.d1_iva_v2 import FA_DEFAULT, calcular_iva_v2
 from pipeline.kpi_engine.kpi_runner import run_kpis
 
@@ -101,6 +101,41 @@ def test_promedio_ponderado_por_peso(session):
     assert r.fes_factor == pytest.approx(0.375)
     assert r.iva_v2 == pytest.approx(0.4219, abs=1e-4)
     assert r.n_soc == 2
+
+
+def test_fa_sectorial_sustituye_constante(session):
+    c = _carrera(session)
+    _exposicion(session, "15-1252", iex_v2=6.0, elasticidad="E-Alta")
+    _mapeo(session, c, "15-1252")
+    session.add(FASectorial(grupo_soc="15", fa=0.10))
+    session.flush()
+    r = calcular_iva_v2(c, session)
+    # 0.6 × 0.5 × (1−0.10) = 0.27 (vs 0.225 con la constante 0.25)
+    assert r.fa == pytest.approx(0.10)
+    assert r.fa_fuente == "sectorial"
+    assert r.iva_v2 == pytest.approx(0.27)
+
+
+def test_fa_mixta_promedia_y_marca_fuente(session):
+    c = _carrera(session)
+    _exposicion(session, "15-1252", iex_v2=6.0, elasticidad="E-Baja")
+    _exposicion(session, "99-0001", iex_v2=6.0, elasticidad="E-Baja")
+    _mapeo(session, c, "15-1252")
+    _mapeo(session, c, "99-0001")   # grupo 99 sin fila → FA_DEFAULT
+    session.add(FASectorial(grupo_soc="15", fa=0.10))
+    session.flush()
+    r = calcular_iva_v2(c, session)
+    assert r.fa == pytest.approx((0.10 + FA_DEFAULT) / 2)
+    assert r.fa_fuente == "mixta"
+
+
+def test_sin_filas_fa_usa_constante(session):
+    c = _carrera(session)
+    _exposicion(session, "15-1252", iex_v2=6.0, elasticidad="E-Alta")
+    _mapeo(session, c, "15-1252")
+    r = calcular_iva_v2(c, session)
+    assert r.fa == pytest.approx(FA_DEFAULT)
+    assert r.fa_fuente == "constante"
 
 
 def test_resultado_acotado_a_uno(session):

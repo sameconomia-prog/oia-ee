@@ -100,3 +100,26 @@ def test_delete_elimina_mapeo(superadmin_client, carrera_con_iex, db_session):
     resp = superadmin_client.delete(f"/admin/soc-map/{row.id}")
     assert resp.status_code == 204
     assert superadmin_client.delete(f"/admin/soc-map/{row.id}").status_code == 404
+
+
+def test_fa_sectorial_sin_jwt_devuelve_401(client):
+    assert client.get("/admin/fa-sectorial").status_code == 401
+
+
+def test_fa_sectorial_put_crea_y_lista(superadmin_client):
+    resp = superadmin_client.put("/admin/fa-sectorial", json={
+        "grupo_soc": "29", "fa": 0.6, "justificacion": "ajuste manual"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["fa"] == 0.6
+    assert data["es_aproximacion"] is False
+    assert data["fuente"] == "superadmin"
+    listado = superadmin_client.get("/admin/fa-sectorial").json()
+    assert any(r["grupo_soc"] == "29" for r in listado)
+
+
+def test_fa_sectorial_valida_rango_y_grupo(superadmin_client):
+    assert superadmin_client.put("/admin/fa-sectorial", json={
+        "grupo_soc": "29", "fa": 1.5}).status_code == 422
+    assert superadmin_client.put("/admin/fa-sectorial", json={
+        "grupo_soc": "abc", "fa": 0.5}).status_code == 422

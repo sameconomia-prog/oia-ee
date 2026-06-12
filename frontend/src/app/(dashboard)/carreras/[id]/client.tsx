@@ -500,8 +500,9 @@ export default function CarreraDetallePage() {
                 <span className="font-semibold text-slate-700">Fórmula</span> — IVA v2 = (IEX/10) × (1 − FES) × (1 − FA).
                 IEX: exposición ocupacional a IA generativa medida a nivel tarea (O*NET) y validada contra
                 adopción observada. FES: factor de elasticidad sectorial ({ivaV2.fes_factor?.toFixed(2)}) — E-Alta descuenta 50%,
-                E-Media 25%, E-Baja 0%. FA: fricción de adopción (constante inicial {ivaV2.fa.toFixed(2)}, en refinamiento con
-                indicadores de regulación y estructura sectorial). TRC: rutinariedad cognitiva (dimensión D7 del IEX,
+                E-Media 25%, E-Baja 0%. FA: fricción de adopción ({ivaV2.fa.toFixed(2)}{ivaV2.fa_fuente === 'sectorial'
+                  ? ', estimada por sector según regulación de ejercicio, sindicación y frontera física'
+                  : ivaV2.fa_fuente === 'mixta' ? ', parcialmente sectorial' : ', constante inicial'}). TRC: rutinariedad cognitiva (dimensión D7 del IEX,
                 0-10) — ya pondera dentro del índice; se muestra solo como referencia interpretativa.
               </p>
               <p>
